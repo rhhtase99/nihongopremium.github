@@ -1415,173 +1415,87 @@
         };
 
 
+
+
+
         Object.assign(BUNPOU_DB, {
             6: [
-                {
-                    id: "b6_1", title: "Kata Benda を Kata Kerja", subtitle: "Objek Langsung",
-                    desc: "Partikel <strong class='text-accent'>を (o)</strong> diletakkan setelah objek dari kata kerja transitif. Dipakai untuk kegiatan seperti makan, minum, membaca, menulis, membeli, melihat, dan sebagainya.",
-                    pattern: "<span class='text-main border-b-2 border-accent'>[Objek]</span> <b>を</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
-                    examples: [
-                        { j: "パンを 食べます。", r: "Pan o tabemasu.", i: "Makan roti." },
-                        { j: "本を 読みました。", r: "Hon o yomimashita.", i: "Sudah membaca buku." }
-                    ],
-                    quizzes: [
-                        { prompt: "Saya minum teh setiap pagi.", words: ["まいあさ", "おちゃ", "を", "のみます"], answerStr: "まいあさおちゃをのみます" },
-                        { prompt: "Kemarin saya membeli kamera.", words: ["きのう", "カメラ", "を", "かいました"], answerStr: "きのうカメラをかいました" }
-                    ]
-                },
-                {
-                    id: "b6_2", title: "Tempat で Kata Kerja", subtitle: "Tempat Melakukan Aksi",
-                    desc: "Partikel <strong class='text-accent'>で</strong> setelah nama tempat menunjukkan lokasi terjadinya suatu kegiatan atau aksi.",
-                    pattern: "<span class='text-main border-b-2 border-accent'>[Tempat]</span> <b>で</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
-                    examples: [
-                        { j: "図書館で 勉強します。", r: "Toshokan de benkyou shimasu.", i: "Belajar di perpustakaan." },
-                        { j: "店で ジュースを 買います。", r: "Mise de juusu o kaimasu.", i: "Membeli jus di toko." }
-                    ],
-                    quizzes: [
-                        { prompt: "Saya menulis laporan di perpustakaan.", words: ["としょかん", "で", "レポート", "を", "かきます"], answerStr: "としょかんでレポートをかきます" },
-                        { prompt: "Bagaimana kalau minum kopi bersama?", words: ["いっしょに", "コーヒー", "を", "のみません", "か"], answerStr: "いっしょにコーヒーをのみませんか" }
-                    ]
-                }
+                { id: "b6_1", title: "Kata Benda を Kata Kerja", subtitle: "Objek Langsung", desc: "Partikel <strong class='text-accent'>を</strong> menunjukkan objek dari kata kerja transitif seperti makan, minum, membaca, menulis, membeli, dan menonton.", pattern: "[Objek] を [Kata Kerja]", examples: [{ j: "パンを 食べます。", r: "Pan o tabemasu.", i: "Makan roti." }, { j: "本を 読みます。", r: "Hon o yomimasu.", i: "Membaca buku." }], quizzes: [{ prompt: "Saya minum teh setiap pagi.", words: ["まいあさ", "おちゃ", "を", "のみます"], answerStr: "まいあさおちゃをのみます" }, { prompt: "Kemarin saya membeli kamera.", words: ["きのう", "カメラ", "を", "かいました"], answerStr: "きのうカメラをかいました" }] },
+                { id: "b6_2", title: "Kata Benda を します", subtitle: "Melakukan Kegiatan", desc: "<strong class='text-accent'>します</strong> dipakai dengan kata benda kegiatan seperti olahraga, permainan, acara, pekerjaan, PR, dan telepon.", pattern: "[Kegiatan] を します", examples: [{ j: "テニスを します。", r: "Tenisu o shimasu.", i: "Bermain tenis." }, { j: "宿題を しました。", r: "Shukudai o shimashita.", i: "Mengerjakan PR." }], quizzes: [{ prompt: "Hari Minggu saya bermain sepak bola.", words: ["にちようび", "サッカー", "を", "します"], answerStr: "にちようびサッカーをします" }, { prompt: "Malam ini saya mengerjakan PR.", words: ["こんばん", "しゅくだい", "を", "します"], answerStr: "こんばんしゅくだいをします" }] },
+                { id: "b6_3", title: "何を しますか", subtitle: "Menanyakan Kegiatan", desc: "<strong class='text-accent'>何をしますか</strong> dipakai untuk menanyakan kegiatan atau hal yang dilakukan seseorang.", pattern: "何を しますか / [Kegiatan] を します", examples: [{ j: "日曜日 何を しますか。", r: "Nichiyoubi nani o shimasu ka.", i: "Hari Minggu melakukan apa?" }, { j: "サッカーを します。", r: "Sakkaa o shimasu.", i: "Bermain sepak bola." }], quizzes: [{ prompt: "Besok kamu melakukan apa?", words: ["あした", "なに", "を", "します", "か"], answerStr: "あしたなにをしますか" }, { prompt: "Saya menonton film.", words: ["えいが", "を", "みます"], answerStr: "えいがをみます" }] },
+                { id: "b6_4", title: "なん dan なに", subtitle: "Dua Bacaan 何", desc: "何 dibaca <strong class='text-accent'>なん</strong> sebelum です atau kata bantu bilangan, dan dibaca <strong class='text-accent'>なに</strong> sebelum partikel を.", pattern: "何ですか / 何歳ですか / 何をしますか", examples: [{ j: "それは 何ですか。", r: "Sore wa nan desu ka.", i: "Itu apa?" }, { j: "何を 買いますか。", r: "Nani o kaimasu ka.", i: "Mau membeli apa?" }], quizzes: [{ prompt: "Itu apa?", words: ["それ", "は", "なん", "です", "か"], answerStr: "それはなんですか" }, { prompt: "Mau membaca apa?", words: ["なに", "を", "よみます", "か"], answerStr: "なにをよみますか" }] },
+                { id: "b6_5", title: "Tempat で Kata Kerja", subtitle: "Tempat Melakukan Aksi", desc: "Partikel <strong class='text-accent'>で</strong> setelah tempat menunjukkan lokasi terjadinya kegiatan.", pattern: "[Tempat] で [Kata Kerja]", examples: [{ j: "駅で 新聞を 買います。", r: "Eki de shinbun o kaimasu.", i: "Membeli koran di stasiun." }, { j: "図書館で 勉強します。", r: "Toshokan de benkyou shimasu.", i: "Belajar di perpustakaan." }], quizzes: [{ prompt: "Saya menulis laporan di perpustakaan.", words: ["としょかん", "で", "レポート", "を", "かきます"], answerStr: "としょかんでレポートをかきます" }, { prompt: "Saya makan siang di kantin.", words: ["しょくどう", "で", "ひるごはん", "を", "たべます"], answerStr: "しょくどうでひるごはんをたべます" }] },
+                { id: "b6_6", title: "Kata Kerja ませんか", subtitle: "Ajakan Sopan", desc: "Bentuk <strong class='text-accent'>ませんか</strong> dipakai untuk mengajak lawan bicara dengan sopan.", pattern: "いっしょに [Kata Kerja] ませんか", examples: [{ j: "いっしょに 京都へ 行きませんか。", r: "Issho ni Kyouto e ikimasen ka.", i: "Bagaimana kalau pergi ke Kyoto bersama?" }], quizzes: [{ prompt: "Bagaimana kalau minum kopi bersama?", words: ["いっしょに", "コーヒー", "を", "のみません", "か"], answerStr: "いっしょにコーヒーをのみませんか" }, { prompt: "Bagaimana kalau menonton film bersama?", words: ["いっしょに", "えいが", "を", "みません", "か"], answerStr: "いっしょにえいがをみませんか" }] },
+                { id: "b6_7", title: "Kata Kerja ましょう", subtitle: "Mengusulkan", desc: "Bentuk <strong class='text-accent'>ましょう</strong> dipakai untuk mengusulkan sesuatu atau menjawab ajakan secara aktif.", pattern: "[Kata Kerja] ましょう", examples: [{ j: "ちょっと 休みましょう。", r: "Chotto yasumimashou.", i: "Mari istirahat sebentar." }], quizzes: [{ prompt: "Mari belajar bahasa Jepang sebentar.", words: ["ちょっと", "にほんご", "を", "べんきょうしましょう"], answerStr: "ちょっとにほんごをべんきょうしましょう" }, { prompt: "Mari makan siang bersama.", words: ["いっしょに", "ひるごはん", "を", "たべましょう"], answerStr: "いっしょにひるごはんをたべましょう" }] },
+                { id: "b6_8", title: "～か", subtitle: "Memastikan Informasi", desc: "Partikel <strong class='text-accent'>か</strong> juga dipakai untuk memastikan atau memahami informasi baru dari lawan bicara.", pattern: "[Informasi]? ...ですか。いいですね。", examples: [{ j: "京都ですか。いいですね。", r: "Kyouto desu ka. Ii desu ne.", i: "Kyoto? Bagus ya." }], quizzes: [{ prompt: "Besok ke Osaka? Bagus ya.", words: ["あした", "おおさか", "へ", "いきます", "か", "いい", "です", "ね"], answerStr: "あしたおおさかへいきますかいいですね" }, { prompt: "Membeli kamera? Bagus ya.", words: ["カメラ", "を", "かいます", "か", "いい", "です", "ね"], answerStr: "カメラをかいますかいいですね" }] }
             ],
             7: [
-                {
-                    id: "b7_1", title: "Alat/Sarana で Kata Kerja", subtitle: "Cara Melakukan Sesuatu",
-                    desc: "Partikel <strong class='text-accent'>で</strong> juga menunjukkan alat, sarana, bahasa, atau cara yang dipakai untuk melakukan sebuah aksi.",
-                    pattern: "<span class='text-main border-b-2 border-accent'>[Alat/Sarana/Bahasa]</span> <b>で</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
-                    examples: [
-                        { j: "ペンで 名前を 書きます。", r: "Pen de namae o kakimasu.", i: "Menulis nama dengan pena." },
-                        { j: "日本語で 話します。", r: "Nihongo de hanashimasu.", i: "Berbicara dalam bahasa Jepang." }
-                    ],
-                    quizzes: [
-                        { prompt: "Saya memotong kertas dengan gunting.", words: ["はさみ", "で", "かみ", "を", "きります"], answerStr: "はさみでかみをきります" },
-                        { prompt: "Apa bahasa Jepang dari 'terima kasih'?", words: ["「terima kasih」", "は", "にほんご", "で", "なん", "です", "か"], answerStr: "「terima kasih」はにほんごでなんですか" }
-                    ]
-                },
-                {
-                    id: "b7_2", title: "Memberi dan Menerima", subtitle: "あげます / もらいます",
-                    desc: "Untuk memberi, gunakan <strong class='text-accent'>Orang に Benda を あげます</strong>. Untuk menerima dari seseorang, gunakan <strong class='text-accent'>Orang に/から Benda を もらいます</strong>.",
-                    pattern: "[Orang] に [Benda] を あげます / [Orang] に・から [Benda] を もらいます",
-                    examples: [
-                        { j: "友達に 写真を あげました。", r: "Tomodachi ni shashin o agemashita.", i: "Memberikan foto kepada teman." },
-                        { j: "先生に 手紙を もらいました。", r: "Sensei ni tegami o moraimashita.", i: "Menerima surat dari guru." }
-                    ],
-                    quizzes: [
-                        { prompt: "Saya memberi kado kepada ibu.", words: ["はは", "に", "プレゼント", "を", "あげました"], answerStr: "ははにプレゼントをあげました" },
-                        { prompt: "Saya meminjam uang dari bank.", words: ["ぎんこう", "から", "おかね", "を", "かりました"], answerStr: "ぎんこうからおかねをかりました" }
-                    ]
-                }
-            ],
-            8: [
-                {
-                    id: "b8_1", title: "Kata Sifat な / い", subtitle: "Predikat dan Negatif",
-                    desc: "Kata sifat <strong class='text-accent'>な</strong> memakai です dan bentuk negatifnya じゃありません. Kata sifat <strong class='text-accent'>い</strong> langsung diikuti です dan bentuk negatifnya menjadi くないです.",
-                    pattern: "[Sifat な] です / [Sifat な] じゃありません / [Sifat い] です / [Sifat い] くないです",
-                    examples: [
-                        { j: "この 町は 静かです。", r: "Kono machi wa shizuka desu.", i: "Kota ini tenang." },
-                        { j: "この 本は 高くないです。", r: "Kono hon wa takakunai desu.", i: "Buku ini tidak mahal." }
-                    ],
-                    quizzes: [
-                        { prompt: "Restoran itu terkenal.", words: ["あの", "レストラン", "は", "ゆうめい", "です"], answerStr: "あのレストランはゆうめいです" },
-                        { prompt: "Buku ini tidak mahal.", words: ["この", "ほん", "は", "たかくない", "です"], answerStr: "このほんはたかくないです" }
-                    ]
-                },
-                {
-                    id: "b8_2", title: "Sifat + Kata Benda / ～が、～", subtitle: "Menerangkan dan Tetapi",
-                    desc: "Kata sifat dapat menerangkan kata benda di depannya. Kata sifat な memakai な sebelum benda. Partikel <strong class='text-accent'>が</strong> menyambungkan dua kalimat yang kontras, berarti 'tetapi'.",
-                    pattern: "[Sifat な] な [KB] / [Sifat い] [KB] / [Kalimat] が [Kalimat]",
-                    examples: [
-                        { j: "親切な 先生です。", r: "Shinsetsu na sensei desu.", i: "Guru yang baik hati." },
-                        { j: "おいしいですが、高いです。", r: "Oishii desu ga, takai desu.", i: "Enak, tetapi mahal." }
-                    ],
-                    quizzes: [
-                        { prompt: "Watt adalah guru yang baik hati.", words: ["ワットせんせい", "は", "しんせつ", "な", "せんせい", "です"], answerStr: "ワットせんせいはしんせつなせんせいです" },
-                        { prompt: "Makanan Jepang enak, tetapi mahal.", words: ["にほん", "の", "たべもの", "は", "おいしい", "です", "が", "たかい", "です"], answerStr: "にほんのたべものはおいしいですがたかいです" }
-                    ]
-                },
-                {
-                    id: "b8_3", title: "どうですか / どんな", subtitle: "Kesan dan Jenis",
-                    desc: "<strong class='text-accent'>どうですか</strong> menanyakan kesan atau keadaan. <strong class='text-accent'>どんな</strong> menanyakan sifat atau jenis kata benda.",
-                    pattern: "[KB] は どうですか / どんな [KB] ですか",
-                    examples: [
-                        { j: "日本の 生活は どうですか。", r: "Nihon no seikatsu wa dou desu ka.", i: "Bagaimana kehidupan di Jepang?" },
-                        { j: "奈良は どんな 町ですか。", r: "Nara wa donna machi desu ka.", i: "Nara kota yang bagaimana?" }
-                    ],
-                    quizzes: [
-                        { prompt: "Bagaimana pekerjaan baru Anda?", words: ["あたらしい", "しごと", "は", "どう", "です", "か"], answerStr: "あたらしいしごとはどうですか" },
-                        { prompt: "Bandung kota yang bagaimana?", words: ["バンドン", "は", "どんな", "まち", "です", "か"], answerStr: "バンドンはどんなまちですか" }
-                    ]
-                }
+                { id: "b7_1", title: "Alat/Sarana で Kata Kerja", subtitle: "Cara Melakukan Sesuatu", desc: "Partikel <strong class='text-accent'>で</strong> menunjukkan alat, sarana, bahasa, atau cara yang digunakan.", pattern: "[Alat/Sarana/Bahasa] で [Kata Kerja]", examples: [{ j: "はしで 食べます。", r: "Hashi de tabemasu.", i: "Makan dengan sumpit." }], quizzes: [{ prompt: "Saya memotong kertas dengan gunting.", words: ["はさみ", "で", "かみ", "を", "きります"], answerStr: "はさみでかみをきります" }, { prompt: "Saya mengirim e-mail dengan komputer.", words: ["パソコン", "で", "メール", "を", "おくります"], answerStr: "パソコンでメールをおくります" }] },
+                { id: "b7_2", title: "～語で 何ですか", subtitle: "Menanyakan Bahasa", desc: "Pola ini dipakai untuk bertanya bagaimana mengatakan kata atau kalimat dalam bahasa lain.", pattern: "[Kata/Kalimat] は [Bahasa] で 何ですか", examples: [{ j: "『ありがとう』は 英語で 何ですか。", r: "Arigatou wa eigo de nan desu ka.", i: "Apa bahasa Inggris dari arigatou?" }], quizzes: [{ prompt: "Apa bahasa Jepang dari 'terima kasih'?", words: ["「terima kasih」", "は", "にほんご", "で", "なん", "です", "か"], answerStr: "「terima kasih」はにほんごでなんですか" }, { prompt: "Apa bahasa Indonesia dari 'hon'?", words: ["「ほん」", "は", "インドネシアご", "で", "なん", "です", "か"], answerStr: "「ほん」はインドネシアごでなんですか" }] },
+                { id: "b7_3", title: "Orang に Benda を あげます", subtitle: "Memberi", desc: "Orang penerima diberi partikel <strong class='text-accent'>に</strong>, sedangkan benda yang diberikan diberi <strong class='text-accent'>を</strong>.", pattern: "[Orang] に [Benda] を あげます", examples: [{ j: "友達に 花を あげました。", r: "Tomodachi ni hana o agemashita.", i: "Memberi bunga kepada teman." }], quizzes: [{ prompt: "Saya memberi kado kepada ibu.", words: ["はは", "に", "プレゼント", "を", "あげました"], answerStr: "ははにプレゼントをあげました" }, { prompt: "Saya mengajarkan bahasa Indonesia kepada teman.", words: ["ともだち", "に", "インドネシアご", "を", "おしえます"], answerStr: "ともだちにインドネシアごをおしえます" }] },
+                { id: "b7_4", title: "Orang に/から Benda を もらいます", subtitle: "Menerima", desc: "Sumber pemberi dapat diberi partikel <strong class='text-accent'>に</strong> atau <strong class='text-accent'>から</strong>. Untuk organisasi, から lebih natural.", pattern: "[Orang/Sumber] に/から [Benda] を もらいます", examples: [{ j: "先生に 手紙を もらいました。", r: "Sensei ni tegami o moraimashita.", i: "Menerima surat dari guru." }], quizzes: [{ prompt: "Saya menerima surat dari guru.", words: ["せんせい", "に", "てがみ", "を", "もらいました"], answerStr: "せんせいにてがみをもらいました" }, { prompt: "Saya meminjam uang dari bank.", words: ["ぎんこう", "から", "おかね", "を", "かりました"], answerStr: "ぎんこうからおかねをかりました" }] },
+                { id: "b7_5", title: "もう Kata Kerja ました", subtitle: "Sudah Selesai", desc: "<strong class='text-accent'>もう</strong> berarti sudah dan dipakai dengan bentuk lampau ました. Jawaban negatifnya memakai <strong class='text-accent'>まだ</strong>.", pattern: "もう [Kata Kerja ました] / まだです", examples: [{ j: "もう 荷物を 送りましたか。", r: "Mou nimotsu o okurimashita ka.", i: "Apakah barang sudah dikirim?" }], quizzes: [{ prompt: "Apakah Anda sudah mengirim barang?", words: ["もう", "にもつ", "を", "おくりました", "か"], answerStr: "もうにもつをおくりましたか" }, { prompt: "Belum, saya belum menulis laporan.", words: ["いいえ", "まだ", "レポート", "を", "かいて", "いません"], answerStr: "いいえまだレポートをかいていません" }] },
+                { id: "b7_6", title: "Menghilangkan Partikel", subtitle: "Percakapan Natural", desc: "Dalam percakapan, partikel seperti は dan を sering dihilangkan jika hubungan maknanya sudah jelas.", pattern: "この スプーン[は]、すてきですね / コーヒー[を]、もう一杯", examples: [{ j: "この スプーン、すてきですね。", r: "Kono supuun, suteki desu ne.", i: "Sendok ini bagus ya." }], quizzes: [{ prompt: "Kopi, mau tambah satu cangkir?", words: ["コーヒー", "もう", "いっぱい", "いかが", "です", "か"], answerStr: "コーヒーもういっぱいいかがですか" }, { prompt: "Kemeja ini bagus ya.", words: ["この", "シャツ", "すてき", "です", "ね"], answerStr: "このシャツすてきですね" }] }
+            ],            8: [
+                { id: "b8_1", title: "Kata Sifat", subtitle: "Kondisi dan Ciri", desc: "Kata sifat menjadi predikat atau menerangkan kata benda. Ada dua jenis: kata sifat <strong class='text-accent'>な</strong> dan kata sifat <strong class='text-accent'>い</strong>.", pattern: "[KB] は [Sifat] です", examples: [{ j: "富士山は 高いです。", r: "Fuji-san wa takai desu.", i: "Gunung Fuji tinggi." }], quizzes: [{ prompt: "Kamar ini bersih.", words: ["この", "へや", "は", "きれい", "です"], answerStr: "このへやはきれいです" }, { prompt: "Tas itu besar.", words: ["その", "かばん", "は", "おおきい", "です"], answerStr: "そのかばんはおおきいです" }] },
+                { id: "b8_2", title: "Kata Sifat な/い です", subtitle: "Positif dan Negatif", desc: "Negatif kata sifat な menjadi <strong class='text-accent'>じゃありません</strong>. Negatif kata sifat い mengganti い menjadi <strong class='text-accent'>くないです</strong>.", pattern: "[Sifat な] じゃありません / [Sifat い] くないです", examples: [{ j: "ここは 静かじゃありません。", r: "Koko wa shizuka ja arimasen.", i: "Di sini tidak tenang." }], quizzes: [{ prompt: "Taman itu tidak tenang.", words: ["あの", "こうえん", "は", "しずか", "じゃ", "ありません"], answerStr: "あのこうえんはしずかじゃありません" }, { prompt: "Buku ini tidak mahal.", words: ["この", "ほん", "は", "たかくない", "です"], answerStr: "このほんはたかくないです" }] },
+                { id: "b8_3", title: "Kata Sifat + Kata Benda", subtitle: "Menerangkan Benda", desc: "Kata sifat な memakai <strong class='text-accent'>な</strong> sebelum kata benda. Kata sifat い langsung diletakkan sebelum kata benda.", pattern: "[Sifat な] な [KB] / [Sifat い] [KB]", examples: [{ j: "親切な 先生です。", r: "Shinsetsu na sensei desu.", i: "Guru yang baik hati." }], quizzes: [{ prompt: "Watt adalah guru yang baik hati.", words: ["ワットせんせい", "は", "しんせつ", "な", "せんせい", "です"], answerStr: "ワットせんせいはしんせつなせんせいです" }, { prompt: "Nara adalah kota yang tua.", words: ["なら", "は", "ふるい", "まち", "です"], answerStr: "ならはふるいまちです" }] },
+                { id: "b8_4", title: "～が、～", subtitle: "Tetapi", desc: "Partikel <strong class='text-accent'>が</strong> menyambungkan dua kalimat yang berlawanan atau kontras. Artinya 'tetapi'.", pattern: "[Kalimat 1] が [Kalimat 2]", examples: [{ j: "おいしいですが、高いです。", r: "Oishii desu ga, takai desu.", i: "Enak, tetapi mahal." }], quizzes: [{ prompt: "Makanan Jepang enak, tetapi mahal.", words: ["にほん", "の", "たべもの", "は", "おいしい", "です", "が", "たかい", "です"], answerStr: "にほんのたべものはおいしいですがたかいです" }, { prompt: "Pekerjaan ini sibuk, tetapi menyenangkan.", words: ["この", "しごと", "は", "いそがしい", "です", "が", "たのしい", "です"], answerStr: "このしごとはいそがしいですがたのしいです" }] },
+                { id: "b8_5", title: "とても / あまり", subtitle: "Tingkat Sifat", desc: "<strong class='text-accent'>とても</strong> dipakai dengan kalimat positif untuk arti sangat. <strong class='text-accent'>あまり</strong> dipakai dengan kalimat negatif untuk arti tidak begitu.", pattern: "とても + positif / あまり + negatif", examples: [{ j: "北京は とても 寒いです。", r: "Pekin wa totemo samui desu.", i: "Beijing sangat dingin." }], quizzes: [{ prompt: "Gunung Fuji sangat tinggi.", words: ["ふじさん", "は", "とても", "たかい", "です"], answerStr: "ふじさんはとてもたかいです" }, { prompt: "Kota itu tidak begitu ramai.", words: ["その", "まち", "は", "あまり", "にぎやか", "じゃ", "ありません"], answerStr: "そのまちはあまりにぎやかじゃありません" }] },
+                { id: "b8_6", title: "Kata Benda は どうですか", subtitle: "Menanyakan Kesan", desc: "<strong class='text-accent'>どうですか</strong> menanyakan kesan, pendapat, atau keadaan tentang sesuatu.", pattern: "[KB] は どうですか", examples: [{ j: "日本の 生活は どうですか。", r: "Nihon no seikatsu wa dou desu ka.", i: "Bagaimana kehidupan di Jepang?" }], quizzes: [{ prompt: "Bagaimana pekerjaan baru Anda?", words: ["あたらしい", "しごと", "は", "どう", "です", "か"], answerStr: "あたらしいしごとはどうですか" }, { prompt: "Bagaimana asrama itu?", words: ["その", "りょう", "は", "どう", "です", "か"], answerStr: "そのりょうはどうですか" }] },
+                { id: "b8_7", title: "どんな Kata Benda", subtitle: "Menanyakan Jenis/Sifat", desc: "<strong class='text-accent'>どんな</strong> diletakkan sebelum kata benda untuk menanyakan sifat, keadaan, atau jenis benda/orang/tempat.", pattern: "どんな [KB] ですか", examples: [{ j: "奈良は どんな 町ですか。", r: "Nara wa donna machi desu ka.", i: "Nara kota yang bagaimana?" }], quizzes: [{ prompt: "Bandung kota yang bagaimana?", words: ["バンドン", "は", "どんな", "まち", "です", "か"], answerStr: "バンドンはどんなまちですか" }, { prompt: "Yamada orang yang bagaimana?", words: ["やまださん", "は", "どんな", "ひと", "です", "か"], answerStr: "やまださんはどんなひとですか" }] },
+                { id: "b8_8", title: "そうですね", subtitle: "Setuju atau Sedang Berpikir", desc: "<strong class='text-accent'>そうですね</strong> dipakai untuk menunjukkan persetujuan atau saat sedang berpikir sebelum menjawab.", pattern: "そうですね。忙しいですが、おもしろいです。", examples: [{ j: "そうですね。忙しいですが、おもしろいです。", r: "Sou desu ne. Isogashii desu ga, omoshiroi desu.", i: "Ya... sibuk, tetapi menarik." }], quizzes: [{ prompt: "Ya... dingin, tetapi menyenangkan.", words: ["そう", "です", "ね", "さむい", "です", "が", "たのしい", "です"], answerStr: "そうですねさむいですがたのしいです" }, { prompt: "Ya... sulit, tetapi menarik.", words: ["そう", "です", "ね", "むずかしい", "です", "が", "おもしろい", "です"], answerStr: "そうですねむずかしいですがおもしろいです" }] }
             ],
             9: [
-                {
-                    id: "b9_1", title: "Objek dengan が", subtitle: "あります / わかります / 好きです",
-                    desc: "Beberapa kata kerja dan kata sifat seperti あります, わかります, 好きです, 嫌いです, 上手です, dan 下手です memakai partikel <strong class='text-accent'>が</strong> untuk objeknya.",
-                    pattern: "[Objek] が あります / わかります / 好きです",
-                    examples: [
-                        { j: "私は 音楽が 好きです。", r: "Watashi wa ongaku ga suki desu.", i: "Saya suka musik." },
-                        { j: "漢字が 少し わかります。", r: "Kanji ga sukoshi wakarimasu.", i: "Mengerti kanji sedikit." }
-                    ],
-                    quizzes: [
-                        { prompt: "Saya suka masakan Jepang.", words: ["わたし", "は", "にほん", "りょうり", "が", "すき", "です"], answerStr: "わたしはにほんりょうりがすきです" },
-                        { prompt: "Saya sama sekali tidak punya uang.", words: ["おかね", "が", "ぜんぜん", "ありません"], answerStr: "おかねがぜんぜんありません" }
-                    ]
-                },
-                {
-                    id: "b9_2", title: "～から / どうして", subtitle: "Alasan",
-                    desc: "<strong class='text-accent'>から</strong> diletakkan setelah kalimat alasan. <strong class='text-accent'>どうして</strong> digunakan untuk menanyakan alasan.",
-                    pattern: "[Alasan] から、[Hasil] / どうして [Kalimat Tanya]",
-                    examples: [
-                        { j: "時間が ありませんから、新聞を 読みません。", r: "Jikan ga arimasen kara, shinbun o yomimasen.", i: "Karena tidak ada waktu, tidak membaca koran." },
-                        { j: "どうして 早く 帰りますか。", r: "Doushite hayaku kaerimasu ka.", i: "Mengapa pulang cepat?" }
-                    ],
-                    quizzes: [
-                        { prompt: "Karena tidak ada waktu, saya tidak membaca koran.", words: ["じかん", "が", "ありません", "から", "しんぶん", "を", "よみません"], answerStr: "じかんがありませんからしんぶんをよみません" },
-                        { prompt: "Mengapa Anda tidak minum kopi?", words: ["どうして", "コーヒー", "を", "のみません", "か"], answerStr: "どうしてコーヒーをのみませんか" }
-                    ]
-                }
+                { id: "b9_1", title: "Kata Benda が あります / わかります / 好きです", subtitle: "Objek dengan が", desc: "Beberapa kata kerja dan kata sifat seperti あります, わかります, 好きです, 嫌いです, 上手です, dan 下手です memakai partikel <strong class='text-accent'>が</strong>.", pattern: "[Objek] が あります/わかります/好きです", examples: [{ j: "私は 日本語が わかります。", r: "Watashi wa Nihongo ga wakarimasu.", i: "Saya mengerti bahasa Jepang." }], quizzes: [{ prompt: "Saya suka masakan Jepang.", words: ["わたし", "は", "にほん", "りょうり", "が", "すき", "です"], answerStr: "わたしはにほんりょうりがすきです" }, { prompt: "Santos mengerti bahasa Indonesia.", words: ["サントスさん", "は", "インドネシアご", "が", "わかります"], answerStr: "サントスさんはインドネシアごがわかります" }] },
+                { id: "b9_2", title: "どんな Kata Benda", subtitle: "Menanyakan Jenis", desc: "<strong class='text-accent'>どんな</strong> dipakai untuk menanyakan jenis atau sifat dari kata benda.", pattern: "どんな [KB] が 好きですか", examples: [{ j: "どんな スポーツが 好きですか。", r: "Donna supootsu ga suki desu ka.", i: "Suka olahraga apa?" }], quizzes: [{ prompt: "Suka minuman yang bagaimana?", words: ["どんな", "のみもの", "が", "すき", "です", "か"], answerStr: "どんなのみものがすきですか" }, { prompt: "Saya suka teh Jepang.", words: ["おちゃ", "が", "すき", "です"], answerStr: "おちゃがすきです" }] },
+                { id: "b9_3", title: "よく / 少し / あまり / 全然", subtitle: "Tingkat dan Kuantitas", desc: "よく, だいたい, 少し, たくさん dipakai dengan positif. あまり dan 全然 dipakai dengan negatif.", pattern: "よく/少し/たくさん + positif / あまり/全然 + negatif", examples: [{ j: "英語が 少し わかります。", r: "Eigo ga sukoshi wakarimasu.", i: "Mengerti bahasa Inggris sedikit." }], quizzes: [{ prompt: "Saya sedikit mengerti bahasa Inggris.", words: ["えいご", "が", "すこし", "わかります"], answerStr: "えいごがすこしわかります" }, { prompt: "Saya sama sekali tidak punya uang.", words: ["おかね", "が", "ぜんぜん", "ありません"], answerStr: "おかねがぜんぜんありません" }] },
+                { id: "b9_4", title: "～から", subtitle: "Memberi Alasan", desc: "<strong class='text-accent'>から</strong> diletakkan setelah kalimat alasan. Artinya karena.", pattern: "[Alasan] から、[Hasil]", examples: [{ j: "時間が ありませんから、新聞を 読みません。", r: "Jikan ga arimasen kara, shinbun o yomimasen.", i: "Karena tidak ada waktu, tidak membaca koran." }], quizzes: [{ prompt: "Karena tidak ada waktu, saya tidak membaca koran.", words: ["じかん", "が", "ありません", "から", "しんぶん", "を", "よみません"], answerStr: "じかんがありませんからしんぶんをよみません" }, { prompt: "Karena film itu menarik, saya menontonnya lagi.", words: ["その", "えいが", "は", "おもしろい", "です", "から", "また", "みます"], answerStr: "そのえいがはおもしろいですからまたみます" }] },
+                { id: "b9_5", title: "どうして", subtitle: "Menanyakan Alasan", desc: "<strong class='text-accent'>どうして</strong> dipakai untuk menanyakan alasan. Jawabannya sering diakhiri dengan から.", pattern: "どうして [Kalimat Tanya] / [Alasan] から", examples: [{ j: "どうして 朝 新聞を 読みませんか。", r: "Doushite asa shinbun o yomimasen ka.", i: "Mengapa pagi-pagi tidak membaca koran?" }], quizzes: [{ prompt: "Mengapa Anda tidak minum kopi?", words: ["どうして", "コーヒー", "を", "のみません", "か"], answerStr: "どうしてコーヒーをのみませんか" }, { prompt: "Karena saya tidak begitu suka kopi.", words: ["コーヒー", "が", "あまり", "すき", "じゃ", "ありません", "から"], answerStr: "コーヒーがあまりすきじゃありませんから" }] }
             ],
             10: [
-                {
-                    id: "b10_1", title: "あります / います", subtitle: "Keberadaan",
-                    desc: "<strong class='text-accent'>あります</strong> dipakai untuk benda mati, tumbuhan, atau hal yang tidak bergerak sendiri. <strong class='text-accent'>います</strong> dipakai untuk manusia dan hewan.",
-                    pattern: "[Tempat] に [Benda] が あります / [Tempat] に [Orang/Hewan] が います",
-                    examples: [
-                        { j: "庭に 木が あります。", r: "Niwa ni ki ga arimasu.", i: "Di halaman ada pohon." },
-                        { j: "駅に 友達が います。", r: "Eki ni tomodachi ga imasu.", i: "Di stasiun ada teman." }
-                    ],
-                    quizzes: [
-                        { prompt: "Di kamar saya ada meja.", words: ["わたし", "の", "へや", "に", "つくえ", "が", "あります"], answerStr: "わたしのへやにつくえがあります" },
-                        { prompt: "Di kantor ada Sdr. Miller.", words: ["じむしょ", "に", "ミラーさん", "が", "います"], answerStr: "じむしょにミラーさんがいます" }
-                    ]
-                },
-                {
-                    id: "b10_2", title: "Benda は Tempat に あります / います", subtitle: "Lokasi yang Sudah Diketahui",
-                    desc: "Jika benda atau orangnya sudah diketahui, letakkan sebagai topik dengan は, lalu sebutkan tempatnya dengan に.",
-                    pattern: "[Benda/Orang] は [Tempat] に あります/います",
-                    examples: [
-                        { j: "鍵は かばんの 中に あります。", r: "Kagi wa kaban no naka ni arimasu.", i: "Kunci ada di dalam tas." },
-                        { j: "先生は 教室に います。", r: "Sensei wa kyoushitsu ni imasu.", i: "Guru ada di kelas." }
-                    ],
-                    quizzes: [
-                        { prompt: "Buku saya ada di atas meja.", words: ["わたし", "の", "ほん", "は", "つくえ", "の", "うえ", "に", "あります"], answerStr: "わたしのほんはつくえのうえにあります" },
-                        { prompt: "Ayah ada di kantor.", words: ["ちち", "は", "かいしゃ", "に", "います"], answerStr: "ちちはかいしゃにいます" }
-                    ]
-                },
-                {
-                    id: "b10_3", title: "Posisi の Kata Benda / や・など", subtitle: "Letak dan Daftar Contoh",
-                    desc: "Kata posisi seperti 上, 下, 中, 隣, dan 近く diletakkan setelah benda dengan の. Partikel や menyebut beberapa contoh, dan など berarti 'dan lain-lain'.",
-                    pattern: "[KB] の [Posisi] に あります / [Benda1] や [Benda2] など",
-                    examples: [
-                        { j: "銀行の 隣に 郵便局が あります。", r: "Ginkou no tonari ni yuubinkyoku ga arimasu.", i: "Di sebelah bank ada kantor pos." },
-                        { j: "箱の 中に 手紙や 写真などが あります。", r: "Hako no naka ni tegami ya shashin nado ga arimasu.", i: "Di dalam kotak ada surat, foto, dan lain-lain." }
-                    ],
-                    quizzes: [
-                        { prompt: "Di bawah kursi ada tas.", words: ["いす", "の", "した", "に", "かばん", "が", "あります"], answerStr: "いすのしたにかばんがあります" },
-                        { prompt: "Di dalam tas ada buku, pensil, dan lain-lain.", words: ["かばん", "の", "なか", "に", "ほん", "や", "えんぴつ", "など", "が", "あります"], answerStr: "かばんのなかにほんやえんぴつなどがあります" }
-                    ]
-                }
+                { id: "b10_1", title: "Kata Benda が あります / います", subtitle: "Keberadaan", desc: "あります dipakai untuk benda mati/tumbuhan. います dipakai untuk manusia dan hewan.", pattern: "[Benda] が あります / [Orang/Hewan] が います", examples: [{ j: "コンピューターが あります。", r: "Konpyuutaa ga arimasu.", i: "Ada komputer." }], quizzes: [{ prompt: "Ada komputer.", words: ["コンピューター", "が", "あります"], answerStr: "コンピューターがあります" }, { prompt: "Ada anak laki-laki.", words: ["おとこのこ", "が", "います"], answerStr: "おとこのこがいます" }] },
+                { id: "b10_2", title: "Tempat に Benda が あります / います", subtitle: "Ada di Tempat", desc: "Tempat keberadaan diberi partikel に.", pattern: "[Tempat] に [Benda/Orang] が あります/います", examples: [{ j: "私の 部屋に 机が あります。", r: "Watashi no heya ni tsukue ga arimasu.", i: "Di kamar saya ada meja." }], quizzes: [{ prompt: "Di kamar saya ada meja.", words: ["わたし", "の", "へや", "に", "つくえ", "が", "あります"], answerStr: "わたしのへやにつくえがあります" }, { prompt: "Di kantor ada Sdr. Miller.", words: ["じむしょ", "に", "ミラーさん", "が", "います"], answerStr: "じむしょにミラーさんがいます" }] },
+                { id: "b10_3", title: "Kata Benda は Tempat に あります / います", subtitle: "Lokasi", desc: "Jika benda atau orang sudah diketahui, jadikan topik dengan は, lalu sebut tempatnya dengan に.", pattern: "[Benda/Orang] は [Tempat] に あります/います", examples: [{ j: "ミラーさんは 事務所に います。", r: "Miraa-san wa jimusho ni imasu.", i: "Sdr. Miller ada di kantor." }], quizzes: [{ prompt: "Buku saya ada di atas meja.", words: ["わたし", "の", "ほん", "は", "つくえ", "の", "うえ", "に", "あります"], answerStr: "わたしのほんはつくえのうえにあります" }, { prompt: "Ayah ada di kantor.", words: ["ちち", "は", "かいしゃ", "に", "います"], answerStr: "ちちはかいしゃにいます" }] },
+                { id: "b10_4", title: "Posisi の Kata Benda", subtitle: "Atas, Bawah, Samping", desc: "Kata posisi seperti 上, 下, 中, 前, 後ろ, 右, 左, 隣, 近く memakai の setelah kata benda acuannya.", pattern: "[KB] の [Posisi] に あります/います", examples: [{ j: "銀行の 隣に 郵便局が あります。", r: "Ginkou no tonari ni yuubinkyoku ga arimasu.", i: "Di sebelah bank ada kantor pos." }], quizzes: [{ prompt: "Di bawah kursi ada tas.", words: ["いす", "の", "した", "に", "かばん", "が", "あります"], answerStr: "いすのしたにかばんがあります" }, { prompt: "Di sebelah kiri restoran ada bank.", words: ["レストラン", "の", "ひだり", "に", "ぎんこう", "が", "あります"], answerStr: "レストランのひだりにぎんこうがあります" }] },
+                { id: "b10_5", title: "Kata Benda や Kata Benda など", subtitle: "Beberapa Contoh", desc: "Partikel や menyebut beberapa contoh dari daftar, bukan semuanya. など berarti dan lain-lain.", pattern: "[Benda1] や [Benda2] など", examples: [{ j: "箱の 中に 手紙や 写真などが あります。", r: "Hako no naka ni tegami ya shashin nado ga arimasu.", i: "Di dalam kotak ada surat, foto, dan lain-lain." }], quizzes: [{ prompt: "Di dalam tas ada buku, pensil, dan lain-lain.", words: ["かばん", "の", "なか", "に", "ほん", "や", "えんぴつ", "など", "が", "あります"], answerStr: "かばんのなかにほんやえんぴつなどがあります" }, { prompt: "Saya membeli roti, susu, dan lain-lain di toko.", words: ["みせ", "で", "パン", "や", "ぎゅうにゅう", "など", "を", "かいました"], answerStr: "みせでパンやぎゅうにゅうなどをかいました" }] },
+                { id: "b10_6", title: "アジアストアですか", subtitle: "Memastikan Inti Pertanyaan", desc: "Dalam percakapan, lawan bicara bisa menegaskan inti pertanyaan terlebih dahulu sebelum menjawab.", pattern: "[Tempat/Nama] ですか。...です。", examples: [{ j: "アジアストアですか。あの ビルの 中です。", r: "Ajia Sutoa desu ka. Ano biru no naka desu.", i: "Asia Store? Di dalam gedung itu." }], quizzes: [{ prompt: "Asia Store? Di dalam gedung itu.", words: ["アジアストア", "です", "か", "あの", "ビル", "の", "なか", "です"], answerStr: "アジアストアですかあのビルのなかです" }, { prompt: "Perpustakaan? Di sebelah kantor pos.", words: ["としょかん", "です", "か", "ゆうびんきょく", "の", "となり", "です"], answerStr: "としょかんですかゆうびんきょくのとなりです" }] }
             ]
+        });
+        const FRESH_BUNPOU_QUIZZES = {
+            b1_1: [{ prompt: "Saya siswa SMA.", words: ["わたし", "は", "こうこうせい", "です"], answerStr: "わたしはこうこうせいです" }, { prompt: "Rina adalah orang Indonesia.", words: ["リナさん", "は", "インドネシアじん", "です"], answerStr: "リナさんはインドネシアじんです" }],
+            b1_2: [{ prompt: "Saya bukan guru.", words: ["わたし", "は", "せんせい", "じゃ", "ありません"], answerStr: "わたしはせんせいじゃありません" }, { prompt: "Santos bukan mahasiswa.", words: ["サントスさん", "は", "がくせい", "では", "ありません"], answerStr: "サントスさんはがくせいではありません" }],
+            b1_3: [{ prompt: "Apakah orang itu dokter?", words: ["あの", "ひと", "は", "いしゃ", "です", "か"], answerStr: "あのひとはいしゃですか" }, { prompt: "Apakah Sdr. Lee pegawai bank?", words: ["リーさん", "は", "ぎんこういん", "です", "か"], answerStr: "リーさんはぎんこういんですか" }],
+            b1_4: [{ prompt: "Saya juga karyawan perusahaan.", words: ["わたし", "も", "かいしゃいん", "です"], answerStr: "わたしもかいしゃいんです" }, { prompt: "Yamada juga orang Jepang.", words: ["やまださん", "も", "にほんじん", "です"], answerStr: "やまださんもにほんじんです" }],
+            b1_5: [{ prompt: "Ini buku bahasa Jepang.", words: ["これ", "は", "にほんご", "の", "ほん", "です"], answerStr: "これはにほんごのほんです" }, { prompt: "Itu tas saya.", words: ["それ", "は", "わたし", "の", "かばん", "です"], answerStr: "それはわたしのかばんです" }],
+            b1_6: [{ prompt: "Orang itu adalah Sdr. Tanaka.", words: ["あの", "ひと", "は", "たなかさん", "です"], answerStr: "あのひとはたなかさんです" }, { prompt: "Apakah Suzuki adalah guru?", words: ["すずきさん", "は", "せんせい", "です", "か"], answerStr: "すずきさんはせんせいですか" }],
+            b2_1: [{ prompt: "Ini adalah kamus.", words: ["これ", "は", "じしょ", "です"], answerStr: "これはじしょです" }, { prompt: "Itu payung siapa?", words: ["それ", "は", "だれ", "の", "かさ", "です", "か"], answerStr: "それはだれのかさですか" }],
+            b2_2: [{ prompt: "Buku ini menarik.", words: ["この", "ほん", "は", "おもしろい", "です"], answerStr: "このほんはおもしろいです" }, { prompt: "Orang itu siapa?", words: ["あの", "ひと", "は", "だれ", "です", "か"], answerStr: "あのひとはだれですか" }],
+            b2_3: [{ prompt: "Ya, benar.", words: ["はい", "そう", "です"], answerStr: "はいそうです" }, { prompt: "Tidak, bukan.", words: ["いいえ", "ちがいます"], answerStr: "いいえちがいます" }],
+            b2_4: [{ prompt: "Ini majalah atau koran?", words: ["これ", "は", "ざっし", "ですか", "しんぶん", "ですか"], answerStr: "これはざっしですかしんぶんですか" }, { prompt: "Itu kunci atau kartu?", words: ["それ", "は", "かぎ", "ですか", "カード", "ですか"], answerStr: "それはかぎですかカードですか" }],
+            b2_5: [{ prompt: "Ini majalah komputer.", words: ["これ", "は", "コンピューター", "の", "ざっし", "です"], answerStr: "これはコンピューターのざっしです" }, { prompt: "Itu buku Rina.", words: ["それ", "は", "リナさん", "の", "ほん", "です"], answerStr: "それはリナさんのほんです" }],
+            b2_6: [{ prompt: "Apakah kamera ini milik Anda?", words: ["この", "カメラ", "は", "あなた", "の", "です", "か"], answerStr: "このカメラはあなたのですか" }, { prompt: "Tas itu milik siapa?", words: ["あの", "かばん", "は", "だれ", "の", "です", "か"], answerStr: "あのかばんはだれのですか" }],
+            b2_7: [{ prompt: "Ini oleh-oleh.", words: ["これ", "は", "お", "みやげ", "です"], answerStr: "これはおみやげです" }, { prompt: "Oh, begitu ya.", words: ["そう", "です", "か"], answerStr: "そうですか" }],
+            b3_1: [{ prompt: "Di sini adalah lobi.", words: ["ここ", "は", "ロビー", "です"], answerStr: "ここはロビーです" }, { prompt: "Kamar kecil di sana.", words: ["おてあらい", "は", "あそこ", "です"], answerStr: "おてあらいはあそこです" }],
+            b3_2: [{ prompt: "Telepon ada di lantai dua.", words: ["でんわ", "は", "２かい", "です"], answerStr: "でんわは２かいです" }, { prompt: "Yamada ada di kantor.", words: ["やまださん", "は", "じむしょ", "です"], answerStr: "やまださんはじむしょです" }],
+            b3_3: [{ prompt: "Ruang rapat ada di mana?", words: ["かいぎしつ", "は", "どこ", "です", "か"], answerStr: "かいぎしつはどこですか" }, { prompt: "Lift sebelah mana?", words: ["エレベーター", "は", "どちら", "です", "か"], answerStr: "エレベーターはどちらですか" }],
+            b3_4: [{ prompt: "Kamera ini buatan Jepang.", words: ["この", "カメラ", "は", "にほん", "の", "です"], answerStr: "このカメラはにほんのです" }, { prompt: "Ini mobil perusahaan.", words: ["これ", "は", "かいしゃ", "の", "くるま", "です"], answerStr: "これはかいしゃのくるまです" }],
+            b3_5: [{ prompt: "Harga payung ini 500 yen.", words: ["この", "かさ", "は", "５００えん", "です"], answerStr: "このかさは５００えんです" }, { prompt: "Berapa harga buku itu?", words: ["その", "ほん", "は", "いくら", "です", "か"], answerStr: "そのほんはいくらですか" }],
+            b4_1: [{ prompt: "Sekarang jam delapan.", words: ["いま", "８じ", "です"], answerStr: "いま８じです" }, { prompt: "Sekarang jam setengah tujuh.", words: ["いま", "６じ", "はん", "です"], answerStr: "いま６じはんです" }],
+            b4_2: [{ prompt: "Bank libur hari Minggu.", words: ["ぎんこう", "は", "にちようび", "やすみ", "です"], answerStr: "ぎんこうはにちようびやすみです" }, { prompt: "Perpustakaan buka dari jam sembilan.", words: ["としょかん", "は", "９じ", "から", "です"], answerStr: "としょかんは９じからです" }],
+            b4_3: [{ prompt: "Saya belajar dari jam tujuh sampai jam sembilan.", words: ["７じ", "から", "９じ", "まで", "べんきょうします"], answerStr: "７じから９じまでべんきょうします" }, { prompt: "Saya bekerja dari Senin sampai Jumat.", words: ["げつようび", "から", "きんようび", "まで", "はたらきます"], answerStr: "げつようびからきんようびまではたらきます" }],
+            b4_4: [{ prompt: "Saya tidur jam sebelas.", words: ["１１じ", "に", "ねます"], answerStr: "１１じにねます" }, { prompt: "Saya bangun jam enam pagi.", words: ["あさ", "６じ", "に", "おきます"], answerStr: "あさ６じにおきます" }],
+            b4_5: [{ prompt: "Saya belajar bahasa Jepang kemarin.", words: ["きのう", "にほんご", "を", "べんきょうしました"], answerStr: "きのうにほんごをべんきょうしました" }, { prompt: "Saya tidak bekerja hari ini.", words: ["きょう", "はたらきません"], answerStr: "きょうはたらきません" }],
+            b5_1: [{ prompt: "Saya pergi ke sekolah.", words: ["がっこう", "へ", "いきます"], answerStr: "がっこうへいきます" }, { prompt: "Saya pulang ke rumah.", words: ["うち", "へ", "かえります"], answerStr: "うちへかえります" }],
+            b5_2: [{ prompt: "Saya tidak pergi ke mana-mana.", words: ["どこ", "へ", "も", "いきません"], answerStr: "どこへもいきません" }, { prompt: "Saya tidak makan apa pun.", words: ["なに", "も", "たべません"], answerStr: "なにもたべません" }],
+            b5_3: [{ prompt: "Saya pergi dengan bus.", words: ["バス", "で", "いきます"], answerStr: "バスでいきます" }, { prompt: "Saya pulang dari stasiun dengan berjalan kaki.", words: ["えき", "から", "あるいて", "かえります"], answerStr: "えきからあるいてかえります" }],
+            b5_4: [{ prompt: "Saya pergi ke Jepang bersama keluarga.", words: ["かぞく", "と", "にほん", "へ", "いきます"], answerStr: "かぞくとにほんへいきます" }, { prompt: "Saya pergi ke Tokyo sendirian.", words: ["ひとり", "で", "とうきょう", "へ", "いきます"], answerStr: "ひとりでとうきょうへいきます" }],
+            b5_5: [{ prompt: "Kapan pergi ke Hiroshima?", words: ["いつ", "ひろしま", "へ", "いきます", "か"], answerStr: "いつひろしまへいきますか" }, { prompt: "Kapan datang ke Indonesia?", words: ["いつ", "インドネシア", "へ", "きました", "か"], answerStr: "いつインドネシアへきましたか" }],
+            b5_6: [{ prompt: "Kereta ekspres berikutnya ya.", words: ["つぎ", "の", "きゅうこう", "です", "よ"], answerStr: "つぎのきゅうこうですよ" }, { prompt: "Es krim ini enak lho.", words: ["この", "アイスクリーム", "は", "おいしい", "です", "よ"], answerStr: "このアイスクリームはおいしいですよ" }]
+        };
+        Object.values(BUNPOU_DB).flat().forEach(item => {
+            if (FRESH_BUNPOU_QUIZZES[item.id]) item.quizzes = FRESH_BUNPOU_QUIZZES[item.id];
+            if (item.quizzes) item.quizzes = item.quizzes.map((quiz, idx) => ({ prompt: quiz.prompt || `Susun kalimat Jepang untuk pola ${item.title} (${idx + 1}).`, ...quiz }));
         });
         const SHOP_ITEMS = [
             { id: 'tropis', name: 'Hutan Tropis', icon: '🌿', price: 100, desc: 'Tema alam dengan partikel daun dan lagu marimba santai.' },
