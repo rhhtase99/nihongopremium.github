@@ -1,4 +1,4 @@
-
+﻿```html
 <!DOCTYPE html>
 <html lang="id" data-season="default" class="transition-colors duration-700">
 <head>
@@ -81,8 +81,158 @@
         .dark[data-season="space"] { --bg-app: #05040A; --accent: #C084FC; --glass-bg: rgba(10, 8, 20, 0.8); --glass-border: rgba(192, 132, 252, 0.2); --text-main: #f2f2f7; --text-muted: #a09eb5; }
 
         /* NATAL (SPECIAL PREMIUM) */
-        [data-season="natal"] { --bg-app: #FDF2F2; --accent: #D32F2F; --glass-bg: rgba(255, 255, 255, 0.75); --glass-border: rgba(211, 47, 47, 0.2); }
-        .dark[data-season="natal"] { --bg-app: #1A0F0F; --accent: #E53935; --glass-bg: rgba(30, 15, 15, 0.85); --glass-border: rgba(229, 57, 53, 0.2); }
+        [data-season="natal"] { --bg-app: #fff7f7; --accent: #d71920; --glass-bg: rgba(255, 255, 255, 0.82); --glass-border: rgba(211, 47, 47, 0.25); --text-main: #241111; --text-muted: #6f4a4a; }
+        .dark[data-season="natal"] { --bg-app: #1A0F0F; --accent: #ff6b6b; --glass-bg: rgba(45, 18, 18, 0.9); --glass-border: rgba(255, 230, 180, 0.32); --text-main: #fff8ed; --text-muted: #ffd6c2; }
+        [data-season="natal"] body {
+            background:
+                radial-gradient(circle at 18% 10%, rgba(255,255,255,0.8) 0 4%, transparent 14%),
+                radial-gradient(circle at 78% 18%, rgba(255,215,0,0.22) 0 4%, transparent 15%),
+                repeating-linear-gradient(135deg, rgba(211,47,47,0.08) 0 12px, rgba(255,255,255,0.16) 12px 24px),
+                linear-gradient(180deg, #fffafa 0%, #ffe8e8 54%, #f9fff0 100%);
+        }
+        .dark[data-season="natal"] body {
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,215,0,0.18) 0 5%, transparent 18%),
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 12px, rgba(255,77,77,0.08) 12px 24px),
+                linear-gradient(180deg, #2a0f12 0%, #160b0b 56%, #102016 100%);
+        }
+        [data-season="natal"] .ios-glass {
+            position: relative;
+            isolation: isolate;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            background:
+                radial-gradient(circle at 18% 0%, rgba(255, 238, 160, 0.26), transparent 30%),
+                linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,246,246,0.82));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 10px 24px -16px rgba(120,0,0,0.55);
+        }
+        .dark[data-season="natal"] .ios-glass {
+            border-color: rgba(255, 225, 176, 0.32);
+            background:
+                radial-gradient(circle at 18% 0%, rgba(255, 208, 103, 0.16), transparent 32%),
+                linear-gradient(180deg, rgba(72, 26, 26, 0.94), rgba(30, 14, 14, 0.9));
+            box-shadow: inset 0 1px 0 rgba(255,225,176,0.16), 0 12px 28px -18px rgba(0,0,0,0.9);
+        }
+        [data-season="natal"] .ios-glass::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2px;
+            pointer-events: none;
+            background: repeating-linear-gradient(135deg, #d71920 0 8px, #fff 8px 16px, #168b45 16px 24px, #fff 24px 32px);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        [data-season="natal"] #bottom-nav {
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 238, 160, 0.24), transparent 32%),
+                linear-gradient(rgba(255,255,255,0.92), rgba(255,246,246,0.88));
+            border: 2px solid rgba(255, 255, 255, 0.86);
+            box-shadow: inset 0 0 0 2px rgba(215,25,32,0.16), 0 10px 24px -18px rgba(120,0,0,0.55);
+        }
+        [data-season="natal"] #bottom-nav::before { pointer-events: none; }
+        .dark[data-season="natal"] #bottom-nav {
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 232, 150, 0.18), transparent 36%),
+                linear-gradient(rgba(63, 22, 22, 0.95), rgba(36, 15, 15, 0.92));
+            border-color: rgba(255, 225, 176, 0.34);
+            box-shadow: inset 0 0 0 2px rgba(255,107,107,0.18), 0 12px 28px -18px rgba(0,0,0,0.9);
+        }
+
+        /* WINDOWS XP FRUTIGER AERO (PREMIUM) */
+        [data-season="xpaero"] {
+            --bg-app: #7ed957; --accent: #0b75db;
+            --glass-bg: rgba(235, 252, 255, 0.72); --glass-border: rgba(255, 255, 255, 0.58);
+            --text-main: #08345f; --text-muted: #1d6d6b;
+        }
+        .dark[data-season="xpaero"] {
+            --bg-app: #062748; --accent: #35d0ff;
+            --glass-bg: rgba(10, 58, 92, 0.72); --glass-border: rgba(113, 236, 255, 0.32);
+            --text-main: #ebfbff; --text-muted: #a7e8e0;
+        }
+        [data-season="xpaero"] body {
+            background:
+                radial-gradient(circle at 16% 14%, rgba(255,255,255,0.55) 0 6%, transparent 18%),
+                linear-gradient(180deg, rgba(23,133,255,0.08) 0%, rgba(255,255,255,0.03) 42%, rgba(104,255,80,0.12) 100%),
+                url("assets/xp-bliss-hd.png") center center / cover fixed no-repeat;
+        }
+        .dark[data-season="xpaero"] body {
+            background:
+                linear-gradient(180deg, rgba(4,25,56,0.42) 0%, rgba(2,18,32,0.36) 46%, rgba(0,38,17,0.45) 100%),
+                url("assets/xp-bliss-hd.png") center center / cover fixed no-repeat;
+        }
+        [data-season="xpaero"] .ios-glass {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(198,244,255,0.62) 48%, rgba(72,184,255,0.28) 49%, rgba(232,255,244,0.68) 100%);
+            border-color: rgba(255,255,255,0.68);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,120,170,0.18), 0 12px 28px -18px rgba(0,70,140,0.7);
+        }
+        .dark[data-season="xpaero"] .ios-glass {
+            background:
+                linear-gradient(180deg, rgba(42,113,144,0.78) 0%, rgba(14,73,109,0.7) 48%, rgba(5,44,78,0.72) 49%, rgba(13,93,70,0.62) 100%);
+            border-color: rgba(118, 234, 255, 0.32);
+            box-shadow: inset 0 1px 0 rgba(188,246,255,0.24), inset 0 -1px 0 rgba(0,0,0,0.32), 0 12px 28px -18px rgba(0,0,0,0.8);
+        }
+        [data-season="xpaero"] button.bg-accent,
+        [data-season="xpaero"] .bg-accent {
+            background: linear-gradient(180deg, #61d5ff 0%, #168ff2 48%, #0068c8 49%, #0751a8 100%);
+            border: 1px solid rgba(0,86,180,0.42);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 7px 14px -9px rgba(0,72,145,0.8);
+        }
+        [data-season="xpaero"] #bottom-nav {
+            background: linear-gradient(180deg, rgba(226,255,255,0.86), rgba(77,184,255,0.58) 48%, rgba(0,118,222,0.58) 49%, rgba(198,255,225,0.7));
+        }
+        [data-season="xpaero"] #season-art-bg { opacity: 0; }
+
+        /* iOS 6 BLUE (RETRO PREMIUM) */
+        [data-season="ios6"] {
+            --bg-app: #eef3f8; --accent: #0878d8;
+            --glass-bg: rgba(250, 252, 255, 0.94); --glass-border: rgba(145, 171, 198, 0.42);
+            --text-main: #203246; --text-muted: #63768a;
+        }
+        .dark[data-season="ios6"] {
+            --bg-app: #172330; --accent: #62b6ff;
+            --glass-bg: rgba(34, 48, 64, 0.94); --glass-border: rgba(123, 166, 205, 0.38);
+            --text-main: #f2f7fb; --text-muted: #b6c7d8;
+        }
+        [data-season="ios6"] body {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.92)) top / 100% 96px no-repeat,
+                radial-gradient(circle at 18% 10%, rgba(255,255,255,0.9) 0 5%, transparent 18%),
+                radial-gradient(circle at 78% 20%, rgba(112,190,255,0.18) 0 9%, transparent 24%),
+                linear-gradient(180deg, #f8fbfe 0%, #e8eff6 44%, #d4e0ec 100%);
+        }
+        .dark[data-season="ios6"] body {
+            background:
+                linear-gradient(180deg, rgba(24,43,64,0.96), rgba(24,43,64,0.96)) top / 100% 96px no-repeat,
+                radial-gradient(circle at 24% 12%, rgba(108,181,244,0.18) 0 9%, transparent 24%),
+                linear-gradient(180deg, #243448 0%, #172330 48%, #101922 100%);
+        }
+        [data-season="ios6"] .ios-glass {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,248,252,0.96) 49%, rgba(221,230,239,0.96) 50%, rgba(248,250,253,0.94) 100%);
+            border-color: rgba(142, 167, 192, 0.44);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(80,111,143,0.13), 0 8px 18px -13px rgba(31,55,81,0.48);
+        }
+        .dark[data-season="ios6"] .ios-glass {
+            background:
+                linear-gradient(180deg, rgba(58,76,98,0.96) 0%, rgba(40,56,75,0.96) 49%, rgba(24,37,52,0.96) 50%, rgba(38,54,72,0.94) 100%);
+            border-color: rgba(132, 174, 214, 0.36);
+            box-shadow: inset 0 1px 0 rgba(169,204,236,0.22), inset 0 -1px 0 rgba(0,0,0,0.28), 0 8px 20px -13px rgba(0,0,0,0.72);
+        }
+        [data-season="ios6"] button.bg-accent,
+        [data-season="ios6"] .bg-accent {
+            background: linear-gradient(180deg, #69bdff 0%, #1688ea 50%, #006dcc 51%, #0057a7 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 5px 12px -8px rgba(0,32,92,0.65);
+            border: 1px solid rgba(0,74,154,0.35);
+        }
+        [data-season="ios6"] #bottom-nav {
+            background: linear-gradient(180deg, rgba(252,254,255,0.97) 0%, rgba(229,237,246,0.95) 48%, rgba(199,215,232,0.94) 49%, rgba(242,247,252,0.95) 100%);
+        }
+        .dark[data-season="ios6"] #bottom-nav {
+            background: linear-gradient(180deg, rgba(54,74,98,0.96) 0%, rgba(34,50,68,0.95) 48%, rgba(20,32,46,0.95) 49%, rgba(38,55,73,0.96) 100%);
+        }
 
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
@@ -104,11 +254,29 @@
         .dark .ios-glass, [data-season="space"] .ios-glass { box-shadow: 0 4px 24px -12px rgba(0,0,0,0.3); }
 
         .text-accent { color: var(--accent); }
+        .text-main { color: var(--text-main); }
         .bg-accent { background-color: var(--accent); }
         .bg-accent-light { background-color: color-mix(in srgb, var(--accent) 15%, transparent); }
         .border-accent { border-color: var(--accent); }
 
         .ios-btn-press:active { transform: scale(0.95); filter: brightness(0.9); }
+        #bottom-nav {
+            position: fixed !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
+            transform: translate3d(-50%, 0, 0);
+            will-change: opacity, transform;
+            transition: opacity 0.8s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+        }
+        #bottom-nav button { min-width: 0; position: relative; z-index: 1; pointer-events: auto; }
+        [data-orientation-view="landscape"] #main-app { max-width: min(58rem, 100vw); }
+        [data-orientation-view="landscape"] #app-viewport { width: 100%; }
+        [data-orientation-view="landscape"] #bottom-nav { max-width: min(44rem, 92vw); }
+        [data-orientation-view="landscape"] #theme-modal > div,
+        [data-orientation-view="landscape"] #shop-modal > div,
+        [data-orientation-view="landscape"] #profile-modal > div,
+        [data-orientation-view="landscape"] #progress-modal > div { max-width: min(44rem, 100vw); }
         
         /* Seasonal Background Art Layer */
         #season-art-bg {
@@ -117,17 +285,20 @@
             opacity: 0.15; transition: opacity 1s ease, background-image 1s ease;
         }
         .dark #season-art-bg, [data-season="space"] #season-art-bg { opacity: 0.08; }
-        .dark[data-season="natal"] #season-art-bg { opacity: 0.15; }
+        [data-season="natal"] #season-art-bg { opacity: 0.34; }
+        .dark[data-season="natal"] #season-art-bg { opacity: 0.26; }
 
         /* Seasonal Particles */
         .season-element { position: absolute; pointer-events: none; opacity: 0.6; z-index: 1; }
         @keyframes floatDown { 0% { transform: translateY(-5vh) rotate(0deg) translateX(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(105vh) rotate(360deg) translateX(30px); opacity: 0; } }
         @keyframes floatUp { 0% { transform: translateY(105vh) scale(0.5); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-5vh) scale(1.2); opacity: 0; } }
         @keyframes floatSpace { 0% { transform: translateY(105vh) rotate(0deg) scale(0.8); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-10vh) rotate(180deg) scale(1.2); opacity: 0; } }
+        @keyframes merryBlink { 0%, 100% { opacity: 0.35; filter: brightness(0.8); } 50% { opacity: 1; filter: brightness(1.8); } }
         
         .particle-down { animation: floatDown linear infinite; position: absolute; pointer-events: none; }
         .particle-up { animation: floatUp linear infinite; position: absolute; pointer-events: none; }
         .particle-space { animation: floatSpace linear infinite; position: absolute; pointer-events: none; }
+        .particle-blink { animation: merryBlink ease-in-out infinite; position: absolute; pointer-events: none; }
         
         /* Coin Animation */
         @keyframes floatCoin { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-40px) scale(1.5); opacity: 0; } }
@@ -269,6 +440,15 @@
                     <button onclick="setTheme('dark')" id="theme-dark-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="moon" class="w-4 h-4"></i> Gelap</button>
                     <button onclick="setTheme('auto')" id="theme-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i> Auto</button>
                 </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="text-xs font-semibold uppercase tracking-wider block mb-3" style="color: var(--text-muted)">Tata Letak</label>
+                <div class="grid grid-cols-2 gap-2 bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-2xl mb-2">
+                    <button onclick="setOrientationMode('auto')" id="orientation-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="rotate-cw" class="w-4 h-4"></i> Auto</button>
+                    <button onclick="setOrientationMode('manual')" id="orientation-manual-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="touchpad" class="w-4 h-4"></i> Manual</button>
+                </div>
+                <button onclick="toggleOrientationView()" id="orientation-toggle-btn" class="w-full ios-glass py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="panel-top" class="w-4 h-4"></i> Ubah ke Portrait</button>
             </div>
             
             <div class="mb-6">
@@ -1234,10 +1414,181 @@
             ]
         };
 
+
+        Object.assign(BUNPOU_DB, {
+            6: [
+                {
+                    id: "b6_1", title: "Kata Benda を Kata Kerja", subtitle: "Objek Langsung",
+                    desc: "Partikel <strong class='text-accent'>を (o)</strong> diletakkan setelah objek dari kata kerja transitif. Dipakai untuk kegiatan seperti makan, minum, membaca, menulis, membeli, melihat, dan sebagainya.",
+                    pattern: "<span class='text-main border-b-2 border-accent'>[Objek]</span> <b>を</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
+                    examples: [
+                        { j: "パンを 食べます。", r: "Pan o tabemasu.", i: "Makan roti." },
+                        { j: "本を 読みました。", r: "Hon o yomimashita.", i: "Sudah membaca buku." }
+                    ],
+                    quizzes: [
+                        { prompt: "Saya minum teh setiap pagi.", words: ["まいあさ", "おちゃ", "を", "のみます"], answerStr: "まいあさおちゃをのみます" },
+                        { prompt: "Kemarin saya membeli kamera.", words: ["きのう", "カメラ", "を", "かいました"], answerStr: "きのうカメラをかいました" }
+                    ]
+                },
+                {
+                    id: "b6_2", title: "Tempat で Kata Kerja", subtitle: "Tempat Melakukan Aksi",
+                    desc: "Partikel <strong class='text-accent'>で</strong> setelah nama tempat menunjukkan lokasi terjadinya suatu kegiatan atau aksi.",
+                    pattern: "<span class='text-main border-b-2 border-accent'>[Tempat]</span> <b>で</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
+                    examples: [
+                        { j: "図書館で 勉強します。", r: "Toshokan de benkyou shimasu.", i: "Belajar di perpustakaan." },
+                        { j: "店で ジュースを 買います。", r: "Mise de juusu o kaimasu.", i: "Membeli jus di toko." }
+                    ],
+                    quizzes: [
+                        { prompt: "Saya menulis laporan di perpustakaan.", words: ["としょかん", "で", "レポート", "を", "かきます"], answerStr: "としょかんでレポートをかきます" },
+                        { prompt: "Bagaimana kalau minum kopi bersama?", words: ["いっしょに", "コーヒー", "を", "のみません", "か"], answerStr: "いっしょにコーヒーをのみませんか" }
+                    ]
+                }
+            ],
+            7: [
+                {
+                    id: "b7_1", title: "Alat/Sarana で Kata Kerja", subtitle: "Cara Melakukan Sesuatu",
+                    desc: "Partikel <strong class='text-accent'>で</strong> juga menunjukkan alat, sarana, bahasa, atau cara yang dipakai untuk melakukan sebuah aksi.",
+                    pattern: "<span class='text-main border-b-2 border-accent'>[Alat/Sarana/Bahasa]</span> <b>で</b> <span class='text-main border-b-2 border-accent'>[Kata Kerja]</span>",
+                    examples: [
+                        { j: "ペンで 名前を 書きます。", r: "Pen de namae o kakimasu.", i: "Menulis nama dengan pena." },
+                        { j: "日本語で 話します。", r: "Nihongo de hanashimasu.", i: "Berbicara dalam bahasa Jepang." }
+                    ],
+                    quizzes: [
+                        { prompt: "Saya memotong kertas dengan gunting.", words: ["はさみ", "で", "かみ", "を", "きります"], answerStr: "はさみでかみをきります" },
+                        { prompt: "Apa bahasa Jepang dari 'terima kasih'?", words: ["「terima kasih」", "は", "にほんご", "で", "なん", "です", "か"], answerStr: "「terima kasih」はにほんごでなんですか" }
+                    ]
+                },
+                {
+                    id: "b7_2", title: "Memberi dan Menerima", subtitle: "あげます / もらいます",
+                    desc: "Untuk memberi, gunakan <strong class='text-accent'>Orang に Benda を あげます</strong>. Untuk menerima dari seseorang, gunakan <strong class='text-accent'>Orang に/から Benda を もらいます</strong>.",
+                    pattern: "[Orang] に [Benda] を あげます / [Orang] に・から [Benda] を もらいます",
+                    examples: [
+                        { j: "友達に 写真を あげました。", r: "Tomodachi ni shashin o agemashita.", i: "Memberikan foto kepada teman." },
+                        { j: "先生に 手紙を もらいました。", r: "Sensei ni tegami o moraimashita.", i: "Menerima surat dari guru." }
+                    ],
+                    quizzes: [
+                        { prompt: "Saya memberi kado kepada ibu.", words: ["はは", "に", "プレゼント", "を", "あげました"], answerStr: "ははにプレゼントをあげました" },
+                        { prompt: "Saya meminjam uang dari bank.", words: ["ぎんこう", "から", "おかね", "を", "かりました"], answerStr: "ぎんこうからおかねをかりました" }
+                    ]
+                }
+            ],
+            8: [
+                {
+                    id: "b8_1", title: "Kata Sifat な / い", subtitle: "Predikat dan Negatif",
+                    desc: "Kata sifat <strong class='text-accent'>な</strong> memakai です dan bentuk negatifnya じゃありません. Kata sifat <strong class='text-accent'>い</strong> langsung diikuti です dan bentuk negatifnya menjadi くないです.",
+                    pattern: "[Sifat な] です / [Sifat な] じゃありません / [Sifat い] です / [Sifat い] くないです",
+                    examples: [
+                        { j: "この 町は 静かです。", r: "Kono machi wa shizuka desu.", i: "Kota ini tenang." },
+                        { j: "この 本は 高くないです。", r: "Kono hon wa takakunai desu.", i: "Buku ini tidak mahal." }
+                    ],
+                    quizzes: [
+                        { prompt: "Restoran itu terkenal.", words: ["あの", "レストラン", "は", "ゆうめい", "です"], answerStr: "あのレストランはゆうめいです" },
+                        { prompt: "Buku ini tidak mahal.", words: ["この", "ほん", "は", "たかくない", "です"], answerStr: "このほんはたかくないです" }
+                    ]
+                },
+                {
+                    id: "b8_2", title: "Sifat + Kata Benda / ～が、～", subtitle: "Menerangkan dan Tetapi",
+                    desc: "Kata sifat dapat menerangkan kata benda di depannya. Kata sifat な memakai な sebelum benda. Partikel <strong class='text-accent'>が</strong> menyambungkan dua kalimat yang kontras, berarti 'tetapi'.",
+                    pattern: "[Sifat な] な [KB] / [Sifat い] [KB] / [Kalimat] が [Kalimat]",
+                    examples: [
+                        { j: "親切な 先生です。", r: "Shinsetsu na sensei desu.", i: "Guru yang baik hati." },
+                        { j: "おいしいですが、高いです。", r: "Oishii desu ga, takai desu.", i: "Enak, tetapi mahal." }
+                    ],
+                    quizzes: [
+                        { prompt: "Watt adalah guru yang baik hati.", words: ["ワットせんせい", "は", "しんせつ", "な", "せんせい", "です"], answerStr: "ワットせんせいはしんせつなせんせいです" },
+                        { prompt: "Makanan Jepang enak, tetapi mahal.", words: ["にほん", "の", "たべもの", "は", "おいしい", "です", "が", "たかい", "です"], answerStr: "にほんのたべものはおいしいですがたかいです" }
+                    ]
+                },
+                {
+                    id: "b8_3", title: "どうですか / どんな", subtitle: "Kesan dan Jenis",
+                    desc: "<strong class='text-accent'>どうですか</strong> menanyakan kesan atau keadaan. <strong class='text-accent'>どんな</strong> menanyakan sifat atau jenis kata benda.",
+                    pattern: "[KB] は どうですか / どんな [KB] ですか",
+                    examples: [
+                        { j: "日本の 生活は どうですか。", r: "Nihon no seikatsu wa dou desu ka.", i: "Bagaimana kehidupan di Jepang?" },
+                        { j: "奈良は どんな 町ですか。", r: "Nara wa donna machi desu ka.", i: "Nara kota yang bagaimana?" }
+                    ],
+                    quizzes: [
+                        { prompt: "Bagaimana pekerjaan baru Anda?", words: ["あたらしい", "しごと", "は", "どう", "です", "か"], answerStr: "あたらしいしごとはどうですか" },
+                        { prompt: "Bandung kota yang bagaimana?", words: ["バンドン", "は", "どんな", "まち", "です", "か"], answerStr: "バンドンはどんなまちですか" }
+                    ]
+                }
+            ],
+            9: [
+                {
+                    id: "b9_1", title: "Objek dengan が", subtitle: "あります / わかります / 好きです",
+                    desc: "Beberapa kata kerja dan kata sifat seperti あります, わかります, 好きです, 嫌いです, 上手です, dan 下手です memakai partikel <strong class='text-accent'>が</strong> untuk objeknya.",
+                    pattern: "[Objek] が あります / わかります / 好きです",
+                    examples: [
+                        { j: "私は 音楽が 好きです。", r: "Watashi wa ongaku ga suki desu.", i: "Saya suka musik." },
+                        { j: "漢字が 少し わかります。", r: "Kanji ga sukoshi wakarimasu.", i: "Mengerti kanji sedikit." }
+                    ],
+                    quizzes: [
+                        { prompt: "Saya suka masakan Jepang.", words: ["わたし", "は", "にほん", "りょうり", "が", "すき", "です"], answerStr: "わたしはにほんりょうりがすきです" },
+                        { prompt: "Saya sama sekali tidak punya uang.", words: ["おかね", "が", "ぜんぜん", "ありません"], answerStr: "おかねがぜんぜんありません" }
+                    ]
+                },
+                {
+                    id: "b9_2", title: "～から / どうして", subtitle: "Alasan",
+                    desc: "<strong class='text-accent'>から</strong> diletakkan setelah kalimat alasan. <strong class='text-accent'>どうして</strong> digunakan untuk menanyakan alasan.",
+                    pattern: "[Alasan] から、[Hasil] / どうして [Kalimat Tanya]",
+                    examples: [
+                        { j: "時間が ありませんから、新聞を 読みません。", r: "Jikan ga arimasen kara, shinbun o yomimasen.", i: "Karena tidak ada waktu, tidak membaca koran." },
+                        { j: "どうして 早く 帰りますか。", r: "Doushite hayaku kaerimasu ka.", i: "Mengapa pulang cepat?" }
+                    ],
+                    quizzes: [
+                        { prompt: "Karena tidak ada waktu, saya tidak membaca koran.", words: ["じかん", "が", "ありません", "から", "しんぶん", "を", "よみません"], answerStr: "じかんがありませんからしんぶんをよみません" },
+                        { prompt: "Mengapa Anda tidak minum kopi?", words: ["どうして", "コーヒー", "を", "のみません", "か"], answerStr: "どうしてコーヒーをのみませんか" }
+                    ]
+                }
+            ],
+            10: [
+                {
+                    id: "b10_1", title: "あります / います", subtitle: "Keberadaan",
+                    desc: "<strong class='text-accent'>あります</strong> dipakai untuk benda mati, tumbuhan, atau hal yang tidak bergerak sendiri. <strong class='text-accent'>います</strong> dipakai untuk manusia dan hewan.",
+                    pattern: "[Tempat] に [Benda] が あります / [Tempat] に [Orang/Hewan] が います",
+                    examples: [
+                        { j: "庭に 木が あります。", r: "Niwa ni ki ga arimasu.", i: "Di halaman ada pohon." },
+                        { j: "駅に 友達が います。", r: "Eki ni tomodachi ga imasu.", i: "Di stasiun ada teman." }
+                    ],
+                    quizzes: [
+                        { prompt: "Di kamar saya ada meja.", words: ["わたし", "の", "へや", "に", "つくえ", "が", "あります"], answerStr: "わたしのへやにつくえがあります" },
+                        { prompt: "Di kantor ada Sdr. Miller.", words: ["じむしょ", "に", "ミラーさん", "が", "います"], answerStr: "じむしょにミラーさんがいます" }
+                    ]
+                },
+                {
+                    id: "b10_2", title: "Benda は Tempat に あります / います", subtitle: "Lokasi yang Sudah Diketahui",
+                    desc: "Jika benda atau orangnya sudah diketahui, letakkan sebagai topik dengan は, lalu sebutkan tempatnya dengan に.",
+                    pattern: "[Benda/Orang] は [Tempat] に あります/います",
+                    examples: [
+                        { j: "鍵は かばんの 中に あります。", r: "Kagi wa kaban no naka ni arimasu.", i: "Kunci ada di dalam tas." },
+                        { j: "先生は 教室に います。", r: "Sensei wa kyoushitsu ni imasu.", i: "Guru ada di kelas." }
+                    ],
+                    quizzes: [
+                        { prompt: "Buku saya ada di atas meja.", words: ["わたし", "の", "ほん", "は", "つくえ", "の", "うえ", "に", "あります"], answerStr: "わたしのほんはつくえのうえにあります" },
+                        { prompt: "Ayah ada di kantor.", words: ["ちち", "は", "かいしゃ", "に", "います"], answerStr: "ちちはかいしゃにいます" }
+                    ]
+                },
+                {
+                    id: "b10_3", title: "Posisi の Kata Benda / や・など", subtitle: "Letak dan Daftar Contoh",
+                    desc: "Kata posisi seperti 上, 下, 中, 隣, dan 近く diletakkan setelah benda dengan の. Partikel や menyebut beberapa contoh, dan など berarti 'dan lain-lain'.",
+                    pattern: "[KB] の [Posisi] に あります / [Benda1] や [Benda2] など",
+                    examples: [
+                        { j: "銀行の 隣に 郵便局が あります。", r: "Ginkou no tonari ni yuubinkyoku ga arimasu.", i: "Di sebelah bank ada kantor pos." },
+                        { j: "箱の 中に 手紙や 写真などが あります。", r: "Hako no naka ni tegami ya shashin nado ga arimasu.", i: "Di dalam kotak ada surat, foto, dan lain-lain." }
+                    ],
+                    quizzes: [
+                        { prompt: "Di bawah kursi ada tas.", words: ["いす", "の", "した", "に", "かばん", "が", "あります"], answerStr: "いすのしたにかばんがあります" },
+                        { prompt: "Di dalam tas ada buku, pensil, dan lain-lain.", words: ["かばん", "の", "なか", "に", "ほん", "や", "えんぴつ", "など", "が", "あります"], answerStr: "かばんのなかにほんやえんぴつなどがあります" }
+                    ]
+                }
+            ]
+        });
         const SHOP_ITEMS = [
             { id: 'tropis', name: 'Hutan Tropis', icon: '🌿', price: 100, desc: 'Tema alam dengan partikel daun dan lagu marimba santai.' },
             { id: 'space', name: 'Luar Angkasa', icon: '🪐', price: 200, desc: 'Tema kosmik dengan bintang jatuh dan lagu ambient galaksi.' },
-            { id: 'natal', name: 'Spesial Natal', icon: '🎄', price: 50, desc: 'Tema liburan meriah dengan Sinterklas, kado, dan salju.' }
+            { id: 'natal', name: 'Spesial Natal', icon: '🎄', price: 50, desc: 'Tema liburan meriah dengan Sinterklas, kado, dan salju.' },
+            { id: 'ios6', name: 'iOS 6 Blue', icon: '📱', price: 250, desc: 'Wallpaper biru glossy, tombol realistis, dan musik retro synth era lama.' },
+            { id: 'xpaero', name: 'XP Frutiger Aero', icon: '🫧', price: 150, desc: 'Langit biru, bukit hijau mencolok, kaca Aero, dan gelembung nostalgia.' }
         ];
 
         /* ================= WEB AUDIO API ================= */
@@ -1260,6 +1611,8 @@
                 else if(state.season === 'tropis') tempo = 100;
                 else if(state.season === 'space') tempo = 40;
                 else if(state.season === 'natal') tempo = 110;
+                else if(state.season === 'ios6') tempo = 132;
+                else if(state.season === 'xpaero') tempo = 128;
 
                 let step = 60 / tempo * 1000 * (this.isExamMode ? 0.25 : 0.5);
                 if ((state.season === 'fuyu' || state.season === 'space') && !this.isExamMode) step += Math.random() * 1000;
@@ -1281,6 +1634,8 @@
                         case 'tropis': scale = [329.63, 392.00, 440.00, 523.25, 587.33]; type = 'sine'; decay = 0.5; vol = 0.1; break; 
                         case 'space': scale = [130.81, 196.00, 261.63, 311.13, 392.00]; type = 'square'; decay = 4.0; vol = 0.05; break; 
                         case 'natal': scale = [329.63, 329.63, 329.63, 392.00, 261.63, 293.66, 349.23]; type = 'sine'; decay = 1.0; vol = 0.15; break; 
+                        case 'ios6': scale = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; type = 'square'; decay = 0.18; vol = 0.055; break;
+                        case 'xpaero': scale = [392.00, 493.88, 523.25, 659.25, 783.99, 987.77]; type = 'triangle'; decay = 0.65; vol = 0.07; break;
                         default: scale = [293.66, 349.23, 392.00, 440.00, 523.25]; type = 'sine'; decay = 1.2; vol = 0.1;
                     }
                 }
@@ -1288,6 +1643,8 @@
                 let freq = scale[Math.floor(Math.random() * scale.length)];
                 if (!this.isExamMode && state.season === 'haru' && Math.random() > 0.7) freq *= 2; 
                 if (!this.isExamMode && state.season === 'space' && Math.random() > 0.8) freq /= 2;
+                if (!this.isExamMode && state.season === 'ios6' && Math.random() > 0.72) freq *= 1.5;
+                if (!this.isExamMode && state.season === 'xpaero' && Math.random() > 0.66) freq *= 2;
                 if (this.isExamMode && Math.random() > 0.8) freq /= 2;
 
                 const osc = this.ctx.createOscillator();
@@ -1296,6 +1653,10 @@
                 if (state.season === 'space' && !this.isExamMode) {
                     const filter = this.ctx.createBiquadFilter();
                     filter.type = 'lowpass'; filter.frequency.value = 800;
+                    osc.connect(filter); filter.connect(gain);
+                } else if (state.season === 'ios6' && !this.isExamMode) {
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass'; filter.frequency.value = 1800; filter.Q.value = 5;
                     osc.connect(filter); filter.connect(gain);
                 } else {
                     osc.connect(gain);
@@ -1318,6 +1679,7 @@
         let state = {
             isFirstLogin: true, activeTab: 'home', user: { name: '', avatar: '🌸' },
             theme: 'auto', season: 'default', musicOn: false, examDifficulty: 'normal',
+            orientationMode: 'auto', orientationView: 'landscape',
             coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'],
             stats: { 
                 correct: 0, wrong: 0, history: [], 
@@ -1339,10 +1701,12 @@
                     if(parsed.coins === undefined) parsed.coins = 0;
                     if(!parsed.unlockedThemes) parsed.unlockedThemes = ['default', 'haru', 'natsu', 'aki', 'fuyu'];
                     if(!parsed.stats.bunpouCompleted) parsed.stats.bunpouCompleted = [];
+                    if(!parsed.orientationMode) parsed.orientationMode = 'auto';
+                    if(!parsed.orientationView) parsed.orientationView = 'landscape';
                     state = { ...state, ...parsed }; 
                 } catch (e) {} 
             }
-            applyTheme(); applySeason(); updateCoinUI();
+            applyTheme(); applyOrientation(); applySeason(); updateCoinUI();
             
             if (state.isFirstLogin) renderOnboardingAvatars();
             else {
@@ -1461,7 +1825,7 @@
                     <p class="text-xs -mt-3 mb-4" style="color: var(--text-muted)">Pahami pola kalimat dengan pelatih AI interaktif.</p>
                     
                     <div class="space-y-4">
-                        ${[1, 2, 3, 4, 5].map(b => {
+                        ${Array.from({ length: 10 }, (_, i) => i + 1).map(b => {
                             const total = BUNPOU_DB[b].length;
                             const done = BUNPOU_DB[b].filter(item => state.stats.bunpouCompleted.includes(item.id)).length;
                             const pct = Math.round((done / total) * 100);
@@ -1562,7 +1926,7 @@
                         <div class="mt-4 pt-4 border-t border-glassborder" id="bunpou-quiz-section">
                             <span class="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1 mb-3"><i data-lucide="target" class="w-3 h-3"></i> Latihan Susun Kalimat (${bunpouSession.currentQuizIdx + 1}/2)</span>
                             
-                            <p class="text-xs font-bold mb-4 text-center">Susun kata menjadi kalimat yang benar!</p>
+                            <div class="ios-glass p-4 rounded-2xl border border-orange-500/25 mb-4 text-center"><span class="text-[10px] font-bold uppercase tracking-widest text-orange-500 block mb-1">Arti Indonesia</span><p class="text-sm font-black text-main leading-snug">${currentQuizData.prompt || "Susun kata menjadi kalimat yang benar!"}</p></div>
                             
                             <!-- Area Jawaban -->
                             <div id="bunpou-selected-area" class="min-h-[60px] bg-glassborder/50 rounded-2xl p-3 flex flex-wrap gap-2 items-center justify-center border border-dashed border-neutral-400/50 mb-4 transition-all">
@@ -2130,6 +2494,7 @@
                 if (el) {
                     if (b === tabId || (b === 'belajar' && tabId === 'belajar-menu') || (b === 'ujian' && tabId === 'ujian-menu')) {
                         el.className = "flex-1 flex flex-col items-center gap-1 py-1 text-accent scale-110 transition-all duration-300";
+                        el.style.color = '';
                     } else {
                         el.className = "flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300";
                         el.style.color = 'var(--text-muted)';
@@ -2254,6 +2619,25 @@
             if (state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) r.classList.add('dark');
             else r.classList.remove('dark');
         }
+
+        function setOrientationMode(mode) {
+            state.orientationMode = mode;
+            if (mode === 'auto') state.orientationView = window.innerWidth >= window.innerHeight ? 'landscape' : 'portrait';
+            saveState(); applyOrientation(); updateThemeBtns();
+        }
+
+        function toggleOrientationView() {
+            state.orientationMode = 'manual';
+            state.orientationView = state.orientationView === 'landscape' ? 'portrait' : 'landscape';
+            saveState(); applyOrientation(); updateThemeBtns();
+        }
+
+        function applyOrientation() {
+            if (state.orientationMode === 'auto') {
+                state.orientationView = window.innerWidth >= window.innerHeight ? 'landscape' : 'portrait';
+            }
+            document.documentElement.setAttribute('data-orientation-view', state.orientationView || 'landscape');
+        }
         
         function setSeason(s) { 
             state.season = s; saveState(); applySeason(); updateThemeBtns(); 
@@ -2319,12 +2703,40 @@
                     o.appendChild(p);
                 }
             } else if (state.season === 'natal') {
-                bgSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 100 L20 80 L5 80 L25 45 L15 45 L30 15 L45 45 L35 45 L55 80 L40 80 L40 100 Z' fill='%232E7D32' opacity='0.15'/%3E%3Cpath d='M75 100 L75 75 L60 75 L80 40 L70 40 L85 10 L100 40 L90 40 L110 75 L95 75 L95 100 Z' fill='%231B5E20' opacity='0.1'/%3E%3Ccircle cx='30' cy='15' r='3' fill='%23FFD700' opacity='0.3'/%3E%3Ccircle cx='85' cy='10' r='3' fill='%23FFD700' opacity='0.3'/%3E%3C/svg%3E")`;
-                const natalItems = ['🎄', '🎅', '🎁', '❄️', '🦌', '⛄'];
-                for(let i=0; i<20; i++) {
+                bgSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3CradialGradient id='glow' cx='.5' cy='.18' r='.55'%3E%3Cstop stop-color='%23FFD966' stop-opacity='.55'/%3E%3Cstop offset='.42' stop-color='%23FFD966' stop-opacity='.12'/%3E%3Cstop offset='1' stop-color='%23FFD966' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23glow)'/%3E%3Cpath d='M50 6 L53 15 L63 15 L55 21 L58 31 L50 25 L42 31 L45 21 L37 15 L47 15 Z' fill='%23FFD700' opacity='.78'/%3E%3Cpath d='M50 19 L32 47 L42 47 L24 73 L38 73 L20 100 L80 100 L62 73 L76 73 L58 47 L68 47 Z' fill='%230E7A3A' opacity='.32'/%3E%3Cpath d='M50 26 L36 49 L45 49 L29 72 L42 72 L28 96 L72 96 L58 72 L71 72 L55 49 L64 49 Z' fill='%23168B45' opacity='.42'/%3E%3Cpath d='M34 52 C45 59 55 38 67 49 M28 75 C43 66 58 88 73 72' fill='none' stroke='%23FFD700' stroke-width='2' opacity='.55'/%3E%3Ccircle cx='38' cy='51' r='2.4' fill='%23D71920' opacity='.72'/%3E%3Ccircle cx='61' cy='48' r='2.4' fill='%23FFD700' opacity='.72'/%3E%3Ccircle cx='34' cy='75' r='2.4' fill='%23FFFFFF' opacity='.72'/%3E%3Ccircle cx='55' cy='80' r='2.4' fill='%23D71920' opacity='.72'/%3E%3Ccircle cx='69' cy='72' r='2.4' fill='%23FFD700' opacity='.72'/%3E%3C/svg%3E")`;
+                const natalItems = ['🎄', '🎅', '🎁', '❄️', '⛄', '🔔', '✨'];
+                for(let i=0; i<24; i++) {
                     const p = document.createElement('div'); p.className = 'particle-down text-2xl drop-shadow-md'; 
                     p.innerText = natalItems[Math.floor(Math.random() * natalItems.length)];
                     p.style.left = Math.random()*100+'vw'; p.style.animationDelay = Math.random()*5+'s'; p.style.animationDuration = 5+Math.random()*6+'s';
+                    o.appendChild(p);
+                }
+                const lights = ['🔴', '🟡', '🟢', '🔵'];
+                for(let i=0; i<18; i++) {
+                    const p = document.createElement('div'); p.className = 'particle-blink text-xs drop-shadow-lg';
+                    p.innerText = lights[i % lights.length];
+                    p.style.left = (i * 6 + Math.random()*2)+'vw'; p.style.top = 10 + Math.sin(i)*8+'vh';
+                    p.style.animationDelay = Math.random()*1.8+'s'; p.style.animationDuration = 0.8+Math.random()*1.2+'s';
+                    o.appendChild(p);
+                }
+            } else if (state.season === 'ios6') {
+                bgSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop stop-color='%23ffffff'/%3E%3Cstop offset='.52' stop-color='%23eef4fa'/%3E%3Cstop offset='1' stop-color='%23d8e4ef'/%3E%3C/linearGradient%3E%3CradialGradient id='g' cx='.28' cy='.16' r='.7'%3E%3Cstop stop-color='%238fd2ff' stop-opacity='.34'/%3E%3Cstop offset='.38' stop-color='%238fd2ff' stop-opacity='.1'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23b)'/%3E%3Ccircle cx='24' cy='16' r='42' fill='url(%23g)'/%3E%3Cpath d='M0 82 C 22 64, 45 88, 70 64 S 112 72, 100 100 L0 100 Z' fill='%230b7dda' opacity='.08'/%3E%3Cpath d='M-8 72 C 18 54, 43 78, 66 56 S 112 64, 108 88' fill='none' stroke='%23ffffff' stroke-width='2' opacity='.42'/%3E%3C/svg%3E")`;
+                const retroNotes = ['♪', '♫', '▣', '◉'];
+                for(let i=0; i<16; i++) {
+                    const p = document.createElement('div'); p.className = 'particle-up text-blue-100 text-lg drop-shadow-md';
+                    p.innerText = retroNotes[Math.floor(Math.random() * retroNotes.length)];
+                    p.style.left = Math.random()*100+'vw'; p.style.animationDelay = Math.random()*5+'s'; p.style.animationDuration = 4+Math.random()*5+'s';
+                    p.style.opacity = 0.5 + Math.random()*0.35;
+                    o.appendChild(p);
+                }
+            } else if (state.season === 'xpaero') {
+                bgSvg = '';
+                for(let i=0; i<20; i++) {
+                    const p = document.createElement('div'); p.className = 'particle-up text-sky-100 drop-shadow-lg';
+                    p.innerText = '○';
+                    p.style.fontSize = 12 + Math.random()*22+'px';
+                    p.style.left = Math.random()*100+'vw'; p.style.animationDelay = Math.random()*6+'s'; p.style.animationDuration = 5+Math.random()*6+'s';
+                    p.style.opacity = 0.35 + Math.random()*0.45;
                     o.appendChild(p);
                 }
             }
@@ -2337,6 +2749,20 @@
                 if(state.theme === t) btn.className = "py-2.5 rounded-xl text-xs font-semibold bg-accent text-white flex justify-center items-center gap-1.5 transition-all";
                 else btn.className = "py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5 transition-all opacity-60 text-main";
             });
+
+            ['auto', 'manual'].forEach(mode => {
+                const btn = document.getElementById(`orientation-${mode}-btn`);
+                if (!btn) return;
+                if(state.orientationMode === mode) btn.className = "py-2.5 rounded-xl text-xs font-semibold bg-accent text-white flex justify-center items-center gap-1.5 transition-all";
+                else btn.className = "py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5 transition-all opacity-60 text-main";
+            });
+
+            const orientationToggle = document.getElementById('orientation-toggle-btn');
+            if (orientationToggle) {
+                const nextLabel = state.orientationView === 'landscape' ? 'Ubah ke Portrait' : 'Ubah ke Landscape';
+                orientationToggle.innerHTML = `<i data-lucide="${state.orientationView === 'landscape' ? 'panel-top' : 'panel-left'}" class="w-4 h-4"></i> ${nextLabel}`;
+                orientationToggle.classList.toggle('opacity-50', state.orientationMode === 'auto');
+            }
             
             ['default', 'haru', 'natsu', 'aki', 'fuyu'].forEach(s => {
                 const btn = document.getElementById(`season-${s}`);
@@ -2359,6 +2785,7 @@
             } else {
                 premiumContainer.style.display = 'none';
             }
+            if (window.lucide) lucide.createIcons();
         }
 
         function toggleMusic() {
@@ -2380,6 +2807,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyTheme(); });
+            window.addEventListener('resize', () => { if (state.orientationMode === 'auto') { applyOrientation(); updateThemeBtns(); } });
         });
     </script>
 </body>
