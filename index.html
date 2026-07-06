@@ -1,4 +1,4 @@
-﻿```html
+```html
 <!DOCTYPE html>
 <html lang="id" data-season="default" class="transition-colors duration-700">
 <head>
@@ -1018,6 +1018,68 @@
             ]
         };
 
+
+    
+const KANJI_N5_DB = (() => {
+    const list = [];
+    const add = (group, kanji, kana, arti) => list.push({ no: list.length + 1, group, kanji, kana, arti });
+
+    [
+        ["一","いち","SATU"],["二","に","DUA"],["三","さん","TIGA"],["四","よん・し","EMPAT"],["五","ご","LIMA"],["六","ろく","ENAM"],["七","なな・しち","TUJUH"],["八","はち","DELAPAN"],["九","きゅう・く","SEMBILAN"],["十","じゅう","SEPULUH"],
+        ["一つ","ひとつ","1 BUAH"],["二つ","ふたつ","2 BUAH"],["三つ","みっつ","3 BUAH"],["四つ","よっつ","4 BUAH"],["五つ","いつつ","5 BUAH"],["六つ","むっつ","6 BUAH"],["七つ","ななつ","7 BUAH"],["八つ","やっつ","8 BUAH"],["九つ","ここのつ","9 BUAH"],["十","とお","10 BUAH"]
+    ].forEach(x => add("Angka Dasar", x[0], x[1], x[2]));
+
+    [
+        ["一月","いちがつ","JANUARI"],["二月","にがつ","FEBRUARI"],["三月","さんがつ","MARET"],["四月","しがつ","APRIL"],["五月","ごがつ","MEI"],["六月","ろくがつ","JUNI"],["七月","しちがつ","JULI"],["八月","はちがつ","AGUSTUS"],["九月","くがつ","SEPTEMBER"],["十月","じゅうがつ","OKTOBER"],["十一月","じゅういちがつ","NOPEMBER"],["十二月","じゅうにがつ","DESEMBER"],
+        ["一日","ついたち","TANGGAL 1"],["二日","ふつか","TANGGAL 2"],["三日","みっか","TANGGAL 3"],["四日","よっか","TANGGAL 4"],["五日","いつか","TANGGAL 5"],["六日","むいか","TANGGAL 6"],["七日","なのか","TANGGAL 7"],["八日","ようか","TANGGAL 8"],["九日","ここのか","TANGGAL 9"],["十日","とおか","TANGGAL 10"],["十一日","じゅういちにち","TANGGAL 11"],["十四日","じゅうよっか","TANGGAL 14"],["十七日","じゅうしちにち","TANGGAL 17"],["十九日","じゅうくにち","TANGGAL 19"],["二十日","はつか","TANGGAL 20"],["三十日","さんじゅうにち","TANGGAL 30"],["三十一日","さんじゅういちにち","TANGGAL 31"],["一日","いちにち","1 HARI"],["三十二日","さんじゅうににち","32 HARI"]
+    ].forEach(x => add("Bulan & Tanggal", x[0], x[1], x[2]));
+
+    [
+        ["百","ひゃく","100"],["二百","にひゃく","200"],["三百","さんびゃく","300"],["四百","よんひゃく","400"],["五百","ごひゃく","500"],["六百","ろっぴゃく","600"],["七百","ななひゃく","700"],["八百","はっぴゃく","800"],["九百","きゅうひゃく","900"],
+        ["千","せん","1.000"],["二千","にせん","2.000"],["三千","さんぜん","3.000"],["四千","よんせん","4.000"],["五千","ごせん","5.000"],["六千","ろくせん","6.000"],["七千","ななせん","7.000"],["八千","はっせん","8.000"],["九千","きゅうせん","9.000"],
+        ["万","まん","PULUH RIBU"],["一万","いちまん","10.000"],["二万","にまん","20.000"],["三万","さんまん","30.000"],["四万","よんまん","40.000"],["五万","ごまん","50.000"],["六万","ろくまん","60.000"],["七万","ななまん","70.000"],["八万","はちまん","80.000"],["九万","きゅうまん","90.000"],["十万","じゅうまん","100.000"],["百万円","ひゃくまんえん","1.000.000 YEN"],["円い","まるい","BULAT"],["万年ひつ","まんねんひつ","PENA"]
+    ].forEach(x => add("Angka Besar & Uang", x[0], x[1], x[2]));
+
+    [
+        ["時間","じかん","WAKTU"],["時計","とけい","JAM"],["一時","いちじ","JAM 1"],["二時","にじ","JAM 2"],["三時","さんじ","JAM 3"],["四時","よじ","JAM 4"],["五時","ごじ","JAM 5"],["六時","ろくじ","JAM 6"],["七時","しちじ","JAM 7"],["八時","はちじ","JAM 8"],["九時","くじ","JAM 9"],["十時","じゅうじ","JAM 10"],["十一時","じゅういちじ","JAM 11"],["十二時","じゅうにじ","JAM 12"],["時","とき","WAKTU / SAAT"],["間","あいだ","ANTARA"],["一時間","いちじかん","1 JAM"],["四時間","よじかん","4 JAM"],["七時間","しちじかん","7 JAM"],["九時間","くじかん","9 JAM"],["十時間","じゅうじかん","10 JAM"],["二十四時間","にじゅうよじかん","24 JAM"],
+        ["一分","いっぷん","1 MENIT"],["二分","にふん","2 MENIT"],["三分","さんぷん","3 MENIT"],["四分","よんぷん","4 MENIT"],["五分","ごふん","5 MENIT"],["六分","ろっぷん","6 MENIT"],["七分","ななふん","7 MENIT"],["八分","はっぷん","8 MENIT"],["九分","きゅうふん","9 MENIT"],["十分","じゅっぷん","10 MENIT"],["三十分","さんじゅっぷん","30 MENIT"],["六十分","ろくじゅっぷん","60 MENIT"],["百分","ひゃっぷん","100 MENIT"],["半分","はんぶん","SEPARUH / SETENGAH"],["分かります","わかります","MENGERTI"],["一時半","いちじはん","01:30"],["二時半","にじはん","02:30"],["三時間半","さんじかんはん","3 JAM SETENGAH"],["四時間半","よじかんはん","4 JAM SETENGAH"]
+    ].forEach(x => add("Waktu & Menit", x[0], x[1], x[2]));
+
+    [
+        ["日本人","にほんじん","ORANG JEPANG"],["日","ひ","HARI / MATAHARI"],["日曜日","にちようび","HARI MINGGU"],["月","つき","BULAN"],["月曜日","げつようび","HARI SENIN"],["一か月","いっかげつ","1 BULAN"],["六か月","ろっかげつ","6 BULAN"],["八か月","はっかげつ","8 BULAN"],["十か月","じゅっかげつ","10 BULAN"],
+        ["火","ひ","API"],["火曜日","かようび","HARI SELASA"],["水","みず","AIR"],["水曜日","すいようび","HARI RABU"],["こう水","こうずい","BANJIR"],["木","き","POHON"],["木曜日","もくようび","HARI KAMIS"],["金","きん","EMAS"],["金曜日","きんようび","HARI JUMAT"],["お金","おかね","UANG"],["土","つち","TANAH"],["土曜日","どようび","HARI SABTU"],["本","ほん","BUKU"],["日本","にほん","JEPANG"],
+        ["一本","いっぽん","1 BATANG"],["二本","にほん","2 BATANG"],["三本","さんぼん","3 BATANG"],["四本","よんほん","4 BATANG"],["五本","ごほん","5 BATANG"],["六本","ろっぽん","6 BATANG"],["七本","ななほん","7 BATANG"],["八本","はっぽん","8 BATANG"],["九本","きゅうほん","9 BATANG"],["十本","じゅっぽん","10 BATANG"],["百本","ひゃっぽん","100 BATANG"]
+    ].forEach(x => add("Hari & Hitungan", x[0], x[1], x[2]));
+
+    [
+        ["人","ひと","ORANG"],["一人","ひとり","1 ORANG"],["二人","ふたり","2 ORANG"],["三人","さんにん","3 ORANG"],["四人","よにん","4 ORANG"],["今","いま","SEKARANG"],["今日","きょう","HARI INI"],["今週","こんしゅう","MINGGU INI"],["今月","こんげつ","BULAN INI"],["今年","ことし","TAHUN INI"],["毎日","まいにち","SETIAP HARI"],["毎週","まいしゅう","SETIAP MINGGU"],["毎月","まいつき","SETIAP BULAN"],["毎年","まいとし","SETIAP TAHUN"],["昨日","きのう","KEMARIN"],["先週","せんしゅう","MINGGU LALU"],["先月","せんげつ","BULAN LALU"],["去年","きょねん","TAHUN LALU"],["明日","あした・あす","BESOK"],["来週","らいしゅう","MINGGU DEPAN"],["来月","らいげつ","BULAN DEPAN"],["来年","らいねん","TAHUN DEPAN"],["一週間","いっしゅうかん","1 MINGGU"],["八週間","はっしゅうかん","8 MINGGU"],["十週間","じゅっしゅうかん","10 MINGGU"],["2020年","にせんにじゅうねん","TAHUN 2020"],["先生","せんせい","GURU"],["生まれます","うまれます","LAHIR"],["誕生日","たんじょうび","ULANG TAHUN"],["来ます","きます","DATANG"],["来る","くる","DATANG"],["来ない","こない","TIDAK DATANG"]
+    ].forEach(x => add("Kalender & Orang", x[0], x[1], x[2]));
+
+    [
+        ["朝","あさ","PAGI"],["毎朝","まいあさ","SETIAP PAGI"],["今朝","けさ","PAGI INI"],["朝ごはん","あさごはん","MAKAN PAGI"],["昼","ひる","SIANG"],["昼休み","ひるやすみ","ISTIRAHAT SIANG"],["昼ごはん","ひるごはん","MAKAN SIANG"],["晩","ばん","MALAM"],["毎晩","まいばん","SETIAP MALAM"],["今晩","こんばん","MALAM INI"],["晩ごはん","ばんごはん","MAKAN MALAM"],["夜","よる","MALAM"],["休みます","やすみます","ISTIRAHAT"],["休み","やすみ","LIBUR"],["午前","ごぜん","AM."],["午後","ごご","PM."],["前","まえ","DEPAN"],["四年前","よねんまえ","4 TAHUN LALU"],["後ろ","うしろ","BELAKANG"],["後で","あとで","NANTI"],["中","なか","TENGAH"],["一日中","いちにちじゅう","SEPANJANG HARI"],["午前中","ごぜんちゅう","SEPANJANG AM."],["上","うえ","ATAS"],["上がります","あがります","NAIK"],["下","した","BAWAH"],["下がります","さがります","TURUN"],["外","そと","LUAR"],["国","くに","NEGARA"],["外国","がいこく","LUAR NEGERI"],["中国","ちゅうごく","CHINA"],["右","みぎ","KANAN"],["右手","みぎて","TANGAN KANAN"],["左","ひだり","KIRI"],["左手","ひだりて","TANGAN KIRI"]
+    ].forEach(x => add("Waktu Harian & Arah", x[0], x[1], x[2]));
+
+    [
+        ["手紙","てがみ","SURAT"],["上手","じょうず","PINTAR"],["下手","へた","BODOH"],["紙","かみ","KERTAS"],["学生","がくせい","PELAJAR / SISWA"],["学校","がっこう","SEKOLAH"],["大学","だいがく","UNIVERSITAS"],["大きい","おおきい","BESAR"],["小さい","ちいさい","KECIL"],["友だち","ともだち","TEMAN"],["子ども","こども","ANAK"],["父","ちち","AYAH"],["お父さん","おとうさん","AYAH"],["母","はは","IBU"],["お母さん","おかあさん","IBU"],["男","おとこ","LAKI-LAKI"],["男の子","おとこのこ","ANAK LAKI-LAKI"],["女","おんな","PEREMPUAN"],["女の子","おんなのこ","ANAK PEREMPUAN"],
+        ["電車","でんしゃ","KERETA LISTRIK"],["電話","でんわ","TELEPON"],["電気","でんき","LAMPU"],["天気","てんき","CUACA"],["車","くるま","MOBIL"],["話","はなし","CERITA"],["話します","はなします","BERBICARA"],["会います","あいます","BERTEMU"],["会話","かいわ","PERCAKAPAN"],["会社","かいしゃ","PERUSAHAAN"],["社長","しゃちょう","KEPALA PERUSAHAAN"],["駅","えき","STASIUN"],["道","みち","JALAN"],["店","みせ","TOKO"],["空","そら","LANGIT"],["空","から","KOSONG"],["空気","くうき","UDARA"]
+    ].forEach(x => add("Sekolah, Keluarga & Kota", x[0], x[1], x[2]));
+
+    [
+        ["山","やま","GUNUNG"],["富士山","ふじさん","GUNUNG FUJI"],["川","かわ","SUNGAI"],["雨","あめ","HUJAN"],["花","はな","BUNGA"],["魚","さかな","IKAN"],["目","め","MATA"],["耳","みみ","TELINGA"],["口","くち","MULUT"],["入口","いりぐち","PINTU MASUK"],["出口","でぐち","PINTU KELUAR"],["人口","じんこう","JUMLAH PENDUDUK"],["銀","ぎん","PERAK"],["銀行","ぎんこう","BANK"],["行きます","いきます","PERGI"],["東京","とうきょう","TOKYO"],["東","ひがし","TIMUR"],["西","にし","BARAT"],["南","みなみ","SELATAN"],["北","きた","UTARA"],["新しい","あたらしい","BARU"],["新聞","しんぶん","KORAN"],["聞きます","ききます","MENDENGAR"],["聞こえます","きこえます","TERDENGAR"],["古い","ふるい","USANG / LAMA"],["何","なに","APA"],["何人","なんにん","BERAPA ORANG"],["何人","なにじん","ORANG MANA"],["何語","なにご","BAHASA APA"],["何時","なんじ","JAM BERAPA"],["インドネシア語","インドネシアご","BAHASA INDONESIA"],["日本語","にほんご","BAHASA JEPANG"],["外国語","がいこくご","BAHASA ASING"]
+    ].forEach(x => add("Alam, Kota & Tanya", x[0], x[1], x[2]));
+
+    [
+        ["高い","たかい","MAHAL / TINGGI"],["安い","やすい","MURAH"],["安全","あんぜん","AMAN"],["長い","ながい","PANJANG"],["はん長","はんちょう","KEPALA REGU"],["短い","みじかい","PENDEK"],["遠い","とおい","JAUH"],["近い","ちかい","DEKAT"],["多い","おおい","BANYAK"],["少ない","すくない","SEDIKIT"],["少し","すこし","SEDIKIT"],["明るい","あかるい","TERANG"],["暗い","くらい","GELAP"],["名前","なまえ","NAMA"],["有名","ゆうめい","TERKENAL"],["有ります","あります","ADA"],["白","しろ","PUTIH"],["黒","くろ","HITAM"],["赤","あか","MERAH"],["青","あお","BIRU"],
+        ["見ます","みます","MELIHAT"],["見えます","みえます","TERLIHAT"],["見せます","みせます","MEMPERLIHATKAN"],["食べます","たべます","MAKAN"],["食べもの","たべもの","MAKANAN"],["食どう","しょくどう","KANTIN"],["飲みます","のみます","MINUM"],["飲みもの","のみもの","MINUMAN"],["買います","かいます","MEMBELI"],["買いもの","かいもの","BELANJA"],["入れます","いれます","MEMASUKKAN"],["入ります","はいります","MASUK"],["出します","だします","MENGELUARKAN"],["出ます","でます","KELUAR"],["出かけます","でかけます","KELUAR RUMAH"],["書きます","かきます","MENULIS"],["読みます","よみます","MEMBACA"],["読書","どくしょ","MEMBACA BUKU"],["じ書","じしょ","KAMUS"]
+    ].forEach(x => add("Sifat & Kegiatan", x[0], x[1], x[2]));
+
+    [
+        ["研修生","けんしゅうせい","PESERTA MAGANG"],["実習生","じっしゅうせい","PESERTA PRAKTEK"],["鳥","とり","AYAM"],["鶏肉","とりにく","DAGING AYAM"],["牛","うし","SAPI"],["牛肉","ぎゅうにく","DAGING SAPI"],["豚","ぶた","BABI"],["豚肉","ぶたにく","DAGING BABI"],["生年月日","せいねんがっぴ","TANGGAL LAHIR"],["酒","さけ","SAKE"],["氏名","しめい","NAMA LENGKAP"],["年齢","ねんれい","USIA"],["番号","ばんごう","NOMOR"],["英語","えいご","BAHASA INGGRIS"],["給料","きゅうりょう","GAJI"],["会計","かいけい","KASIR"],["交番","こうばん","POS POLISI"],["性別","せいべつ","JENIS KELAMIN"],["国籍","こくせき","KEWARGANEGARAAN"],["登録証","とうろくしょう","PENDAFTARAN"],["非常口","ひじょうぐち","PINTU DARURAT"],["残業","ざんぎょう","LEMBUR"],["切符","きっぷ","TIKET"],["住所","じゅうしょ","ALAMAT"],["署名","しょめい","TANDA TANGAN"],["給与","きゅうよ","UPAH / GAJI"],["売り場","うりば","TEMPAT PENJUALAN"]
+    ].forEach(x => add("Dokumen, Kerja & Makanan", x[0], x[1], x[2]));
+
+            return list;
+        })();
+
         /* ================= BUNPOU (GRAMMAR) DATABASE ================= */
         const BUNPOU_DB = {
             1: [
@@ -1597,7 +1659,7 @@
             coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'],
             stats: { 
                 correct: 0, wrong: 0, history: [], 
-                hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0,
+                hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0,
                 bunpouCompleted: [] // Array of completed bunpou IDs
             },
             quiz: { currentQuestion: 0, questions: [], correctCount: 0, wrongCount: 0, total: 0, timerObj: null }
@@ -1685,7 +1747,7 @@
                     <div class="ios-glass p-6 rounded-[2.5rem] relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 text-9xl opacity-10 pointer-events-none select-none">🇯🇵</div>
                         <h1 class="text-2xl font-black tracking-tight mb-1">Belajar Jepang</h1>
-                        <p class="text-xs" style="color: var(--text-muted)">Kuasai Hiragana, Katakana, Kosakata, dan Tata Bahasa.</p>
+                        <p class="text-xs" style="color: var(--text-muted)">Kuasai Hiragana, Katakana, Kanji N5, Kosakata, dan Tata Bahasa.</p>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-3">
@@ -1702,7 +1764,7 @@
 
                     <h3 class="text-xs font-semibold uppercase tracking-widest px-1 mt-4" style="color: var(--text-muted)">Menu Utama</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Materi dasar')}
+                        ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
                         ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-10')}
                         ${renderMenuBtn('latihan', 'gamepad-2', 'Latihan', `Kumpulkan ${coinIcon}`)}
@@ -2028,12 +2090,17 @@
                             <div class="w-20 h-20 rounded-3xl bg-accent-light text-accent flex items-center justify-center text-5xl font-black group-hover:scale-110 transition-transform">ア</div>
                             <div class="text-center"><span class="font-extrabold text-xl block mb-1">KATAKANA</span><span class="text-xs" style="color: var(--text-muted)">Aksara untuk kata serapan.</span></div>
                         </button>
+                        <button onclick="openLetterViewer('kanji')" class="ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
+                            <div class="w-20 h-20 rounded-3xl bg-accent-light text-accent flex items-center justify-center text-5xl font-black group-hover:scale-110 transition-transform">漢</div>
+                            <div class="text-center"><span class="font-extrabold text-xl block mb-1">KANJI N5</span><span class="text-xs" style="color: var(--text-muted)">Daftar Kanji N5 per kelompok.</span></div>
+                        </button>
                     </div>
                 </div>`;
             lucide.createIcons();
         }
 
         function openLetterViewer(type) {
+            if (type === 'kanji') { renderKanjiViewer(); return; }
             const isH = type === 'hiragana'; 
             const db = isH ? HIRAGANA_DB : KATAKANA_DB;
             
@@ -2068,7 +2135,58 @@
             </div>`;
         }
 
+
+        function renderKanjiViewer() {
+            const groups = [...new Set(KANJI_N5_DB.map(item => item.group))];
+            document.getElementById('app-viewport').innerHTML = `
+                <div class="animate-fade-in space-y-6 pb-24">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2"><button onclick="switchTab('belajar-menu')" style="color: var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold tracking-tight">Kanji N5</h2></div>
+                        <button onclick="startLevelQuiz('kanji-n5')" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
+                    </div>
+                    <p class="text-xs -mt-4" style="color: var(--text-muted)">${KANJI_N5_DB.length} entri Kanji N5 dari daftar belajar, dikelompokkan seperti kotak Hiragana/Katakana.</p>
+                    ${groups.map(group => renderKanjiGroup(group, KANJI_N5_DB.filter(item => item.group === group))).join('')}
+                </div>`;
+            lucide.createIcons();
+            state.stats.kanjiProgress = Math.min(100, (state.stats.kanjiProgress || 0) + 10);
+            saveState();
+        }
+
+        function renderKanjiGroup(title, arr) {
+            return `<div class="ios-glass p-5 rounded-[2.2rem]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-bold text-accent uppercase tracking-wider">${title}</h3>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-glassborder" style="color: var(--text-muted)">${arr.length} entri</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    ${arr.map(item => `
+                        <button onclick="tapKanji(${item.no})" class="p-3 ios-glass rounded-xl hover:bg-accent-light hover:text-accent hover:border-accent active:scale-95 text-left min-h-[92px] transition-all flex flex-col justify-between">
+                            <span class="text-[9px] font-black text-accent">#${item.no}</span>
+                            <span class="text-2xl font-black text-main leading-none">${item.kanji}</span>
+                            <span class="text-[10px] font-bold opacity-70 leading-tight">${item.kana}</span>
+                            <span class="text-[9px] font-black text-main leading-tight uppercase">${item.arti}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        function tapKanji(no) {
+            const item = KANJI_N5_DB.find(x => x.no === no);
+            if (!item) return;
+            document.getElementById('modal-category').innerText = item.group;
+            document.getElementById('modal-char').innerText = item.kanji;
+            document.getElementById('modal-romaji').innerText = item.kana;
+            const btn = document.querySelector('#letter-modal button');
+            if (btn) btn.innerHTML = `<i data-lucide="book-open" class="w-4 h-4"></i> ${item.arti}`;
+            const m = document.getElementById('letter-modal');
+            m.classList.remove('hidden'); setTimeout(() => m.querySelector('div').classList.remove('scale-90', 'opacity-0'), 50);
+            lucide.createIcons();
+        }
+
         function tapLetter(char, romaji, cat) {
+            const btn = document.querySelector('#letter-modal button');
+            if (btn) btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4"></i> Putar Suara`;
             document.getElementById('modal-category').innerText = cat.split(' ')[1] || 'Umum';
             document.getElementById('modal-char').innerText = char;
             document.getElementById('modal-romaji').innerText = romaji;
@@ -2131,6 +2249,7 @@
                         ${renderStartBtn("Level 5 - Katakana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-lengkap')")}
                         ${renderStartBtn("Level 6 - Campuran Huruf", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('campuran')")}
                         ${renderStartBtn("Level 7 - Kosakata Lengkap", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kotoba-campuran')")}
+                        ${renderStartBtn("Level 8 - Kanji N5", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kanji-n5')")}
                     </div>
                 </div>`;
         }
@@ -2200,6 +2319,7 @@
                 p=[...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10]]; 
                 t="Level 7"; 
             }
+            else if (l==='kanji-n5') { p=KANJI_N5_DB; t="Level 8 - Kanji N5"; }
             setupQuizFlow(p, t, false);
         }
 
@@ -2213,7 +2333,7 @@
                 t="Ujian Katakana"; 
             }
             else { 
-                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10]].filter(x=>x.j||x.kana); 
+                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KANJI_N5_DB].filter(x=>x.j||x.kana); 
                 t="Pro Campuran"; 
             }
             setupQuizFlow(p, t, true);
@@ -2234,7 +2354,7 @@
             let wp = [];
 
             if (isKotoba) {
-                const all = [...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10]];
+                const all = [...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KANJI_N5_DB];
                 wp = all.filter(x => x.arti !== item.arti).map(x => x.arti);
             } else {
                 const all = [...HIRAGANA_DB.seion,...HIRAGANA_DB.dakuon,...KATAKANA_DB.seion,...KATAKANA_DB.dakuon];
@@ -2711,7 +2831,7 @@
 
         function resetData(type) {
             if (type === 'progress') { 
-                state.stats = { correct: 0, wrong: 0, history: [], hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, bunpouCompleted: [] }; 
+                state.stats = { correct: 0, wrong: 0, history: [], hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0, bunpouCompleted: [] }; 
                 saveState(); alert("Kemajuan di-reset! Koin dan Tema tidak hilang."); closeThemeModal(); switchTab('home');
             } else { 
                 localStorage.removeItem('nihongo_premium_v8'); location.reload(); 
@@ -2729,3 +2849,4 @@
 
 
 ```
+
