@@ -147,9 +147,9 @@
             --text-main: #08345f; --text-muted: #1d6d6b;
         }
         .dark[data-season="xpaero"] {
-            --bg-app: #062748; --accent: #35d0ff;
-            --glass-bg: rgba(10, 58, 92, 0.72); --glass-border: rgba(113, 236, 255, 0.32);
-            --text-main: #ebfbff; --text-muted: #a7e8e0;
+            --bg-app: #103b17; --accent: #35d0ff;
+            --glass-bg: rgba(18, 78, 31, 0.76); --glass-border: rgba(130, 255, 151, 0.34);
+            --text-main: #f0fff2; --text-muted: #a7e8c0;
         }
         [data-season="xpaero"] body {
             background:
@@ -159,7 +159,7 @@
         }
         .dark[data-season="xpaero"] body {
             background:
-                linear-gradient(180deg, rgba(4,25,56,0.42) 0%, rgba(2,18,32,0.36) 46%, rgba(0,38,17,0.45) 100%),
+                linear-gradient(180deg, rgba(6,39,12,0.72) 0%, rgba(10,63,21,0.66) 46%, rgba(20,94,30,0.62) 100%),
                 url("assets/xp-bliss-hd.png") center center / cover fixed no-repeat;
         }
         [data-season="xpaero"] .ios-glass {
@@ -182,6 +182,11 @@
         }
         [data-season="xpaero"] #bottom-nav {
             background: linear-gradient(180deg, rgba(226,255,255,0.86), rgba(77,184,255,0.58) 48%, rgba(0,118,222,0.58) 49%, rgba(198,255,225,0.7));
+        }
+        [data-season="xpaero"] .progress-fill {
+            background: linear-gradient(180deg, #8fff75 0%, #38db4a 48%, #10a832 49%, #087a24 100%);
+            border: 1px solid rgba(8, 122, 36, 0.35);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 4px 10px -7px rgba(4,94,24,0.9);
         }
         [data-season="xpaero"] #season-art-bg { opacity: 0; }
 
@@ -1567,88 +1572,69 @@ const KANJI_N5_DB = (() => {
             { id: 'xpaero', name: 'XP Frutiger Aero', icon: '🫧', price: 150, desc: 'Langit biru, bukit hijau mencolok, kaca Aero, dan gelembung nostalgia.' }
         ];
 
-        /* ================= WEB AUDIO API ================= */
-        class RealTimeSynth {
-            constructor() { this.ctx = null; this.isPlaying = false; }
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            start() { this.init(); if (this.isPlaying) return; this.isPlaying = true; this.scheduler(); }
-            stop() { this.isPlaying = false; if (this.timerId) clearTimeout(this.timerId); }
-            setExamMode(state) { this.isExamMode = state; }
-            
-            scheduler() {
-                if (!this.isPlaying) return;
-                this.playTone();
-                let tempo = 90;
-                if(this.isExamMode) tempo = 160;
-                else if(state.season === 'haru') tempo = 120;
-                else if(state.season === 'natsu') tempo = 140;
-                else if(state.season === 'aki') tempo = 70;
-                else if(state.season === 'fuyu') tempo = 50;
-                else if(state.season === 'tropis') tempo = 100;
-                else if(state.season === 'space') tempo = 40;
-                else if(state.season === 'natal') tempo = 110;
-                else if(state.season === 'ios6') tempo = 132;
-                else if(state.season === 'xpaero') tempo = 128;
-
-                let step = 60 / tempo * 1000 * (this.isExamMode ? 0.25 : 0.5);
-                if ((state.season === 'fuyu' || state.season === 'space') && !this.isExamMode) step += Math.random() * 1000;
-                this.timerId = setTimeout(() => this.scheduler(), step);
+        /* ================= MUSIC FILES ================= */
+        class FileMusicEngine {
+            constructor() {
+                this.audio = null;
+                this.isPlaying = false;
+                this.isExamMode = false;
+                this.currentSrc = '';
+                this.basePath = 'NihonGo Premium/Music/';
+                this.tracks = {
+                    default: 'Default.mp3',
+                    haru: 'Haru.mp3',
+                    natsu: 'Natsu.mp3',
+                    aki: 'Aki_.mp3',
+                    fuyu: 'Fuyu_.mp3',
+                    tropis: 'Rainforest.mp3',
+                    space: 'Luar Angkasa.mp3',
+                    natal: 'Natal.mp3',
+                    ios6: 'iOS6.mp3',
+                    xpaero: 'XP Frutiger Sero.mp3',
+                    exam: 'Exam Mode.mp3'
+                };
             }
-            
-            playTone() {
-                if (!this.ctx) return;
-                let scale, type, decay, vol = 0.1;
-                
-                if (this.isExamMode) {
-                    scale = [293.66, 311.13, 392.00, 440.00, 466.16]; type = 'triangle'; decay = 0.2; vol = 0.15;
-                } else {
-                    switch(state.season) {
-                        case 'haru': scale = [523.25, 587.33, 698.46, 783.99, 880.00]; type = 'triangle'; decay = 0.8; vol = 0.08; break; 
-                        case 'natsu': scale = [261.63, 329.63, 349.23, 392.00, 493.88]; type = 'square'; decay = 0.3; vol = 0.04; break; 
-                        case 'aki': scale = [164.81, 174.61, 220.00, 246.94, 261.63]; type = 'sine'; decay = 2.5; vol = 0.12; break; 
-                        case 'fuyu': scale = [1046.50, 1174.66, 1244.51, 1567.98, 1661.22]; type = 'sine'; decay = 3.0; vol = 0.03; break; 
-                        case 'tropis': scale = [329.63, 392.00, 440.00, 523.25, 587.33]; type = 'sine'; decay = 0.5; vol = 0.1; break; 
-                        case 'space': scale = [130.81, 196.00, 261.63, 311.13, 392.00]; type = 'square'; decay = 4.0; vol = 0.05; break; 
-                        case 'natal': scale = [329.63, 329.63, 329.63, 392.00, 261.63, 293.66, 349.23]; type = 'sine'; decay = 1.0; vol = 0.15; break; 
-                        case 'ios6': scale = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; type = 'square'; decay = 0.18; vol = 0.055; break;
-                        case 'xpaero': scale = [392.00, 493.88, 523.25, 659.25, 783.99, 987.77]; type = 'triangle'; decay = 0.65; vol = 0.07; break;
-                        default: scale = [293.66, 349.23, 392.00, 440.00, 523.25]; type = 'sine'; decay = 1.2; vol = 0.1;
-                    }
-                }
 
-                let freq = scale[Math.floor(Math.random() * scale.length)];
-                if (!this.isExamMode && state.season === 'haru' && Math.random() > 0.7) freq *= 2; 
-                if (!this.isExamMode && state.season === 'space' && Math.random() > 0.8) freq /= 2;
-                if (!this.isExamMode && state.season === 'ios6' && Math.random() > 0.72) freq *= 1.5;
-                if (!this.isExamMode && state.season === 'xpaero' && Math.random() > 0.66) freq *= 2;
-                if (this.isExamMode && Math.random() > 0.8) freq /= 2;
+            getTrackSrc() {
+                const file = this.isExamMode ? this.tracks.exam : (this.tracks[state.season] || this.tracks.default);
+                return encodeURI(this.basePath + file);
+            }
 
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                
-                if (state.season === 'space' && !this.isExamMode) {
-                    const filter = this.ctx.createBiquadFilter();
-                    filter.type = 'lowpass'; filter.frequency.value = 800;
-                    osc.connect(filter); filter.connect(gain);
-                } else if (state.season === 'ios6' && !this.isExamMode) {
-                    const filter = this.ctx.createBiquadFilter();
-                    filter.type = 'bandpass'; filter.frequency.value = 1800; filter.Q.value = 5;
-                    osc.connect(filter); filter.connect(gain);
-                } else {
-                    osc.connect(gain);
+            loadTrack() {
+                const src = this.getTrackSrc();
+                if (this.audio && this.currentSrc === src) return;
+                if (this.audio) this.audio.pause();
+                this.audio = new Audio(src);
+                this.audio.loop = true;
+                this.audio.volume = this.isExamMode ? 0.42 : 0.32;
+                this.currentSrc = src;
+            }
+
+            start() {
+                this.isPlaying = true;
+                this.loadTrack();
+                this.audio.play().catch(() => {
+                    this.isPlaying = false;
+                });
+            }
+
+            stop() {
+                this.isPlaying = false;
+                if (this.audio) this.audio.pause();
+            }
+
+            setExamMode(isExam) {
+                const changed = this.isExamMode !== isExam;
+                this.isExamMode = isExam;
+                if (changed && this.isPlaying) {
+                    this.loadTrack();
+                    this.audio.play().catch(() => {
+                        this.isPlaying = false;
+                    });
                 }
-                
-                gain.connect(this.ctx.destination);
-                osc.type = type;
-                
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + decay);
-                
-                osc.start(); osc.stop(this.ctx.currentTime + decay + 0.1);
             }
         }
-        const MusicEngine = new RealTimeSynth();
+        const MusicEngine = new FileMusicEngine();
 
         /* ================= STATE & APP BOOTSTRAP ================= */
         const AVATARS = ['🍣','🌸','⛩️','🗻','🎎','🏮','🍡','🦊','🥋','🍵'];
@@ -1780,7 +1766,7 @@ const KANJI_N5_DB = (() => {
         function renderProgCard(t, i, p) {
             return `<div class="ios-glass p-3 rounded-2xl flex flex-col gap-2">
                 <div class="flex justify-between items-center text-[10px]"><span class="font-bold flex items-center gap-1.5">${i} ${t}</span><span class="font-bold text-accent">${p}%</span></div>
-                <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden"><div class="bg-accent h-full rounded-full transition-all duration-500" style="width: ${p}%"></div></div>
+                <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden"><div class="progress-fill bg-accent h-full rounded-full transition-all duration-500" style="width: ${p}%"></div></div>
             </div>`;
         }
 
@@ -1816,7 +1802,7 @@ const KANJI_N5_DB = (() => {
                                     <div class="w-10 h-10 rounded-full bg-glassborder flex items-center justify-center text-main"><i data-lucide="chevron-right" class="w-5 h-5"></i></div>
                                 </div>
                                 <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden mt-2 relative z-10">
-                                    <div class="bg-accent h-full rounded-full transition-all" style="width: ${pct}%"></div>
+                                    <div class="progress-fill bg-accent h-full rounded-full transition-all" style="width: ${pct}%"></div>
                                 </div>
                                 <p class="text-[10px] mt-2 text-right font-bold" style="color: var(--text-muted)">${pct}% Selesai</p>
                             </div>
@@ -1863,7 +1849,7 @@ const KANJI_N5_DB = (() => {
 
                     <!-- Progress Bar -->
                     <div class="w-full h-1.5 bg-glassborder rounded-full overflow-hidden">
-                        <div class="h-full bg-accent transition-all duration-500" style="width: ${progressPct}%"></div>
+                        <div class="progress-fill h-full bg-accent transition-all duration-500" style="width: ${progressPct}%"></div>
                     </div>
 
                     <div class="overflow-y-auto flex-1 pb-4 hide-scrollbar space-y-4 pt-2">
@@ -2849,4 +2835,3 @@ const KANJI_N5_DB = (() => {
 
 
 ```
-
