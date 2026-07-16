@@ -159,7 +159,7 @@
         }
         .dark[data-season="xpaero"] body {
             background:
-                linear-gradient(180deg, rgba(4,25,56,0.72) 0%, rgba(2,18,32,0.64) 46%, rgba(0,38,64,0.58) 100%),
+                linear-gradient(180deg, rgba(4,25,56,0.42) 0%, rgba(2,18,32,0.36) 46%, rgba(0,38,17,0.45) 100%),
                 url("assets/xp-bliss-hd.png") center center / cover fixed no-repeat;
         }
         [data-season="xpaero"] .ios-glass {
@@ -182,11 +182,6 @@
         }
         [data-season="xpaero"] #bottom-nav {
             background: linear-gradient(180deg, rgba(226,255,255,0.86), rgba(77,184,255,0.58) 48%, rgba(0,118,222,0.58) 49%, rgba(198,255,225,0.7));
-        }
-        [data-season="xpaero"] .progress-fill {
-            background: linear-gradient(180deg, #8fff75 0%, #38db4a 48%, #10a832 49%, #087a24 100%);
-            border: 1px solid rgba(8, 122, 36, 0.35);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 4px 10px -7px rgba(4,94,24,0.9);
         }
         [data-season="xpaero"] #season-art-bg { opacity: 0; }
 
@@ -982,26 +977,6 @@
             ]
         };
 
-        Object.assign(KOTOBA_DB, {
-            11: [
-                { kana: "います", kanji: "", arti: "Ada / mempunyai (makhluk hidup)", romaji: "imasu" },
-                { kana: "かかります", kanji: "", arti: "Memerlukan (waktu/uang)", romaji: "kakarimasu" },
-                { kana: "ひとつ", kanji: "一つ", arti: "Satu buah", romaji: "hitotsu" }, { kana: "ふたつ", kanji: "二つ", arti: "Dua buah", romaji: "futatsu" }, { kana: "みっつ", kanji: "三つ", arti: "Tiga buah", romaji: "mittsu" }, { kana: "よっつ", kanji: "四つ", arti: "Empat buah", romaji: "yottsu" }, { kana: "いつつ", kanji: "五つ", arti: "Lima buah", romaji: "itsutsu" }, { kana: "むっつ", kanji: "六つ", arti: "Enam buah", romaji: "muttsu" }, { kana: "ななつ", kanji: "七つ", arti: "Tujuh buah", romaji: "nanatsu" }, { kana: "やっつ", kanji: "八つ", arti: "Delapan buah", romaji: "yattsu" }, { kana: "ここのつ", kanji: "九つ", arti: "Sembilan buah", romaji: "kokonotsu" }, { kana: "とお", kanji: "十", arti: "Sepuluh buah", romaji: "too" }, { kana: "いくつ", kanji: "", arti: "Berapa buah", romaji: "ikutsu" },
-                { kana: "ひとり", kanji: "一人", arti: "Satu orang", romaji: "hitori" }, { kana: "ふたり", kanji: "二人", arti: "Dua orang", romaji: "futari" }, { kana: "～にん", kanji: "～人", arti: "~ orang", romaji: "~nin" }, { kana: "～だい", kanji: "～台", arti: "~ unit (mesin/kendaraan)", romaji: "~dai" }, { kana: "～まい", kanji: "～枚", arti: "~ lembar", romaji: "~mai" }, { kana: "～かい", kanji: "～回", arti: "~ kali", romaji: "~kai" },
-                { kana: "りんご", kanji: "", arti: "Apel", romaji: "ringo" }, { kana: "みかん", kanji: "", arti: "Jeruk", romaji: "mikan" }, { kana: "サンドイッチ", kanji: "", arti: "Sandwich", romaji: "sandoicchi" }, { kana: "カレーライス", kanji: "", arti: "Nasi kare", romaji: "karee raisu" }, { kana: "アイスクリーム", kanji: "", arti: "Es krim", romaji: "aisu kuriimu" }, { kana: "きって", kanji: "切手", arti: "Perangko", romaji: "kitte" }, { kana: "はがき", kanji: "", arti: "Kartu pos", romaji: "hagaki" }, { kana: "ふうとう", kanji: "封筒", arti: "Amplop", romaji: "fuutou" },
-                { kana: "りょうしん", kanji: "両親", arti: "Orang tua", romaji: "ryoushin" }, { kana: "きょうだい", kanji: "兄弟", arti: "Saudara", romaji: "kyoudai" }, { kana: "あに", kanji: "兄", arti: "Kakak laki-laki sendiri", romaji: "ani" }, { kana: "おにいさん", kanji: "お兄さん", arti: "Kakak laki-laki orang lain", romaji: "oniisan" }, { kana: "あね", kanji: "姉", arti: "Kakak perempuan sendiri", romaji: "ane" }, { kana: "おねえさん", kanji: "お姉さん", arti: "Kakak perempuan orang lain", romaji: "oneesan" }, { kana: "おとうと", kanji: "弟", arti: "Adik laki-laki sendiri", romaji: "otouto" }, { kana: "おとうとさん", kanji: "弟さん", arti: "Adik laki-laki orang lain", romaji: "otoutosan" }, { kana: "いもうと", kanji: "妹", arti: "Adik perempuan sendiri", romaji: "imouto" }, { kana: "いもうとさん", kanji: "妹さん", arti: "Adik perempuan orang lain", romaji: "imoutosan" },
-                { kana: "がいこく", kanji: "外国", arti: "Luar negeri", romaji: "gaikoku" }, { kana: "りゅうがくせい", kanji: "留学生", arti: "Pelajar asing", romaji: "ryuugakusei" }, { kana: "クラス", kanji: "", arti: "Kelas", romaji: "kurasu" }, { kana: "～じかん", kanji: "～時間", arti: "~ jam", romaji: "~jikan" }, { kana: "～しゅうかん", kanji: "～週間", arti: "~ minggu", romaji: "~shuukan" }, { kana: "～かげつ", kanji: "～か月", arti: "~ bulan", romaji: "~kagetsu" }, { kana: "～ねん", kanji: "～年", arti: "~ tahun", romaji: "~nen" }, { kana: "どのくらい", kanji: "", arti: "Berapa lama / kira-kira", romaji: "donokurai" }, { kana: "ぜんぶで", kanji: "全部で", arti: "Semuanya", romaji: "zenbu de" }, { kana: "みんな", kanji: "", arti: "Semua", romaji: "minna" }, { kana: "～だけ", kanji: "", arti: "Hanya ~", romaji: "~dake" }, { kana: "いいてんきですね", kanji: "いい天気ですね", arti: "Cuacanya bagus ya", romaji: "ii tenki desu ne" }, { kana: "おでかけですか", kanji: "お出かけですか", arti: "Mau keluar?", romaji: "odekake desu ka" }, { kana: "ちょっと～まで", kanji: "", arti: "Ke ~ sebentar", romaji: "chotto ~ made" }, { kana: "いってらっしゃい", kanji: "行ってらっしゃい", arti: "Hati-hati", romaji: "itterasshai" }, { kana: "いってきます", kanji: "行ってきます", arti: "Saya berangkat", romaji: "ittekimasu" }, { kana: "ふなびん", kanji: "船便", arti: "Pos laut", romaji: "funabin" }, { kana: "こうくうびん", kanji: "航空便", arti: "Pos udara", romaji: "koukuubin" }, { kana: "おねがいします", kanji: "お願いします", arti: "Tolong", romaji: "onegaishimasu" }
-            ],
-            12: [
-                { kana: "かんたん", kanji: "簡単", arti: "Mudah", romaji: "kantan" }, { kana: "ちかい", kanji: "近い", arti: "Dekat", romaji: "chikai" }, { kana: "とおい", kanji: "遠い", arti: "Jauh", romaji: "tooi" }, { kana: "はやい", kanji: "速い・早い", arti: "Cepat", romaji: "hayai" }, { kana: "おそい", kanji: "遅い", arti: "Lambat", romaji: "osoi" }, { kana: "おおい", kanji: "多い", arti: "Banyak", romaji: "ooi" }, { kana: "すくない", kanji: "少ない", arti: "Sedikit", romaji: "sukunai" }, { kana: "あたたかい", kanji: "暖かい・温かい", arti: "Hangat", romaji: "atatakai" }, { kana: "すずしい", kanji: "涼しい", arti: "Sejuk", romaji: "suzushii" }, { kana: "あまい", kanji: "甘い", arti: "Manis", romaji: "amai" }, { kana: "からい", kanji: "辛い", arti: "Pedas", romaji: "karai" }, { kana: "おもい", kanji: "重い", arti: "Berat", romaji: "omoi" }, { kana: "かるい", kanji: "軽い", arti: "Ringan", romaji: "karui" }, { kana: "いい", kanji: "", arti: "Baik", romaji: "ii" },
-                { kana: "きせつ", kanji: "季節", arti: "Musim", romaji: "kisetsu" }, { kana: "はる", kanji: "春", arti: "Musim semi", romaji: "haru" }, { kana: "なつ", kanji: "夏", arti: "Musim panas", romaji: "natsu" }, { kana: "あき", kanji: "秋", arti: "Musim gugur", romaji: "aki" }, { kana: "ふゆ", kanji: "冬", arti: "Musim dingin", romaji: "fuyu" }, { kana: "てんき", kanji: "天気", arti: "Cuaca", romaji: "tenki" }, { kana: "あめ", kanji: "雨", arti: "Hujan", romaji: "ame" }, { kana: "ゆき", kanji: "雪", arti: "Salju", romaji: "yuki" }, { kana: "くもり", kanji: "曇り", arti: "Mendung", romaji: "kumori" },
-                { kana: "ホテル", kanji: "", arti: "Hotel", romaji: "hoteru" }, { kana: "くうこう", kanji: "空港", arti: "Bandara", romaji: "kuukou" }, { kana: "うみ", kanji: "海", arti: "Laut", romaji: "umi" }, { kana: "せかい", kanji: "世界", arti: "Dunia", romaji: "sekai" }, { kana: "パーティー", kanji: "", arti: "Pesta", romaji: "paatii" }, { kana: "おまつり", kanji: "お祭り", arti: "Perayaan", romaji: "omatsuri" }, { kana: "すきやき", kanji: "すき焼き", arti: "Sukiyaki", romaji: "sukiyaki" }, { kana: "さしみ", kanji: "刺身", arti: "Sashimi", romaji: "sashimi" }, { kana: "すし", kanji: "お寿司", arti: "Sushi", romaji: "sushi" }, { kana: "てんぷら", kanji: "", arti: "Tempura", romaji: "tenpura" }, { kana: "ぶたにく", kanji: "豚肉", arti: "Daging babi", romaji: "butaniku" }, { kana: "とりにく", kanji: "鶏肉", arti: "Daging ayam", romaji: "toriniku" }, { kana: "ぎゅうにく", kanji: "牛肉", arti: "Daging sapi", romaji: "gyuuniku" }, { kana: "レモン", kanji: "", arti: "Lemon", romaji: "remon" }, { kana: "いけばな", kanji: "生け花", arti: "Seni merangkai bunga", romaji: "ikebana" }, { kana: "もみじ", kanji: "紅葉", arti: "Daun maple merah", romaji: "momiji" }, { kana: "どちら", kanji: "", arti: "Yang mana", romaji: "dochira" }, { kana: "どちらも", kanji: "", arti: "Keduanya", romaji: "dochira mo" }, { kana: "いちばん", kanji: "", arti: "Paling", romaji: "ichiban" }, { kana: "ずっと", kanji: "", arti: "Jauh lebih", romaji: "zutto" }, { kana: "はじめて", kanji: "初めて", arti: "Untuk pertama kali", romaji: "hajimete" }, { kana: "ただいま", kanji: "", arti: "Saya pulang", romaji: "tadaima" }, { kana: "おかえりなさい", kanji: "お帰りなさい", arti: "Selamat pulang", romaji: "okaerinasai" }, { kana: "わあ、すごいひとですね", kanji: "わあ、すごい人ですね", arti: "Wah, banyak orang ya", romaji: "waa, sugoi hito desu ne" }, { kana: "つかれました", kanji: "疲れました", arti: "Lelah", romaji: "tsukaremashita" }
-            ],
-            13: [
-                { kana: "あそびます", kanji: "遊びます", arti: "Bermain", romaji: "asobimasu" }, { kana: "およぎます", kanji: "泳ぎます", arti: "Berenang", romaji: "oyogimasu" }, { kana: "むかえます", kanji: "迎えます", arti: "Menjemput", romaji: "mukaemasu" }, { kana: "つかれます", kanji: "疲れます", arti: "Lelah", romaji: "tsukaremasu" }, { kana: "けっこんします", kanji: "結婚します", arti: "Menikah", romaji: "kekkon shimasu" }, { kana: "かいものします", kanji: "買い物します", arti: "Berbelanja", romaji: "kaimono shimasu" }, { kana: "しょくじします", kanji: "食事します", arti: "Makan", romaji: "shokuji shimasu" }, { kana: "さんぽします", kanji: "散歩します", arti: "Berjalan-jalan", romaji: "sanpo shimasu" }, { kana: "たいへん", kanji: "大変", arti: "Berat / susah", romaji: "taihen" }, { kana: "ほしい", kanji: "欲しい", arti: "Ingin (benda)", romaji: "hoshii" }, { kana: "ひろい", kanji: "広い", arti: "Luas", romaji: "hiroi" }, { kana: "せまい", kanji: "狭い", arti: "Sempit", romaji: "semai" }, { kana: "プール", kanji: "", arti: "Kolam renang", romaji: "puuru" }, { kana: "かわ", kanji: "川", arti: "Sungai", romaji: "kawa" }, { kana: "びじゅつ", kanji: "美術", arti: "Seni", romaji: "bijutsu" }, { kana: "つり", kanji: "釣り", arti: "Memancing", romaji: "tsuri" }, { kana: "スキー", kanji: "", arti: "Ski", romaji: "sukii" }, { kana: "しゅうまつ", kanji: "週末", arti: "Akhir pekan", romaji: "shuumatsu" }, { kana: "おしょうがつ", kanji: "お正月", arti: "Tahun baru", romaji: "oshougatsu" }, { kana: "～ごろ", kanji: "", arti: "Sekitar / kira-kira", romaji: "~goro" }, { kana: "なにか", kanji: "何か", arti: "Sesuatu", romaji: "nanika" }, { kana: "どこか", kanji: "", arti: "Suatu tempat", romaji: "dokoka" }, { kana: "おなかがすきます", kanji: "", arti: "Lapar", romaji: "onaka ga sukimasu" }, { kana: "のどがかわきます", kanji: "", arti: "Haus", romaji: "nodo ga kawakimasu" }, { kana: "そうしましょう", kanji: "", arti: "Ya, mari", romaji: "sou shimashou" }, { kana: "ごちゅうもんは", kanji: "ご注文は", arti: "Mau pesan apa?", romaji: "gochuumon wa" }, { kana: "ていしょく", kanji: "定食", arti: "Menu paket", romaji: "teishoku" }, { kana: "しょうしょうおまちください", kanji: "少々お待ちください", arti: "Tunggu sebentar", romaji: "shoushou omachi kudasai" }, { kana: "べつべつに", kanji: "別々に", arti: "Sendiri-sendiri / masing-masing", romaji: "betsubetsu ni" }
-            ]
-        });
-
         const HIRAGANA_DB = {
             seion: [{j:"あ",r:"a"},{j:"い",r:"i"},{j:"う",r:"u"},{j:"え",r:"e"},{j:"お",r:"o"},{j:"か",r:"ka"},{j:"き",r:"ki"},{j:"く",r:"ku"},{j:"け",r:"ke"},{j:"こ",r:"ko"},{j:"さ",r:"sa"},{j:"し",r:"shi"},{j:"す",r:"su"},{j:"せ",r:"se"},{j:"そ",r:"so"},{j:"た",r:"ta"},{j:"ち",r:"chi"},{j:"つ",r:"tsu"},{j:"て",r:"te"},{j:"と",r:"to"},{j:"な",r:"na"},{j:"に",r:"ni"},{j:"ぬ",r:"nu"},{j:"ね",r:"ne"},{j:"の",r:"no"},{j:"は",r:"ha"},{j:"ひ",r:"hi"},{j:"ふ",r:"fu"},{j:"へ",r:"he"},{j:"ほ",r:"ho"},{j:"ま",r:"ma"},{j:"み",r:"mi"},{j:"む",r:"mu"},{j:"め",r:"me"},{j:"も",r:"mo"},{j:"や",r:"ya"},{j:"",r:""},{j:"ゆ",r:"yu"},{j:"",r:""},{j:"よ",r:"yo"},{j:"ら",r:"ra"},{j:"り",r:"ri"},{j:"る",r:"ru"},{j:"れ",r:"re"},{j:"ろ",r:"ro"},{j:"わ",r:"wa"},{j:"",r:""},{j:"",r:""},{j:"",r:""},{j:"を",r:"wo"},{j:"ん",r:"n"}],
             dakuon: [{j:"が",r:"ga"},{j:"ぎ",r:"gi"},{j:"ぐ",r:"gu"},{j:"げ",r:"ge"},{j:"ご",r:"go"},{j:"ざ",r:"za"},{j:"じ",r:"ji"},{j:"ず",r:"zu"},{j:"ぜ",r:"ze"},{j:"ぞ",r:"zo"},{j:"だ",r:"da"},{j:"ぢ",r:"ji"},{j:"づ",r:"zu"},{j:"で",r:"de"},{j:"ど",r:"do"},{j:"ば",r:"ba"},{j:"び",r:"bi"},{j:"ぶ",r:"bu"},{j:"べ",r:"be"},{j:"ぼ",r:"bo"}],
@@ -1549,31 +1524,6 @@ const KANJI_N5_DB = (() => {
                 { id: "b10_6", title: "アジアストアですか", subtitle: "Memastikan Inti Pertanyaan", desc: "Dalam percakapan, lawan bicara bisa menegaskan inti pertanyaan terlebih dahulu sebelum menjawab.", pattern: "[Tempat/Nama] ですか。...です。", examples: [{ j: "アジアストアですか。あの ビルの 中です。", r: "Ajia Sutoa desu ka. Ano biru no naka desu.", i: "Asia Store? Di dalam gedung itu." }], quizzes: [{ prompt: "Asia Store? Di dalam gedung itu.", words: ["アジアストア", "です", "か", "あの", "ビル", "の", "なか", "です"], answerStr: "アジアストアですかあのビルのなかです" }, { prompt: "Perpustakaan? Di sebelah kantor pos.", words: ["としょかん", "です", "か", "ゆうびんきょく", "の", "となり", "です"], answerStr: "としょかんですかゆうびんきょくのとなりです" }] }
             ]
         });
-        Object.assign(BUNPOU_DB, {
-            11: [
-                { id: "b11_1", title: "Kata Bantu Bilangan", subtitle: "Menghitung benda, orang, dan waktu", desc: "Kata bantu bilangan diletakkan setelah angka dan dipilih sesuai benda yang dihitung: <strong class='text-accent'>～人</strong> untuk orang, <strong class='text-accent'>～台</strong> untuk mesin/kendaraan, <strong class='text-accent'>～枚</strong> untuk benda tipis, <strong class='text-accent'>～回</strong> untuk frekuensi, serta ～時間・～週間・～か月・～年 untuk jangka waktu.", pattern: "[Angka] + [Kata bantu bilangan]", examples: [{ j: "外国人が 二人 います。", r: "Gaikokujin ga futari imasu.", i: "Ada dua orang asing." }, { j: "りんごを 四つ 買いました。", r: "Ringo o yottsu kaimashita.", i: "Membeli empat buah apel." }], quizzes: [{ prompt: "Ada dua orang pelajar asing.", words: ["りゅうがくせい", "が", "ふたり", "います"], answerStr: "りゅうがくせいがふたりいます" }, { prompt: "Saya membeli tiga buah apel.", words: ["りんご", "を", "みっつ", "かいました"], answerStr: "りんごをみっつかいました" }] },
-                { id: "b11_2", title: "いくつ / 何人", subtitle: "Menanyakan kuantitas", desc: "<strong class='text-accent'>いくつ</strong> menanyakan jumlah benda dengan hitungan umum. <strong class='text-accent'>何人</strong> menanyakan jumlah orang.", pattern: "[Benda] は いくつ ですか / [Tempat] に [Orang] が 何人 いますか", examples: [{ j: "みかんを いくつ 買いましたか。", r: "Mikan o ikutsu kaimashita ka.", i: "Membeli berapa buah jeruk?" }, { j: "この会社に 外国人が 何人 いますか。", r: "Kono kaisha ni gaikokujin ga nannin imasu ka.", i: "Ada berapa orang asing di perusahaan ini?" }], quizzes: [{ prompt: "Membeli berapa buah jeruk?", words: ["みかん", "を", "いくつ", "かいました", "か"], answerStr: "みかんをいくつかいましたか" }, { prompt: "Ada lima orang.", words: ["ごにん", "います"], answerStr: "ごにんいます" }] },
-                { id: "b11_3", title: "どのくらい / ～ぐらい", subtitle: "Lama dan perkiraan", desc: "<strong class='text-accent'>どのくらい</strong> dipakai untuk menanyakan lama waktu. <strong class='text-accent'>～ぐらい</strong> menyatakan perkiraan jumlah atau waktu.", pattern: "どのくらい [Kata Kerja] ますか / [Jumlah] ぐらい", examples: [{ j: "日本語を どのくらい 勉強しましたか。", r: "Nihongo o donokurai benkyou shimashita ka.", i: "Berapa lama belajar bahasa Jepang?" }, { j: "学校に 先生が 三十人ぐらい います。", r: "Gakkou ni sensei ga sanjuunin gurai imasu.", i: "Ada kira-kira 30 guru di sekolah." }], quizzes: [{ prompt: "Saya belajar bahasa Jepang selama tiga tahun.", words: ["にほんご", "を", "さんねん", "べんきょうしました"], answerStr: "にほんごをさんねんべんきょうしました" }, { prompt: "Memerlukan kira-kira lima belas menit.", words: ["１５ふん", "ぐらい", "かかります"], answerStr: "１５ふんぐらいかかります" }] },
-                { id: "b11_4", title: "Frekuensi ～回", subtitle: "Berapa kali melakukan", desc: "Kata bantu bilangan <strong class='text-accent'>回</strong> dipakai bersama jangka waktu untuk menyatakan frekuensi.", pattern: "[Jangka waktu] に [Angka] 回 [Kata Kerja] ます", examples: [{ j: "一か月に 二回 映画を 見ます。", r: "Ikkagetsu ni nikai eiga o mimasu.", i: "Sebulan dua kali menonton film." }], quizzes: [{ prompt: "Sebulan dua kali menonton film.", words: ["いっかげつ", "に", "にかい", "えいが", "を", "みます"], answerStr: "いっかげつににかいえいがをみます" }, { prompt: "Saya pergi ke perpustakaan sekali seminggu.", words: ["いっしゅうかん", "に", "いっかい", "としょかん", "へ", "いきます"], answerStr: "いっしゅうかんにいっかいとしょかんへいきます" }] },
-                { id: "b11_5", title: "～だけ", subtitle: "Hanya", desc: "<strong class='text-accent'>だけ</strong> diletakkan setelah kata benda atau kata bantu bilangan untuk menyatakan 'hanya'.", pattern: "[Kata Benda / Jumlah] だけ", examples: [{ j: "パワー電気に 外国人の 社員が 一人だけ います。", r: "Pawaa denki ni gaikokujin no shain ga hitori dake imasu.", i: "Di Power Electric hanya ada satu pegawai asing." }], quizzes: [{ prompt: "Hari libur hanya hari Minggu.", words: ["やすみ", "は", "にちようび", "だけ", "です"], answerStr: "やすみはにちようびだけです" }, { prompt: "Saya hanya punya satu kakak laki-laki.", words: ["あに", "が", "ひとり", "だけ", "います"], answerStr: "あにがひとりだけいます" }] }
-            ],
-            12: [
-                { id: "b12_1", title: "Bentuk Lampau Kata Benda & Kata Sifat な", subtitle: "Positif dan negatif", desc: "Untuk kata benda dan kata sifat な: sekarang positif <strong class='text-accent'>です</strong>, negatif じゃありません, lampau positif でした, dan lampau negatif じゃありませんでした.", pattern: "[KB/KSな] でした / じゃありませんでした", examples: [{ j: "きのうは 雨でした。", r: "Kinou wa ame deshita.", i: "Kemarin hujan." }, { j: "きのうの 試験は 簡単じゃありませんでした。", r: "Kinou no shiken wa kantan ja arimasen deshita.", i: "Ujian kemarin tidak mudah." }], quizzes: [{ prompt: "Kemarin hujan.", words: ["きのう", "は", "あめ", "でした"], answerStr: "きのうはあめでした" }, { prompt: "Ujian kemarin tidak mudah.", words: ["きのう", "の", "しけん", "は", "かんたん", "じゃ", "ありませんでした"], answerStr: "きのうのしけんはかんたんじゃありませんでした" }] },
-                { id: "b12_2", title: "Bentuk Lampau Kata Sifat い", subtitle: "～かったです", desc: "Kata sifat い berubah menjadi <strong class='text-accent'>～かったです</strong> untuk lampau positif, dan <strong class='text-accent'>～くなかったです</strong> untuk lampau negatif.", pattern: "[KSい] かったです / くなかったです", examples: [{ j: "きのうは 暑かったです。", r: "Kinou wa atsukatta desu.", i: "Kemarin panas." }, { j: "きのうの パーティーは あまり 楽しくなかったです。", r: "Kinou no paatii wa amari tanoshikunakatta desu.", i: "Pesta kemarin tidak begitu menyenangkan." }], quizzes: [{ prompt: "Kemarin panas.", words: ["きのう", "は", "あつかった", "です"], answerStr: "きのうはあつかったです" }, { prompt: "Pesta kemarin tidak begitu menyenangkan.", words: ["きのう", "の", "パーティー", "は", "あまり", "たのしくなかった", "です"], answerStr: "きのうのパーティーはあまりたのしくなかったです" }] },
-                { id: "b12_3", title: "Kata Benda 1 は Kata Benda 2 より Kata Sifat です", subtitle: "Perbandingan dua benda", desc: "Pola ini menyatakan bahwa KB1 lebih memiliki suatu sifat daripada KB2.", pattern: "[KB1] は [KB2] より [Kata Sifat] です", examples: [{ j: "この 車は あの 車より 大きいです。", r: "Kono kuruma wa ano kuruma yori ookii desu.", i: "Mobil ini lebih besar daripada mobil itu." }], quizzes: [{ prompt: "Musim panas lebih panas daripada musim semi.", words: ["なつ", "は", "はる", "より", "あつい", "です"], answerStr: "なつははるよりあついです" }, { prompt: "Jakarta lebih ramai daripada kota itu.", words: ["ジャカルタ", "は", "その", "まち", "より", "にぎやか", "です"], answerStr: "ジャカルタはそのまちよりにぎやかです" }] },
-                { id: "b12_4", title: "どちらが～ですか / ～のほうが", subtitle: "Memilih dari dua", desc: "Untuk membandingkan dua benda, gunakan <strong class='text-accent'>どちらが</strong> lalu jawab dengan ～のほうが.", pattern: "A と B と どちらが [Sifat] ですか。B のほうが [Sifat] です", examples: [{ j: "サッカーと 野球と どちらが おもしろいですか。サッカーのほうが おもしろいです。", r: "Sakkaa to yakyuu to dochira ga omoshiroi desu ka.", i: "Mana lebih menarik, sepak bola atau bisbol?" }], quizzes: [{ prompt: "Mana lebih dingin, Hokkaido atau Osaka?", words: ["ほっかいどう", "と", "おおさか", "と", "どちら", "が", "すずしい", "です", "か"], answerStr: "ほっかいどうとおおさかとどちらがすずしいですか" }, { prompt: "Hokkaido lebih sejuk.", words: ["ほっかいどう", "の", "ほう", "が", "すずしい", "です"], answerStr: "ほっかいどうのほうがすずしいです" }] },
-                { id: "b12_5", title: "～の中で ～が いちばん", subtitle: "Paling dalam kelompok", desc: "Gunakan pola ini untuk menyatakan yang paling dalam suatu kelompok, tempat, atau jangka waktu. Kata tanya yang dipakai menunjukkan subjek.", pattern: "[Lingkup] の中で [Apa/Siapa/Kapan] が いちばん [Sifat] ですか", examples: [{ j: "日本料理の 中で 何が いちばん おいしいですか。天ぷらが いちばん おいしいです。", r: "Nihon ryouri no naka de nani ga ichiban oishii desu ka.", i: "Apa yang paling enak di antara masakan Jepang?" }], quizzes: [{ prompt: "Apa yang paling enak di antara masakan Jepang?", words: ["にほんりょうり", "の", "なか", "で", "なに", "が", "いちばん", "おいしい", "です", "か"], answerStr: "にほんりょうりのなかでなにがいちばんおいしいですか" }, { prompt: "Tempura yang paling enak.", words: ["てんぷら", "が", "いちばん", "おいしい", "です"], answerStr: "てんぷらがいちばんおいしいです" }] },
-                { id: "b12_6", title: "Kata Sifat の", subtitle: "Menggantikan kata benda", desc: "Kata sifat dapat diikuti <strong class='text-accent'>の</strong> untuk menggantikan kata benda yang sudah jelas dalam konteks.", pattern: "[Kata Sifat] の", examples: [{ j: "カリナさんの かばんは どれですか。あの 赤くて、大きいのです。", r: "Ano akakute, ookii no desu.", i: "Yang merah dan besar itu." }], quizzes: [{ prompt: "Yang merah dan besar itu.", words: ["あの", "あかくて", "おおきい", "の", "です"], answerStr: "あのあかくておおきいのです" }, { prompt: "Saya mau yang ringan.", words: ["かるい", "の", "が", "ほしい", "です"], answerStr: "かるいのがほしいです" }] }
-            ],
-            13: [
-                { id: "b13_1", title: "Kata Benda が 欲しいです", subtitle: "Menginginkan benda", desc: "<strong class='text-accent'>欲しい</strong> adalah kata sifat い. Benda yang diinginkan ditandai dengan partikel が.", pattern: "[Benda] が 欲しいです", examples: [{ j: "私は 友達が 欲しいです。", r: "Watashi wa tomodachi ga hoshii desu.", i: "Saya ingin punya teman." }], quizzes: [{ prompt: "Saya ingin punya teman.", words: ["わたし", "は", "ともだち", "が", "ほしい", "です"], answerStr: "わたしはともだちがほしいです" }, { prompt: "Sekarang yang paling saya inginkan adalah mobil.", words: ["いま", "いちばん", "ほしい", "の", "は", "くるま", "です"], answerStr: "いまいちばんほしいのはくるまです" }] },
-                { id: "b13_2", title: "Kata Kerja Bentuk ます たいです", subtitle: "Ingin melakukan", desc: "Bentuk たい menyatakan keinginan melakukan sesuatu. Objek dapat memakai を atau が. Bentuk ini menyatakan keinginan pembicara, bukan orang ketiga.", pattern: "[Kata Kerja bentuk ます] たいです", examples: [{ j: "私は 沖縄へ 行きたいです。", r: "Watashi wa Okinawa e ikitai desu.", i: "Saya ingin pergi ke Okinawa." }, { j: "私は 天ぷらを 食べたいです。", r: "Watashi wa tenpura o tabetai desu.", i: "Saya ingin makan tempura." }], quizzes: [{ prompt: "Saya ingin pergi ke Okinawa.", words: ["わたし", "は", "おきなわ", "へ", "いきたい", "です"], answerStr: "わたしはおきなわへいきたいです" }, { prompt: "Saya ingin makan tempura.", words: ["わたし", "は", "てんぷら", "を", "たべたい", "です"], answerStr: "わたしはてんぷらをたべたいです" }] },
-                { id: "b13_3", title: "Tempat へ 行きます / 来ます / 帰ります", subtitle: "Tujuan dengan aktivitas", desc: "Objek tujuan dari 行きます・来ます・帰ります ditandai dengan に. Jika kegiatannya berupa kata benda します, gunakan bentuk kata benda tersebut sebelum に行きます.", pattern: "[Tempat] へ [Kegiatan] に 行きます/来ます/帰ります", examples: [{ j: "神戸へ インド料理を 食べに 行きます。", r: "Koube e Indo ryouri o tabe ni ikimasu.", i: "Pergi ke Kobe untuk makan masakan India." }, { j: "神戸へ 買い物に 行きます。", r: "Koube e kaimono ni ikimasu.", i: "Pergi ke Kobe untuk berbelanja." }], quizzes: [{ prompt: "Pergi ke Kobe untuk berbelanja.", words: ["こうべ", "へ", "かいもの", "に", "いきます"], answerStr: "こうべへかいものにいきます" }, { prompt: "Datang ke Jepang untuk belajar seni.", words: ["にほん", "へ", "びじゅつ", "の", "べんきょう", "に", "きました"], answerStr: "にほんへびじゅつのべんきょうにきました" }] },
-                { id: "b13_4", title: "どこか / 何か", subtitle: "Suatu tempat / sesuatu", desc: "どこか berarti suatu tempat dan 何か berarti sesuatu. Partikel へ atau を dapat dihilangkan dalam percakapan.", pattern: "どこか(へ) 行きます / 何か(を) [Kata Kerja] ます", examples: [{ j: "夏休みは どこかへ 行きましたか。", r: "Natsuyasumi wa dokoka e ikimashita ka.", i: "Saat liburan pergi ke mana?" }], quizzes: [{ prompt: "Ya, saya pergi ke Hokkaido untuk bermain ski.", words: ["はい", "ほっかいどう", "へ", "スキー", "に", "いきました"], answerStr: "はいほっかいどうへスキーにいきました" }, { prompt: "Karena haus, saya ingin minum sesuatu.", words: ["のど", "が", "かわきました", "から", "なにか", "を", "のみたい", "です"], answerStr: "のどがかわきましたからなにかをのみたいです" }] },
-                { id: "b13_5", title: "ご～", subtitle: "Ungkapan sopan", desc: "Awalan <strong class='text-accent'>ご</strong> dipakai untuk menunjukkan penghormatan, misalnya ご注文.", pattern: "ご + Kata Benda", examples: [{ j: "ご注文は？", r: "Gochuumon wa?", i: "Mau pesan apa?" }], quizzes: [{ prompt: "Mau pesan apa?", words: ["ごちゅうもん", "は"], answerStr: "ごちゅうもんは" }, { prompt: "Ya, mari kita lakukan begitu.", words: ["はい", "そう", "しましょう"], answerStr: "はいそうしましょう" }] }
-            ]
-        });
-
         const FRESH_BUNPOU_QUIZZES = {
             b1_1: [{ prompt: "Saya siswa SMA.", words: ["わたし", "は", "こうこうせい", "です"], answerStr: "わたしはこうこうせいです" }, { prompt: "Rina adalah orang Indonesia.", words: ["リナさん", "は", "インドネシアじん", "です"], answerStr: "リナさんはインドネシアじんです" }],
             b1_2: [{ prompt: "Saya bukan guru.", words: ["わたし", "は", "せんせい", "じゃ", "ありません"], answerStr: "わたしはせんせいじゃありません" }, { prompt: "Santos bukan mahasiswa.", words: ["サントスさん", "は", "がくせい", "では", "ありません"], answerStr: "サントスさんはがくせいではありません" }],
@@ -1617,69 +1567,88 @@ const KANJI_N5_DB = (() => {
             { id: 'xpaero', name: 'XP Frutiger Aero', icon: '🫧', price: 150, desc: 'Langit biru, bukit hijau mencolok, kaca Aero, dan gelembung nostalgia.' }
         ];
 
-        /* ================= MUSIC FILES ================= */
-        class FileMusicEngine {
-            constructor() {
-                this.audio = null;
-                this.isPlaying = false;
-                this.isExamMode = false;
-                this.currentSrc = '';
-                this.basePath = 'Music/';
-                this.tracks = {
-                    default: 'Default.mp3',
-                    haru: 'Haru.mp3',
-                    natsu: 'Natsu.mp3',
-                    aki: 'Aki.mp3',
-                    fuyu: 'Fuyu.mp3',
-                    tropis: 'Rainforest.mp3',
-                    space: 'Luar Angkasa.mp3',
-                    natal: 'Natal.mp3',
-                    ios6: 'iOS6.mp3',
-                    xpaero: 'XP Frutiger Sero.mp3',
-                    exam: 'Exam Mode.mp3'
-                };
-            }
+        /* ================= WEB AUDIO API ================= */
+        class RealTimeSynth {
+            constructor() { this.ctx = null; this.isPlaying = false; }
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+            start() { this.init(); if (this.isPlaying) return; this.isPlaying = true; this.scheduler(); }
+            stop() { this.isPlaying = false; if (this.timerId) clearTimeout(this.timerId); }
+            setExamMode(state) { this.isExamMode = state; }
+            
+            scheduler() {
+                if (!this.isPlaying) return;
+                this.playTone();
+                let tempo = 90;
+                if(this.isExamMode) tempo = 160;
+                else if(state.season === 'haru') tempo = 120;
+                else if(state.season === 'natsu') tempo = 140;
+                else if(state.season === 'aki') tempo = 70;
+                else if(state.season === 'fuyu') tempo = 50;
+                else if(state.season === 'tropis') tempo = 100;
+                else if(state.season === 'space') tempo = 40;
+                else if(state.season === 'natal') tempo = 110;
+                else if(state.season === 'ios6') tempo = 132;
+                else if(state.season === 'xpaero') tempo = 128;
 
-            getTrackSrc() {
-                const file = this.isExamMode ? this.tracks.exam : (this.tracks[state.season] || this.tracks.default);
-                return encodeURI(this.basePath + file);
+                let step = 60 / tempo * 1000 * (this.isExamMode ? 0.25 : 0.5);
+                if ((state.season === 'fuyu' || state.season === 'space') && !this.isExamMode) step += Math.random() * 1000;
+                this.timerId = setTimeout(() => this.scheduler(), step);
             }
-
-            loadTrack() {
-                const src = this.getTrackSrc();
-                if (this.audio && this.currentSrc === src) return;
-                if (this.audio) this.audio.pause();
-                this.audio = new Audio(src);
-                this.audio.loop = true;
-                this.audio.volume = this.isExamMode ? 0.42 : 0.32;
-                this.currentSrc = src;
-            }
-
-            start() {
-                this.isPlaying = true;
-                this.loadTrack();
-                this.audio.play().catch(() => {
-                    this.isPlaying = false;
-                });
-            }
-
-            stop() {
-                this.isPlaying = false;
-                if (this.audio) this.audio.pause();
-            }
-
-            setExamMode(isExam) {
-                const changed = this.isExamMode !== isExam;
-                this.isExamMode = isExam;
-                if (changed && this.isPlaying) {
-                    this.loadTrack();
-                    this.audio.play().catch(() => {
-                        this.isPlaying = false;
-                    });
+            
+            playTone() {
+                if (!this.ctx) return;
+                let scale, type, decay, vol = 0.1;
+                
+                if (this.isExamMode) {
+                    scale = [293.66, 311.13, 392.00, 440.00, 466.16]; type = 'triangle'; decay = 0.2; vol = 0.15;
+                } else {
+                    switch(state.season) {
+                        case 'haru': scale = [523.25, 587.33, 698.46, 783.99, 880.00]; type = 'triangle'; decay = 0.8; vol = 0.08; break; 
+                        case 'natsu': scale = [261.63, 329.63, 349.23, 392.00, 493.88]; type = 'square'; decay = 0.3; vol = 0.04; break; 
+                        case 'aki': scale = [164.81, 174.61, 220.00, 246.94, 261.63]; type = 'sine'; decay = 2.5; vol = 0.12; break; 
+                        case 'fuyu': scale = [1046.50, 1174.66, 1244.51, 1567.98, 1661.22]; type = 'sine'; decay = 3.0; vol = 0.03; break; 
+                        case 'tropis': scale = [329.63, 392.00, 440.00, 523.25, 587.33]; type = 'sine'; decay = 0.5; vol = 0.1; break; 
+                        case 'space': scale = [130.81, 196.00, 261.63, 311.13, 392.00]; type = 'square'; decay = 4.0; vol = 0.05; break; 
+                        case 'natal': scale = [329.63, 329.63, 329.63, 392.00, 261.63, 293.66, 349.23]; type = 'sine'; decay = 1.0; vol = 0.15; break; 
+                        case 'ios6': scale = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; type = 'square'; decay = 0.18; vol = 0.055; break;
+                        case 'xpaero': scale = [392.00, 493.88, 523.25, 659.25, 783.99, 987.77]; type = 'triangle'; decay = 0.65; vol = 0.07; break;
+                        default: scale = [293.66, 349.23, 392.00, 440.00, 523.25]; type = 'sine'; decay = 1.2; vol = 0.1;
+                    }
                 }
+
+                let freq = scale[Math.floor(Math.random() * scale.length)];
+                if (!this.isExamMode && state.season === 'haru' && Math.random() > 0.7) freq *= 2; 
+                if (!this.isExamMode && state.season === 'space' && Math.random() > 0.8) freq /= 2;
+                if (!this.isExamMode && state.season === 'ios6' && Math.random() > 0.72) freq *= 1.5;
+                if (!this.isExamMode && state.season === 'xpaero' && Math.random() > 0.66) freq *= 2;
+                if (this.isExamMode && Math.random() > 0.8) freq /= 2;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                if (state.season === 'space' && !this.isExamMode) {
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass'; filter.frequency.value = 800;
+                    osc.connect(filter); filter.connect(gain);
+                } else if (state.season === 'ios6' && !this.isExamMode) {
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass'; filter.frequency.value = 1800; filter.Q.value = 5;
+                    osc.connect(filter); filter.connect(gain);
+                } else {
+                    osc.connect(gain);
+                }
+                
+                gain.connect(this.ctx.destination);
+                osc.type = type;
+                
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + decay);
+                
+                osc.start(); osc.stop(this.ctx.currentTime + decay + 0.1);
             }
         }
-        const MusicEngine = new FileMusicEngine();
+        const MusicEngine = new RealTimeSynth();
 
         /* ================= STATE & APP BOOTSTRAP ================= */
         const AVATARS = ['🍣','🌸','⛩️','🗻','🎎','🏮','🍡','🦊','🥋','🍵'];
@@ -1797,7 +1766,7 @@ const KANJI_N5_DB = (() => {
                     <div class="grid grid-cols-2 gap-4">
                         ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
-                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-13')}
+                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-10')}
                         ${renderMenuBtn('latihan', 'gamepad-2', 'Latihan', `Kumpulkan ${coinIcon}`)}
                     </div>
                     <button onclick="switchTab('ujian-menu')" class="w-full bg-accent text-white p-4 rounded-3xl font-bold flex items-center justify-between active:scale-95 shadow-md shadow-blue-500/20">
@@ -1811,7 +1780,7 @@ const KANJI_N5_DB = (() => {
         function renderProgCard(t, i, p) {
             return `<div class="ios-glass p-3 rounded-2xl flex flex-col gap-2">
                 <div class="flex justify-between items-center text-[10px]"><span class="font-bold flex items-center gap-1.5">${i} ${t}</span><span class="font-bold text-accent">${p}%</span></div>
-                <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden"><div class="progress-fill bg-accent h-full rounded-full transition-all duration-500" style="width: ${p}%"></div></div>
+                <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden"><div class="bg-accent h-full rounded-full transition-all duration-500" style="width: ${p}%"></div></div>
             </div>`;
         }
 
@@ -1832,7 +1801,7 @@ const KANJI_N5_DB = (() => {
                     <p class="text-xs -mt-3 mb-4" style="color: var(--text-muted)">Pahami pola kalimat dengan pelatih AI interaktif.</p>
                     
                     <div class="space-y-4">
-                        ${Array.from({ length: 13 }, (_, i) => i + 1).map(b => {
+                        ${Array.from({ length: 10 }, (_, i) => i + 1).map(b => {
                             const total = BUNPOU_DB[b].length;
                             const done = BUNPOU_DB[b].filter(item => state.stats.bunpouCompleted.includes(item.id)).length;
                             const pct = Math.round((done / total) * 100);
@@ -1847,7 +1816,7 @@ const KANJI_N5_DB = (() => {
                                     <div class="w-10 h-10 rounded-full bg-glassborder flex items-center justify-center text-main"><i data-lucide="chevron-right" class="w-5 h-5"></i></div>
                                 </div>
                                 <div class="w-full bg-glassborder h-2 rounded-full overflow-hidden mt-2 relative z-10">
-                                    <div class="progress-fill bg-accent h-full rounded-full transition-all" style="width: ${pct}%"></div>
+                                    <div class="bg-accent h-full rounded-full transition-all" style="width: ${pct}%"></div>
                                 </div>
                                 <p class="text-[10px] mt-2 text-right font-bold" style="color: var(--text-muted)">${pct}% Selesai</p>
                             </div>
@@ -1894,7 +1863,7 @@ const KANJI_N5_DB = (() => {
 
                     <!-- Progress Bar -->
                     <div class="w-full h-1.5 bg-glassborder rounded-full overflow-hidden">
-                        <div class="progress-fill h-full bg-accent transition-all duration-500" style="width: ${progressPct}%"></div>
+                        <div class="h-full bg-accent transition-all duration-500" style="width: ${progressPct}%"></div>
                     </div>
 
                     <div class="overflow-y-auto flex-1 pb-4 hide-scrollbar space-y-4 pt-2">
@@ -2235,9 +2204,9 @@ const KANJI_N5_DB = (() => {
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
                     <h2 class="text-xl font-bold tracking-tight">Kosakata (Kotoba)</h2>
-                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 13 (Lengkap).</p>
+                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 10 (Lengkap).</p>
                     <div class="space-y-3">
-                        ${Array.from({ length: 13 }, (_, i) => i + 1).map(b => `<div onclick="openKotobaBab(${b})" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
+                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(b => `<div onclick="openKotobaBab(${b})" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
                             <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center font-bold text-lg">${b}</div><div><h3 class="font-extrabold text-sm">Pelajaran ${b}</h3><p class="text-[10px]" style="color: var(--text-muted)">${KOTOBA_DB[b].length} kosakata</p></div></div>
                             <i data-lucide="chevron-right" style="color: var(--text-muted)" class="w-5 h-5"></i>
                         </div>`).join('')}
@@ -2347,7 +2316,7 @@ const KANJI_N5_DB = (() => {
             }
             else if (l==='campuran') { p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion].filter(x=>x.j); t="Level 6"; }
             else if (l==='kotoba-campuran') { 
-                p=[...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13]]; 
+                p=[...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10]]; 
                 t="Level 7"; 
             }
             else if (l==='kanji-n5') { p=KANJI_N5_DB; t="Level 8 - Kanji N5"; }
@@ -2364,7 +2333,7 @@ const KANJI_N5_DB = (() => {
                 t="Ujian Katakana"; 
             }
             else { 
-                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13],...KANJI_N5_DB].filter(x=>x.j||x.kana); 
+                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KANJI_N5_DB].filter(x=>x.j||x.kana); 
                 t="Pro Campuran"; 
             }
             setupQuizFlow(p, t, true);
@@ -2379,66 +2348,23 @@ const KANJI_N5_DB = (() => {
             renderQuizQuestion(title, isExam);
         }
 
-        function isKanjiQuizItem(item) {
-            return !!(item && item.group && item.kanji && item.kana && typeof item.no === 'number');
-        }
-
-        function cleanReading(value) {
-            return String(value || '').trim().replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
-        }
-
-        function readingMiddleKey(value) {
-            const primary = cleanReading(value).split(/[・/／\s]+/)[0] || cleanReading(value);
-            const chars = Array.from(primary);
-            return chars.length ? chars[Math.floor(chars.length / 2)] : '';
-        }
-
-        function buildKanjiReadingDistractors(item) {
-            const correct = cleanReading(item.kana);
-            const middle = readingMiddleKey(correct);
-            const pool = KANJI_N5_DB
-                .filter(x => x.no !== item.no && cleanReading(x.kana) !== correct)
-                .map(x => ({
-                    kana: cleanReading(x.kana),
-                    group: x.group,
-                    score:
-                        (x.group === item.group ? 4 : 0) +
-                        (readingMiddleKey(x.kana) === middle ? 3 : 0) +
-                        (Array.from(cleanReading(x.kana))[0] === Array.from(correct)[0] ? 2 : 0) +
-                        (Math.abs(Array.from(cleanReading(x.kana)).length - Array.from(correct).length) <= 1 ? 1 : 0) +
-                        Math.random()
-                }))
-                .sort((a, b) => b.score - a.score)
-                .map(x => x.kana);
-
-            return [...new Set(pool)];
-        }
-
-        function escapeQuizArg(value) {
-            return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        }
-
         function renderQuizQuestion(title, isExam) {
             const q = state.quiz.currentQuestion; const item = state.quiz.questions[q];
-            const isKanji = isKanjiQuizItem(item);
-            const isKotoba = !!item.arti && !isKanji; 
+            const isKotoba = !!item.arti; 
             let wp = [];
 
-            if (isKanji) {
-                wp = buildKanjiReadingDistractors(item);
-            } else if (isKotoba) {
-                const all = [...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13],...KANJI_N5_DB];
+            if (isKotoba) {
+                const all = [...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KANJI_N5_DB];
                 wp = all.filter(x => x.arti !== item.arti).map(x => x.arti);
             } else {
                 const all = [...HIRAGANA_DB.seion,...HIRAGANA_DB.dakuon,...KATAKANA_DB.seion,...KATAKANA_DB.dakuon];
                 wp = all.filter(x => x.r && x.r !== item.r).map(x => x.r);
             }
-            wp = [...new Set(wp)];
-            if (!isKanji) wp = wp.sort(() => Math.random() - 0.5);
+            wp = [...new Set(wp)].sort(() => Math.random() - 0.5);
             
-            const correct = isKanji ? cleanReading(item.kana) : (isKotoba ? item.arti : item.r);
+            const correct = isKotoba ? item.arti : item.r;
             const choices = [correct, ...wp.slice(0, 3)].sort(() => Math.random() - 0.5);
-            const symbol = isKanji ? item.kanji : (isKotoba ? (item.kanji && item.kanji !== item.kana ? `${item.kanji}<br><span class="text-2xl mt-1 block opacity-60">${item.kana}</span>` : item.kana) : item.j);
+            const symbol = isKotoba ? (item.kanji && item.kanji !== item.kana ? `${item.kanji}<br><span class="text-2xl mt-1 block opacity-60">${item.kana}</span>` : item.kana) : item.j;
             const isSuperHard = (isExam && state.examDifficulty === 'hard');
 
             document.getElementById('app-viewport').innerHTML = `
@@ -2454,19 +2380,17 @@ const KANJI_N5_DB = (() => {
 
                     <div id="q-card" class="ios-glass p-8 rounded-[2.5rem] ${isSuperHard ? 'border-red-400/50' : 'border-accent'} text-center flex flex-col justify-center min-h-[180px] transition-all relative">
                         <span class="text-6xl font-black select-none leading-none text-main">${symbol}</span>
-                        <span id="q-hint" class="text-xs mt-4" style="color: var(--text-muted)">${isKanji ? 'Pilih bunyi hiragananya' : (isKotoba ? 'Pilih arti yang tepat' : 'Cara membacanya?')}</span>
+                        <span id="q-hint" class="text-xs mt-4" style="color: var(--text-muted)">${isKotoba ? 'Pilih arti yang tepat' : 'Cara membacanya?'}</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3" id="c-grid">
                         ${choices.map((ch, idx) => `
-                            <button onclick="submitQuizAnswer('${escapeQuizArg(ch)}', '${escapeQuizArg(correct)}', this)" class="p-5 ios-glass hover:bg-accent-light hover:border-accent active:scale-95 text-sm font-bold rounded-[1.8rem] text-left flex flex-col gap-2 transition-all relative">
+                            <button onclick="submitQuizAnswer('${ch.replace(/'/g,"\\'")}', '${correct.replace(/'/g,"\\'")}', this)" class="p-5 ios-glass hover:bg-accent-light hover:border-accent active:scale-95 text-sm font-bold rounded-[1.8rem] text-left flex flex-col gap-2 transition-all relative">
                                 <span class="text-[10px] uppercase tracking-widest text-accent">${['A','B','C','D'][idx]}</span>
                                 <span class="leading-snug capitalize text-main">${ch}</span>
                             </button>
                         `).join('')}
                     </div>
-
-                    <div id="answer-feedback" class="hidden ios-glass border p-3 rounded-2xl text-xs font-bold leading-relaxed"></div>
 
                     <div class="flex justify-between items-center text-xs font-bold px-1" style="color: var(--text-muted)">
                         <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> ${state.quiz.correctCount}</span>
@@ -2504,13 +2428,12 @@ const KANJI_N5_DB = (() => {
 
             const isT = chosen === null; const isC = chosen === correct;
             const currentItem = state.quiz.questions[state.quiz.currentQuestion];
-            const isKanji = isKanjiQuizItem(currentItem);
-            const isKotoba = !!currentItem.arti && !isKanji;
+            const isKotoba = !!currentItem.arti;
             
             if (isC && !isT) {
                 state.quiz.correctCount++; state.stats.correct++;
                 
-                const coinEarned = (isKotoba || isKanji) ? 10 : 5;
+                const coinEarned = isKotoba ? 10 : 5;
                 state.coins += coinEarned;
                 updateCoinUI();
                 
@@ -2536,26 +2459,13 @@ const KANJI_N5_DB = (() => {
                 });
                 playChime(false);
             }
-
-            if (isKanji) {
-                const feedback = document.getElementById('answer-feedback');
-                if (feedback) {
-                    feedback.classList.remove('hidden', 'border-emerald-500/40', 'border-red-500/40', 'text-emerald-500', 'text-red-500');
-                    feedback.classList.add(isC && !isT ? 'border-emerald-500/40' : 'border-red-500/40');
-                    feedback.innerHTML = `
-                        <div class="${isC && !isT ? 'text-emerald-500' : 'text-red-500'} mb-1">${isC && !isT ? 'Benar!' : (isT ? 'Waktu habis.' : 'Belum tepat.')}</div>
-                        <div class="text-main">Jawaban benar: <span class="text-accent">${cleanReading(currentItem.kana)}</span></div>
-                        <div style="color: var(--text-muted)">Arti: ${currentItem.arti}</div>
-                    `;
-                }
-            }
             saveState();
 
             setTimeout(() => {
                 state.quiz.currentQuestion++;
                 if (state.quiz.currentQuestion < state.quiz.total) renderQuizQuestion(document.querySelector('.tracking-widest').innerText, MusicEngine.isExamMode);
                 else renderQuizResults();
-            }, isKanji ? 2400 : 1200);
+            }, 1200);
         }
 
         function playChime(success) {
@@ -2939,3 +2849,4 @@ const KANJI_N5_DB = (() => {
 
 
 ```
+
