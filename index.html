@@ -322,6 +322,15 @@
         .kanji-flashcard.is-flipped .kanji-flashcard-inner { transform: rotateY(180deg); }
         .kanji-flashcard-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
         .kanji-flashcard-back { transform: rotateY(180deg); }
+
+        /* Main menu artwork - follows the current theme accent automatically */
+        .main-menu-card { position: relative; min-height: 220px; overflow: hidden; isolation: isolate; border: 1px solid var(--glass-border); }
+        .main-menu-card::before { content: ''; position: absolute; width: 150%; height: 88px; top: -34px; left: -28px; z-index: -1; background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 52%, white), color-mix(in srgb, var(--accent) 14%, transparent) 60%, transparent 61%); border-radius: 0 0 60% 42%; opacity: .8; }
+        .main-menu-card::after { content: ''; position: absolute; width: 84px; height: 84px; top: 18px; right: 16px; z-index: -1; opacity: .22; background-image: radial-gradient(var(--accent) 1.3px, transparent 1.3px); background-size: 8px 8px; }
+        .main-menu-arrow { box-shadow: 0 7px 20px -10px color-mix(in srgb, var(--accent) 80%, transparent); }
+        .learning-choice-card { position: relative; overflow: hidden; isolation: isolate; }
+        .learning-choice-card::before { content: ''; position: absolute; inset: 0 auto auto 0; width: 130%; height: 72px; background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 32%, transparent), transparent 66%); transform: rotate(-5deg) translateY(-26px); z-index: -1; }
+        .learning-choice-card::after { content: ''; position: absolute; width: 84px; height: 84px; bottom: 12px; right: 16px; opacity: .18; background-image: radial-gradient(var(--accent) 1.2px, transparent 1.2px); background-size: 8px 8px; z-index: -1; }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative flex flex-col">
@@ -368,7 +377,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="toggleMusic()" id="music-btn" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press transition-colors" style="color: var(--text-muted)"><i data-lucide="music-4" class="w-5 h-5"></i></button>
+                <button onclick="openMusicModal()" id="music-btn" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press transition-colors" style="color: var(--text-muted)" aria-label="Pengaturan musik"><i data-lucide="music-4" class="w-5 h-5"></i></button>
                 <button onclick="openShopModal()" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press text-yellow-500 hover:bg-yellow-500/10 transition-colors"><i data-lucide="shopping-bag" class="w-5 h-5"></i></button>
                 <button onclick="openThemeModal()" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press" style="color: var(--text-muted)"><i data-lucide="settings" class="w-5 h-5"></i></button>
             </div>
@@ -483,6 +492,21 @@
                 <button onclick="resetData('progress')" class="w-full ios-glass border-orange-500/30 text-orange-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Reset Kemajuan Belajar</button>
                 <button onclick="resetData('all')" class="w-full ios-glass border-red-500/30 text-red-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Semua & Logout</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Audio Settings -->
+    <div id="music-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-end justify-center">
+        <div class="w-full max-w-md bg-appbg rounded-t-[2.5rem] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full border-t border-glassborder max-h-[85vh] overflow-y-auto">
+            <div class="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-4" onclick="closeMusicModal()"></div>
+            <div class="flex justify-between items-center mb-6"><div><p class="text-[10px] font-bold text-accent uppercase tracking-widest">Audio</p><h3 class="text-xl font-bold">Musik & Suara</h3></div><button onclick="closeMusicModal()" style="color: var(--text-muted)"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="ios-glass p-4 rounded-3xl mb-4 flex items-center justify-between gap-4"><div><p class="font-bold text-sm">Backsound</p><p class="text-[10px]" style="color: var(--text-muted)">Nyalakan atau matikan musik latar.</p></div><button id="music-power-btn" onclick="setMusicEnabled(!state.musicOn)" class="px-4 py-2 rounded-full bg-accent text-white text-xs font-bold"></button></div>
+            <div class="ios-glass p-4 rounded-3xl mb-4 space-y-4">
+                <label class="block"><div class="flex justify-between text-xs font-bold mb-2"><span>Volume backsound</span><span id="bg-volume-value" class="text-accent"></span></div><input id="bg-volume-input" oninput="setAudioVolume('background', this.value)" type="range" min="0" max="100" class="w-full accent-current"></label>
+                <label class="block"><div class="flex justify-between text-xs font-bold mb-2"><span>Volume suara sistem</span><span id="system-volume-value" class="text-accent"></span></div><input id="system-volume-input" oninput="setAudioVolume('system', this.value)" type="range" min="0" max="100" class="w-full accent-current"></label>
+            </div>
+            <div class="ios-glass p-4 rounded-3xl space-y-3"><div><p class="font-bold text-sm">Lagu dari galeri</p><p id="custom-track-name" class="text-[10px] mt-1" style="color: var(--text-muted)">Belum ada lagu pribadi dipilih.</p></div><input id="music-file-input" type="file" accept="audio/*" class="hidden" onchange="setCustomMusic(this.files[0])"><button onclick="document.getElementById('music-file-input').click()" class="w-full bg-accent text-white py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="folder-music" class="w-4 h-4"></i> Pilih lagu dari galeri</button><button onclick="useDefaultMusic()" class="w-full ios-glass py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Kembali ke sound default tema</button></div>
+            <p class="text-[10px] text-center mt-4" style="color: var(--text-muted)">Lagu dari galeri aktif selama halaman aplikasi ini terbuka.</p>
         </div>
     </div>
 
@@ -1052,6 +1076,19 @@
 
 
     
+Object.assign(KOTOBA_DB, {
+    14: [
+        { kana: "つけます", kanji: "", arti: "Menyalakan / memasang", romaji: "tsukemasu" }, { kana: "けします", kanji: "消します", arti: "Mematikan / memadamkan", romaji: "keshimasu" }, { kana: "あけます", kanji: "開けます", arti: "Membuka", romaji: "akemasu" }, { kana: "しめます", kanji: "閉めます", arti: "Menutup", romaji: "shimemasu" },
+        { kana: "いそぎます", kanji: "急ぎます", arti: "Buru-buru", romaji: "isogimasu" }, { kana: "まちます", kanji: "待ちます", arti: "Menunggu", romaji: "machimasu" }, { kana: "もちます", kanji: "持ちます", arti: "Membawa / memegang", romaji: "mochimasu" }, { kana: "とります", kanji: "取ります", arti: "Mengambil", romaji: "torimasu" }, { kana: "てつだいます", kanji: "手伝います", arti: "Membantu", romaji: "tetsudaimasu" }, { kana: "よびます", kanji: "呼びます", arti: "Memanggil", romaji: "yobimasu" }, { kana: "はなします", kanji: "話します", arti: "Berbicara", romaji: "hanashimasu" }, { kana: "つかいます", kanji: "使います", arti: "Memakai / menggunakan", romaji: "tsukaimasu" }, { kana: "とめます", kanji: "止めます", arti: "Menghentikan / memarkir", romaji: "tomemasu" }, { kana: "みせます", kanji: "見せます", arti: "Memperlihatkan", romaji: "misemasu" }, { kana: "おしえます", kanji: "教えます", arti: "Memberitahukan / mengajar", romaji: "oshiemasu" },
+        { kana: "すわります", kanji: "座ります", arti: "Duduk", romaji: "suwarimasu" }, { kana: "たちます", kanji: "立ちます", arti: "Berdiri", romaji: "tachimasu" }, { kana: "はいります", kanji: "入ります", arti: "Masuk", romaji: "hairimasu" }, { kana: "でます", kanji: "出ます", arti: "Keluar", romaji: "demasu" }, { kana: "ふります", kanji: "降ります", arti: "Turun (hujan)", romaji: "furimasu" }, { kana: "コピーします", kanji: "", arti: "Memfotokopi", romaji: "kopii shimasu" },
+        { kana: "でんき", kanji: "電気", arti: "Listrik / lampu", romaji: "denki" }, { kana: "エアコン", kanji: "", arti: "AC", romaji: "eakon" }, { kana: "パスポート", kanji: "", arti: "Paspor", romaji: "pasupooto" }, { kana: "なまえ", kanji: "名前", arti: "Nama", romaji: "namae" }, { kana: "じゅうしょ", kanji: "住所", arti: "Alamat", romaji: "juusho" }, { kana: "ちず", kanji: "地図", arti: "Peta", romaji: "chizu" }, { kana: "しお", kanji: "塩", arti: "Garam", romaji: "shio" }, { kana: "さとう", kanji: "砂糖", arti: "Gula", romaji: "satou" }, { kana: "もんだい", kanji: "問題", arti: "Masalah / soal", romaji: "mondai" }, { kana: "こたえ", kanji: "答え", arti: "Jawaban", romaji: "kotae" }, { kana: "よみかた", kanji: "読み方", arti: "Cara membaca", romaji: "yomikata" }, { kana: "まっすぐ", kanji: "", arti: "Lurus", romaji: "massugu" }, { kana: "ゆっくり", kanji: "", arti: "Pelan-pelan", romaji: "yukkuri" }, { kana: "すぐ", kanji: "", arti: "Segera / langsung", romaji: "sugu" }, { kana: "また", kanji: "", arti: "Lagi", romaji: "mata" }, { kana: "あとで", kanji: "", arti: "Nanti", romaji: "atode" }, { kana: "もうすこし", kanji: "もう少し", arti: "Sedikit lagi", romaji: "mou sukoshi" }
+    ],
+    15: [
+        { kana: "おきます", kanji: "置きます", arti: "Meletakkan / menaruh", romaji: "okimasu" }, { kana: "つくります", kanji: "作ります・造ります", arti: "Membuat / membangun", romaji: "tsukurimasu" }, { kana: "うります", kanji: "売ります", arti: "Menjual", romaji: "urimasu" }, { kana: "しります", kanji: "知ります", arti: "Mengetahui / mengenal", romaji: "shirimasu" }, { kana: "すみます", kanji: "住みます", arti: "Tinggal", romaji: "sumimasu" }, { kana: "けんきゅうします", kanji: "研究します", arti: "Meneliti", romaji: "kenkyuu shimasu" },
+        { kana: "しりょう", kanji: "資料", arti: "Data / bahan", romaji: "shiryou" }, { kana: "カタログ", kanji: "", arti: "Katalog", romaji: "katarogu" }, { kana: "じこくひょう", kanji: "時刻表", arti: "Jadwal", romaji: "jikokuhyou" }, { kana: "ふく", kanji: "服", arti: "Baju", romaji: "fuku" }, { kana: "せいひん", kanji: "製品", arti: "Produk", romaji: "seihin" }, { kana: "ソフト", kanji: "", arti: "Perangkat lunak", romaji: "sofuto" }, { kana: "でんしじしょ", kanji: "電子辞書", arti: "Kamus elektronik", romaji: "denshi jisho" }, { kana: "けいざい", kanji: "経済", arti: "Ekonomi", romaji: "keizai" }, { kana: "しやくしょ", kanji: "市役所", arti: "Kantor wali kota", romaji: "shiyakusho" }, { kana: "こうこう", kanji: "高校", arti: "SMA", romaji: "koukou" }, { kana: "はいしゃ", kanji: "歯医者", arti: "Dokter gigi", romaji: "haisha" }, { kana: "どくしん", kanji: "独身", arti: "Bujangan / belum menikah", romaji: "dokushin" }, { kana: "すみません", kanji: "", arti: "Maaf / permisi", romaji: "sumimasen" }, { kana: "みなさん", kanji: "皆さん", arti: "Semuanya, bapak-bapak dan ibu-ibu", romaji: "minasan" }, { kana: "おもいだします", kanji: "思い出します", arti: "Teringat", romaji: "omoidasimasu" }, { kana: "いらっしゃいます", kanji: "", arti: "Ada / datang / pergi (bentuk hormat)", romaji: "irasshaimasu" }
+    ]
+});
+
 const KANJI_N5_DB = (() => {
     const list = [];
     const add = (group, kanji, kana, arti) => list.push({ no: list.length + 1, group, kanji, kana, arti });
@@ -1581,6 +1618,23 @@ const KANJI_N5_DB = (() => {
             ]
         });
 
+        Object.assign(BUNPOU_DB, {
+            14: [
+                { id: "b14_1", title: "Kata Kerja Bentuk て", subtitle: "Membentuk kata kerja て", desc: "Bentuk <strong class='text-accent'>て</strong> dipakai untuk menyambung pola-pola penting. Untuk Kelompok I: います・ちます・ります menjadi って; みます・びます・にます menjadi んで; きます menjadi いて; ぎます menjadi いで; dan します menjadi して. Kelompok II cukup mengganti ます dengan て.", pattern: "書きます → 書いて / 食べます → 食べて", examples: [{ j: "かきます → かいて", r: "kakimasu → kaite", i: "menulis" }, { j: "のみます → のんで", r: "nomimasu → nonde", i: "minum" }], quizzes: [{ prompt: "Bentuk て dari まちます", words: ["まって"], answerStr: "まって" }, { prompt: "Bentuk て dari たべます", words: ["たべて"], answerStr: "たべて" }] },
+                { id: "b14_2", title: "Kata Kerja Bentuk て ください", subtitle: "Permintaan sopan", desc: "Pola <strong class='text-accent'>～てください</strong> dipakai untuk meminta atau mengarahkan lawan bicara dengan sopan.", pattern: "[Kata Kerja bentuk て] ください", examples: [{ j: "ここに 名前を 書いてください。", r: "Koko ni namae o kaite kudasai.", i: "Tolong tuliskan nama di sini." }], quizzes: [{ prompt: "Tolong tuliskan alamat di sini.", words: ["ここ", "に", "じゅうしょ", "を", "かいて", "ください"], answerStr: "ここにじゅうしょをかいてください" }, { prompt: "Tolong buka jendela.", words: ["まど", "を", "あけて", "ください"], answerStr: "まどをあけてください" }] },
+                { id: "b14_3", title: "Kata Kerja Bentuk て います", subtitle: "Aksi sedang berlangsung", desc: "<strong class='text-accent'>～ています</strong> menyatakan suatu aksi yang sedang terjadi saat ini.", pattern: "[Kata Kerja bentuk て] います", examples: [{ j: "ミラーさんは 電話を かけています。", r: "Miraa-san wa denwa o kakete imasu.", i: "Sdr. Miller sedang menelepon." }, { j: "いま 雨が 降っています。", r: "Ima ame ga futte imasu.", i: "Sekarang hujan turun." }], quizzes: [{ prompt: "Saya sedang membaca buku.", words: ["わたし", "は", "ほん", "を", "よんで", "います"], answerStr: "わたしはほんをよんでいます" }, { prompt: "Sekarang hujan turun.", words: ["いま", "あめ", "が", "ふって", "います"], answerStr: "いまあめがふっています" }] },
+                { id: "b14_4", title: "Kata Benda が Kata Kerja", subtitle: "Fenomena dan keadaan", desc: "Partikel <strong class='text-accent'>が</strong> digunakan saat menyatakan fenomena alam atau keadaan yang diamati secara objektif.", pattern: "[Kata Benda] が [Kata Kerja]", examples: [{ j: "雨が 降っています。", r: "Ame ga futte imasu.", i: "Hujan turun." }], quizzes: [{ prompt: "Sdr. Miller tidak ada.", words: ["ミラーさん", "が", "いません"], answerStr: "ミラーさんがいません" }, { prompt: "Hujan turun.", words: ["あめ", "が", "ふっています"], answerStr: "あめがふっています" }] },
+                { id: "b14_5", title: "Kata Kerja Bentuk ます ましょうか", subtitle: "Menawarkan bantuan", desc: "<strong class='text-accent'>～ましょうか</strong> digunakan untuk menawarkan melakukan sesuatu untuk lawan bicara: 'Bagaimana kalau saya…?'.", pattern: "[Kata Kerja bentuk ます] ましょうか", examples: [{ j: "荷物を 持ちましょうか。", r: "Nimotsu o mochimashou ka.", i: "Bagaimana kalau saya membawakan barang?" }], quizzes: [{ prompt: "Bagaimana kalau saya membantu?", words: ["てつだい", "ましょう", "か"], answerStr: "てつだいましょうか" }, { prompt: "Bagaimana kalau saya mengambilkan?", words: ["とり", "ましょう", "か"], answerStr: "とりましょうか" }] }
+            ],
+            15: [
+                { id: "b15_1", title: "Kata Kerja Bentuk て も いいですか", subtitle: "Meminta izin", desc: "Pola <strong class='text-accent'>～てもいいですか</strong> digunakan untuk meminta izin. Jawaban izinnya: ええ、いいですよ.", pattern: "[Kata Kerja bentuk て] も いいですか", examples: [{ j: "写真を 撮っても いいですか。", r: "Shashin o tottemo ii desu ka.", i: "Boleh mengambil foto?" }], quizzes: [{ prompt: "Boleh duduk di sini?", words: ["ここ", "に", "すわって", "も", "いい", "です", "か"], answerStr: "ここにすわってもいいですか" }, { prompt: "Ya, boleh.", words: ["ええ", "いい", "です", "よ"], answerStr: "ええいいですよ" }] },
+                { id: "b15_2", title: "Kata Kerja Bentuk て は いけません", subtitle: "Larangan", desc: "<strong class='text-accent'>～てはいけません</strong> menyatakan larangan atau 'tidak boleh'.", pattern: "[Kata Kerja bentuk て] は いけません", examples: [{ j: "ここで たばこを 吸っては いけません。", r: "Koko de tabako o sutte wa ikemasen.", i: "Tidak boleh merokok di sini." }], quizzes: [{ prompt: "Tidak boleh masuk ke sini.", words: ["ここ", "に", "はいって", "は", "いけません"], answerStr: "ここにはいってはいけません" }, { prompt: "Tidak boleh memarkir mobil di sini.", words: ["ここ", "に", "くるま", "を", "とめて", "は", "いけません"], answerStr: "ここにくるまをとめてはいけません" }] },
+                { id: "b15_3", title: "Kata Kerja Bentuk て います", subtitle: "Keadaan, kebiasaan, pekerjaan", desc: "Selain aksi sedang berlangsung, <strong class='text-accent'>～ています</strong> juga dapat menyatakan keadaan, kebiasaan, pekerjaan, dan status.", pattern: "[Kata Kerja bentuk て] います", examples: [{ j: "わたしは 大阪に 住んでいます。", r: "Watashi wa Oosaka ni sunde imasu.", i: "Saya tinggal di Osaka." }, { j: "ミラーさんは IMCで 働いています。", r: "Miraa-san wa IMC de hataraite imasu.", i: "Sdr. Miller bekerja di IMC." }], quizzes: [{ prompt: "Saya tinggal di Jakarta.", words: ["わたし", "は", "ジャカルタ", "に", "すんで", "います"], answerStr: "わたしはジャカルタにすんでいます" }, { prompt: "Saya tahu nomor telepon kantor wali kota.", words: ["しやくしょ", "の", "でんわばんごう", "を", "しって", "います"], answerStr: "しやくしょのでんわばんごうをしっています" }] },
+                { id: "b15_4", title: "Kata Benda に Kata Kerja", subtitle: "Tujuan masuk, duduk, naik", desc: "Partikel <strong class='text-accent'>に</strong> dipakai dengan kata kerja seperti 入ります, 座ります, 乗ります, dan つきます untuk menunjukkan tempat tujuan atau hasil tindakan.", pattern: "[Tempat] に [Kata Kerja]", examples: [{ j: "ここに 座っても いいですか。", r: "Koko ni suwatte mo ii desu ka.", i: "Boleh duduk di sini?" }], quizzes: [{ prompt: "Silakan naik bus nomor 16 dari stasiun Kyoto.", words: ["きょうとえき", "から", "１６ばん", "の", "バス", "に", "のって", "ください"], answerStr: "きょうとえきから１６ばんのバスにのってください" }, { prompt: "Tidak boleh masuk ke sini.", words: ["ここ", "に", "はいって", "は", "いけません"], answerStr: "ここにはいってはいけません" }] },
+                { id: "b15_5", title: "Kata Benda に Kata Benda を Kata Kerja", subtitle: "Tempat terjadinya tindakan", desc: "Partikel <strong class='text-accent'>に</strong> dapat menunjukkan tempat ketika sebuah benda diletakkan, ditulis, atau diparkir.", pattern: "[Tempat] に [Benda] を [Kata Kerja]", examples: [{ j: "ここに 車を 止めてください。", r: "Koko ni kuruma o tomete kudasai.", i: "Parkirkan mobil di sini." }], quizzes: [{ prompt: "Tuliskan alamat di sini.", words: ["ここ", "に", "じゅうしょ", "を", "かいて", "ください"], answerStr: "ここにじゅうしょをかいてください" }, { prompt: "Letakkan buku di meja.", words: ["つくえ", "に", "ほん", "を", "おいて", "ください"], answerStr: "つくえにほんをおいてください" }] }
+            ]
+        });
+
         const FRESH_BUNPOU_QUIZZES = {
             b1_1: [{ prompt: "Saya siswa SMA.", words: ["わたし", "は", "こうこうせい", "です"], answerStr: "わたしはこうこうせいです" }, { prompt: "Rina adalah orang Indonesia.", words: ["リナさん", "は", "インドネシアじん", "です"], answerStr: "リナさんはインドネシアじんです" }],
             b1_2: [{ prompt: "Saya bukan guru.", words: ["わたし", "は", "せんせい", "じゃ", "ありません"], answerStr: "わたしはせんせいじゃありません" }, { prompt: "Santos bukan mahasiswa.", words: ["サントスさん", "は", "がくせい", "では", "ありません"], answerStr: "サントスさんはがくせいではありません" }],
@@ -1631,6 +1685,8 @@ const KANJI_N5_DB = (() => {
                 this.isPlaying = false;
                 this.isExamMode = false;
                 this.currentSrc = '';
+                this.customSrc = '';
+                this.customName = '';
                 this.basePath = 'Music/';
                 this.tracks = {
                     default: 'Default.mp3',
@@ -1648,6 +1704,7 @@ const KANJI_N5_DB = (() => {
             }
 
             getTrackSrc() {
+                if (!this.isExamMode && this.customSrc) return this.customSrc;
                 const file = this.isExamMode ? this.tracks.exam : (this.tracks[state.season] || this.tracks.default);
                 return encodeURI(this.basePath + file);
             }
@@ -1658,7 +1715,7 @@ const KANJI_N5_DB = (() => {
                 if (this.audio) this.audio.pause();
                 this.audio = new Audio(src);
                 this.audio.loop = true;
-                this.audio.volume = this.isExamMode ? 0.42 : 0.32;
+                this.audio.volume = Math.max(0, Math.min(1, Number(state.backgroundVolume ?? 32) / 100));
                 this.currentSrc = src;
             }
 
@@ -1685,6 +1742,22 @@ const KANJI_N5_DB = (() => {
                     });
                 }
             }
+
+            setCustomTrack(file) {
+                if (!file) return;
+                if (this.customSrc) URL.revokeObjectURL(this.customSrc);
+                this.customSrc = URL.createObjectURL(file);
+                this.customName = file.name;
+                if (this.isPlaying && !this.isExamMode) { this.currentSrc = ''; this.loadTrack(); this.audio.play().catch(() => {}); }
+            }
+
+            useThemeTrack() {
+                if (this.customSrc) URL.revokeObjectURL(this.customSrc);
+                this.customSrc = ''; this.customName = '';
+                if (this.isPlaying && !this.isExamMode) { this.currentSrc = ''; this.loadTrack(); this.audio.play().catch(() => {}); }
+            }
+
+            refreshVolume() { if (this.audio) this.audio.volume = Math.max(0, Math.min(1, Number(state.backgroundVolume ?? 32) / 100)); }
         }
         const MusicEngine = new FileMusicEngine();
 
@@ -1692,7 +1765,7 @@ const KANJI_N5_DB = (() => {
         const AVATARS = ['🍣','🌸','⛩️','🗻','🎎','🏮','🍡','🦊','🥋','🍵'];
         let state = {
             isFirstLogin: true, activeTab: 'home', user: { name: '', avatar: '🌸' },
-            theme: 'auto', season: 'default', musicOn: false, examDifficulty: 'normal',
+            theme: 'auto', season: 'default', musicOn: false, backgroundVolume: 32, systemVolume: 70, customMusicName: '', examDifficulty: 'normal',
             orientationMode: 'auto', orientationView: 'landscape',
             coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'],
             stats: { 
@@ -1703,7 +1776,7 @@ const KANJI_N5_DB = (() => {
             quiz: { currentQuestion: 0, questions: [], correctCount: 0, wrongCount: 0, total: 0, timerObj: null }
         };
 
-        let bunpouSession = { bab: 1, currentIdx: 0, currentQuizIdx: 0, selectedWords: [], availableWords: [] };
+        let bunpouSession = { bab: 1, currentIdx: 0, currentQuizIdx: 0, selectedWords: [], availableWords: [], mode: 'arrange' };
 
         const getCoinIcon = () => state.season === 'natal' ? '🔔' : '🪙';
 
@@ -1717,10 +1790,13 @@ const KANJI_N5_DB = (() => {
                     if(!parsed.stats.bunpouCompleted) parsed.stats.bunpouCompleted = [];
                     if(!parsed.orientationMode) parsed.orientationMode = 'auto';
                     if(!parsed.orientationView) parsed.orientationView = 'landscape';
+                    if(parsed.backgroundVolume === undefined) parsed.backgroundVolume = 32;
+                    if(parsed.systemVolume === undefined) parsed.systemVolume = 70;
+                    parsed.customMusicName = ''; // File lokal perlu dipilih ulang setelah halaman dimuat ulang.
                     state = { ...state, ...parsed }; 
                 } catch (e) {} 
             }
-            applyTheme(); applyOrientation(); applySeason(); updateCoinUI();
+            applyTheme(); applyOrientation(); applySeason(); updateCoinUI(); syncMusicUI();
             
             if (state.isFirstLogin) renderOnboardingAvatars();
             else {
@@ -1804,7 +1880,7 @@ const KANJI_N5_DB = (() => {
                     <div class="grid grid-cols-2 gap-4">
                         ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
-                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-13')}
+                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-15')}
                         ${renderMenuBtn('latihan', 'gamepad-2', 'Latihan', `Kumpulkan ${coinIcon}`)}
                     </div>
                     <button onclick="switchTab('ujian-menu')" class="w-full bg-accent text-white p-4 rounded-3xl font-bold flex items-center justify-between active:scale-95 shadow-md shadow-blue-500/20">
@@ -1823,9 +1899,10 @@ const KANJI_N5_DB = (() => {
         }
 
         function renderMenuBtn(tab, icon, title, sub) {
-            return `<button onclick="switchTab('${tab}')" class="ios-glass p-6 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 hover:scale-[1.02] active:scale-95">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-accent-light text-accent"><i data-lucide="${icon}" class="w-6 h-6"></i></div>
-                <span class="font-bold text-sm text-main">${title}</span><span class="text-[10px]" style="color: var(--text-muted)">${sub}</span>
+            return `<button onclick="switchTab('${tab}')" class="main-menu-card ios-glass p-5 rounded-[2.5rem] flex flex-col items-center justify-center text-center gap-3 hover:scale-[1.02] active:scale-95 transition-all">
+                <div class="w-20 h-20 rounded-[2rem] flex items-center justify-center bg-accent-light text-accent shadow-inner"><i data-lucide="${icon}" class="w-10 h-10"></i></div>
+                <div><span class="font-black text-lg text-main block leading-tight">${title}</span><span class="text-xs mt-2 block" style="color: var(--text-muted)">${sub}</span></div>
+                <span class="main-menu-arrow absolute bottom-5 right-5 w-10 h-10 rounded-full bg-accent-light text-accent flex items-center justify-center"><i data-lucide="arrow-right" class="w-5 h-5"></i></span>
             </button>`;
         }
 
@@ -1839,7 +1916,7 @@ const KANJI_N5_DB = (() => {
                     <p class="text-xs -mt-3 mb-4" style="color: var(--text-muted)">Pahami pola kalimat dengan pelatih AI interaktif.</p>
                     
                     <div class="space-y-4">
-                        ${Array.from({ length: 13 }, (_, i) => i + 1).map(b => {
+                        ${Array.from({ length: 15 }, (_, i) => i + 1).map(b => {
                             const total = BUNPOU_DB[b].length;
                             const done = BUNPOU_DB[b].filter(item => state.stats.bunpouCompleted.includes(item.id)).length;
                             const pct = Math.round((done / total) * 100);
@@ -1896,7 +1973,7 @@ const KANJI_N5_DB = (() => {
                             <button onclick="switchTab('bunpou')" style="color: var(--text-muted)" class="active:scale-90"><i data-lucide="x" class="w-6 h-6"></i></button>
                             <span class="text-xs font-bold uppercase tracking-widest text-accent">Bab ${bunpouSession.bab}</span>
                         </div>
-                        <span class="text-xs font-bold bg-glassborder px-3 py-1 rounded-full">${bunpouSession.currentIdx + 1} / ${list.length}</span>
+                        <div class="flex items-center gap-2"><button onclick="toggleBunpouMode()" class="text-[10px] font-bold bg-accent text-white px-3 py-1.5 rounded-full">${bunpouSession.mode === 'input' ? 'Susun Kata' : 'Isian'}</button><span class="text-xs font-bold bg-glassborder px-3 py-1 rounded-full">${bunpouSession.currentIdx + 1} / ${list.length}</span></div>
                     </div>
 
                     <!-- Progress Bar -->
@@ -1919,6 +1996,7 @@ const KANJI_N5_DB = (() => {
                                 <div class="bg-appbg/50 p-3 rounded-xl text-center text-xs mt-2 border border-glassborder">
                                     ${item.pattern}
                                 </div>
+                                <div class="mt-3 p-3 rounded-xl bg-accent-light text-xs leading-relaxed"><b class="text-accent">Cara memahami:</b> baca pola dari kiri ke kanan, tentukan fungsi partikel atau perubahan kata kerjanya, lalu bandingkan dengan contoh. Ulangi dengan mengganti kata benda agar pola terasa alami.</div>
                             </div>
                         </div>
 
@@ -1938,11 +2016,11 @@ const KANJI_N5_DB = (() => {
 
                         <!-- Kuis Interaktif -->
                         <div class="mt-4 pt-4 border-t border-glassborder" id="bunpou-quiz-section">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1 mb-3"><i data-lucide="target" class="w-3 h-3"></i> Latihan Susun Kalimat (${bunpouSession.currentQuizIdx + 1}/2)</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-orange-500 flex items-center gap-1 mb-3"><i data-lucide="target" class="w-3 h-3"></i> ${bunpouSession.mode === 'input' ? 'Latihan Isian' : 'Latihan Susun Kalimat'} (${bunpouSession.currentQuizIdx + 1}/2)</span>
                             
                             <div class="ios-glass p-4 rounded-2xl border border-orange-500/25 mb-4 text-center"><span class="text-[10px] font-bold uppercase tracking-widest text-orange-500 block mb-1">Arti Indonesia</span><p class="text-sm font-black text-main leading-snug">${currentQuizData.prompt || "Susun kata menjadi kalimat yang benar!"}</p></div>
                             
-                            <!-- Area Jawaban -->
+                            ${bunpouSession.mode === 'input' ? `<input id="bunpou-answer-input" onkeydown="if(event.key==='Enter') checkBunpou()" class="w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-4 text-center font-bold text-main outline-none focus:border-accent mb-4" placeholder="Ketik kalimat Jepang yang benar">` : `<!-- Area Jawaban -->
                             <div id="bunpou-selected-area" class="min-h-[60px] bg-glassborder/50 rounded-2xl p-3 flex flex-wrap gap-2 items-center justify-center border border-dashed border-neutral-400/50 mb-4 transition-all">
                                 <!-- selected words go here -->
                             </div>
@@ -1952,7 +2030,7 @@ const KANJI_N5_DB = (() => {
                                 ${bunpouSession.availableWords.map((w, idx) => `
                                     <button id="avail-word-${idx}" onclick="tapBunpouWord(${idx}, '${w}')" class="word-token px-4 py-3 bg-appbg rounded-xl font-bold text-main shadow-sm border border-glassborder active:scale-90 hover:bg-accent-light hover:text-accent">${w}</button>
                                 `).join('')}
-                            </div>
+                            </div>`}
 
                             <button id="bunpou-check-btn" onclick="checkBunpou()" class="w-full bg-accent/50 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 pointer-events-none transition-all duration-300">
                                 Cek Jawaban
@@ -1963,6 +2041,8 @@ const KANJI_N5_DB = (() => {
             lucide.createIcons();
             updateBunpouButtons();
         }
+
+        function toggleBunpouMode() { bunpouSession.mode = bunpouSession.mode === 'input' ? 'arrange' : 'input'; renderBunpouSlide(); }
 
         function tapBunpouWord(idx, word) {
             document.getElementById(`avail-word-${idx}`).classList.add('selected');
@@ -1978,7 +2058,7 @@ const KANJI_N5_DB = (() => {
         }
 
         function renderBunpouSelected() {
-            const area = document.getElementById('bunpou-selected-area');
+            const area = document.getElementById('bunpou-selected-area') || document.getElementById('bunpou-answer-input');
             area.innerHTML = bunpouSession.selectedWords.map((sw, selIdx) => `
                 <button onclick="untapBunpouWord(${selIdx})" class="animate-fade-in px-4 py-2 bg-accent text-white rounded-xl font-bold shadow-md active:scale-90">${sw.word}</button>
             `).join('');
@@ -1988,6 +2068,7 @@ const KANJI_N5_DB = (() => {
 
         function updateBunpouButtons() {
             const btn = document.getElementById('bunpou-check-btn');
+            if (bunpouSession.mode === 'input') { btn.classList.remove('bg-accent/50', 'pointer-events-none'); btn.classList.add('bg-accent'); btn.innerText = 'Cek Jawaban'; return; }
             const item = BUNPOU_DB[bunpouSession.bab][bunpouSession.currentIdx];
             const currentQuizData = item.quizzes[bunpouSession.currentQuizIdx];
             const totalWords = currentQuizData.words.length;
@@ -2007,19 +2088,19 @@ const KANJI_N5_DB = (() => {
         function checkBunpou() {
             const item = BUNPOU_DB[bunpouSession.bab][bunpouSession.currentIdx];
             const currentQuizData = item.quizzes[bunpouSession.currentQuizIdx];
-            const answerUser = bunpouSession.selectedWords.map(sw => sw.word).join('');
+            const answerUser = bunpouSession.mode === 'input' ? (document.getElementById('bunpou-answer-input')?.value || '') : bunpouSession.selectedWords.map(sw => sw.word).join('');
             
             const quizSection = document.getElementById('bunpou-quiz-section');
-            const area = document.getElementById('bunpou-selected-area');
+            const area = document.getElementById('bunpou-selected-area') || document.getElementById('bunpou-answer-input');
             const btn = document.getElementById('bunpou-check-btn');
             const coinIcon = getCoinIcon();
 
-            if (answerUser === currentQuizData.answerStr) {
+            if (normalizeQuizAnswer(answerUser) === normalizeQuizAnswer(currentQuizData.answerStr)) {
                 playChime(true);
                 area.classList.remove('border-dashed', 'border-neutral-400/50');
                 area.classList.add('bg-emerald-500/20', 'border-emerald-500');
                 
-                const tokens = area.querySelectorAll('button');
+                const tokens = area.querySelectorAll ? area.querySelectorAll('button') : [];
                 tokens.forEach((t, i) => {
                     t.classList.remove('active:scale-90'); t.removeAttribute('onclick');
                     t.classList.replace('bg-accent', 'bg-emerald-500');
@@ -2062,7 +2143,8 @@ const KANJI_N5_DB = (() => {
                 }, 400);
 
                 setTimeout(() => {
-                    while(bunpouSession.selectedWords.length > 0) untapBunpouWord(0);
+                    if (bunpouSession.mode === 'input') { const input = document.getElementById('bunpou-answer-input'); if (input) input.value = ''; }
+                    else while(bunpouSession.selectedWords.length > 0) untapBunpouWord(0);
                 }, 600);
             }
         }
@@ -2120,15 +2202,15 @@ const KANJI_N5_DB = (() => {
                         <h2 class="text-xl font-bold tracking-tight">Jenis Huruf</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-4">
-                        <button onclick="openLetterViewer('hiragana')" class="ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
+                        <button onclick="openLetterViewer('hiragana')" class="learning-choice-card ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
                             <div class="w-20 h-20 rounded-3xl bg-accent-light text-accent flex items-center justify-center text-5xl font-black group-hover:scale-110 transition-transform">あ</div>
                             <div class="text-center"><span class="font-extrabold text-xl block mb-1">HIRAGANA</span><span class="text-xs" style="color: var(--text-muted)">Aksara asli Jepang.</span></div>
                         </button>
-                        <button onclick="openLetterViewer('katakana')" class="ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
+                        <button onclick="openLetterViewer('katakana')" class="learning-choice-card ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
                             <div class="w-20 h-20 rounded-3xl bg-accent-light text-accent flex items-center justify-center text-5xl font-black group-hover:scale-110 transition-transform">ア</div>
                             <div class="text-center"><span class="font-extrabold text-xl block mb-1">KATAKANA</span><span class="text-xs" style="color: var(--text-muted)">Aksara untuk kata serapan.</span></div>
                         </button>
-                        <button onclick="openLetterViewer('kanji')" class="ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
+                        <button onclick="openLetterViewer('kanji')" class="learning-choice-card ios-glass border border-accent p-8 rounded-[2.5rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 group">
                             <div class="w-20 h-20 rounded-3xl bg-accent-light text-accent flex items-center justify-center text-5xl font-black group-hover:scale-110 transition-transform">漢</div>
                             <div class="text-center"><span class="font-extrabold text-xl block mb-1">KANJI N5</span><span class="text-xs" style="color: var(--text-muted)">Daftar Kanji N5 per kelompok.</span></div>
                         </button>
@@ -2180,7 +2262,7 @@ const KANJI_N5_DB = (() => {
                 <div class="animate-fade-in space-y-6 pb-24">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2"><button onclick="switchTab('belajar-menu')" style="color: var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold tracking-tight">Kanji N5</h2></div>
-                        <button onclick="startLevelQuiz('kanji-n5')" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
+                        <button onclick="startLevelQuiz('kanji-n5', 'input')" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="keyboard" class="w-4 h-4"></i> Isian</button>
                     </div>
                     <p class="text-xs -mt-4" style="color: var(--text-muted)">${KANJI_N5_DB.length} entri Kanji N5 dari daftar belajar, dikelompokkan seperti kotak Hiragana/Katakana.</p>
                     ${groups.map(group => renderKanjiGroup(group, KANJI_N5_DB.filter(item => item.group === group))).join('')}
@@ -2306,9 +2388,9 @@ const KANJI_N5_DB = (() => {
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
                     <h2 class="text-xl font-bold tracking-tight">Kosakata (Kotoba)</h2>
-                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 13 (Lengkap).</p>
+                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 15 (Lengkap).</p>
                     <div class="space-y-3">
-                        ${Array.from({ length: 13 }, (_, i) => i + 1).map(b => `<div onclick="openKotobaBab(${b})" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
+                        ${Array.from({ length: 15 }, (_, i) => i + 1).map(b => `<div onclick="openKotobaBab(${b})" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
                             <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center font-bold text-lg">${b}</div><div><h3 class="font-extrabold text-sm">Pelajaran ${b}</h3><p class="text-[10px]" style="color: var(--text-muted)">${KOTOBA_DB[b].length} kosakata</p></div></div>
                             <i data-lucide="chevron-right" style="color: var(--text-muted)" class="w-5 h-5"></i>
                         </div>`).join('')}
@@ -2323,7 +2405,7 @@ const KANJI_N5_DB = (() => {
                 <div class="animate-fade-in space-y-6 pb-24">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2"><button onclick="switchTab('kotoba')" style="color: var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold tracking-tight">Bab ${bab}</h2></div>
-                        <button onclick="startKotobaLatihan(${bab})" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
+                        <button onclick="openKotobaPracticeModal(${bab})" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
                     </div>
                     <div class="space-y-3">
                         ${list.map(i => `<div class="ios-glass p-4 rounded-3xl flex flex-col gap-1.5">
@@ -2347,14 +2429,19 @@ const KANJI_N5_DB = (() => {
                         ${renderStartBtn("Level 1 - Hiragana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dasar')")}
                         ${renderStartBtn("Level 2 - Hiragana + Dakuon", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dakuon')")}
                         ${renderStartBtn("Level 3 - Hiragana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-lengkap')")}
+                        ${renderPracticeDivider('Latihan Katakana', 'Mulai dari huruf dasar sampai lengkap.')}
                         ${renderStartBtn("Level 4 - Katakana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-dasar')")}
                         ${renderStartBtn("Level 5 - Katakana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-lengkap')")}
                         ${renderStartBtn("Level 6 - Campuran Huruf", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('campuran')")}
+                        ${renderPracticeDivider('Latihan Kosakata', 'Uji arti kata dari semua pelajaran.')}
                         ${renderStartBtn("Level 7 - Kosakata Lengkap", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kotoba-campuran')")}
+                        ${renderPracticeDivider('Latihan Kanji', 'Pilih atau ketik bacaan hiragana kanji N5.')}
                         ${renderStartBtn("Level 8 - Kanji N5", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kanji-n5')")}
                     </div>
                 </div>`;
         }
+
+        function renderPracticeDivider(title, desc) { return `<div class="bg-accent text-white px-5 py-3 rounded-2xl shadow-md shadow-blue-500/15"><span class="text-xs font-black uppercase tracking-widest block">${title}</span><span class="text-[10px] text-white/80">${desc}</span></div>`; }
 
         function renderStartBtn(t, s, a) {
             return `<div onclick="${a}" class="ios-glass p-4 rounded-3xl flex justify-between items-center cursor-pointer hover:border-accent active:scale-95 transition-all">
@@ -2388,6 +2475,8 @@ const KANJI_N5_DB = (() => {
                             <div><span class="text-xs font-bold text-accent uppercase tracking-widest">MODEL B</span><h3 class="font-extrabold text-base mt-0.5">Ujian Katakana</h3></div>
                             <div class="w-12 h-12 rounded-full bg-accent-light text-accent flex justify-center items-center"><i data-lucide="play" class="w-5 h-5"></i></div>
                         </button>
+                        <button onclick="startExamModel('kotoba')" class="w-full ios-glass p-5 rounded-[2rem] text-left flex justify-between items-center hover:border-accent active:scale-95"><div><span class="text-xs font-bold text-accent uppercase tracking-widest">MODEL C</span><h3 class="font-extrabold text-base mt-0.5">Ujian Kosakata</h3><p class="text-[10px]" style="color:var(--text-muted)">150 soal</p></div><i data-lucide="layers" class="w-5 h-5 text-accent"></i></button>
+                        <button onclick="startExamModel('bunpou')" class="w-full ios-glass p-5 rounded-[2rem] text-left flex justify-between items-center hover:border-accent active:scale-95"><div><span class="text-xs font-bold text-accent uppercase tracking-widest">MODEL D</span><h3 class="font-extrabold text-base mt-0.5">Ujian Bunpou</h3><p class="text-[10px]" style="color:var(--text-muted)">150 soal · hard: 15 detik</p></div><i data-lucide="book-open-check" class="w-5 h-5 text-accent"></i></button>
                         <button onclick="startExamModel('all')" class="w-full ${proBtnClass} text-white p-6 rounded-[2rem] text-left flex justify-between items-center active:scale-95 transition-all duration-500">
                             <div>
                                 <span class="text-xs font-bold ${isH ? 'text-white/90' : 'text-white/70'} uppercase tracking-widest">PRO MODEL ${isH ? '🔥' : ''}</span>
@@ -2402,9 +2491,15 @@ const KANJI_N5_DB = (() => {
 
         function setExamModeToggle(m) { state.examDifficulty = m; saveState(); renderUjianTabs(); }
 
-        function startKotobaLatihan(bab) { setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false); }
+        function openKotobaPracticeModal(bab) {
+            const old = document.getElementById('kotoba-practice-modal'); if (old) old.remove();
+            const modal = document.createElement('div'); modal.id = 'kotoba-practice-modal'; modal.className = 'fixed inset-0 z-[80] bg-black/55 backdrop-blur-sm flex items-center justify-center px-5';
+            modal.innerHTML = `<div class="ios-glass w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl"><div class="flex justify-between items-start mb-5"><div><p class="text-[10px] font-bold text-accent uppercase tracking-widest">Bab ${bab}</p><h3 class="text-xl font-black">Pilih tipe latihan</h3></div><button onclick="document.getElementById('kotoba-practice-modal').remove()"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="space-y-3"><button onclick="startKotobaLatihan(${bab}, 'choice')" class="w-full ios-glass p-5 rounded-3xl text-left hover:border-accent"><i data-lucide="list-checks" class="w-5 h-5 text-accent mb-2"></i><span class="font-bold block">Pilihan ganda</span><span class="text-xs" style="color:var(--text-muted)">Pilih arti yang tepat.</span></button><button onclick="startKotobaLatihan(${bab}, 'input')" class="w-full bg-accent text-white p-5 rounded-3xl text-left"><i data-lucide="keyboard" class="w-5 h-5 mb-2"></i><span class="font-bold block">Isian</span><span class="text-xs text-white/80">Ketik arti yang benar.</span></button></div></div>`;
+            document.body.appendChild(modal); lucide.createIcons();
+        }
+        function startKotobaLatihan(bab, mode = 'choice') { const modal = document.getElementById('kotoba-practice-modal'); if (modal) modal.remove(); setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode); }
         
-        function startLevelQuiz(l) {
+        function startLevelQuiz(l, mode = 'choice') {
             let p = [], t = "";
             if (l==='hira-dasar') { p=HIRAGANA_DB.seion.filter(x=>x.j); t="Level 1"; }
             else if (l==='hira-dakuon') { p=[...HIRAGANA_DB.seion,...HIRAGANA_DB.dakuon].filter(x=>x.j); t="Level 2"; }
@@ -2418,11 +2513,11 @@ const KANJI_N5_DB = (() => {
             }
             else if (l==='campuran') { p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion].filter(x=>x.j); t="Level 6"; }
             else if (l==='kotoba-campuran') { 
-                p=[...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13]]; 
+                p=Object.values(KOTOBA_DB).flat(); 
                 t="Level 7"; 
             }
             else if (l==='kanji-n5') { p=KANJI_N5_DB; t="Level 8 - Kanji N5"; }
-            setupQuizFlow(p, t, false);
+            setupQuizFlow(p, t, false, mode);
         }
 
         function startExamModel(type) {
@@ -2434,18 +2529,21 @@ const KANJI_N5_DB = (() => {
                 p=[...KATAKANA_DB.seion,...KATAKANA_DB.dakuon,...KATAKANA_DB.handakuon,...yoon,...toku].filter(x=>x.j); 
                 t="Ujian Katakana"; 
             }
+            else if (type==='kotoba') { p=Object.values(KOTOBA_DB).flat(); t="Ujian Kosakata"; }
+            else if (type==='bunpou') { p=Object.values(BUNPOU_DB).flat().map(item => ({ kana: item.title, kanji: item.pattern, arti: item.subtitle })); t="Ujian Bunpou"; }
             else { 
-                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13],...KANJI_N5_DB].filter(x=>x.j||x.kana); 
+                p=[...HIRAGANA_DB.seion,...KATAKANA_DB.seion,...Object.values(KOTOBA_DB).flat(),...KANJI_N5_DB].filter(x=>x.j||x.kana); 
                 t="Pro Campuran"; 
             }
-            setupQuizFlow(p, t, true);
+            setupQuizFlow(p, t, true, 'choice', type === 'bunpou' ? 15 : 5);
         }
 
-        function setupQuizFlow(items, title, isExam) {
+        function setupQuizFlow(items, title, isExam, mode = 'choice', timeLimit = 5) {
             if (items.length === 0) return;
             const shuffled = [...items].sort(() => Math.random() - 0.5);
-            state.quiz.currentQuestion = 0; state.quiz.questions = shuffled;
-            state.quiz.correctCount = 0; state.quiz.wrongCount = 0; state.quiz.total = shuffled.length;
+            const questions = isExam ? Array.from({ length: 150 }, (_, i) => shuffled[i % shuffled.length]) : shuffled;
+            state.quiz.currentQuestion = 0; state.quiz.questions = questions;
+            state.quiz.correctCount = 0; state.quiz.wrongCount = 0; state.quiz.total = questions.length; state.quiz.mode = mode; state.quiz.timeLimit = timeLimit;
             MusicEngine.setExamMode(isExam);
             renderQuizQuestion(title, isExam);
         }
@@ -2498,7 +2596,7 @@ const KANJI_N5_DB = (() => {
             if (isKanji) {
                 wp = buildKanjiReadingDistractors(item);
             } else if (isKotoba) {
-                const all = [...KOTOBA_DB[1],...KOTOBA_DB[2],...KOTOBA_DB[3],...KOTOBA_DB[4],...KOTOBA_DB[5],...KOTOBA_DB[6],...KOTOBA_DB[7],...KOTOBA_DB[8],...KOTOBA_DB[9],...KOTOBA_DB[10],...KOTOBA_DB[11],...KOTOBA_DB[12],...KOTOBA_DB[13],...KANJI_N5_DB];
+                const all = [...Object.values(KOTOBA_DB).flat(),...KANJI_N5_DB];
                 wp = all.filter(x => x.arti !== item.arti).map(x => x.arti);
             } else {
                 const all = [...HIRAGANA_DB.seion,...HIRAGANA_DB.dakuon,...KATAKANA_DB.seion,...KATAKANA_DB.dakuon];
@@ -2511,6 +2609,7 @@ const KANJI_N5_DB = (() => {
             const choices = [correct, ...wp.slice(0, 3)].sort(() => Math.random() - 0.5);
             const symbol = isKanji ? item.kanji : (isKotoba ? (item.kanji && item.kanji !== item.kana ? `${item.kanji}<br><span class="text-2xl mt-1 block opacity-60">${item.kana}</span>` : item.kana) : item.j);
             const isSuperHard = (isExam && state.examDifficulty === 'hard');
+            const isInput = state.quiz.mode === 'input';
 
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in flex flex-col justify-between h-full space-y-5 pb-24 relative">
@@ -2525,17 +2624,17 @@ const KANJI_N5_DB = (() => {
 
                     <div id="q-card" class="ios-glass p-8 rounded-[2.5rem] ${isSuperHard ? 'border-red-400/50' : 'border-accent'} text-center flex flex-col justify-center min-h-[180px] transition-all relative">
                         <span class="text-6xl font-black select-none leading-none text-main">${symbol}</span>
-                        <span id="q-hint" class="text-xs mt-4" style="color: var(--text-muted)">${isKanji ? 'Pilih bunyi hiragananya' : (isKotoba ? 'Pilih arti yang tepat' : 'Cara membacanya?')}</span>
+                        <span id="q-hint" class="text-xs mt-4" style="color: var(--text-muted)">${isInput ? (isKanji ? 'Tulis bacaan hiragananya' : (isKotoba ? 'Tulis arti Indonesianya' : 'Tulis cara membacanya')) : (isKanji ? 'Pilih bunyi hiragananya' : (isKotoba ? 'Pilih arti yang tepat' : 'Cara membacanya?'))}</span>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3" id="c-grid">
+                    ${isInput ? `<div class="ios-glass p-4 rounded-[1.8rem] space-y-3"><input id="quiz-text-answer" onkeydown="if(event.key==='Enter') submitTextQuizAnswer('${escapeQuizArg(correct)}')" autocomplete="off" autocapitalize="off" class="w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-4 text-center font-bold text-main outline-none focus:border-accent" placeholder="Ketik jawaban di sini"><button id="text-submit-btn" onclick="submitTextQuizAnswer('${escapeQuizArg(correct)}')" class="w-full bg-accent text-white py-3 rounded-2xl font-bold">Cek Jawaban</button></div>` : `<div class="grid grid-cols-2 gap-3" id="c-grid">
                         ${choices.map((ch, idx) => `
                             <button onclick="submitQuizAnswer('${escapeQuizArg(ch)}', '${escapeQuizArg(correct)}', this)" class="p-5 ios-glass hover:bg-accent-light hover:border-accent active:scale-95 text-sm font-bold rounded-[1.8rem] text-left flex flex-col gap-2 transition-all relative">
                                 <span class="text-[10px] uppercase tracking-widest text-accent">${['A','B','C','D'][idx]}</span>
                                 <span class="leading-snug capitalize text-main">${ch}</span>
                             </button>
                         `).join('')}
-                    </div>
+                    </div>`}
 
                     <div id="answer-feedback" class="hidden ios-glass border p-3 rounded-2xl text-xs font-bold leading-relaxed"></div>
 
@@ -2547,13 +2646,43 @@ const KANJI_N5_DB = (() => {
             lucide.createIcons();
 
             if (isSuperHard) {
-                let tl = 5; 
+                let tl = state.quiz.timeLimit || 5; 
                 setTimeout(() => { document.getElementById('timer-bar').style.width = '0%'; }, 50); 
                 state.quiz.timerObj = setInterval(() => {
                     tl--;
                     if (tl <= 0) { clearInterval(state.quiz.timerObj); state.quiz.timerObj = null; submitQuizAnswer(null, correct, null); }
                 }, 1000);
             }
+        }
+
+        function normalizeQuizAnswer(value) { return String(value ?? '').trim().toLocaleLowerCase().replace(/[\s\-_/.,!?()[\]{}~]/g, ''); }
+
+        function isFlexibleKotobaAnswer(answer, item, correct) {
+            if (!item || !item.arti || isKanjiQuizItem(item)) return normalizeQuizAnswer(answer) === normalizeQuizAnswer(correct);
+            const user = normalizeQuizAnswer(answer);
+            if (!user) return false;
+            const parts = String(item.arti)
+                .replace(/\[[^\]]*\]/g, '')
+                .replace(/\([^)]*\)/g, '')
+                .split(/[\/,;]+/)
+                .map(normalizeQuizAnswer)
+                .filter(Boolean);
+            const aliases = { sdr: ['saudara'], dosen: ['guru'], guru: ['dosen'], pagi: ['am'], malam: ['pm'], sore: ['pm'] };
+            return parts.some(part => {
+                const variants = [part, ...(aliases[part] || [])];
+                return variants.some(variant => {
+                    if ((variant.includes('tidak') || variant.includes('bukan')) && !(user.includes('tidak') || user.includes('bukan'))) return false;
+                    return user === variant || (user.length >= 3 && (variant.includes(user) || user.includes(variant)));
+                });
+            });
+        }
+        function submitTextQuizAnswer(correct) {
+            const input = document.getElementById('quiz-text-answer');
+            if (!input || input.disabled) return;
+            input.disabled = true;
+            const item = state.quiz.questions[state.quiz.currentQuestion];
+            const accepted = isFlexibleKotobaAnswer(input.value, item, correct);
+            submitQuizAnswer(accepted ? correct : input.value, correct, document.getElementById('text-submit-btn'));
         }
 
         function showFloatingCoin(element, amount) {
@@ -2573,7 +2702,7 @@ const KANJI_N5_DB = (() => {
             const btns = document.querySelectorAll('#c-grid button');
             btns.forEach(b => b.removeAttribute('onclick'));
 
-            const isT = chosen === null; const isC = chosen === correct;
+            const isT = chosen === null; const isC = normalizeQuizAnswer(chosen) === normalizeQuizAnswer(correct);
             const currentItem = state.quiz.questions[state.quiz.currentQuestion];
             const isKanji = isKanjiQuizItem(currentItem);
             const isKotoba = !!currentItem.arti && !isKanji;
@@ -2636,11 +2765,11 @@ const KANJI_N5_DB = (() => {
                 osc.connect(gain); gain.connect(ac.destination);
                 if (success) {
                     osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, ac.currentTime); osc.frequency.setValueAtTime(783.99, ac.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.12, ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.45);
+                    gain.gain.setValueAtTime(0.12 * (Number(state.systemVolume ?? 70) / 100), ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.45);
                     osc.start(); osc.stop(ac.currentTime + 0.5);
                 } else {
                     osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, ac.currentTime); osc.frequency.linearRampToValueAtTime(147, ac.currentTime + 0.35);
-                    gain.gain.setValueAtTime(0.1, ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.1 * (Number(state.systemVolume ?? 70) / 100), ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.4);
                     osc.start(); osc.stop(ac.currentTime + 0.45);
                 }
             } catch(e) {}
@@ -2983,11 +3112,62 @@ const KANJI_N5_DB = (() => {
             if (window.lucide) lucide.createIcons();
         }
 
-        function toggleMusic() {
-            state.musicOn = !state.musicOn; saveState();
+        function openMusicModal() {
+            syncMusicUI();
+            document.getElementById('music-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('music-modal').querySelector('div').classList.remove('translate-y-full'), 50);
+        }
+
+        function closeMusicModal() {
+            document.getElementById('music-modal').querySelector('div').classList.add('translate-y-full');
+            setTimeout(() => document.getElementById('music-modal').classList.add('hidden'), 300);
+        }
+
+        function setMusicEnabled(enabled) {
+            state.musicOn = enabled; saveState();
+            if (enabled) MusicEngine.start(); else MusicEngine.stop();
+            syncMusicUI();
+        }
+
+        function toggleMusic() { setMusicEnabled(!state.musicOn); }
+
+        function setAudioVolume(type, value) {
+            const normalized = Math.max(0, Math.min(100, Number(value)));
+            if (type === 'background') { state.backgroundVolume = normalized; MusicEngine.refreshVolume(); }
+            else state.systemVolume = normalized;
+            saveState(); syncMusicUI();
+        }
+
+        function setCustomMusic(file) {
+            if (!file) return;
+            MusicEngine.setCustomTrack(file);
+            state.customMusicName = file.name;
+            state.musicOn = true;
+            saveState(); MusicEngine.start(); syncMusicUI();
+        }
+
+        function useDefaultMusic() {
+            MusicEngine.useThemeTrack();
+            state.customMusicName = '';
+            saveState();
+            if (state.musicOn) MusicEngine.start();
+            syncMusicUI();
+        }
+
+        function syncMusicUI() {
             const btn = document.getElementById('music-btn');
-            if (state.musicOn) { MusicEngine.start(); btn.classList.add('text-accent', 'bg-accent-light'); btn.style.color = ''; }
-            else { MusicEngine.stop(); btn.classList.remove('text-accent', 'bg-accent-light'); btn.style.color = 'var(--text-muted)'; }
+            if (btn) { btn.classList.toggle('text-accent', state.musicOn); btn.classList.toggle('bg-accent-light', state.musicOn); btn.style.color = state.musicOn ? '' : 'var(--text-muted)'; }
+            const power = document.getElementById('music-power-btn');
+            if (power) power.innerHTML = state.musicOn ? '<i data-lucide="volume-2" class="w-4 h-4 inline mr-1"></i> Nyala' : '<i data-lucide="volume-x" class="w-4 h-4 inline mr-1"></i> Mati';
+            const bg = document.getElementById('bg-volume-input'), sys = document.getElementById('system-volume-input');
+            if (bg) bg.value = state.backgroundVolume ?? 32;
+            if (sys) sys.value = state.systemVolume ?? 70;
+            const bgLabel = document.getElementById('bg-volume-value'), sysLabel = document.getElementById('system-volume-value');
+            if (bgLabel) bgLabel.innerText = `${state.backgroundVolume ?? 32}%`;
+            if (sysLabel) sysLabel.innerText = `${state.systemVolume ?? 70}%`;
+            const trackName = document.getElementById('custom-track-name');
+            if (trackName) trackName.innerText = MusicEngine.customName || state.customMusicName || 'Sound default tema sedang digunakan.';
+            if (window.lucide) lucide.createIcons();
         }
 
         function resetData(type) {
