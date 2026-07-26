@@ -324,13 +324,29 @@
         .kanji-flashcard-back { transform: rotateY(180deg); }
 
         /* Main menu artwork - follows the current theme accent automatically */
-        .main-menu-card { position: relative; min-height: 220px; overflow: hidden; isolation: isolate; border: 1px solid var(--glass-border); }
+        .main-menu-card { position: relative; min-height: 174px; overflow: hidden; isolation: isolate; border: 1px solid var(--glass-border); }
         .main-menu-card::before { content: ''; position: absolute; width: 150%; height: 88px; top: -34px; left: -28px; z-index: -1; background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 52%, white), color-mix(in srgb, var(--accent) 14%, transparent) 60%, transparent 61%); border-radius: 0 0 60% 42%; opacity: .8; }
         .main-menu-card::after { content: ''; position: absolute; width: 84px; height: 84px; top: 18px; right: 16px; z-index: -1; opacity: .22; background-image: radial-gradient(var(--accent) 1.3px, transparent 1.3px); background-size: 8px 8px; }
         .main-menu-arrow { box-shadow: 0 7px 20px -10px color-mix(in srgb, var(--accent) 80%, transparent); }
         .learning-choice-card { position: relative; overflow: hidden; isolation: isolate; }
         .learning-choice-card::before { content: ''; position: absolute; inset: 0 auto auto 0; width: 130%; height: 72px; background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 32%, transparent), transparent 66%); transform: rotate(-5deg) translateY(-26px); z-index: -1; }
         .learning-choice-card::after { content: ''; position: absolute; width: 84px; height: 84px; bottom: 12px; right: 16px; opacity: .18; background-image: radial-gradient(var(--accent) 1.2px, transparent 1.2px); background-size: 8px 8px; z-index: -1; }
+
+        /* Portrait: keep long questions and answer choices readable without overflowing. */
+        .quiz-symbol { font-size: clamp(2rem, 10vw, 3.75rem); overflow-wrap: anywhere; word-break: break-word; }
+        .quiz-choice { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+        @media (max-width: 480px) and (orientation: portrait) {
+            .main-menu-card { min-height: 154px; }
+            .main-menu-card::before { height: 68px; }
+            .main-menu-card .menu-icon { width: 3.5rem; height: 3.5rem; border-radius: 1rem; }
+            .main-menu-card .menu-icon svg { width: 1.75rem; height: 1.75rem; }
+            .main-menu-card .menu-title { font-size: 1rem; }
+            .main-menu-card .menu-subtitle { font-size: .68rem; margin-top: .3rem; }
+            #q-card { padding: 1.25rem; min-height: 142px; }
+            .quiz-symbol { font-size: clamp(1.7rem, 9vw, 2.45rem); line-height: 1.15; }
+            #c-grid { gap: .65rem; }
+            .quiz-choice { padding: 1rem; font-size: .78rem; line-height: 1.25; border-radius: 1.35rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative flex flex-col">
@@ -505,8 +521,8 @@
                 <label class="block"><div class="flex justify-between text-xs font-bold mb-2"><span>Volume backsound</span><span id="bg-volume-value" class="text-accent"></span></div><input id="bg-volume-input" oninput="setAudioVolume('background', this.value)" type="range" min="0" max="100" class="w-full accent-current"></label>
                 <label class="block"><div class="flex justify-between text-xs font-bold mb-2"><span>Volume suara sistem</span><span id="system-volume-value" class="text-accent"></span></div><input id="system-volume-input" oninput="setAudioVolume('system', this.value)" type="range" min="0" max="100" class="w-full accent-current"></label>
             </div>
-            <div class="ios-glass p-4 rounded-3xl space-y-3"><div><p class="font-bold text-sm">Lagu dari galeri</p><p id="custom-track-name" class="text-[10px] mt-1" style="color: var(--text-muted)">Belum ada lagu pribadi dipilih.</p></div><input id="music-file-input" type="file" accept="audio/*" class="hidden" onchange="setCustomMusic(this.files[0])"><button onclick="document.getElementById('music-file-input').click()" class="w-full bg-accent text-white py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="folder-music" class="w-4 h-4"></i> Pilih lagu dari galeri</button><button onclick="useDefaultMusic()" class="w-full ios-glass py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Kembali ke sound default tema</button></div>
-            <p class="text-[10px] text-center mt-4" style="color: var(--text-muted)">Lagu dari galeri aktif selama halaman aplikasi ini terbuka.</p>
+            <div class="ios-glass p-4 rounded-3xl space-y-3"><div><p class="font-bold text-sm">Musik dari perangkat</p><p id="custom-track-name" class="text-[10px] mt-1" style="color: var(--text-muted)">Belum ada musik pribadi dipilih.</p></div><input id="music-file-input" type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/mp4,.mp3,.wav,.ogg,.m4a" class="hidden" onchange="setCustomMusic(this.files[0])"><button onclick="document.getElementById('music-file-input').click()" class="w-full bg-accent text-white py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="folder-music" class="w-4 h-4"></i> Pilih musik dari perangkat</button><button onclick="useDefaultMusic()" class="w-full ios-glass py-3 rounded-2xl text-xs font-bold flex justify-center items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Kembali ke musik tema</button></div>
+            <p class="text-[10px] text-center mt-4" style="color: var(--text-muted)">Format yang didukung: MP3, WAV, OGG, atau M4A. Musik pilihan aktif selama halaman ini terbuka.</p>
         </div>
     </div>
 
@@ -1716,12 +1732,16 @@ const KANJI_N5_DB = (() => {
                 this.audio = new Audio(src);
                 this.audio.loop = true;
                 this.audio.volume = Math.max(0, Math.min(1, Number(state.backgroundVolume ?? 32) / 100));
+                this.audio.muted = this.audio.volume === 0;
                 this.currentSrc = src;
             }
 
             start() {
+                if (!state.musicOn || Number(state.backgroundVolume ?? 32) <= 0) { if (this.audio) this.audio.pause(); this.isPlaying = false; return; }
                 this.isPlaying = true;
                 this.loadTrack();
+                this.audio.muted = false;
+                this.refreshVolume();
                 this.audio.play().catch(() => {
                     this.isPlaying = false;
                 });
@@ -1757,7 +1777,13 @@ const KANJI_N5_DB = (() => {
                 if (this.isPlaying && !this.isExamMode) { this.currentSrc = ''; this.loadTrack(); this.audio.play().catch(() => {}); }
             }
 
-            refreshVolume() { if (this.audio) this.audio.volume = Math.max(0, Math.min(1, Number(state.backgroundVolume ?? 32) / 100)); }
+            refreshVolume() {
+                const volume = Math.max(0, Math.min(1, Number(state.backgroundVolume ?? 32) / 100));
+                if (!this.audio) return;
+                this.audio.volume = volume;
+                this.audio.muted = volume === 0;
+                if (volume === 0) { this.audio.pause(); this.isPlaying = false; }
+            }
         }
         const MusicEngine = new FileMusicEngine();
 
@@ -1899,9 +1925,9 @@ const KANJI_N5_DB = (() => {
         }
 
         function renderMenuBtn(tab, icon, title, sub) {
-            return `<button onclick="switchTab('${tab}')" class="main-menu-card ios-glass p-5 rounded-[2.5rem] flex flex-col items-center justify-center text-center gap-3 hover:scale-[1.02] active:scale-95 transition-all">
-                <div class="w-20 h-20 rounded-[2rem] flex items-center justify-center bg-accent-light text-accent shadow-inner"><i data-lucide="${icon}" class="w-10 h-10"></i></div>
-                <div><span class="font-black text-lg text-main block leading-tight">${title}</span><span class="text-xs mt-2 block" style="color: var(--text-muted)">${sub}</span></div>
+            return `<button onclick="switchTab('${tab}')" class="main-menu-card ios-glass p-4 rounded-[1.6rem] flex flex-col items-center justify-center text-center gap-2 hover:scale-[1.02] active:scale-95 transition-all">
+                <div class="menu-icon w-16 h-16 rounded-2xl flex items-center justify-center bg-accent-light text-accent shadow-inner"><i data-lucide="${icon}" class="w-8 h-8"></i></div>
+                <div><span class="menu-title font-black text-base text-main block leading-tight">${title}</span><span class="menu-subtitle text-[11px] mt-1 block" style="color: var(--text-muted)">${sub}</span></div>
                 <span class="main-menu-arrow absolute bottom-5 right-5 w-10 h-10 rounded-full bg-accent-light text-accent flex items-center justify-center"><i data-lucide="arrow-right" class="w-5 h-5"></i></span>
             </button>`;
         }
@@ -1947,6 +1973,19 @@ const KANJI_N5_DB = (() => {
             bunpouSession.currentIdx = 0;
             bunpouSession.currentQuizIdx = 0;
             renderBunpouSlide();
+        }
+
+        function buildBunpouDetail(item) {
+            const pattern = String(item.pattern || '');
+            const hasQuestion = /か/.test(pattern);
+            const hasVerb = /Kata Kerja|ます|ません|ました|て/.test(`${item.title} ${pattern}`);
+            const hasParticle = /[はがをにでとへからまで]/.test(pattern);
+            return `
+                <div class="mt-3 grid gap-2 text-xs leading-relaxed">
+                    <div class="p-3 rounded-xl bg-accent-light"><b class="text-accent">Fungsi pola:</b> ${item.subtitle}. Pola ini dipakai saat ingin menyampaikan makna tersebut dalam kalimat sopan bahasa Jepang.</div>
+                    <div class="p-3 rounded-xl bg-appbg/60 border border-glassborder"><b>Susunan:</b> isi setiap bagian dalam tanda kurung siku dengan kata yang sesuai; partikel menempel pada kata tepat sebelumnya.${hasParticle ? ' Jangan memindahkan partikel karena fungsinya dapat berubah.' : ''}</div>
+                    <div class="p-3 rounded-xl bg-appbg/60 border border-glassborder"><b>Catatan penggunaan:</b> ${hasVerb ? 'perhatikan bentuk kata kerja yang tertulis pada pola (misalnya ます, ません, atau ました), karena perubahan bentuk mengubah nuansa waktu atau kesopanan.' : 'pilih kata benda atau keterangan yang sesuai dengan konteks kalimat.'}${hasQuestion ? ' Akhiran か menandai kalimat tanya.' : ''}</div>
+                </div>`;
         }
 
         function renderBunpouSlide() {
@@ -1996,7 +2035,7 @@ const KANJI_N5_DB = (() => {
                                 <div class="bg-appbg/50 p-3 rounded-xl text-center text-xs mt-2 border border-glassborder">
                                     ${item.pattern}
                                 </div>
-                                <div class="mt-3 p-3 rounded-xl bg-accent-light text-xs leading-relaxed"><b class="text-accent">Cara memahami:</b> baca pola dari kiri ke kanan, tentukan fungsi partikel atau perubahan kata kerjanya, lalu bandingkan dengan contoh. Ulangi dengan mengganti kata benda agar pola terasa alami.</div>
+                                ${buildBunpouDetail(item)}
                             </div>
                         </div>
 
@@ -2426,28 +2465,69 @@ const KANJI_N5_DB = (() => {
                     <h2 class="text-xl font-bold tracking-tight">Menu Latihan</h2>
                     <p class="text-xs -mt-3" style="color: var(--text-muted)">Uji ingatan dan kumpulkan ${coinIcon}!</p>
                     <div class="space-y-3">
-                        ${renderStartBtn("Level 1 - Hiragana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dasar')")}
-                        ${renderStartBtn("Level 2 - Hiragana + Dakuon", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dakuon')")}
-                        ${renderStartBtn("Level 3 - Hiragana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-lengkap')")}
-                        ${renderPracticeDivider('Latihan Katakana', 'Mulai dari huruf dasar sampai lengkap.')}
+                        ${renderPracticeDivider('Latihan Hiragana', 'Mulai dari huruf dasar sampai lengkap.', "openWritingMenu('hiragana')")}
+                         ${renderStartBtn("Level 1 - Hiragana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dasar')")}
+                         ${renderStartBtn("Level 2 - Hiragana + Dakuon", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dakuon')")}
+                         ${renderStartBtn("Level 3 - Hiragana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-lengkap')")}
+                        ${renderPracticeDivider('Latihan Katakana', 'Mulai dari huruf dasar sampai lengkap.', "openWritingMenu('katakana')")}
                         ${renderStartBtn("Level 4 - Katakana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-dasar')")}
                         ${renderStartBtn("Level 5 - Katakana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-lengkap')")}
                         ${renderStartBtn("Level 6 - Campuran Huruf", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('campuran')")}
                         ${renderPracticeDivider('Latihan Kosakata', 'Uji arti kata dari semua pelajaran.')}
                         ${renderStartBtn("Level 7 - Kosakata Lengkap", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kotoba-campuran')")}
-                        ${renderPracticeDivider('Latihan Kanji', 'Pilih atau ketik bacaan hiragana kanji N5.')}
+                        ${renderPracticeDivider('Latihan Kanji', 'Pilih, ketik, atau berlatih menulis Kanji N5.', "openWritingMenu('kanji')")}
                         ${renderStartBtn("Level 8 - Kanji N5", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kanji-n5')")}
                     </div>
                 </div>`;
         }
 
-        function renderPracticeDivider(title, desc) { return `<div class="bg-accent text-white px-5 py-3 rounded-2xl shadow-md shadow-blue-500/15"><span class="text-xs font-black uppercase tracking-widest block">${title}</span><span class="text-[10px] text-white/80">${desc}</span></div>`; }
+        function renderPracticeDivider(title, desc, writingAction = '') {
+            const writingButton = writingAction ? `<button onclick="${writingAction}" class="shrink-0 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 px-2.5 py-2 text-[10px] font-black leading-tight text-left"><i data-lucide="pen-line" class="w-3.5 h-3.5 inline mr-1"></i>Latihan<br>Menulis</button>` : '';
+            return `<div class="bg-accent text-white px-4 py-3 rounded-2xl shadow-md shadow-blue-500/15 flex items-center gap-3">${writingButton}<div class="min-w-0"><span class="text-xs font-black uppercase tracking-widest block">${title}</span><span class="text-[10px] text-white/80">${desc}</span></div></div>`;
+        }
 
         function renderStartBtn(t, s, a) {
             return `<div onclick="${a}" class="ios-glass p-4 rounded-3xl flex justify-between items-center cursor-pointer hover:border-accent active:scale-95 transition-all">
                 <div><h3 class="font-bold text-sm text-accent">${t}</h3><p class="text-[10px]" style="color: var(--text-muted)">${s}</p></div><i data-lucide="arrow-right" style="color: var(--text-muted)" class="w-5 h-5"></i>
             </div>`;
         }
+
+        let writingSession = { type: '', label: '', items: [], index: 0, hasInk: false };
+        function writingGroups(type) {
+            if (type === 'hiragana') return [{ key: 'seion', label: 'Hiragana Dasar', items: HIRAGANA_DB.seion }, { key: 'dakuon', label: 'Hiragana Dakuon', items: HIRAGANA_DB.dakuon }, { key: 'handakuon', label: 'Hiragana Handakuon', items: HIRAGANA_DB.handakuon }, { key: 'yoon', label: 'Hiragana Yōon', items: HIRAGANA_DB.yoon }];
+            if (type === 'katakana') return [{ key: 'seion', label: 'Katakana Dasar', items: KATAKANA_DB.seion }, { key: 'dakuon', label: 'Katakana Dakuon', items: KATAKANA_DB.dakuon }, { key: 'handakuon', label: 'Katakana Handakuon', items: KATAKANA_DB.handakuon }, { key: 'yoon', label: 'Katakana Yōon', items: KATAKANA_DB.yoon || [] }];
+            return [{ key: 'n5', label: 'Kanji N5', items: KANJI_N5_DB }];
+        }
+        function openWritingMenu(type) {
+            const title = type === 'hiragana' ? 'Hiragana' : type === 'katakana' ? 'Katakana' : 'Kanji';
+            const groups = writingGroups(type).filter(group => group.items.length);
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><div><h2 class="text-xl font-bold">Latihan Menulis ${title}</h2><p class="text-xs" style="color:var(--text-muted)">Pilih materi, lalu ikuti bentuk hurufnya.</p></div></div><div class="space-y-3">${groups.map(group => renderStartBtn(group.label, 'Tulis berurutan dengan jari atau stylus', `startWritingPractice('${type}', '${group.key}')`)).join('')}</div></div>`;
+            lucide.createIcons();
+        }
+        function startWritingPractice(type, groupKey) {
+            const group = writingGroups(type).find(item => item.key === groupKey); if (!group) return;
+            writingSession = { type, label: group.label, items: group.items.filter(item => item.j || item.kanji), index: 0, hasInk: false };
+            renderWritingPractice();
+        }
+        function renderWritingPractice() {
+            const item = writingSession.items[writingSession.index];
+            if (!item) { openWritingMenu(writingSession.type); return; }
+            const symbol = item.j || item.kanji, reading = item.r || item.kana || '';
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center justify-between"><button onclick="openWritingMenu('${writingSession.type}')" class="text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5 inline"></i> Latihan Menulis</button><span class="text-xs font-bold bg-accent-light text-accent px-3 py-1 rounded-full">${writingSession.index + 1} / ${writingSession.items.length}</span></div><div class="ios-glass p-5 rounded-3xl text-center border-accent"><p class="text-xs font-bold text-accent uppercase tracking-widest">${writingSession.label}</p><div class="text-7xl font-black mt-3 text-main">${symbol}</div><p class="text-sm mt-2" style="color:var(--text-muted)">${reading}</p><p class="text-xs mt-3" style="color:var(--text-muted)">Tirukan huruf di area tulis dengan jari atau stylus.</p></div><div class="ios-glass p-3 rounded-3xl"><canvas id="writing-canvas" aria-label="Area latihan menulis" class="w-full rounded-2xl bg-white/60 dark:bg-black/20 touch-none" style="height:280px; border: 1px dashed var(--accent)"></canvas></div><div class="grid grid-cols-2 gap-3"><button onclick="clearWritingCanvas()" class="ios-glass py-3 rounded-2xl text-sm font-bold"><i data-lucide="eraser" class="w-4 h-4 inline mr-1"></i> Hapus</button><button onclick="completeWritingPractice()" class="bg-accent text-white py-3 rounded-2xl text-sm font-bold"><i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Sudah Menulis</button></div></div>`;
+            lucide.createIcons(); setupWritingCanvas();
+        }
+        function setupWritingCanvas() {
+            const canvas = document.getElementById('writing-canvas'); if (!canvas) return;
+            const rect = canvas.getBoundingClientRect(), ratio = window.devicePixelRatio || 1;
+            canvas.width = rect.width * ratio; canvas.height = rect.height * ratio;
+            const ctx = canvas.getContext('2d'); ctx.scale(ratio, ratio); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 7; ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#007AFF';
+            let drawing = false, last = null; const point = e => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+            canvas.addEventListener('pointerdown', e => { drawing = true; last = point(e); canvas.setPointerCapture(e.pointerId); writingSession.hasInk = true; });
+            canvas.addEventListener('pointermove', e => { if (!drawing) return; const next = point(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(next.x, next.y); ctx.stroke(); last = next; });
+            const end = () => { drawing = false; last = null; }; canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+        }
+        function clearWritingCanvas() { const c = document.getElementById('writing-canvas'); if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height); writingSession.hasInk = false; }
+        function completeWritingPractice() { if (!writingSession.hasInk) { alert('Tulis hurufnya terlebih dahulu, lalu tekan tombol Sudah Menulis.'); return; } const reward = writingSession.type === 'kanji' ? 10 : 5; state.coins += reward; if (writingSession.type === 'hiragana') state.stats.hiraganaProgress = Math.min(100, (state.stats.hiraganaProgress || 0) + 1); else if (writingSession.type === 'katakana') state.stats.katakanaProgress = Math.min(100, (state.stats.katakanaProgress || 0) + 1); else state.stats.kanjiProgress = Math.min(100, (state.stats.kanjiProgress || 0) + 1); saveState(); updateCoinUI(); writingSession.index++; writingSession.hasInk = false; renderWritingPractice(); }
 
         function renderUjianTabs() {
             const isH = state.examDifficulty === 'hard';
@@ -2623,13 +2703,13 @@ const KANJI_N5_DB = (() => {
                     </div>
 
                     <div id="q-card" class="ios-glass p-8 rounded-[2.5rem] ${isSuperHard ? 'border-red-400/50' : 'border-accent'} text-center flex flex-col justify-center min-h-[180px] transition-all relative">
-                        <span class="text-6xl font-black select-none leading-none text-main">${symbol}</span>
+                        <span class="quiz-symbol font-black select-none leading-none text-main">${symbol}</span>
                         <span id="q-hint" class="text-xs mt-4" style="color: var(--text-muted)">${isInput ? (isKanji ? 'Tulis bacaan hiragananya' : (isKotoba ? 'Tulis arti Indonesianya' : 'Tulis cara membacanya')) : (isKanji ? 'Pilih bunyi hiragananya' : (isKotoba ? 'Pilih arti yang tepat' : 'Cara membacanya?'))}</span>
                     </div>
 
                     ${isInput ? `<div class="ios-glass p-4 rounded-[1.8rem] space-y-3"><input id="quiz-text-answer" onkeydown="if(event.key==='Enter') submitTextQuizAnswer('${escapeQuizArg(correct)}')" autocomplete="off" autocapitalize="off" class="w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-4 text-center font-bold text-main outline-none focus:border-accent" placeholder="Ketik jawaban di sini"><button id="text-submit-btn" onclick="submitTextQuizAnswer('${escapeQuizArg(correct)}')" class="w-full bg-accent text-white py-3 rounded-2xl font-bold">Cek Jawaban</button></div>` : `<div class="grid grid-cols-2 gap-3" id="c-grid">
                         ${choices.map((ch, idx) => `
-                            <button onclick="submitQuizAnswer('${escapeQuizArg(ch)}', '${escapeQuizArg(correct)}', this)" class="p-5 ios-glass hover:bg-accent-light hover:border-accent active:scale-95 text-sm font-bold rounded-[1.8rem] text-left flex flex-col gap-2 transition-all relative">
+                            <button onclick="submitQuizAnswer('${escapeQuizArg(ch)}', '${escapeQuizArg(correct)}', this)" class="quiz-choice p-5 ios-glass hover:bg-accent-light hover:border-accent active:scale-95 text-sm font-bold rounded-[1.8rem] text-left flex flex-col gap-2 transition-all relative">
                                 <span class="text-[10px] uppercase tracking-widest text-accent">${['A','B','C','D'][idx]}</span>
                                 <span class="leading-snug capitalize text-main">${ch}</span>
                             </button>
@@ -2759,6 +2839,7 @@ const KANJI_N5_DB = (() => {
         }
 
         function playChime(success) {
+            if (Number(state.systemVolume ?? 70) <= 0) return;
             try {
                 const ac = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ac.createOscillator(); const gain = ac.createGain();
@@ -3133,13 +3214,15 @@ const KANJI_N5_DB = (() => {
 
         function setAudioVolume(type, value) {
             const normalized = Math.max(0, Math.min(100, Number(value)));
-            if (type === 'background') { state.backgroundVolume = normalized; MusicEngine.refreshVolume(); }
+            if (type === 'background') { state.backgroundVolume = normalized; MusicEngine.refreshVolume(); if (normalized > 0 && state.musicOn) MusicEngine.start(); }
             else state.systemVolume = normalized;
             saveState(); syncMusicUI();
         }
 
         function setCustomMusic(file) {
             if (!file) return;
+            const isAudio = /^audio\//.test(file.type) || /\.(mp3|wav|ogg|m4a)$/i.test(file.name);
+            if (!isAudio) { alert('Pilih file musik berformat MP3, WAV, OGG, atau M4A.'); return; }
             MusicEngine.setCustomTrack(file);
             state.customMusicName = file.name;
             state.musicOn = true;
