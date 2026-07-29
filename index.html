@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id" data-season="default" class="transition-colors duration-700">
 <head>
@@ -87,17 +87,23 @@
         /* INARI SHRINE (PREMIUM) */
         [data-season="inari"] { --bg-app: #F8F5EF; --accent: #D64A2F; --glass-bg: rgba(255, 251, 245, .86); --glass-border: rgba(214, 74, 47, .22); --text-main: #2F2A28; --text-muted: #746762; }
         .dark[data-season="inari"] { --bg-app: #241c1a; --accent: #F08A4B; --glass-bg: rgba(47, 35, 31, .88); --glass-border: rgba(212, 175, 55, .28); --text-main: #FFF7EE; --text-muted: #DEC9B8; }
-        [data-season="inari"] body { background: #F8F5EF; }
-        .dark[data-season="inari"] body { background: #241c1a; }
-        [data-season="inari"] #season-art-bg { background-image: url("assets/Inari Shrine/Inari Shrine.jpeg") !important; background-size: cover; background-position: center top; opacity: .11; }
-        .dark[data-season="inari"] #season-art-bg { opacity: .08; filter: saturate(.7) brightness(.56); }
-        [data-season="inari"] .home-hero { min-height: 205px; background: url("assets/Inari Shrine/IMG_2034.jpeg") center / cover no-repeat; border-color: rgba(214,74,47,.18); box-shadow: 0 16px 30px -22px rgba(150,52,31,.5); }
+        [data-season="inari"] body { background: #F8F5EF url("assets/Inari Shrine/Background/Inari.png") center top / cover fixed no-repeat; }
+        .dark[data-season="inari"] body { background: #241c1a url("assets/Inari Shrine/Background/Inari Dark.png") center top / cover fixed no-repeat; }
+        [data-orientation-view="landscape"][data-season="inari"] body { background-image: url("assets/Inari Shrine/Background/Inari Landscape.png"); }
+        [data-orientation-view="landscape"].dark[data-season="inari"] body { background-image: url("assets/Inari Shrine/Background/Inari Landscape Dark.png"); }
+        [data-season="inari"] #season-art-bg { background-image: none !important; opacity: 0 !important; }
+        [data-season="inari"] .home-hero { min-height: 205px; background-color: #F8F5EF; background-image: url("assets/Inari Shrine/Inari Shrine.jpeg") !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; border-color: rgba(214,74,47,.18); box-shadow: 0 16px 30px -22px rgba(150,52,31,.5); }
+        [data-orientation-view="landscape"][data-season="inari"] .home-hero { background-image: url("assets/Inari Shrine/Inari Shrine Landscape.png") !important; }
+        .dark[data-season="inari"] .home-hero { background-image: url("assets/Inari Shrine/Inari Shrine Dark.png") !important; }
+        [data-orientation-view="landscape"].dark[data-season="inari"] .home-hero { background-image: url("assets/Inari Shrine/Inari Shrine Landscape Dark.png") !important; }
         [data-season="inari"] .home-hero h1, [data-season="inari"] .home-hero p, [data-season="inari"] .home-hero > div { visibility: hidden; }
-        [data-season="inari"] .main-menu-card { border-color: rgba(214,74,47,.18); background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,248,241,.86)), url("assets/Inari Shrine/IMG_2034.jpeg") center / cover; box-shadow: 0 12px 24px -18px rgba(150,52,31,.42); }
+        [data-season="inari"] .main-menu-card { border-color: rgba(214,74,47,.18); background: linear-gradient(180deg, #FFFDF9 0%, #FFF6ED 100%); box-shadow: 0 12px 24px -18px rgba(150,52,31,.42); }
         [data-season="inari"] .main-menu-card::before { height: 82px; top: -20px; background: linear-gradient(110deg, #D64A2F 0%, #F08A4B 72%, transparent 73%); opacity: .94; }
-        [data-season="inari"] .main-menu-card::after { background-image: url("assets/Inari Shrine/IMG_2034.jpeg"); background-size: 230px auto; background-position: right bottom; border-radius: 50%; opacity: .13; }
+        [data-season="inari"] .main-menu-card::after { content: '🦊  🍁'; width: auto; height: auto; top: auto; right: .7rem; bottom: .45rem; z-index: 0; pointer-events: none; background: none; border-radius: 0; font-size: 1.8rem; letter-spacing: .2rem; opacity: .2; filter: saturate(.9); }
+        [data-season="inari"] .main-menu-card > * { position: relative; z-index: 1; }
         [data-season="inari"] .menu-icon { background: #FFF9F1; border: 1px solid rgba(214,74,47,.34); box-shadow: 0 8px 14px -10px rgba(150,52,31,.5); }
-        .dark[data-season="inari"] .main-menu-card { background: linear-gradient(rgba(48,32,28,.86), rgba(48,32,28,.9)), url("assets/Inari Shrine/IMG_2034.jpeg") center / cover; }
+        .dark[data-season="inari"] .main-menu-card { background: linear-gradient(180deg, #382621, #2D201D); }
+        .dark[data-season="inari"] .main-menu-card::after { opacity: .16; }
 
         /* TROPIS (PREMIUM) */
         [data-season="tropis"] { --bg-app: #E8F5E9; --accent: #2E7D32; --glass-bg: rgba(255, 255, 255, 0.65); --glass-border: rgba(46, 125, 50, 0.15); }
@@ -541,11 +547,6 @@
                     <button onclick="setSeason('aki')" id="season-aki" class="flex flex-col items-center gap-1 p-2 rounded-2xl ios-glass border-2 border-transparent transition-all"><span class="text-lg">🍁</span><span class="text-[9px] font-bold">Aki</span></button>
                     <button onclick="setSeason('fuyu')" id="season-fuyu" class="flex flex-col items-center gap-1 p-2 rounded-2xl ios-glass border-2 border-transparent transition-all"><span class="text-lg">❄️</span><span class="text-[9px] font-bold">Fuyu</span></button>
                 </div>
-            </div>
-
-            <div class="mb-6" id="premium-themes-container" style="display: none;">
-                <label class="text-xs font-semibold uppercase tracking-wider block mb-3 text-yellow-500">Tema Premium</label>
-                <div class="grid grid-cols-2 gap-2" id="premium-themes-grid"></div>
             </div>
 
             <div class="space-y-3">
@@ -1739,6 +1740,8 @@ const KANJI_N5_DB = (() => {
             { id: 'ios6', name: 'iOS 6 Blue', icon: '📱', price: 250, desc: 'Wallpaper biru glossy, tombol realistis, dan musik retro synth era lama.' },
             { id: 'xpaero', name: 'XP Frutiger Aero', icon: '🫧', price: 150, desc: 'Langit biru, bukit hijau mencolok, kaca Aero, dan gelembung nostalgia.' }
         ];
+        const PREMIUM_THEME_ORDER = ['tropis', 'space', 'natal', 'ios6', 'xpaero', 'kyoto', 'inari'];
+        SHOP_ITEMS.sort((a, b) => PREMIUM_THEME_ORDER.indexOf(a.id) - PREMIUM_THEME_ORDER.indexOf(b.id));
 
         /* ================= MUSIC FILES ================= */
         class FileMusicEngine {
@@ -3174,15 +3177,8 @@ const KANJI_N5_DB = (() => {
                     o.appendChild(p);
                 }
             } else if (state.season === 'inari') {
+                // Komposisi Inari terkunci di hero agar ornamen tidak melayang di atas konten.
                 bgSvg = '';
-                const inariItems = ['⛩️', '🦊', '🍁'];
-                for(let i=0; i<9; i++) {
-                    const p = document.createElement('div'); p.className = 'particle-down text-lg drop-shadow-sm';
-                    p.innerText = inariItems[Math.floor(Math.random() * inariItems.length)];
-                    p.style.left = Math.random()*100+'vw'; p.style.animationDelay = Math.random()*6+'s'; p.style.animationDuration = 7+Math.random()*5+'s';
-                    p.style.opacity = .24 + Math.random()*.18;
-                    o.appendChild(p);
-                }
             } else if (state.season === 'tropis') {
                 bgSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 C 20 80, 40 100, 60 70 C 80 40, 100 80, 100 100 Z' fill='%234caf50' opacity='0.2'/%3E%3Cpath d='M-20 100 C 10 60, 50 110, 80 50 C 110 -10, 120 100, 120 100 Z' fill='%232e7d32' opacity='0.15'/%3E%3C/svg%3E")`;
                 const leaves = ['🍃', '🌿', '🌱'];
@@ -3275,7 +3271,7 @@ const KANJI_N5_DB = (() => {
             const premiumGrid = document.getElementById('premium-themes-grid');
             const unlockedPremium = SHOP_ITEMS.filter(item => state.unlockedThemes.includes(item.id));
             
-            if (unlockedPremium.length > 0) {
+            if (premiumContainer && premiumGrid && unlockedPremium.length > 0) {
                 premiumContainer.style.display = 'block';
                 premiumGrid.innerHTML = unlockedPremium.map(item => `
                     <button onclick="setSeason('${item.id}')" class="flex items-center gap-2 p-3 rounded-2xl ios-glass border-2 transition-all ${state.season === item.id ? 'border-accent bg-accent-light' : 'border-transparent'} hover:scale-105 active:scale-95">
@@ -3283,7 +3279,7 @@ const KANJI_N5_DB = (() => {
                         <span class="text-[10px] font-bold text-left leading-tight">${item.name}</span>
                     </button>
                 `).join('');
-            } else {
+            } else if (premiumContainer) {
                 premiumContainer.style.display = 'none';
             }
             if (window.lucide) lucide.createIcons();
@@ -3384,3 +3380,4 @@ const KANJI_N5_DB = (() => {
 </html>
 
 
+```
