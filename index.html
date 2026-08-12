@@ -314,33 +314,33 @@
             from { opacity: 0; transform: translateY(-10px) scale(.94); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .kotoba-practice-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 54;
-            background: transparent;
-            cursor: default;
-        }
         .kotoba-practice-panel {
             position: fixed;
-            z-index: 60;
+            z-index: 70;
+            right: max(0.8rem, env(safe-area-inset-right));
             width: 13.75rem;
             padding: .46rem;
             border-radius: 1.45rem;
             transform-origin: top right;
             isolation: isolate;
+            background: linear-gradient(145deg, color-mix(in srgb, var(--glass-bg) 92%, white), color-mix(in srgb, var(--glass-bg) 88%, transparent));
+            border: 1px solid color-mix(in srgb, white 50%, var(--glass-border));
+            backdrop-filter: blur(28px) saturate(175%);
+            -webkit-backdrop-filter: blur(28px) saturate(175%);
             box-shadow: 0 1.15rem 2.7rem -1.45rem color-mix(in srgb, var(--accent) 38%, rgba(0,0,0,.45));
             animation: kotobaPracticeReveal .52s cubic-bezier(.22,.88,.25,1.16) both;
         }
         .kotoba-practice-panel.is-closing { animation: kotobaPracticeHide .30s cubic-bezier(.4,0,.7,.2) both; pointer-events: none; }
         .kotoba-practice-choice {
             min-height: 4.1rem;
+            background: color-mix(in srgb, var(--glass-bg) 82%, white);
             border: 1px solid color-mix(in srgb, var(--glass-border) 88%, transparent);
             animation: kotobaPracticeChoice .34s .14s cubic-bezier(.22,.88,.25,1.12) both;
         }
         .kotoba-practice-choice + .kotoba-practice-choice { margin-top: .43rem; animation-delay: .23s; }
         .kotoba-practice-choice--accent {
             color: white;
+            background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 83%, white), var(--accent));
             border-color: color-mix(in srgb, var(--accent) 62%, white);
             box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 .6rem 1.1rem -.8rem color-mix(in srgb, var(--accent) 88%, transparent);
         }
@@ -357,7 +357,7 @@
         #kotoba-practice-trigger.is-expanded { transform: scale(.94); opacity: .55; filter: saturate(.8); }
         /* Ukuran dan jarak panel sengaja berbeda untuk tiap orientasi. */
         [data-orientation-view="portrait"] .kotoba-practice-panel { width: min(13.75rem, calc(100vw - 1.5rem)); }
-        [data-orientation-view="landscape"] .kotoba-practice-panel { width: min(14.5rem, calc(100vw - 2rem)); }
+        [data-orientation-view="landscape"] .kotoba-practice-panel { width: min(14.5rem, calc(100vw - 2.5rem)); right: max(1.25rem, env(safe-area-inset-right)); }
         @media (max-width: 390px) {
             [data-orientation-view="portrait"] .kotoba-practice-panel { width: min(13rem, calc(100vw - 1.25rem)); }
         }
@@ -2101,7 +2101,7 @@ const KANJI_N5_DB = (() => {
         let state = {
             isFirstLogin: true, activeTab: 'home', user: { name: '', avatar: '🌸' },
             theme: 'auto', season: 'default', musicOn: false, backgroundVolume: 32, systemVolume: 70, customMusicName: '', examDifficulty: 'normal',
-            orientationMode: 'auto', orientationView: 'landscape', reminderOn: false, dailyTarget: 10, rating: 0, favorites: [],
+            orientationMode: 'auto', orientationView: 'landscape', kotobaPracticeMode: 'input', reminderOn: false, dailyTarget: 10, rating: 0, favorites: [],
             coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'],
             stats: { 
                 correct: 0, wrong: 0, history: [], 
@@ -2112,6 +2112,8 @@ const KANJI_N5_DB = (() => {
         };
 
         let bunpouSession = { bab: 1, currentIdx: 0, currentQuizIdx: 0, selectedWords: [], availableWords: [], mode: 'arrange' };
+        /* Satu sumber state untuk popover latihan kosakata. */
+        let kotobaPracticeMenu = { isOpen: false, closeTimer: null, launchTimer: null };
 
         const getCoinIcon = () => state.season === 'natal' ? '🔔' : '🪙';
 
@@ -2125,6 +2127,7 @@ const KANJI_N5_DB = (() => {
                     if(!parsed.stats.bunpouCompleted) parsed.stats.bunpouCompleted = [];
                     if(!parsed.orientationMode) parsed.orientationMode = 'auto';
                     if(!parsed.orientationView) parsed.orientationView = 'landscape';
+                    if(!parsed.kotobaPracticeMode) parsed.kotobaPracticeMode = 'input';
                     if(parsed.backgroundVolume === undefined) parsed.backgroundVolume = 32;
                     if(parsed.systemVolume === undefined) parsed.systemVolume = 70;
                     if(parsed.reminderOn === undefined) parsed.reminderOn = false;
@@ -2751,6 +2754,7 @@ const KANJI_N5_DB = (() => {
         }
 
         function openKotobaBab(bab) {
+            closeKotobaPracticePanel();
             const list = KOTOBA_DB[bab];
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-6 pb-24">
@@ -2885,54 +2889,84 @@ const KANJI_N5_DB = (() => {
 
         function closeKotobaPracticePanel() {
             const panel = document.getElementById('kotoba-practice-panel');
-            const backdrop = document.getElementById('kotoba-practice-backdrop');
             const trigger = document.getElementById('kotoba-practice-trigger');
+            kotobaPracticeMenu.isOpen = false;
+            clearTimeout(kotobaPracticeMenu.launchTimer);
+            kotobaPracticeMenu.launchTimer = null;
             if (trigger) { trigger.classList.remove('is-expanded'); trigger.setAttribute('aria-expanded', 'false'); }
-            if (panel && !panel.classList.contains('is-closing')) {
-                panel.classList.add('is-closing');
-                setTimeout(() => panel.remove(), 300);
-            }
-            if (backdrop) backdrop.remove();
+            if (!panel || panel.classList.contains('is-closing')) return;
+            panel.classList.add('is-closing');
+            clearTimeout(kotobaPracticeMenu.closeTimer);
+            kotobaPracticeMenu.closeTimer = setTimeout(() => {
+                panel.remove();
+                kotobaPracticeMenu.closeTimer = null;
+            }, 300);
         }
 
         function positionKotobaPracticePanel() {
             const panel = document.getElementById('kotoba-practice-panel');
             const trigger = document.getElementById('kotoba-practice-trigger');
-            const app = document.getElementById('main-app');
-            if (!panel || !trigger || !app) return;
-            const appRect = app.getBoundingClientRect();
+            if (!panel || !trigger || !kotobaPracticeMenu.isOpen) return;
             const triggerRect = trigger.getBoundingClientRect();
             const isLandscape = document.documentElement.getAttribute('data-orientation-view') === 'landscape';
-            const panelWidth = panel.getBoundingClientRect().width;
-            const horizontalPadding = isLandscape ? 18 : 12;
-            const leftMin = appRect.left + horizontalPadding;
-            const leftMax = Math.max(leftMin, appRect.right - panelWidth - horizontalPadding);
-            const desiredLeft = triggerRect.right - panelWidth;
-            panel.style.left = `${Math.min(Math.max(desiredLeft, leftMin), leftMax)}px`;
-            panel.style.top = `${triggerRect.bottom + (isLandscape ? 9 : 10)}px`;
+            const viewportHeight = window.visualViewport?.height || window.innerHeight;
+            const panelHeight = panel.getBoundingClientRect().height;
+            const topGap = isLandscape ? 16 : 14;
+            const safeTop = isLandscape ? 12 : 10;
+            panel.style.removeProperty('left');
+            panel.style.top = `${Math.max(safeTop, Math.min(triggerRect.bottom + topGap, viewportHeight - panelHeight - 12))}px`;
         }
 
         function toggleKotobaPracticePanel(bab) {
-            if (document.getElementById('kotoba-practice-panel')) { closeKotobaPracticePanel(); return; }
+            if (kotobaPracticeMenu.isOpen || document.getElementById('kotoba-practice-panel')) { closeKotobaPracticePanel(); return; }
             const trigger = document.getElementById('kotoba-practice-trigger');
             if (!trigger) return;
+            const activeMode = state.kotobaPracticeMode || 'input';
+            kotobaPracticeMenu.isOpen = true;
             trigger.classList.add('is-expanded');
             trigger.setAttribute('aria-expanded', 'true');
-            const backdrop = document.createElement('button');
-            backdrop.id = 'kotoba-practice-backdrop';
-            backdrop.type = 'button';
-            backdrop.setAttribute('aria-label', 'Tutup pilihan latihan');
-            backdrop.onclick = closeKotobaPracticePanel;
             const panel = document.createElement('div');
             panel.id = 'kotoba-practice-panel';
             panel.className = 'kotoba-practice-panel ios-glass';
             panel.setAttribute('role', 'menu');
-            panel.innerHTML = `<button onclick="startKotobaLatihan(${bab}, 'choice')" class="kotoba-practice-choice w-full rounded-[1.08rem] p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="list-checks" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black text-main">Pilihan Ganda</span><span class="mt-0.5 block text-[11px] leading-tight" style="color:var(--text-muted)">Pilih arti yang tepat.</span></span></span></button>
-                <button onclick="startKotobaLatihan(${bab}, 'input')" class="kotoba-practice-choice kotoba-practice-choice--accent w-full rounded-[1.08rem] bg-accent p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="keyboard" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black">Isian</span><span class="mt-0.5 block text-[11px] leading-tight text-white/80">Ketik arti yang benar.</span></span></span></button>`;
-            document.body.append(backdrop, panel);
+            panel.innerHTML = `<button onclick="startKotobaLatihan(${bab}, 'choice')" class="kotoba-practice-choice ${activeMode === 'choice' ? 'kotoba-practice-choice--accent bg-accent' : ''} w-full rounded-[1.08rem] p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="list-checks" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black ${activeMode === 'choice' ? '' : 'text-main'}">Pilihan Ganda</span><span class="mt-0.5 block text-[11px] leading-tight ${activeMode === 'choice' ? 'text-white/80' : ''}" ${activeMode === 'choice' ? '' : 'style="color:var(--text-muted)"'}>Pilih arti yang tepat.</span></span></span></button>
+                <button onclick="startKotobaLatihan(${bab}, 'input')" class="kotoba-practice-choice ${activeMode === 'input' ? 'kotoba-practice-choice--accent bg-accent' : ''} w-full rounded-[1.08rem] p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="keyboard" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black ${activeMode === 'input' ? '' : 'text-main'}">Isian</span><span class="mt-0.5 block text-[11px] leading-tight ${activeMode === 'input' ? 'text-white/80' : ''}" ${activeMode === 'input' ? '' : 'style="color:var(--text-muted)"'}>Ketik arti yang benar.</span></span></span></button>`;
+            document.body.appendChild(panel);
             requestAnimationFrame(() => { positionKotobaPracticePanel(); lucide.createIcons(); });
         }
-        function startKotobaLatihan(bab, mode = 'choice') { closeKotobaPracticePanel(); setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode); }
+        function startKotobaLatihan(bab, mode = 'choice') {
+            state.kotobaPracticeMode = mode; saveState();
+            closeKotobaPracticePanel();
+            kotobaPracticeMenu.launchTimer = setTimeout(() => {
+                kotobaPracticeMenu.launchTimer = null;
+                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode);
+            }, 320);
+        }
+        /* Dismiss lifecycle: panel tidak menghalangi tap atau scroll di halaman. */
+        document.addEventListener('pointerdown', (event) => {
+            if (!kotobaPracticeMenu.isOpen) return;
+            const panel = document.getElementById('kotoba-practice-panel');
+            const trigger = document.getElementById('kotoba-practice-trigger');
+            if (panel?.contains(event.target) || trigger?.contains(event.target)) return;
+            closeKotobaPracticePanel();
+        }, true);
+        document.addEventListener('scroll', () => {
+            if (kotobaPracticeMenu.isOpen) closeKotobaPracticePanel();
+        }, true);
+        document.addEventListener('touchmove', () => {
+            if (kotobaPracticeMenu.isOpen) closeKotobaPracticePanel();
+        }, { passive: true });
+        document.addEventListener('wheel', () => {
+            if (kotobaPracticeMenu.isOpen) closeKotobaPracticePanel();
+        }, { passive: true });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeKotobaPracticePanel();
+        });
+        window.addEventListener('blur', closeKotobaPracticePanel);
+        window.addEventListener('pagehide', closeKotobaPracticePanel);
+        window.visualViewport?.addEventListener('resize', () => {
+            if (kotobaPracticeMenu.isOpen) closeKotobaPracticePanel();
+        });
         
         function startLevelQuiz(l, mode = 'choice') {
             let p = [], t = "";
@@ -3245,6 +3279,7 @@ const KANJI_N5_DB = (() => {
 
         /* ================= HELPERS, COINS, & THEME SYSTEM ================= */
         function switchTab(tabId) {
+            closeKotobaPracticePanel();
             state.activeTab = tabId; saveState();
             if (tabId !== 'ujian-menu' && state.quiz.currentQuestion === 0) MusicEngine.setExamMode(false);
             if (state.quiz.timerObj) { clearInterval(state.quiz.timerObj); state.quiz.timerObj = null; }
@@ -3426,11 +3461,13 @@ const KANJI_N5_DB = (() => {
         }
 
         function applyOrientation() {
+            const previousView = document.documentElement.getAttribute('data-orientation-view');
             if (state.orientationMode === 'auto') {
                 state.orientationView = window.innerWidth >= window.innerHeight ? 'landscape' : 'portrait';
             }
             document.documentElement.setAttribute('data-orientation-view', state.orientationView || 'landscape');
-            requestAnimationFrame(positionKotobaPracticePanel);
+            if (previousView && previousView !== state.orientationView && kotobaPracticeMenu.isOpen) closeKotobaPracticePanel();
+            else requestAnimationFrame(positionKotobaPracticePanel);
         }
         
         function setSeason(s) { 
