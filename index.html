@@ -298,6 +298,70 @@
         .border-accent { border-color: var(--accent); }
 
         .ios-btn-press:active { transform: scale(0.95); filter: brightness(0.9); }
+
+        /* Pemilih latihan kotoba: panel kecil bergaya liquid glass yang selalu
+           berada di dalam lebar aplikasi, bukan di tepi jendela browser. */
+        @keyframes kotobaPracticeReveal {
+            0% { opacity: 0; transform: translateY(-13px) scale(.78); filter: blur(8px); }
+            55% { opacity: 1; transform: translateY(2px) scale(1.018); filter: blur(0); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        @keyframes kotobaPracticeHide {
+            from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+            to { opacity: 0; transform: translateY(-9px) scale(.86); filter: blur(5px); }
+        }
+        @keyframes kotobaPracticeChoice {
+            from { opacity: 0; transform: translateY(-10px) scale(.94); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .kotoba-practice-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 54;
+            background: transparent;
+            cursor: default;
+        }
+        .kotoba-practice-panel {
+            position: fixed;
+            z-index: 60;
+            width: 13.75rem;
+            padding: .46rem;
+            border-radius: 1.45rem;
+            transform-origin: top right;
+            isolation: isolate;
+            box-shadow: 0 1.15rem 2.7rem -1.45rem color-mix(in srgb, var(--accent) 38%, rgba(0,0,0,.45));
+            animation: kotobaPracticeReveal .52s cubic-bezier(.22,.88,.25,1.16) both;
+        }
+        .kotoba-practice-panel.is-closing { animation: kotobaPracticeHide .30s cubic-bezier(.4,0,.7,.2) both; pointer-events: none; }
+        .kotoba-practice-choice {
+            min-height: 4.1rem;
+            border: 1px solid color-mix(in srgb, var(--glass-border) 88%, transparent);
+            animation: kotobaPracticeChoice .34s .14s cubic-bezier(.22,.88,.25,1.12) both;
+        }
+        .kotoba-practice-choice + .kotoba-practice-choice { margin-top: .43rem; animation-delay: .23s; }
+        .kotoba-practice-choice--accent {
+            color: white;
+            border-color: color-mix(in srgb, var(--accent) 62%, white);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 .6rem 1.1rem -.8rem color-mix(in srgb, var(--accent) 88%, transparent);
+        }
+        .kotoba-practice-icon {
+            color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 13%, transparent);
+        }
+        .kotoba-practice-choice--accent .kotoba-practice-icon {
+            color: white;
+            background: rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.2);
+        }
+        #kotoba-practice-trigger { transform-origin: right center; }
+        #kotoba-practice-trigger.is-expanded { transform: scale(.94); opacity: .55; filter: saturate(.8); }
+        /* Ukuran dan jarak panel sengaja berbeda untuk tiap orientasi. */
+        [data-orientation-view="portrait"] .kotoba-practice-panel { width: min(13.75rem, calc(100vw - 1.5rem)); }
+        [data-orientation-view="landscape"] .kotoba-practice-panel { width: min(14.5rem, calc(100vw - 2rem)); }
+        @media (max-width: 390px) {
+            [data-orientation-view="portrait"] .kotoba-practice-panel { width: min(13rem, calc(100vw - 1.25rem)); }
+        }
+
         #bottom-nav {
             position: fixed !important;
             left: 50% !important;
@@ -1094,6 +1158,24 @@
             ]
         });
 
+
+        Object.assign(KOTOBA_DB, {
+            16: [
+                {kana:'のります',kanji:'乗ります',arti:'naik (kendaraan)',romaji:'norimasu'}, {kana:'おります',kanji:'降ります',arti:'turun (kendaraan)',romaji:'orimasu'}, {kana:'のりかえます',kanji:'乗り換えます',arti:'berganti kendaraan',romaji:'norikaemasu'}, {kana:'あびます',kanji:'浴びます',arti:'mandi / berendam',romaji:'abimasu'}, {kana:'いれます',kanji:'入れます',arti:'memasukkan',romaji:'iremasu'}, {kana:'だします',kanji:'出します',arti:'mengeluarkan / menyerahkan',romaji:'dashimasu'}, {kana:'おします',kanji:'押します',arti:'menekan',romaji:'oshimasu'}, {kana:'わかい',kanji:'若い',arti:'muda',romaji:'wakai'}, {kana:'ながい',kanji:'長い',arti:'panjang',romaji:'nagai'}, {kana:'みじかい',kanji:'短い',arti:'pendek',romaji:'mijikai'}, {kana:'からだ',kanji:'体',arti:'badan',romaji:'karada'}, {kana:'あたま',kanji:'頭',arti:'kepala',romaji:'atama'}, {kana:'かみ',kanji:'髪',arti:'rambut',romaji:'kami'}, {kana:'め',kanji:'目',arti:'mata',romaji:'me'}, {kana:'みみ',kanji:'耳',arti:'telinga',romaji:'mimi'}, {kana:'は',kanji:'歯',arti:'gigi',romaji:'ha'}, {kana:'あし',kanji:'足',arti:'kaki',romaji:'ashi'}, {kana:'せ',kanji:'背',arti:'punggung / tinggi badan',romaji:'se'}
+            ],
+            17: [
+                {kana:'おぼえます',kanji:'覚えます',arti:'mengingat / menghafal',romaji:'oboemasu'}, {kana:'わすれます',kanji:'忘れます',arti:'lupa',romaji:'wasuremasu'}, {kana:'なくします',kanji:'無くします',arti:'kehilangan',romaji:'nakushimasu'}, {kana:'はらいます',kanji:'払います',arti:'membayar',romaji:'haraimasu'}, {kana:'かえします',kanji:'返します',arti:'mengembalikan',romaji:'kaeshimasu'}, {kana:'でかけます',kanji:'出かけます',arti:'pergi keluar',romaji:'dekakemasu'}, {kana:'ぬぎます',kanji:'脱ぎます',arti:'melepas pakaian',romaji:'nugimasu'}, {kana:'もっていきます',kanji:'持って行きます',arti:'membawa pergi',romaji:'motteikimasu'}, {kana:'もってきます',kanji:'持って来ます',arti:'membawa datang',romaji:'mottekimasu'}, {kana:'しんぱいします',kanji:'心配します',arti:'khawatir',romaji:'shinpai shimasu'}, {kana:'ざんぎょうします',kanji:'残業します',arti:'lembur',romaji:'zangyou shimasu'}, {kana:'しゅっちょうします',kanji:'出張します',arti:'dinas',romaji:'shucchou shimasu'}, {kana:'くすり',kanji:'薬',arti:'obat',romaji:'kusuri'}, {kana:'おふろ',kanji:'お風呂',arti:'mandi / kamar mandi',romaji:'ofuro'}, {kana:'きけん',kanji:'危険',arti:'berbahaya',romaji:'kiken'}, {kana:'ねつ',kanji:'熱',arti:'demam',romaji:'netsu'}, {kana:'びょうき',kanji:'病気',arti:'sakit',romaji:'byouki'}, {kana:'うわぎ',kanji:'上着',arti:'baju jaket',romaji:'uwagi'}
+            ],
+            18: [
+                {kana:'できます',kanji:'出来ます',arti:'dapat / bisa',romaji:'dekimasu'}, {kana:'あらいます',kanji:'洗います',arti:'mencuci',romaji:'araimasu'}, {kana:'ひきます',kanji:'弾きます',arti:'bermain alat musik',romaji:'hikimasu'}, {kana:'うたいます',kanji:'歌います',arti:'bernyanyi',romaji:'utaimasu'}, {kana:'あつめます',kanji:'集めます',arti:'mengumpulkan',romaji:'atsumemasu'}, {kana:'すてます',kanji:'捨てます',arti:'membuang',romaji:'sutemasu'}, {kana:'かえます',kanji:'換えます',arti:'menukar / mengganti',romaji:'kaemasu'}, {kana:'うんてんします',kanji:'運転します',arti:'mengemudi',romaji:'unten shimasu'}, {kana:'よやくします',kanji:'予約します',arti:'memesan / reservasi',romaji:'yoyaku shimasu'}, {kana:'ピアノ',kanji:'',arti:'piano',romaji:'piano'}, {kana:'メートル',kanji:'',arti:'meter',romaji:'meetoru'}, {kana:'げんきん',kanji:'現金',arti:'uang tunai',romaji:'genkin'}, {kana:'しゅみ',kanji:'趣味',arti:'hobi',romaji:'shumi'}, {kana:'にっき',kanji:'日記',arti:'catatan harian',romaji:'nikki'}, {kana:'おいのり',kanji:'お祈り',arti:'doa',romaji:'oinori'}, {kana:'しちょう',kanji:'市長',arti:'wali kota',romaji:'shichou'}, {kana:'ぶちょう',kanji:'部長',arti:'kepala seksi',romaji:'buchou'}, {kana:'しゃちょう',kanji:'社長',arti:'direktur utama',romaji:'shachou'}, {kana:'どうぶつ',kanji:'動物',arti:'hewan',romaji:'doubutsu'}
+            ],
+            19: [
+                {kana:'のぼります',kanji:'登ります',arti:'naik / mendaki',romaji:'noborimasu'}, {kana:'とまります',kanji:'泊まります',arti:'menginap',romaji:'tomarimasu'}, {kana:'そうじします',kanji:'掃除します',arti:'membersihkan',romaji:'souji shimasu'}, {kana:'せんたくします',kanji:'洗濯します',arti:'mencuci pakaian',romaji:'sentaku shimasu'}, {kana:'なります',kanji:'なります',arti:'menjadi',romaji:'narimasu'}, {kana:'つよい',kanji:'強い',arti:'kuat',romaji:'tsuyoi'}, {kana:'よわい',kanji:'弱い',arti:'lemah',romaji:'yowai'}, {kana:'れんしゅう',kanji:'練習',arti:'latihan',romaji:'renshuu'}, {kana:'ゴルフ',kanji:'',arti:'golf',romaji:'gorufu'}, {kana:'すもう',kanji:'相撲',arti:'sumo',romaji:'sumou'}, {kana:'おちゃ',kanji:'お茶',arti:'upacara minum teh',romaji:'ocha'}, {kana:'ひ',kanji:'日',arti:'hari',romaji:'hi'}, {kana:'ちょうし',kanji:'調子',arti:'kondisi',romaji:'choushi'}, {kana:'いちど',kanji:'一度',arti:'sekali / satu kali',romaji:'ichido'}, {kana:'いちども',kanji:'一度も',arti:'tidak sekali pun',romaji:'ichido mo'}, {kana:'だんだん',kanji:'',arti:'berangsur-angsur',romaji:'dandan'}, {kana:'もうすぐ',kanji:'',arti:'sebentar lagi',romaji:'mou sugu'}, {kana:'おかげさまで',kanji:'',arti:'terima kasih atas bantuan',romaji:'okagesama de'}
+            ],
+            20: [
+                {kana:'いります',kanji:'要ります',arti:'memerlukan',romaji:'irimasu'}, {kana:'しらべます',kanji:'調べます',arti:'memeriksa / mencari',romaji:'shirabemasu'}, {kana:'しゅうりします',kanji:'修理します',arti:'memperbaiki',romaji:'shuuri shimasu'}, {kana:'ぼく',kanji:'僕',arti:'aku (laki-laki, informal)',romaji:'boku'}, {kana:'きみ',kanji:'君',arti:'kamu (informal)',romaji:'kimi'}, {kana:'くん',kanji:'〜君',arti:'sapaan anak laki-laki',romaji:'kun'}, {kana:'うん',kanji:'',arti:'ya (informal)',romaji:'un'}, {kana:'ううん',kanji:'',arti:'tidak (informal)',romaji:'uun'}, {kana:'ことば',kanji:'言葉',arti:'kata / bahasa',romaji:'kotoba'}, {kana:'きもの',kanji:'着物',arti:'kimono',romaji:'kimono'}, {kana:'ビザ',kanji:'',arti:'visa',romaji:'biza'}, {kana:'はじめ',kanji:'初め',arti:'awal / mula-mula',romaji:'hajime'}, {kana:'おわり',kanji:'終わり',arti:'akhir',romaji:'owari'}, {kana:'こっち',kanji:'',arti:'sini (informal)',romaji:'kocchi'}, {kana:'そっち',kanji:'',arti:'situ (informal)',romaji:'socchi'}, {kana:'あっち',kanji:'',arti:'sana (informal)',romaji:'acchi'}, {kana:'どっち',kanji:'',arti:'mana (informal)',romaji:'docchi'}, {kana:'もう',kanji:'',arti:'sudah',romaji:'mou'}, {kana:'まだ',kanji:'',arti:'masih / belum',romaji:'mada'}
+            ]
+        });
         const HIRAGANA_DB = {
             seion: [{j:"あ",r:"a"},{j:"い",r:"i"},{j:"う",r:"u"},{j:"え",r:"e"},{j:"お",r:"o"},{j:"か",r:"ka"},{j:"き",r:"ki"},{j:"く",r:"ku"},{j:"け",r:"ke"},{j:"こ",r:"ko"},{j:"さ",r:"sa"},{j:"し",r:"shi"},{j:"す",r:"su"},{j:"せ",r:"se"},{j:"そ",r:"so"},{j:"た",r:"ta"},{j:"ち",r:"chi"},{j:"つ",r:"tsu"},{j:"て",r:"te"},{j:"と",r:"to"},{j:"な",r:"na"},{j:"に",r:"ni"},{j:"ぬ",r:"nu"},{j:"ね",r:"ne"},{j:"の",r:"no"},{j:"は",r:"ha"},{j:"ひ",r:"hi"},{j:"ふ",r:"fu"},{j:"へ",r:"he"},{j:"ほ",r:"ho"},{j:"ま",r:"ma"},{j:"み",r:"mi"},{j:"む",r:"mu"},{j:"め",r:"me"},{j:"も",r:"mo"},{j:"や",r:"ya"},{j:"",r:""},{j:"ゆ",r:"yu"},{j:"",r:""},{j:"よ",r:"yo"},{j:"ら",r:"ra"},{j:"り",r:"ri"},{j:"る",r:"ru"},{j:"れ",r:"re"},{j:"ろ",r:"ro"},{j:"わ",r:"wa"},{j:"",r:""},{j:"",r:""},{j:"",r:""},{j:"を",r:"wo"},{j:"ん",r:"n"}],
             dakuon: [{j:"が",r:"ga"},{j:"ぎ",r:"gi"},{j:"ぐ",r:"gu"},{j:"げ",r:"ge"},{j:"ご",r:"go"},{j:"ざ",r:"za"},{j:"じ",r:"ji"},{j:"ず",r:"zu"},{j:"ぜ",r:"ze"},{j:"ぞ",r:"zo"},{j:"だ",r:"da"},{j:"ぢ",r:"ji"},{j:"づ",r:"zu"},{j:"で",r:"de"},{j:"ど",r:"do"},{j:"ば",r:"ba"},{j:"び",r:"bi"},{j:"ぶ",r:"bu"},{j:"べ",r:"be"},{j:"ぼ",r:"bo"}],
@@ -1696,6 +1778,182 @@ const KANJI_N5_DB = (() => {
             ]
         });
 
+
+        Object.assign(BUNPOU_DB, {
+            16: [
+                {id:'b16_1',title:'Kata Kerja Bentuk て',subtitle:'Menghubungkan urutan aksi',desc:'Bentuk <strong class="text-accent">て</strong> menghubungkan dua atau lebih aktivitas yang dilakukan berurutan.',pattern:'[Kata Kerja て]、[Kata Kerja て]、…',examples:[{j:'あさ シャワーを あびて、かいしゃへ いきます。',r:'Asa shawaa o abite, kaisha e ikimasu.',i:'Pagi hari saya mandi lalu pergi ke kantor.'}],quizzes:[{prompt:'Makan lalu minum teh.',words:['ごはん','を','たべて','おちゃ','を','のみます'],answerStr:'ごはんをたべておちゃをのみます'},{prompt:'Naik kereta lalu turun di Umeda.',words:['でんしゃ','に','のって','うめだ','で','おります'],answerStr:'でんしゃにのってうめだでおります'}]},
+                {id:'b16_2',title:'Kata Sifat い・な dalam Bentuk て',subtitle:'Menggabungkan sifat',desc:'Kata sifat い menjadi <strong class="text-accent">～くて</strong>; kata sifat な menjadi <strong class="text-accent">～で</strong> untuk menghubungkan sifat.',pattern:'[Sifat い]くて / [Sifat な]で',examples:[{j:'ミラーさんは わかくて、げんきです。',r:'Miraa-san wa wakakute, genki desu.',i:'Miller muda dan sehat.'}],quizzes:[{prompt:'Kamar ini sempit tetapi bersih.',words:['この','へや','は','せまくて','きれい','です'],answerStr:'このへやはせまくてきれいです'},{prompt:'Cuaca kemarin baik dan panas.',words:['きのう','は','てんき','が','よくて','あつかった','です'],answerStr:'きのうはてんきがよくてあつかったです'}]},
+                {id:'b16_3',title:'Kata Benda で',subtitle:'Menghubungkan kata benda',desc:'Partikel <strong class="text-accent">で</strong> dapat menyambungkan dua kata benda atau menyatakan latar/status.',pattern:'[Kata Benda] で、[Kata Benda] です',examples:[{j:'カリナさんは インドネシアじんで、がくせいです。',r:'Karina-san wa Indoneshia-jin de, gakusei desu.',i:'Karina orang Indonesia dan mahasiswa.'}],quizzes:[{prompt:'Saya mahasiswa dan orang Indonesia.',words:['わたし','は','インドネシアじん','で','がくせい','です'],answerStr:'わたしはインドネシアじんでがくせいです'},{prompt:'Rina adalah dokter dan ibu rumah tangga.',words:['リナさん','は','いしゃ','で','しゅふ','です'],answerStr:'リナさんはいしゃでしゅふです'}]}
+            ],
+            17: [
+                {id:'b17_1',title:'Kata Kerja Bentuk ない',subtitle:'Bentuk negatif biasa',desc:'Bentuk <strong class="text-accent">ない</strong> adalah bentuk negatif biasa dari kata kerja dan menjadi dasar beberapa pola penting.',pattern:'[Kata Kerja bentuk ない]',examples:[{j:'あした かいしゃへ いかない。',r:'Ashita kaisha e ikanai.',i:'Besok tidak pergi ke kantor.'}],quizzes:[{prompt:'Saya tidak minum alkohol.',words:['わたし','は','おさけ','を','のみません'],answerStr:'わたしはおさけをのみません'},{prompt:'Jangan khawatir.',words:['しんぱい','しないで','ください'],answerStr:'しんぱいしないでください'}]},
+                {id:'b17_2',title:'～ないで ください',subtitle:'Meminta agar tidak dilakukan',desc:'Gunakan <strong class="text-accent">～ないでください</strong> untuk meminta lawan bicara agar tidak melakukan sesuatu.',pattern:'[Kata Kerja ない] でください',examples:[{j:'ここで たばこを すわないでください。',r:'Koko de tabako o suwanaide kudasai.',i:'Tolong jangan merokok di sini.'}],quizzes:[{prompt:'Jangan lupa obat.',words:['くすり','を','わすれないで','ください'],answerStr:'くすりをわすれないでください'},{prompt:'Jangan masuk ke ruangan ini.',words:['この','へや','に','はいらないで','ください'],answerStr:'このへやにはいらないでください'}]},
+                {id:'b17_3',title:'～なければ なりません / ～なくても いいです',subtitle:'Kewajiban dan tidak wajib',desc:'<strong class="text-accent">～なければなりません</strong> berarti harus; <strong class="text-accent">～なくてもいいです</strong> berarti tidak perlu.',pattern:'[Kata Kerja ない]ければ なりません',examples:[{j:'くすりを のまなければ なりません。',r:'Kusuri o nomanakereba narimasen.',i:'Harus minum obat.'}],quizzes:[{prompt:'Besok tidak perlu datang.',words:['あした','は','こなくて','も','いい','です'],answerStr:'あしたはこなくてもいいです'},{prompt:'Harus bekerja sampai pukul lima.',words:['５じ','まで','はたらかなければ','なりません'],answerStr:'５じまではたらかなければなりません'}]}
+            ],
+            18: [
+                {id:'b18_1',title:'Kata Kerja Bentuk Kamus',subtitle:'Bentuk dasar kata kerja',desc:'Bentuk kamus dipakai dalam berbagai pola, termasuk menyatakan kemampuan dan kegiatan.',pattern:'[Kata Kerja bentuk kamus]',examples:[{j:'わたしは にほんごを はなすことが できます。',r:'Watashi wa nihongo o hanasu koto ga dekimasu.',i:'Saya bisa berbicara bahasa Jepang.'}],quizzes:[{prompt:'Saya bisa bermain ski.',words:['わたし','は','スキー','を','する','こと','が','できます'],answerStr:'わたしはスキーをすることができます'},{prompt:'Miller bisa bahasa Jepang.',words:['ミラーさん','は','にほんご','が','できます'],answerStr:'ミラーさんはにほんごができます'}]},
+                {id:'b18_2',title:'～ことが できます',subtitle:'Kemampuan atau kemungkinan',desc:'Pola <strong class="text-accent">～ことができます</strong> menyatakan kemampuan melakukan sebuah kegiatan.',pattern:'[Kata Kerja bentuk kamus] ことが できます',examples:[{j:'ピアノを ひくことが できます。',r:'Piano o hiku koto ga dekimasu.',i:'Bisa bermain piano.'}],quizzes:[{prompt:'Bisa melihat Gunung Fuji di sini.',words:['ここ','で','ふじさん','を','みる','こと','が','できます'],answerStr:'ここでふじさんをみることができます'},{prompt:'Tidak bisa mengemudi.',words:['うんてん','する','こと','が','できません'],answerStr:'うんてんすることができません'}]},
+                {id:'b18_3',title:'～まえに',subtitle:'Sebelum melakukan sesuatu',desc:'Gunakan <strong class="text-accent">～まえに</strong> setelah bentuk kamus untuk menyatakan tindakan yang dilakukan sebelumnya.',pattern:'[Kata Kerja bentuk kamus] まえに',examples:[{j:'ねる まえに、ほんを よみます。',r:'Neru mae ni, hon o yomimasu.',i:'Sebelum tidur, saya membaca buku.'}],quizzes:[{prompt:'Sebelum makan, cuci tangan.',words:['たべる','まえに','て','を','あらいます'],answerStr:'たべるまえにてをあらいます'},{prompt:'Sebelum berangkat, pesan tiket.',words:['でかける','まえに','きっぷ','を','よやくします'],answerStr:'でかけるまえにきっぷをよやくします'}]}
+            ],
+            19: [
+                {id:'b19_1',title:'Kata Kerja Bentuk た',subtitle:'Bentuk lampau biasa',desc:'Bentuk <strong class="text-accent">た</strong> adalah bentuk lampau biasa dan dipakai untuk pengalaman serta urutan kegiatan.',pattern:'[Kata Kerja bentuk た]',examples:[{j:'きのう そうじした。',r:'Kinou souji shita.',i:'Kemarin saya membersihkan.'}],quizzes:[{prompt:'Saya sudah pernah pergi ke Hokkaido.',words:['ほっかいどう','へ','いった','こと','が','あります'],answerStr:'ほっかいどうへいったことがあります'},{prompt:'Saya sudah pernah mendaki Gunung Fuji.',words:['ふじさん','に','のぼった','こと','が','あります'],answerStr:'ふじさんにのぼったことがあります'}]},
+                {id:'b19_2',title:'～たことが あります',subtitle:'Pengalaman',desc:'Pola <strong class="text-accent">～たことがあります</strong> menyatakan bahwa seseorang pernah memiliki pengalaman melakukan sesuatu.',pattern:'[Kata Kerja bentuk た] ことが あります',examples:[{j:'すもうを みたことが あります。',r:'Sumou o mita koto ga arimasu.',i:'Saya pernah menonton sumo.'}],quizzes:[{prompt:'Pernah menginap di hotel.',words:['ホテル','に','とまった','こと','が','あります'],answerStr:'ホテルにとまったことがあります'},{prompt:'Belum pernah bermain golf.',words:['ゴルフ','を','した','こと','が','ありません'],answerStr:'ゴルフをしたことがありません'}]},
+                {id:'b19_3',title:'～たり ～たり します',subtitle:'Contoh beberapa kegiatan',desc:'Gunakan <strong class="text-accent">～たり～たりします</strong> untuk memberi contoh beberapa kegiatan yang dilakukan.',pattern:'[Kata Kerja た]り、[Kata Kerja た]り します',examples:[{j:'にちようび テニスを したり、えいがを みたり します。',r:'Nichiyoubi tenisu o shitari, eiga o mitari shimasu.',i:'Hari Minggu saya bermain tenis dan menonton film, dan sebagainya.'}],quizzes:[{prompt:'Membersihkan dan mencuci pakaian.',words:['そうじ','したり','せんたく','したり','します'],answerStr:'そうじしたりせんたくしたりします'},{prompt:'Makan dan minum teh.',words:['たべたり','おちゃ','を','のんだり','します'],answerStr:'たべたりおちゃをのんだりします'}]}
+            ],
+            20: [
+                {id:'b20_1',title:'Bentuk Sopan dan Bentuk Biasa',subtitle:'Gaya percakapan',desc:'Bahasa Jepang memakai bentuk sopan untuk situasi formal dan bentuk biasa dalam percakapan akrab.',pattern:'です・ます / bentuk biasa',examples:[{j:'あした とうきょうへ いきます。／あした とうきょうへ いく。',r:'Ashita Toukyou e ikimasu / iku.',i:'Besok pergi ke Tokyo.'}],quizzes:[{prompt:'Bentuk biasa dari いきます.',words:['いく'],answerStr:'いく'},{prompt:'Bentuk sopan dari たべる.',words:['たべます'],answerStr:'たべます'}]},
+                {id:'b20_2',title:'～けど',subtitle:'Menyatakan kontras ringan',desc:'<strong class="text-accent">けど</strong> menghubungkan dua pernyataan dengan nuansa tetapi/namun.',pattern:'[Kalimat biasa] けど、…',examples:[{j:'からい けど、おいしいです。',r:'Karai kedo, oishii desu.',i:'Pedas, tetapi enak.'}],quizzes:[{prompt:'Saya suka kopi, tetapi tidak minum setiap hari.',words:['コーヒー','が','すき','です','けど','まいにち','のみません'],answerStr:'コーヒーがすきですけどまいにちのみません'},{prompt:'Mau pergi, tetapi hujan.',words:['いきたい','です','けど','あめ','です'],answerStr:'いきたいですけどあめです'}]},
+                {id:'b20_3',title:'～し',subtitle:'Memberi beberapa alasan',desc:'<strong class="text-accent">し</strong> dipakai untuk menambahkan alasan atau informasi lebih dari satu.',pattern:'[Kalimat biasa]し、[Kalimat biasa]し、…',examples:[{j:'この まちは しずかだし、べんりです。',r:'Kono machi wa shizuka da shi, benri desu.',i:'Kota ini tenang dan praktis.'}],quizzes:[{prompt:'Kamar ini luas dan bersih.',words:['この','へや','は','ひろい','し','きれい','です'],answerStr:'このへやはひろいしきれいです'},{prompt:'Saya tidak bisa pergi karena sibuk dan sakit.',words:['いそがしい','し','びょうき','ですから','いけません'],answerStr:'いそがしいしびょうきですからいけません'}]}
+            ]
+        });
+        /* Pelajaran 16–20 — daftar lengkap sesuai buku. */
+        const addKotoba = (bab, rows) => KOTOBA_DB[bab] = rows.map(row => { const [kana, kanji, arti, romaji] = row.split('|'); return { kana, kanji, arti, romaji: romaji || kana }; });
+        addKotoba(16, [
+            'のります|乗ります|naik [kereta rel listrik]|norimasu','おります|降ります|turun [kereta rel listrik]|orimasu','のりかえます|乗り換えます|ganti, pindah|norikaemasu','あびます|浴びます|mandi [shower]|abimasu','いれます|入れます|memasukkan|iremasu','だします|出します|mengeluarkan, menyerahkan, mengirim|dashimasu','おろします|下ろします|mengeluarkan/mengambil [uang]|oroshimasu','はいります|入ります|masuk [universitas]|hairimasu','でます|出ます|tamat [dari universitas]|demasu','おします|押します|menekan|oshimasu','のみます|飲みます|minum [minuman keras]|nomimasu','はじめます|始めます|mulai|hajimemasu','けんがくします|見学します|mengunjungi|kengaku shimasu','でんわします|電話します|menelepon|denwa shimasu','わかい|若い|muda|wakai','ながい|長い|panjang|nagai','みじかい|短い|pendek|mijikai','あかるい|明るい|terang|akarui','くらい|暗い|gelap|kurai','からだ|体|badan|karada','あたま|頭|kepala|atama','かみ|髪|rambut|kami','かお|顔|muka|kao','め|目|mata|me','みみ|耳|telinga|mimi','はな|鼻|hidung|hana','くち|口|mulut|kuchi','は|歯|gigi|ha','おなか||perut|onaka','あし|足|kaki|ashi','せ|背|punggung|se','サービス||pelayanan|saabisu','ジョギング||joging|jogingu','シャワー||shower|shawaa','みどり|緑|hijau, tumbuhan hijau|midori','おてら|お寺|wihara|otera','じんじゃ|神社|kuil Shinto|jinja','いちばん|一番|nomor satu/paling|ichiban','どうやって||dengan cara bagaimana|douyatte','どの～||yang mana [lebih dari tiga]|dono','どれ||mana [lebih dari tiga]|dore','すごいですね||hebat|sugoi desu ne','いいえ、まだまだです||tidak, belum memuaskan|iie madamada desu','おひきだしですか|お引き出しですか|mau menarik uang?|ohikidashi desu ka','まず||pertama-tama|mazu','つぎに|次に|kemudian|tsugi ni','キャッシュカード||kartu ATM|kyasshu kaado','あんしょうばんごう|暗証番号|PIN|anshou bangou','かくにん|確認|cek/memastikan|kakunin','ボタン||tombol|botan'
+        ]);
+        addKotoba(17, ['おぼえます|覚えます|mengingat, menghafal|oboemasu','わすれます|忘れます|lupa|wasuremasu','なくします||kehilangan|nakushimasu','はらいます|払います|membayar|haraimasu','かえします|返します|mengembalikan|kaeshimasu','でかけます|出かけます|pergi, keluar, berangkat|dekakemasu','ぬぎます|脱ぎます|melepas [baju, sepatu]|nugimasu','もっていきます|持って行きます|membawa pergi|motte ikimasu','もってきます|持って来ます|membawa datang|motte kimasu','しんぱいします|心配します|mengkhawatirkan|shinpai shimasu','ざんぎょうします|残業します|lembur|zangyou shimasu','しゅっちょうします|出張します|dinas|shucchou shimasu','のみます|飲みます|minum [obat]|nomimasu','はいります|入ります|mandi, masuk [ofuro]|hairimasu','たいせつ|大切|penting, bernilai|taisetsu','だいじょうぶ|大丈夫|tidak apa-apa|daijoubu','あぶない|危ない|berbahaya|abunai','きんえん|禁煙|dilarang merokok|kinen','けんこうほけんしょう|健康保険証|kartu asuransi kesehatan|kenkou hokenshou','ねつ|熱|demam|netsu','びょうき|病気|sakit|byouki','くすり|薬|obat|kusuri','おふろ|お風呂|mandi, kamar mandi|ofuro','うわぎ|上着|baju, jaket|uwagi','したぎ|下着|pakaian dalam|shitagi','２、３にち|２、３日|dua atau tiga hari|ni san nichi','２、３～||dua atau tiga ~|ni san','～までに||sampai dengan [batas waktu]|made ni','ですから||oleh karena itu|desu kara','どうしましたか||kenapa?/ada masalah apa?|dou shimashita ka','のど||kerongkongan|nodo','～がいたいです|～が痛いです|~ sakit|ga itai desu','かぜ||masuk angin|kaze','それから||dan, kemudian|sorekara','おだいじに|お大事に|semoga lekas sembuh|odaiji ni']);
+        addKotoba(18, ['できます||dapat, bisa, mampu|dekimasu','あらいます|洗います|mencuci|araimasu','ひきます|弾きます|bermain [alat musik]|hikimasu','うたいます|歌います|bernyanyi|utaimasu','あつめます|集めます|mengumpulkan|atsumemasu','すてます|捨てます|membuang|sutemasu','かえます|換えます|mengganti, menukar|kaemasu','うんてんします|運転します|menyetir|unten shimasu','よやくします|予約します|memesan|yoyaku shimasu','ピアノ||piano|piano','～メートル||~ meter|meetoru','げんきん|現金|uang tunai|genkin','しゅみ|趣味|hobi, kegemaran|shumi','にっき|日記|catatan harian|nikki','おいのり|お祈り|doa|oinori','かちょう|課長|kepala seksi|kachou','ぶちょう|部長|kepala bagian|buchou','しゃちょう|社長|direktur utama|shachou','どうぶつ|動物|hewan, binatang|doubutsu','うま|馬|kuda|uma','インターネット||internet|intaanetto','とくに|特に|terutama, khususnya|toku ni','へえ||betul ya?/masa!|hee','それはおもしろいですね||itu menarik ya|sore wa omoshiroi desu ne','なかなか||jarang, tidak mudah [negatif]|nakanaka','はんとうですか|本当ですか|betul?/benar?|hontou desu ka','ぜひ||benar-benar, mesti|zehi']);
+        addKotoba(19, ['のぼります|登ります・上ります|naik|noborimasu','とまります|泊まります|menginap [hotel]|tomarimasu','そうじします|掃除します|membersihkan|souji shimasu','せんたくします|洗濯します|mencuci pakaian|sentaku shimasu','なります||menjadi|narimasu','ねむい|眠い|mengantuk|nemui','つよい|強い|kuat|tsuyoi','よわい|弱い|lemah|yowai','れんしゅう|練習|latihan|renshuu','ゴルフ||golf|gorufu','すもう|相撲|sumo|sumou','おちゃ|お茶|upacara minum teh|ocha','ひ|日|hari|hi','ちょうし|調子|kondisi|choushi','いちど|一度|sekali|ichido','いちども|一度も|sekali-kali [negatif]|ichido mo','だんだん||berangsur-angsur|dandan','もうすぐ||tidak lama lagi|mou sugu','おかげさまで||atas berkat|okagesama de','でも||tetapi|demo','しょくじ|食事|makan|shokuji','ダイエット||diet|daietto','むり|無理|paksa, berlebihan|muri','からだにいい|体にいい|baik untuk tubuh|karada ni ii']);
+        addKotoba(20, ['いります|要ります|memerlukan [VISA]|irimasu','しらべます|調べます|memeriksa, meneliti, mengecek|shirabemasu','しゅうりします|修理します|memperbaiki|shuuri shimasu','ぼく|僕|aku [laki-laki, informal]|boku','きみ|君|kamu [informal]|kimi','～くん|～君|Sdr. ~ [informal]|kun','うん||ya [informal]|un','ううん||tidak, bukan [informal]|uun','ことば|言葉|kata, bahasa|kotoba','きもの|着物|kimono|kimono','ビザ||VISA|biza','はじめ|初め|awal, mula-mula|hajime','おわり|終わり|akhir|owari','こっち||sini [informal]|kocchi','そっち||situ [informal]|socchi','あっち||sana [informal]|acchi','どっち||mana [informal]|docchi','みんなで||kita semua, kita sama-sama|minna de','～けど||~ tetapi [informal dari が]|kedo','おなかがいっぱいです||sudah kenyang|onaka ga ippai desu','よかったら||kalau mau, kalau suka|yokattara','いろいろ||macam-macam|iroiro']);
+
+        const BUNPOU_GUIDE_16_20 = {
+            b16_1:['Bentuk て menyambungkan beberapa tindakan berurutan; kata sifat い menjadi ～くて, sedangkan kata sifat な dan kata benda menjadi ～で。','あさ ジョギングを して、シャワーを あびて、かいしゃへ いきます。','Pagi hari joging, mandi, lalu pergi ke kantor.','Pergi ke Kobe, menonton film, lalu minum teh.','こうべへ いって、えいがを みて、おちゃを のみました。'],
+            b16_2:['～てから menyatakan tindakan kedua dilakukan setelah tindakan pertama selesai.','おかねを いれてから、ボタンを おして ください。','Tekan tombol setelah memasukkan uang.','Setelah pekerjaan ini selesai, baru makan.','この しごとが おわってから、たべます。'],
+            b16_3:['Pola ini menyatakan ciri atau bagian dari topik. Kata benda kedua diberi が.','おおさかは たべものが おいしいです。','Makanan Osaka enak.','Rambut Maria panjang.','マリアさんは かみが ながいです。'],
+            b16_4:['Dengan 出ます dan 降ります, を menunjukkan tempat yang ditinggalkan atau titik awal.','７じに うちを でます。','Pukul tujuh keluar dari rumah.','Turun kereta di Umeda.','うめだで でんしゃを おります。'],
+            b16_5:['どうやって dipakai untuk menanyakan cara pergi atau cara melakukan sesuatu.','だいがくまで どうやって いきますか。','Bagaimana caranya pergi ke universitas?','Bagaimana pergi ke universitas?','だいがくまで どうやって いきますか。'],
+            b16_6:['どれ dipakai sendiri; どの harus langsung diikuti kata benda. Keduanya memilih dari tiga atau lebih pilihan.','ミラーさんの かさは どれですか。','Yang mana payung Sdr. Miller?','Santos orang yang mana?','サントスさんは どの ひとですか。'],
+            b17_1:['Bentuk ない adalah bentuk negatif biasa dan menjadi dasar pola larangan, kewajiban, serta tidak perlu.','あした かいしゃへ いかない。','Besok tidak pergi ke kantor.','Saya tidak minum alkohol.','わたしは おさけを のまない。'],
+            b17_2:['～ないでください digunakan untuk meminta orang lain agar tidak melakukan sesuatu.','ここで しゃしんを とらないで ください。','Jangan mengambil foto di sini!','Jangan khawatir.','しんぱい しないで ください。'],
+            b17_3:['～なければなりません berarti harus. Bentuknya negatif, tetapi artinya menyatakan kewajiban.','くすりを のまなければ なりません。','Harus minum obat.','Harus mengembalikan buku sampai Sabtu.','どようびまでに ほんを かえさなければ なりません。'],
+            b17_4:['～なくてもいいです menyatakan suatu tindakan tidak wajib dilakukan.','あした こなくても いいです。','Besok tidak perlu datang.','Tidak perlu membayar hari ini.','きょうは はらわなくても いいです。'],
+            b17_5:['Objek dengan を dapat dijadikan topik dengan mengganti を menjadi は dan meletakkannya di depan.','にもつは ここに おかないで ください。','Barangnya jangan diletakkan di sini.','Makan siang dimakan di kantin perusahaan.','ひるごはんは かいしゃの しょくどうで たべます。'],
+            b17_6:['～までに menunjukkan batas waktu suatu tindakan harus selesai; berbeda dari ～まで yang menunjukkan tindakan berlangsung hingga batas.','かいぎは ５じまでに おわります。','Rapat selesai sebelum pukul lima.','Kembalikan buku sampai Sabtu.','どようびまでに ほんを かえします。'],
+            b18_1:['Bentuk kamus adalah bentuk dasar kata kerja yang dicantumkan dalam kamus.','かきます → かく。たべます → たべる。','Menulis → menulis; makan → makan (bentuk kamus).','Bentuk kamus dari よみます.','よむ'],
+            b18_2:['Untuk kemampuan gunakan N が できます atau kata kerja bentuk kamus + ことができます.','かんじを よむことが できます。','Bisa membaca kanji.','Bisa membayar dengan kartu.','カードで はらうことが できます。'],
+            b18_3:['Hobi dapat berupa benda atau kegiatan. Untuk kegiatan gunakan kata kerja bentuk kamus + ことです.','わたしの しゅみは おんがくを きくことです。','Hobi saya adalah mendengarkan musik.','Hobi saya adalah bermain golf.','わたしの しゅみは ゴルフを することです。'],
+            b18_4:['～まえに berarti sebelum. Dipakai setelah bentuk kamus, kata benda + の, atau keterangan jangka waktu.','ねる まえに、ほんを よみます。','Sebelum tidur, membaca buku.','Sebelum makan, cuci tangan.','しょくじの まえに、てを あらいます。'],
+            b18_5:['なかなか biasanya diikuti bentuk negatif dan berarti tidak mudah atau jarang terjadi.','にほんでは なかなか うまを みることが できません。','Di Jepang tidak mudah melihat kuda.','Tidak mudah memahami kanji.','かんじは なかなか わかりません。'],
+            b18_6:['ぜひ menekankan harapan atau keinginan pembicara.','ぜひ ほっかいどうへ いきたいです。','Ingin sekali pergi ke Hokkaido.','Sungguh diharapkan datang bermain.','ぜひ あそびに きてください。'],
+            b19_1:['Bentuk た adalah bentuk lampau biasa: て menjadi た dan で menjadi だ.','のんで → のんだ。たべて → たべた。','Minum → sudah minum; makan → sudah makan.','Bentuk た dari のみます.','のんだ'],
+            b19_2:['～たことがあります menyatakan pengalaman yang pernah dilakukan pada masa lampau.','うまに のったことが あります。','Pernah berkuda.','Pernah menginap di hotel.','ホテルに とまったことが あります。'],
+            b19_3:['～たり～たりします memberi beberapa contoh kegiatan; tidak menunjukkan urutan waktu.','にちようびは テニスを したり、えいがを みたりします。','Hari Minggu bermain tenis, menonton film, dan sebagainya.','Membersihkan dan mencuci pakaian.','そうじ したり、せんたく したりします。'],
+            b19_4:['なります menunjukkan perubahan: sifat い menjadi ～く, sifat な dan kata benda menjadi ～に.','さむく なります。げんきに なります。','Menjadi dingin; menjadi sehat.','Menjadi umur 25 tahun.','２５さいに なります。'],
+            b20_1:['Bentuk sopan memakai です・ます. Bentuk biasa dipakai dalam percakapan akrab.','あした とうきょうへ いきます。／あした とうきょうへ いく。','Besok pergi ke Tokyo.','Bentuk biasa dari いきます.','いく'],
+            b20_2:['Bentuk sopan dipakai dengan orang baru, atasan, atau situasi formal. Bentuk biasa dipakai dengan teman dekat dan keluarga.','せんせいには です・ます。ともだちとは ふつうけい。','Kepada guru gunakan bentuk sopan; dengan teman gunakan bentuk biasa.','Bentuk biasa dari げんきです.','げんきだ'],
+            b20_3:['Dalam percakapan bentuk biasa, beberapa partikel dapat dihilangkan jika konteks jelas. けど berfungsi seperti が (tetapi).','そのカレー おいしい？ うん、からいけど、おいしい。','Kare itu enak? Ya, pedas tetapi enak.','Punya tiket sumo, mau pergi bersama?','すもうの チケットが あるけど、いっしょに いかない？']
+        };
+        const BUNPOU_EXTRA_16_20 = {
+            b16_1:['ミラーさんは わかくて、げんきです。','Sdr. Miller muda dan sehat.','Kemarin cuaca baik dan panas.','きのうは てんきが よくて、あつかったです。'],
+            b16_2:['シャワーを あびてから、ねます。','Setelah mandi, tidur.','Setelah makan, minum obat.','しょくじを してから、くすりを のみます。'],
+            b16_3:['マリアさんは かみが ながいです。','Rambut Maria panjang.','Franken di Jerman anggurnya terkenal.','ドイツの フランケンは ワインが ゆうめいです。'],
+            b16_4:['だいがくを でます。','Keluar/tamat dari universitas.','Keluar dari rumah pukul tujuh.','７じに うちを でます。'],
+            b16_5:['きょうとえきから １６ばんの バスに のります。','Naik bus nomor 16 dari Stasiun Kyoto.','Bagaimana cara pergi ke bank?','ぎんこうまで どうやって いきますか。'],
+            b16_6:['これは どの かさですか。','Ini payung yang mana?','Buku yang mana milik Anda?','どの ほんが あなたのですか。'],
+            b17_1:['わたしは くるまを もたない。','Saya tidak memiliki mobil.','Saya tidak lupa kartu asuransi.','けんこうほけんしょうを わすれない。'],
+            b17_2:['あした おくれないで ください。','Tolong jangan terlambat besok.','Jangan hilangkan kartu ATM.','キャッシュカードを なくさないで ください。'],
+            b17_3:['まいにち くすりを のまなければ なりません。','Harus minum obat setiap hari.','Harus berangkat sekarang.','いま でかけなければ なりません。'],
+            b17_4:['あしたは ざんぎょうしなくても いいです。','Besok tidak perlu lembur.','Tidak perlu membawa uang tunai.','げんきんを もっていかなくても いいです。'],
+            b17_5:['この かばんは もっていかなくても いいです。','Tas ini tidak perlu dibawa.','Obatnya harus diminum.','くすりは のまなければ なりません。'],
+            b17_6:['しゅくだいを きんようびまでに だします。','Menyerahkan PR sebelum hari Jumat.','Pekerjaan selesai sebelum jam lima.','しごとは ５じまでに おわります。'],
+            b18_1:['いそぎます → いそぐ。きます → くる。','Bergegas → bergegas; datang → datang (bentuk kamus).','Bentuk kamus dari たべます.','たべる'],
+            b18_2:['ミラーさんは にほんごが できます。','Sdr. Miller bisa bahasa Jepang.','Bisa menyetir mobil.','くるまを うんてんすることが できます。'],
+            b18_3:['わたしの しゅみは ピアノです。','Hobi saya adalah piano.','Hobi saya adalah menulis buku harian.','わたしの しゅみは にっきを かくことです。'],
+            b18_4:['にほんへ くるまえに、にほんごを べんきょうしました。','Sebelum datang ke Jepang, belajar bahasa Jepang.','Sebelum berangkat, pesan tiket.','でかけるまえに、きっぷを よやくします。'],
+            b18_5:['この しごとは なかなか おわりません。','Pekerjaan ini tidak mudah selesai.','Tidak mudah menghafal kata-kata.','ことばを なかなか おぼえられません。'],
+            b18_6:['ぜひ きょうとへ きてください。','Sungguh diharapkan datang ke Kyoto.','Sangat ingin melihat kuda.','ぜひ うまを みたいです。'],
+            b19_1:['かいて → かいた。して → した。','Menulis → sudah menulis; melakukan → sudah melakukan.','Bentuk た dari たべます.','たべた'],
+            b19_2:['にほんへ いったことが あります。','Pernah pergi ke Jepang.','Pernah bermain sumo.','すもうを したことが あります。'],
+            b19_3:['やすみの ひは ねたり、にっきを かいたりします。','Saat libur, tidur, menulis buku harian, dan sebagainya.','Bermain golf dan minum teh.','ゴルフを したり、おちゃを のんだりします。'],
+            b19_4:['はるに なります。','Menjadi musim semi.','Menjadi sehat.','げんきに なります。'],
+            b20_1:['まいにち いそがしいです。／まいにち いそがしい。','Setiap hari sibuk.','Bentuk biasa dari すきです.','すきだ'],
+            b20_2:['てがみは ていねいけいで かきます。','Surat ditulis dalam bentuk sopan.','Bentuk sopan dari いく.','いきます'],
+            b20_3:['じしょ もってる？ うん、もってる。','Punya kamus? Ya, punya.','Kare itu pedas tetapi enak.','その カレーは からいけど、おいしい。']
+        };
+        const bunpouItem = (id, title, subtitle, pattern) => {
+            const g = BUNPOU_GUIDE_16_20[id];
+            const e = BUNPOU_EXTRA_16_20[id];
+            const answer = g[4].replace(/[、。？]/g,'').replace(/ /g,'');
+            const words = g[4].replace(/[、。？]/g,'').split(/\s+/);
+            const answer2 = e[3].replace(/[、。？]/g,'').replace(/ /g,'');
+            const words2 = e[3].replace(/[、。？]/g,'').split(/\s+/);
+            return { id, title, subtitle, desc:g[0], pattern, examples:[{j:g[1],r:'',i:g[2]},{j:e[0],r:'',i:e[1]}], quizzes:[{prompt:g[3],words,answerStr:answer},{prompt:e[2],words:words2,answerStr:answer2}] };
+        };
+        BUNPOU_DB[16] = [['Cara menyambung kalimat yang lebih dari dua','～て／～くて／～で'],['Kata Kerja Bentuk てから、Kata Kerja','Vてから、V'],['Kata Benda 1 は Kata Benda 2 が Kata Sifat','KB1 は KB2 が 形容詞です'],['Kata Benda を Kata Kerja','場所を 出ます／降ります'],['どうやって','～まで どうやって 行きますか'],['どれ／どの Kata Benda','どれですか／どの＋名詞ですか']].map((x,i)=>bunpouItem(`b16_${i+1}`,x[0],`Nomor ${i+1}`,x[1]));
+        BUNPOU_DB[17] = [['Kata Kerja Bentuk ない','Vない'],['Kata Kerja Bentuk ないでください','Vないでください'],['Kata Kerja Bentuk ない なければなりません','Vなければなりません'],['Kata Kerja Bentuk ない なくてもいいです','Vなくてもいいです'],['Pentopikan objek','Objek は …'],['Kata Benda (waktu) までに Kata Kerja','時間までに V']].map((x,i)=>bunpouItem(`b17_${i+1}`,x[0],`Nomor ${i+1}`,x[1]));
+        BUNPOU_DB[18] = [['Kata Kerja Bentuk Kamus','V辞書形'],['Kata Benda／Kata Kerja Bentuk Kamus ことができます','N／V辞書形ことができます'],['わたしの趣味は Kata Benda／Kata Kerja Bentuk Kamus ことです','趣味は N／V辞書形ことです'],['～まえに','V辞書形／Nの まえに'],['なかなか','なかなか～ません'],['ぜひ','ぜひ～たいです／～てください']].map((x,i)=>bunpouItem(`b18_${i+1}`,x[0],`Nomor ${i+1}`,x[1]));
+        BUNPOU_DB[19] = [['Kata Kerja Bentuk た','Vた'],['Kata Kerja Bentuk た ことが あります','Vたことがあります'],['Kata Kerja たり、Kata Kerja たりします','Vたり、Vたりします'],['Kata Sifat／Kata Benda に なります','形容詞く／に なります']].map((x,i)=>bunpouItem(`b19_${i+1}`,x[0],`Nomor ${i+1}`,x[1]));
+        BUNPOU_DB[20] = [['Bentuk Sopan dan Bentuk Biasa','です・ます／普通形'],['Pembagian pemakaian Bentuk Sopan dan Bentuk Biasa','formal／akrab'],['Percakapan dalam Bentuk Biasa','～けど／partikel dapat dihilangkan']].map((x,i)=>bunpouItem(`b20_${i+1}`,x[0],`Nomor ${i+1}`,x[1]));
+
+        /* Kosakata Pelajaran 21 dari daftar buku. */
+        addKotoba(21, ['おもいます|思います|mengira, berpikir|omoimasu','いいます|言います|mengatakan, berkata|iimasu','かちます|勝ちます|menang|kachimasu','まけます|負けます|kalah|makemasu','あります||ada, diadakan [pesta/perayaan]|arimasu','やくにたちます|役に立ちます|berguna, bermanfaat|yaku ni tachimasu','うごきます|動きます|pindah, bergerak|ugokimasu','やめます||berhenti [kerja]|yamemasu','きをつけます|気をつけます|berwaspada, berhati-hati|ki o tsukemasu','りゅうがくします|留学します|studi di luar negeri|ryuugaku shimasu','むだ|無駄|sia-sia, tidak berguna|muda','ふべん|不便|tidak praktis|fuben','すごい||hebat, bukan main|sugoi','ほんとう|本当|betul, benar|hontou','うそ||bohong|uso','じどうしゃ|自動車|mobil|jidousha','こうつう|交通|lalu lintas|koutsuu','ぶっか|物価|harga barang|bukka','ほうそう|放送|siaran, pengumuman|housou','ニュース||warta berita|nyuusu','アニメ||animasi|anime','マンガ||manga, komik|manga','デザイン||desain, model|dezain','ゆめ|夢|mimpi|yume','てんさい|天才|genius|tensai','しあい|試合|pertandingan|shiai','いけん|意見|pendapat|iken','はなし|話|cerita [bercerita]|hanashi','ちきゅう|地球|bumi|chikyuu','つき|月|bulan|tsuki','さいきん|最近|akhir-akhir ini|saikin','たぶん||mungkin, barangkali|tabun','きっと||pasti|kitto','ほんとうに|本当に|betul-betul|hontou ni','そんなに||tidak begitu [diikuti negatif]|sonnani','～について||tentang, mengenai ~|~ ni tsuite','ひさしぶりですね||sudah lama tidak bertemu ya|hisashiburi desu ne','～でものみませんか||bagaimana kalau kita minum ~?|~ demo nomimasen ka','もちろん||tentu saja|mochiron','もうかえらないと||saya harus pulang|mou kaeranai to']);
+
+        addKotoba(22, ['きます|着ます|memakai [kemeja]|kimasu','はきます|履きます|memakai [sepatu, celana]|hakimasu','かぶります||memakai [topi]|kaburimasu','かけます||memakai [kacamata]|kakemasu','します||memakai [dasi]|shimasu','うまれます|生まれます|lahir|umaremasu','わたしたち||kami, kita|watashitachi','コート||mantel|kooto','セーター||sweater, baju hangat|seetaa','スーツ||pakaian setelan|suutsu','ぼうし|帽子|topi|boushi','めがね|眼鏡|kaca mata|megane','ケーキ||kue|keeki','おべんとう|お弁当|bekal|obentou','ロボット||robot|robotto','ユーモア||humor|yuumoa','つごう|都合|kondisi|tsugou','よく||sering kali|yoku']);
+        addKotoba(23, ['ききます|聞きます|bertanya [kepada guru]|kikimasu','まわします|回します|memutar|mawashimasu','ひきます|引きます|tarik|hikimasu','かえます|変えます|mengubah|kaemasu','さわります|触ります|menyentuh [pintu]|sawarimasu','でます|出ます|keluar [uang kembalian]|demasu','あるきます|歩きます|berjalan kaki|arukimasu','わたります|渡ります|menyeberang [jembatan]|watarimasu','まがります|曲がります|belok [ke kanan]|magarimasu','さびしい|寂しい|sepi|sabishii','おゆ|お湯|air panas|oyu','おと|音|bunyi, suara|oto','サイズ||ukuran|saizu','こしょう|故障|kerusakan|koshou','みち|道|jalan|michi','こうさてん|交差点|perempatan|kousaten','しんごう|信号|lampu lalu lintas|shingou','かど|角|sudut|kado','はし|橋|jembatan|hashi','ちゅうしゃじょう|駐車場|tempat parkir|chuushajou','たてもの|建物|gedung|tatemono','なんかいも|何回も|berkali-kali|nankai mo','～め||yang ke-~|me']);
+
+        addKotoba(24, ['くれます||diberikan [oleh orang lain kepada saya/keluarga saya]|kuremasu','なおします|直します|mengoreksi, memperbaiki|naoshimasu','つれていきます|連れて行きます|membawa, mengajak pergi|tsurete ikimasu','つれてきます|連れて来ます|membawa datang, mengajak datang|tsurete kimasu','おくります|送ります|mengantar [orang]|okurimasu','しょうかいします|紹介します|memperkenalkan|shoukai shimasu','あんないします|案内します|mengantarkan, memandu|annai shimasu','せつめいします|説明します|menjelaskan, menerangkan|setsumei shimasu','おじいさん||kakek|ojiisan','おじいちゃん||kakek [akrab]|ojiichan','おばあさん||nenek|obaasan','おばあちゃん||nenek [akrab]|obaachan','じゅんび|準備|persiapan|junbi','ひっこし|引っ越し|pindah rumah|hikkoshi','おかし|お菓子|kue|okashi','ホームステイ||homestay|hoomusutei','ぜんぶ|全部|semua|zenbu','じぶんで|自分で|dengan sendiri|jibun de']);
+
+        addKotoba(25, ['かんがえます|考えます|berpikir, memikirkan|kangaemasu','つきます|着きます|tiba, sampai|tsukimasu','とります|取ります|berumur, lanjut usia|torimasu','たりません|足りません|cukup|tarimasen','いなか|田舎|desa, kampung halaman|inaka','チャンス||kesempatan|chansu','おく|億|ratus juta|oku','もし||kalau, jika|moshi','いみ|意味|arti, makna|imi']);
+
+        /* Kosakata bagian Kaiwa dari foto buku, dimasukkan ke daftar Kotoba. */
+        const appendKotoba = (bab, rows) => KOTOBA_DB[bab].push(...rows.map(row => {
+            const [kana, kanji, arti, romaji] = row.split('|');
+            return { kana, kanji, arti, romaji: romaji || kana };
+        }));
+        appendKotoba(22, [
+            'えーと||itu…|eeto',
+            'おめでとう［ございます］||selamat [untuk ulang tahun, pernikahan, dan tahun baru]|omedetou [gozaimasu]',
+            'おさがしですか|お探しですか|mencari apa?|osagashi desu ka',
+            'では||kalau begitu|dewa',
+            'こちら||ini [ungkapan sopan dari これ]|kochira',
+            'やちん|家賃|biaya sewa rumah|yachin',
+            'ダイニングキッチン||ruang makan dengan dapur|dainingu kicchin',
+            'わしつ|和室|kamar ala Jepang|washitsu',
+            'おしいれ|押し入れ|lemari dinding ala Jepang|oshiire',
+            'ふとん|布団|selimut dan kasur berisi kapas ala Jepang|futon'
+        ]);
+        appendKotoba(24, ['ほかに|他に|selain, yang lain|hoka ni']);
+        appendKotoba(25, ['ほかに|他に|selain, yang lain|hoka ni']);
+
+        /* Bab 21–25: penjelasan satu paragraf, dua contoh, dan dua latihan terjemahan. */
+        const addBunpouChapter = (bab, rows) => BUNPOU_DB[bab] = rows.map((row, index) => {
+            const [title, desc, pattern, ej1, ei1, ej2, ei2, q1, a1, q2, a2] = row.split('§');
+            const quiz = (prompt, answer) => ({ prompt, words:answer.replace(/[、。？]/g,'').split(/\s+/), answerStr:answer.replace(/[、。？]/g,'').replace(/ /g,'') });
+            return { id:`b${bab}_${index + 1}`, title, subtitle:`Nomor ${index + 1}`, desc, pattern, examples:[{j:ej1,r:'',i:ei1},{j:ej2,r:'',i:ei2}], quizzes:[quiz(q1,a1),quiz(q2,a2)] };
+        });
+        addBunpouChapter(21, [
+            'Bentuk Biasa + と思います§Pola ini menyampaikan dugaan atau pendapat pribadi dengan nada sopan; kata kerja dan kata sifat い memakai bentuk biasa, sedangkan kata sifat な dan kata benda positif memakai だ sebelum と.§普通形 + と思います§あした あめが ふると おもいます。§Saya kira besok akan hujan.§にほんは ぶっかが たかいと おもいます。§Menurut saya harga barang di Jepang mahal.§Saya kira Miller akan datang besok.§ミラーさんは あした くると おもいます。§Menurut saya kota ini praktis.§この まちは べんりだと おもいます。',
+            '「Kalimat」／Bentuk Biasa + と言いました§Pola ini mengutip ucapan langsung dengan 「…」と atau melaporkan isi ucapan dengan bentuk biasa + と言いました.§「…」と いいます／普通形 + と いいました§ねる まえに、「おやすみなさい」と いいます。§Sebelum tidur mengucapkan “selamat tidur”.§ミラーさんは らいしゅう とうきょうへ しゅっちょうすると いいました。§Miller berkata minggu depan akan dinas ke Tokyo.§Yamada berkata akan pergi ke Jepang.§やまださんは にほんへ いくと いいました。§Saya berkata “terima kasih”.§「ありがとう」と いいました。',
+            'Bentuk Biasa + でしょう？§Dengan intonasi naik, でしょう？ meminta konfirmasi atau kesepakatan; untuk kata sifat な dan kata benda positif, hilangkan だ.§普通形 + でしょう？§あした パーティーに いくでしょう？§Besok pergi ke pesta, bukan?§この ほんは おもしろいでしょう？§Buku ini menarik, kan?§Hari ini hari Minggu, kan?§きょうは にちようびでしょう？§Orang itu orang Jepang, bukan?§あの ひとは にほんじんでしょう？',
+            'Kata Benda Tempat で Kata Benda Acara が あります§Jika kata benda kedua adalah acara, kejadian, ujian, atau perayaan, あります berarti diadakan/terjadi dan tempatnya ditandai で.§場所で イベントが あります§とうきょうで サッカーの しあいが あります。§Di Tokyo ada pertandingan sepak bola.§がっこうで おまつりが あります。§Di sekolah ada festival.§Ada ujian di universitas.§だいがくで しけんが あります。§Ada pesta di rumah saya.§うちで パーティーが あります。',
+            'Kata Benda Adegan/Kondisi で§Partikel で menunjukkan adegan, forum, atau situasi ketika tindakan seperti berbicara dan menyampaikan pendapat dilakukan.§場面で 行動します§かいぎで なにか いけんを いいましたか。§Apakah Anda menyampaikan pendapat dalam rapat?§しあいで かちました。§Menang dalam pertandingan.§Berbicara tentang Jepang di kelas.§きょうしつで にほんについて はなします。§Apakah Anda berbicara di rapat?§かいぎで はなしましたか。',
+            'Kata Benda でも Kata Kerja§でも menawarkan satu contoh ringan sambil membuka pilihan lain yang sejenis, sehingga ajakan atau usulan terdengar santai dan tidak memaksa.§Nでも V§ちょっと ビールでも のみませんか。§Bagaimana kalau minum bir atau semacamnya?§コーヒーでも のみましょう。§Mari minum kopi atau semacamnya.§Bagaimana kalau makan siang atau semacamnya?§ひるごはんでも たべませんか。§Mari menonton film atau semacamnya.§えいがでも みましょう。',
+            'Kata Kerja Bentuk ない + ないと…§ないと adalah singkatan percakapan dari ないといけません atau なければなりません; bagian akhir sering dihilangkan karena kewajibannya sudah dipahami dari konteks.§Vないと…§もう かえらないと…。§Saya harus segera pulang.§くすりを のまないと…。§Saya harus minum obat.§Harus berangkat sekarang.§いま でかけないと…。§Harus belajar.§べんきょうしないと…。'
+        ]);
+        addBunpouChapter(22, [
+            'Anak Kalimat yang Menerangkan Kata Benda§Anak kalimat diletakkan di depan kata benda seperti “yang …”; subjek di dalam anak kalimat memakai が, kata sifat な memakai な, dan kata benda memakai の.§普通形 + 名詞§ミラーさんが つくった ケーキです。§Ini kue yang dibuat oleh Miller.§かみが ながくて、めが くろい ひとです。§Orang yang rambutnya panjang dan matanya hitam.§Saya membeli buku yang menarik.§おもしろい ほんを かいました。§Saya bertemu orang yang tinggal di Jepang.§にほんに すんでいる ひとに あいました。',
+            'Kata Kerja Bentuk Kamus + 時間／約束／用事§Bentuk kamus dapat menerangkan kata benda seperti waktu, janji, atau urusan untuk menjelaskan kegiatan yang akan dilakukan.§V辞書形 + 時間／約束／用事§あさごはんを たべる じかんが ありません。§Tidak ada waktu untuk makan pagi.§ともだちと えいがを みる やくそくが あります。§Ada janji menonton film dengan teman.§Saya ada urusan untuk pergi ke bank.§ぎんこうへ いく ようじが あります。§Tidak ada waktu untuk belajar.§べんきょうする じかんが ありません。',
+            'Kata Kerja Bentuk ます + ましょうか§ましょうか dipakai untuk menawarkan bantuan atau mengusulkan tindakan secara aktif kepada lawan bicara.§Vます → Vましょうか§にもつを もちましょうか。§Boleh saya bawakan barangnya?§いまから いきましょうか。§Bagaimana kalau kita pergi sekarang?§Boleh saya bantu?§てつだいましょうか。§Bagaimana kalau kita makan bersama?§いっしょに たべましょうか。'
+        ]);
+        addBunpouChapter(23, [
+            'Kata Kerja／Kata Sifat／Kata Benda + とき§とき menunjukkan waktu terjadinya peristiwa: gunakan bentuk kamus untuk aksi sebelum/belum selesai, bentuk た setelah aksi selesai, sifat な + な, dan kata benda + の.§V辞書形・Vた／い形・な形な／Nの + とき§パリへ いくとき、かばんを かいました。§Saat akan pergi ke Paris, saya membeli tas.§パリへ いったとき、かばんを かいました。§Saat sudah pergi/tiba di Paris, saya membeli tas.§Saat sibuk, saya minum kopi.§いそがしいとき、コーヒーを のみます。§Saat kecil, saya tinggal di Jakarta.§こどものとき、ジャカルタに すんでいました。',
+            'Kata Kerja Bentuk Kamus + と§と menyatakan akibat yang pasti, alami, atau otomatis; klausa setelahnya tidak boleh berupa keinginan, ajakan, permohonan, atau perintah.§V辞書形 + と、結果§この ボタンを おすと、おつりが でます。§Kalau menekan tombol ini, uang kembalian keluar.§みぎへ まがると、ゆうびんきょくが あります。§Kalau belok kanan, ada kantor pos.§Kalau musim semi tiba, menjadi hangat.§はるに なると、あたたかく なります。§Kalau minum obat ini, menjadi sehat.§この くすりを のむと、げんきに なります。',
+            'Kata Benda が Kata Sifat§が menandai hal, fenomena, atau bagian yang dirasakan dan dijelaskan sifatnya secara langsung, misalnya suara, rasa, atau pemandangan.§N が 形容詞です§おとが ちいさいです。§Suaranya kecil.§この りょうりは あじが いいです。§Masakan ini rasanya enak.§Pemandangan Gunung Fuji indah.§ふじさんの けしきが きれいです。§Musik ini suaranya keras.§この おんがくは おとが おおきいです。',
+            'Kata Benda Tempat を Kata Kerja Pergerakan§Dengan kata kerja perpindahan seperti 散歩します, 渡ります, dan 曲がります, を menandai tempat atau area yang dilewati, bukan objek penderita.§場所を 散歩します／渡ります／曲がります§こうえんを さんぽします。§Berjalan-jalan melewati taman.§はしを わたります。§Menyeberangi jembatan.§Belok di persimpangan itu.§あの こうさてんを みぎへ まがります。§Berjalan-jalan melewati jalan ini.§この みちを さんぽします。'
+        ]);
+        addBunpouChapter(24, [
+            'くれます§くれます berarti “memberikan kepada saya/keluarga saya”; subjeknya selalu orang lain dan penerima adalah pembicara atau orang dalam kelompok pembicara.§人が わたしに Nを くれます§さとうさんは わたしに クリスマスカードを くれました。§Sdr. Sato memberi kartu Natal kepada saya.§ともだちは わたしに ほんを くれました。§Teman memberi buku kepada saya.§Ibu memberi saya sweater.§ははは わたしに セーターを くれました。§Guru memberi saya kamus.§せんせいは わたしに じしょを くれました。',
+            '～てあげます／～てもらいます／～てくれます§～てあげます menyatakan melakukan kebaikan untuk orang lain, ～てもらいます menerima bantuan dari orang lain, dan ～てくれます menyatakan orang lain melakukan kebaikan untuk saya/keluarga saya.§Vて あげます／もらいます／くれます§わたしは きむらさんに ほんを かして あげました。§Saya meminjamkan buku kepada Kimura.§やまださんに でんわばんごうを おしえて もらいました。§Saya diajari nomor telepon oleh Yamada.§Ibu mengirim sweater kepada saya.§ははは わたしに セーターを おくって くれました。§Saya membantu teman membawa barang.§ともだちに にもつを もって あげました。',
+            'Kata Benda 1 は Kata Benda 2 が Kata Kerja§Pola ini menempatkan hasil atau benda sebagai topik lalu menyebut orang yang melakukan tindakan, terutama dalam konteks pemberian atau kebaikan.§N1 は N2 が Vてくれました§この ワインは さとうさんが くれました。§Anggur ini diberikan oleh Sato.§この ケーキは ははが つくって くれました。§Kue ini dibuatkan oleh ibu.§Kamus ini diberikan oleh guru.§この じしょは せんせいが くれました。§Foto ini diambilkan oleh teman.§この しゃしんは ともだちが とって くれました。'
+        ]);
+        addBunpouChapter(25, [
+            'Bentuk Biasa Lampau + たら§～たら menyatakan syarat umum; klausa setelahnya boleh berupa keinginan, ajakan, permohonan, atau perintah, dan kata sifat/kata benda memakai かったら／だったら.§普通形過去 + ら§おかねが あったら、りょこうします。§Kalau punya uang, saya akan berwisata.§やすかったら、この パソコンを かいます。§Kalau murah, saya membeli komputer ini.§Kalau besok hujan, tidak pergi.§あした あめだったら、いきません。§Kalau ada waktu, mari kita makan bersama.§じかんが あったら、いっしょに たべましょう。',
+            'Kata Kerja Bentuk た + たら§Dengan kata kerja, ～たら juga berarti “setelah sudah …”; tindakan kedua dilakukan setelah tindakan pertama benar-benar selesai.§Vたら、V§１０じに なったら、でかけましょう。§Kalau sudah pukul 10, mari berangkat.§うちへ かえったら、でんわします。§Setelah pulang ke rumah, saya menelepon.§Setelah makan, minum obat.§たべたら、くすりを のみます。§Setelah tiba di Tokyo, hubungi saya.§とうきょうに ついたら、でんわして ください。',
+            'Kata Kerja／Kata Sifat + ても§～ても menyatakan hal utama tetap terjadi walaupun kondisi di depannya tidak ideal atau berlawanan; kata sifat い menjadi ～くても, sedangkan sifat な dan kata benda menjadi ～でも.§Vても／い形くても／な形・Nでも§あめが ふっても、せんたくします。§Walaupun hujan, saya tetap mencuci pakaian.§やすくても、この くるまを かいません。§Walaupun murah, saya tidak membeli mobil ini.§Walaupun hari Minggu, saya bekerja.§にちようびでも、はたらきます。§Walaupun sibuk, tolong datang.§いそがしくても、きてください。',
+            'もし§もし diletakkan di awal kalimat untuk mempertegas andaian dan umumnya berpasangan dengan ～たら atau ～ても.§もし ～たら／～ても§もし １おくえん あったら、いろいろな くにを りょこうしたいです。§Seandainya punya 100 juta yen, saya ingin berwisata ke banyak negara.§もし あめが ふっても、いきます。§Seandainya hujan pun, saya tetap pergi.§Seandainya libur, saya ingin tidur.§もし やすみだったら、ねたいです。§Seandainya punya mobil, pergi ke Kyoto.§もし くるまが あったら、きょうとへ いきます。',
+            'Subjek Anak Kalimat dengan が§Di dalam anak kalimat seperti ～たら, ～ても, ～とき, dan ～まえに, pelaku ditandai dengan が, bukan は, agar topik utama kalimat tetap jelas.§子句の主語が + 述語§ともだちが くる まえに、へやを そうじします。§Sebelum teman datang, saya membersihkan kamar.§あめが ふったら、うちに います。§Kalau hujan turun, saya tinggal di rumah.§Saat ibu memasak, saya belajar.§ははが りょうりを するとき、わたしは べんきょうします。§Kalau guru datang, berdirilah.§せんせいが きたら、たってください。'
+        ]);
+
         const FRESH_BUNPOU_QUIZZES = {
             b1_1: [{ prompt: "Saya siswa SMA.", words: ["わたし", "は", "こうこうせい", "です"], answerStr: "わたしはこうこうせいです" }, { prompt: "Rina adalah orang Indonesia.", words: ["リナさん", "は", "インドネシアじん", "です"], answerStr: "リナさんはインドネシアじんです" }],
             b1_2: [{ prompt: "Saya bukan guru.", words: ["わたし", "は", "せんせい", "じゃ", "ありません"], answerStr: "わたしはせんせいじゃありません" }, { prompt: "Santos bukan mahasiswa.", words: ["サントスさん", "は", "がくせい", "では", "ありません"], answerStr: "サントスさんはがくせいではありません" }],
@@ -1960,7 +2218,7 @@ const KANJI_N5_DB = (() => {
                     <div class="grid grid-cols-2 gap-4">
                         ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
-                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-15')}
+                        ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-20')}
                         ${renderMenuBtn('latihan', 'gamepad-2', 'Latihan', `Kumpulkan ${coinIcon}`)}
                     </div>
                     <button onclick="switchTab('ujian-menu')" class="w-full bg-accent text-white p-4 rounded-3xl font-bold flex items-center justify-between active:scale-95 shadow-md shadow-blue-500/20">
@@ -1996,7 +2254,7 @@ const KANJI_N5_DB = (() => {
                     <p class="text-xs -mt-3 mb-4" style="color: var(--text-muted)">Pahami pola kalimat dengan pelatih AI interaktif.</p>
                     
                     <div class="space-y-4">
-                        ${Array.from({ length: 15 }, (_, i) => i + 1).map(b => {
+                        ${Object.keys(BUNPOU_DB).map(Number).sort((a, b) => a - b).map(b => {
                             const total = BUNPOU_DB[b].length;
                             const done = BUNPOU_DB[b].filter(item => state.stats.bunpouCompleted.includes(item.id)).length;
                             const pct = Math.round((done / total) * 100);
@@ -2319,7 +2577,7 @@ const KANJI_N5_DB = (() => {
             
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-6 pb-24">
-                    <div class="flex items-center justify-between">
+                    <div class="relative flex items-center justify-between">
                         <div class="flex items-center gap-2"><button onclick="switchTab('belajar-menu')" style="color: var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold tracking-tight">${isH ? 'Hiragana' : 'Katakana'}</h2></div>
                         <span class="text-xs bg-accent-light text-accent px-3 py-1 rounded-full font-bold">${type.toUpperCase()}</span>
                     </div>
@@ -2481,9 +2739,9 @@ const KANJI_N5_DB = (() => {
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
                     <h2 class="text-xl font-bold tracking-tight">Kosakata (Kotoba)</h2>
-                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 15 (Lengkap).</p>
+                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Kosakata Bab 1 - 25 (Lengkap).</p>
                     <div class="space-y-3">
-                        ${Array.from({ length: 15 }, (_, i) => i + 1).map(b => `<div onclick="openKotobaBab(${b})" data-favorite="Kosakata Bab ${b}" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
+                        ${Object.keys(KOTOBA_DB).map(Number).sort((a, b) => a - b).map(b => `<div onclick="openKotobaBab(${b})" data-favorite="Kosakata Bab ${b}" class="ios-glass p-5 rounded-3xl hover:border-accent hover:scale-[1.01] active:scale-95 transition-all flex justify-between items-center cursor-pointer">
                             <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center font-bold text-lg">${b}</div><div><h3 class="font-extrabold text-sm">Pelajaran ${b}</h3><p class="text-[10px]" style="color: var(--text-muted)">${KOTOBA_DB[b].length} kosakata</p></div></div>
                             <i data-lucide="chevron-right" style="color: var(--text-muted)" class="w-5 h-5"></i>
                         </div>`).join('')}
@@ -2498,7 +2756,7 @@ const KANJI_N5_DB = (() => {
                 <div class="animate-fade-in space-y-6 pb-24">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2"><button onclick="switchTab('kotoba')" style="color: var(--text-muted)"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold tracking-tight">Bab ${bab}</h2></div>
-                        <button onclick="openKotobaPracticeModal(${bab})" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
+                        <button id="kotoba-practice-trigger" onclick="toggleKotobaPracticePanel(${bab})" aria-expanded="false" class="bg-accent text-white text-xs font-bold px-4 py-2 rounded-full ios-btn-press flex items-center gap-1.5 transition-all duration-300"><i data-lucide="play-circle" class="w-4 h-4"></i> Latihan</button>
                     </div>
                     <div class="space-y-3">
                         ${list.map(i => `<div class="ios-glass p-4 rounded-3xl flex flex-col gap-1.5">
@@ -2625,13 +2883,56 @@ const KANJI_N5_DB = (() => {
 
         function setExamModeToggle(m) { state.examDifficulty = m; saveState(); renderUjianTabs(); }
 
-        function openKotobaPracticeModal(bab) {
-            const old = document.getElementById('kotoba-practice-modal'); if (old) old.remove();
-            const modal = document.createElement('div'); modal.id = 'kotoba-practice-modal'; modal.className = 'fixed inset-0 z-[80] bg-black/55 backdrop-blur-sm flex items-center justify-center px-5';
-            modal.innerHTML = `<div class="ios-glass w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl"><div class="flex justify-between items-start mb-5"><div><p class="text-[10px] font-bold text-accent uppercase tracking-widest">Bab ${bab}</p><h3 class="text-xl font-black">Pilih tipe latihan</h3></div><button onclick="document.getElementById('kotoba-practice-modal').remove()"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="space-y-3"><button onclick="startKotobaLatihan(${bab}, 'choice')" class="w-full ios-glass p-5 rounded-3xl text-left hover:border-accent"><i data-lucide="list-checks" class="w-5 h-5 text-accent mb-2"></i><span class="font-bold block">Pilihan ganda</span><span class="text-xs" style="color:var(--text-muted)">Pilih arti yang tepat.</span></button><button onclick="startKotobaLatihan(${bab}, 'input')" class="w-full bg-accent text-white p-5 rounded-3xl text-left"><i data-lucide="keyboard" class="w-5 h-5 mb-2"></i><span class="font-bold block">Isian</span><span class="text-xs text-white/80">Ketik arti yang benar.</span></button></div></div>`;
-            document.body.appendChild(modal); lucide.createIcons();
+        function closeKotobaPracticePanel() {
+            const panel = document.getElementById('kotoba-practice-panel');
+            const backdrop = document.getElementById('kotoba-practice-backdrop');
+            const trigger = document.getElementById('kotoba-practice-trigger');
+            if (trigger) { trigger.classList.remove('is-expanded'); trigger.setAttribute('aria-expanded', 'false'); }
+            if (panel && !panel.classList.contains('is-closing')) {
+                panel.classList.add('is-closing');
+                setTimeout(() => panel.remove(), 300);
+            }
+            if (backdrop) backdrop.remove();
         }
-        function startKotobaLatihan(bab, mode = 'choice') { const modal = document.getElementById('kotoba-practice-modal'); if (modal) modal.remove(); setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode); }
+
+        function positionKotobaPracticePanel() {
+            const panel = document.getElementById('kotoba-practice-panel');
+            const trigger = document.getElementById('kotoba-practice-trigger');
+            const app = document.getElementById('main-app');
+            if (!panel || !trigger || !app) return;
+            const appRect = app.getBoundingClientRect();
+            const triggerRect = trigger.getBoundingClientRect();
+            const isLandscape = document.documentElement.getAttribute('data-orientation-view') === 'landscape';
+            const panelWidth = panel.getBoundingClientRect().width;
+            const horizontalPadding = isLandscape ? 18 : 12;
+            const leftMin = appRect.left + horizontalPadding;
+            const leftMax = Math.max(leftMin, appRect.right - panelWidth - horizontalPadding);
+            const desiredLeft = triggerRect.right - panelWidth;
+            panel.style.left = `${Math.min(Math.max(desiredLeft, leftMin), leftMax)}px`;
+            panel.style.top = `${triggerRect.bottom + (isLandscape ? 9 : 10)}px`;
+        }
+
+        function toggleKotobaPracticePanel(bab) {
+            if (document.getElementById('kotoba-practice-panel')) { closeKotobaPracticePanel(); return; }
+            const trigger = document.getElementById('kotoba-practice-trigger');
+            if (!trigger) return;
+            trigger.classList.add('is-expanded');
+            trigger.setAttribute('aria-expanded', 'true');
+            const backdrop = document.createElement('button');
+            backdrop.id = 'kotoba-practice-backdrop';
+            backdrop.type = 'button';
+            backdrop.setAttribute('aria-label', 'Tutup pilihan latihan');
+            backdrop.onclick = closeKotobaPracticePanel;
+            const panel = document.createElement('div');
+            panel.id = 'kotoba-practice-panel';
+            panel.className = 'kotoba-practice-panel ios-glass';
+            panel.setAttribute('role', 'menu');
+            panel.innerHTML = `<button onclick="startKotobaLatihan(${bab}, 'choice')" class="kotoba-practice-choice w-full rounded-[1.08rem] p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="list-checks" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black text-main">Pilihan Ganda</span><span class="mt-0.5 block text-[11px] leading-tight" style="color:var(--text-muted)">Pilih arti yang tepat.</span></span></span></button>
+                <button onclick="startKotobaLatihan(${bab}, 'input')" class="kotoba-practice-choice kotoba-practice-choice--accent w-full rounded-[1.08rem] bg-accent p-3 text-left transition-all hover:-translate-y-0.5 active:scale-[.98]" role="menuitem"><span class="flex items-center gap-3"><span class="kotoba-practice-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"><i data-lucide="keyboard" class="w-[1.1rem] h-[1.1rem]"></i></span><span><span class="block text-sm font-black">Isian</span><span class="mt-0.5 block text-[11px] leading-tight text-white/80">Ketik arti yang benar.</span></span></span></button>`;
+            document.body.append(backdrop, panel);
+            requestAnimationFrame(() => { positionKotobaPracticePanel(); lucide.createIcons(); });
+        }
+        function startKotobaLatihan(bab, mode = 'choice') { closeKotobaPracticePanel(); setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode); }
         
         function startLevelQuiz(l, mode = 'choice') {
             let p = [], t = "";
@@ -3129,6 +3430,7 @@ const KANJI_N5_DB = (() => {
                 state.orientationView = window.innerWidth >= window.innerHeight ? 'landscape' : 'portrait';
             }
             document.documentElement.setAttribute('data-orientation-view', state.orientationView || 'landscape');
+            requestAnimationFrame(positionKotobaPracticePanel);
         }
         
         function setSeason(s) { 
@@ -3138,6 +3440,7 @@ const KANJI_N5_DB = (() => {
         
         function applySeason() {
             document.documentElement.setAttribute('data-season', state.season);
+            requestAnimationFrame(positionKotobaPracticePanel);
             const o = document.getElementById('season-overlay'); o.innerHTML = '';
             const bgLayer = document.getElementById('season-art-bg');
             
@@ -3373,10 +3676,14 @@ const KANJI_N5_DB = (() => {
             });
             ['pointerup', 'pointercancel', 'pointerleave'].forEach(eventName => document.addEventListener(eventName, () => { if (favoritePressTimer) { clearTimeout(favoritePressTimer); favoritePressTimer = null; } }));
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyTheme(); });
-            window.addEventListener('resize', () => { if (state.orientationMode === 'auto') { applyOrientation(); updateThemeBtns(); } });
+            window.addEventListener('resize', () => {
+                if (state.orientationMode === 'auto') { applyOrientation(); updateThemeBtns(); }
+                positionKotobaPracticePanel();
+            });
         });
     </script>
 </body>
 </html>
+
 
 
