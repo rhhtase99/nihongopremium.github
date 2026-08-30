@@ -368,13 +368,112 @@
             right: auto !important;
             bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
             transform: translate3d(-50%, 0, 0);
-            will-change: opacity, transform;
-            transition: opacity 0.8s ease, transform 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+            overflow: visible;
+            isolation: isolate;
+            background: color-mix(in srgb, var(--glass-bg) 82%, transparent) !important;
+            border-color: color-mix(in srgb, var(--glass-border) 78%, rgba(255,255,255,.55)) !important;
+            box-shadow: 0 12px 28px rgba(40, 49, 66, .13), inset 0 1px 0 rgba(255,255,255,.58);
+            backdrop-filter: blur(24px) saturate(145%);
+            -webkit-backdrop-filter: blur(24px) saturate(145%);
+            will-change: opacity, transform, filter;
+            transition: opacity .32s ease, transform .5s cubic-bezier(.22,.86,.24,1), background .35s ease, border-color .35s ease, filter .35s ease;
         }
+        /* Bar navigasi bergaya liquid glass: lapisan cahaya bergerak membuatnya
+           terasa seperti elemen native, tetapi tetap mengikuti warna tema aktif. */
+        #bottom-nav::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            z-index: -1;
+            overflow: hidden;
+            border-radius: inherit;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 48% 105% at 5% -45%, rgba(255,255,255,.78), transparent 68%),
+                linear-gradient(105deg, transparent 22%, rgba(255,255,255,.28) 45%, transparent 68%);
+            background-size: 100% 100%, 235% 100%;
+            background-position: center, 130% 0;
+            animation: navGlassSheen 8.5s ease-in-out infinite;
+        }
+        @keyframes navGlassSheen {
+            0%, 35% { background-position: center, 130% 0; }
+            64%, 100% { background-position: center, -110% 0; }
+        }
+        @keyframes navReturn {
+            0% { opacity: 0; transform: translate3d(-50%, 1.5rem, 0) scale(.82); }
+            62% { opacity: 1; transform: translate3d(-50%, -.16rem, 0) scale(1.025); }
+            100% { opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
+        }
+        #bottom-nav::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            left: 8%; right: 8%; top: 0;
+            height: 42%;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,.43), transparent);
+            opacity: .62;
+            pointer-events: none;
+        }
+        #bottom-nav button {
+            border-radius: 1rem;
+            isolation: isolate;
+            transition: color .28s ease, transform .32s cubic-bezier(.2,.9,.2,1), background .28s ease, filter .28s ease;
+        }
+        #bottom-nav button::before {
+            content: "";
+            position: absolute;
+            inset: .1rem .28rem;
+            z-index: -1;
+            border-radius: .86rem;
+            background: color-mix(in srgb, var(--accent) 13%, transparent);
+            opacity: 0;
+            transform: scale(.78);
+            transition: opacity .28s ease, transform .38s cubic-bezier(.2,.9,.2,1);
+        }
+        #bottom-nav button.text-accent::before { opacity: 1; transform: scale(1); }
+        #bottom-nav button.text-accent i { filter: drop-shadow(0 4px 5px color-mix(in srgb, var(--accent) 30%, transparent)); }
+        #bottom-nav button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); transform: translateY(-2px); }
+        #bottom-nav button:active { transform: translateY(1px) scale(.91); }
+        #bottom-nav.nav-returning { animation: navReturn .52s cubic-bezier(.22,.86,.24,1) both; }
+        #bottom-nav.nav-collapsed {
+            opacity: 0;
+            pointer-events: none;
+            transform: translate3d(-50%, calc(100% + 3.8rem), 0) scale(.82);
+            filter: blur(3px);
+        }
+        #bottom-nav-restore {
+            position: fixed;
+            left: max(1rem, env(safe-area-inset-left));
+            bottom: max(1.1rem, env(safe-area-inset-bottom));
+            width: 3rem;
+            height: 3rem;
+            z-index: 55;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: var(--text-main);
+            background: color-mix(in srgb, var(--glass-bg) 76%, transparent);
+            border: 1px solid color-mix(in srgb, var(--glass-border) 82%, rgba(255,255,255,.7));
+            box-shadow: 0 9px 24px rgba(40, 49, 66, .17), inset 0 1px 0 rgba(255,255,255,.65);
+            backdrop-filter: blur(22px) saturate(150%);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
+            opacity: 0;
+            pointer-events: none;
+            transform: translate3d(-.8rem, .8rem, 0) scale(.64);
+            transition: opacity .28s ease, transform .45s cubic-bezier(.22,.86,.24,1), background .3s ease, box-shadow .3s ease;
+        }
+        #bottom-nav-restore::before { content: ""; position: absolute; inset: 4px; border-radius: inherit; border: 1px solid rgba(255,255,255,.38); pointer-events: none; }
+        #bottom-nav-restore.is-visible { opacity: 1; pointer-events: auto; transform: translate3d(0, 0, 0) scale(1); }
+        #bottom-nav-restore:hover { transform: translate3d(0, -2px, 0) scale(1.04); }
+        #bottom-nav-restore:active { transform: scale(.91); }
         #bottom-nav button { min-width: 0; position: relative; z-index: 1; pointer-events: auto; }
         [data-orientation-view="landscape"] #main-app { max-width: min(58rem, 100vw); }
         [data-orientation-view="landscape"] #app-viewport { width: 100%; }
-        [data-orientation-view="landscape"] #bottom-nav { max-width: min(44rem, 92vw); }
+        [data-orientation-view="portrait"] #bottom-nav { width: min(96%, 28rem); }
+        [data-orientation-view="landscape"] #bottom-nav { width: min(58vw, 44rem); max-width: min(44rem, 92vw); bottom: max(.8rem, env(safe-area-inset-bottom)) !important; }
+        [data-orientation-view="landscape"] #bottom-nav-restore { left: max(.9rem, env(safe-area-inset-left)); bottom: max(.8rem, env(safe-area-inset-bottom)); }
         [data-orientation-view="landscape"] #theme-modal > div,
         [data-orientation-view="landscape"] #shop-modal > div,
         [data-orientation-view="landscape"] #profile-modal > div,
@@ -415,7 +514,10 @@
         .settings-section { border: 1px solid var(--glass-border); border-radius: 1.75rem; overflow: hidden; background: var(--glass-bg); box-shadow: 0 8px 22px -18px rgba(0,0,0,.35); }
         .settings-row { width: 100%; display: flex; align-items: center; gap: .8rem; padding: .86rem 1rem; text-align: left; border-bottom: 1px solid var(--glass-border); color: var(--text-main); }
         .settings-row:last-child { border-bottom: 0; }
-        .settings-row i:first-child { color: var(--accent); }
+        /* Ikon dibesarkan secara visual tanpa mengubah tinggi bar atau jarak teks. */
+        .settings-icon { width: 1.48rem; height: 1.48rem; flex: 0 0 1.48rem; object-fit: contain; transform: scale(1.63); filter: drop-shadow(0 2px 3px rgba(0,0,0,.11)); transition: transform .28s cubic-bezier(.22,.8,.2,1), opacity .22s ease; }
+        .settings-row:hover .settings-icon { transform: scale(1.73) rotate(-2deg); }
+        .settings-action-icon { width: .98rem; height: .98rem; object-fit: contain; vertical-align: -2px; }
         .settings-row .setting-value { margin-left: auto; color: var(--text-muted); font-size: .72rem; font-weight: 700; }
         #theme-modal > div > .mb-6, #theme-modal > div > .space-y-3 { display: none; }
 
@@ -518,6 +620,7 @@
         <button onclick="switchTab('latihan')" id="tab-latihan" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="gamepad-2" class="w-5 h-5"></i><span class="text-[8px] font-bold">Latihan</span></button>
         <button onclick="switchTab('ujian-menu')" id="tab-ujian" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="award" class="w-5 h-5"></i><span class="text-[8px] font-bold">Ujian</span></button>
     </nav>
+    <button id="bottom-nav-restore" onclick="restoreBottomNav()" aria-label="Tampilkan navigasi"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
 
     <!-- MODALS -->
     
@@ -577,29 +680,52 @@
                 <button onclick="closeThemeModal()" style="color: var(--text-muted)"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <div class="space-y-4 pb-4">
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tema</p><div class="settings-section"><button onclick="openSettingsDetail('themes')" class="settings-row"><i data-lucide="palette" class="w-5 h-5"></i><span class="font-bold text-sm">Pilih Tema</span><span class="setting-value" id="current-theme-label">Tema</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="toggleDarkMode()" class="settings-row"><i data-lucide="moon" class="w-5 h-5"></i><span class="font-bold text-sm">Mode Gelap</span><span class="setting-value" id="dark-mode-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="setTheme('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="smartphone" class="w-5 h-5"></i><span class="font-bold text-sm">Ikuti pengaturan perangkat</span><span class="setting-value" id="auto-theme-label">Auto</span></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tata Letak</p><div class="settings-section"><button onclick="setOrientationMode('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="rotate-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Auto</span><span class="setting-value" id="orientation-mode-label">Aktif</span></button><button onclick="setOrientationMode('manual'); toggleOrientationView(); refreshSettingsSummary()" class="settings-row"><i data-lucide="panel-top" class="w-5 h-5"></i><span class="font-bold text-sm">Manual</span><span class="setting-value">Ubah orientasi</span></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Bahasa</p><div class="settings-section"><button onclick="openSettingsDetail('app-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Aplikasi</span><span class="setting-value">Bahasa Indonesia</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('learning-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Pembelajaran</span><span class="setting-value">Jepang</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Pembelajaran</p><div class="settings-section"><button onclick="openSettingsDetail('favorites')" class="settings-row"><i data-lucide="book-open-check" class="w-5 h-5"></i><span class="font-bold text-sm">Materi Favorit</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('reminder')" class="settings-row"><i data-lucide="bell" class="w-5 h-5"></i><span class="font-bold text-sm">Pengingat Belajar</span><span class="setting-value" id="reminder-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('target')" class="settings-row"><i data-lucide="graduation-cap" class="w-5 h-5"></i><span class="font-bold text-sm">Target Harian</span><span class="setting-value" id="target-label">10 menit</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Lainnya</p><div class="settings-section"><button onclick="openSettingsDetail('rating')" class="settings-row"><i data-lucide="star" class="w-5 h-5"></i><span class="font-bold text-sm">Beri Rating</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('share')" class="settings-row"><i data-lucide="share-2" class="w-5 h-5"></i><span class="font-bold text-sm">Bagikan Aplikasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('about')" class="settings-row"><i data-lucide="info" class="w-5 h-5"></i><span class="font-bold text-sm">Tentang Kami</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('privacy')" class="settings-row"><i data-lucide="shield-check" class="w-5 h-5"></i><span class="font-bold text-sm">Kebijakan Privasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('terms')" class="settings-row"><i data-lucide="scroll-text" class="w-5 h-5"></i><span class="font-bold text-sm">Syarat & Ketentuan</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Data Akun</p><div class="settings-section"><button onclick="resetData('progress')" class="settings-row text-orange-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Reset Kemajuan Belajar</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('all')" class="settings-row text-red-600"><i data-lucide="log-out" class="w-5 h-5"></i><span class="font-bold text-sm">Hapus Semua & Logout</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tema</p><div class="settings-section">
+                    <button onclick="openSettingsDetail('themes')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Theme.png" alt=""><span class="font-bold text-sm">Pilih Tema</span><span class="setting-value" id="current-theme-label">Tema</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button id="settings-darkmode-button" onclick="toggleDarkMode()" class="settings-row"><img id="settings-darkmode-icon" class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Dark%20Mode.PNG" alt=""><span id="settings-darkmode-title" class="font-bold text-sm">Mode Gelap</span><span class="setting-value" id="dark-mode-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('auto'); refreshSettingsSummary()" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/System%20Mode.png" alt=""><span class="font-bold text-sm">Ikuti pengaturan perangkat</span><span class="setting-value" id="auto-theme-label">Auto</span></button>
+                </div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tata Letak</p><div class="settings-section">
+                    <button onclick="setOrientationMode('auto'); refreshSettingsSummary()" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Auto%20Rotation.png" alt=""><span class="font-bold text-sm">Auto</span><span class="setting-value" id="orientation-mode-label">Aktif</span></button>
+                    <button onclick="setOrientationMode('manual'); toggleOrientationView(); refreshSettingsSummary()" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Manual.png" alt=""><span class="font-bold text-sm">Manual</span><span class="setting-value">Ubah orientasi</span></button>
+                </div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Bahasa</p><div class="settings-section">
+                    <button onclick="openSettingsDetail('app-language')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/App%20Language.png" alt=""><span class="font-bold text-sm">Bahasa Aplikasi</span><span class="setting-value">Bahasa Indonesia</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="openSettingsDetail('learning-language')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Learning%20Language.PNG" alt=""><span class="font-bold text-sm">Bahasa Pembelajaran</span><span class="setting-value">Jepang</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Pembelajaran</p><div class="settings-section">
+                    <button onclick="openSettingsDetail('favorites')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Favorite%20Material.png" alt=""><span class="font-bold text-sm">Materi Favorit</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="openSettingsDetail('reminder')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Study%20Reminder.png" alt=""><span class="font-bold text-sm">Pengingat Belajar</span><span class="setting-value" id="reminder-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="openSettingsDetail('target')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Daily%20Target.PNG" alt=""><span class="font-bold text-sm">Target Harian</span><span class="setting-value" id="target-label">10 menit</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Lainnya</p><div class="settings-section">
+                    <button onclick="openSettingsDetail('rating')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Give%20a%20Rating.png" alt=""><span class="font-bold text-sm">Beri Rating</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="openSettingsDetail('share')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Share%20App.png" alt=""><span class="font-bold text-sm">Bagikan Aplikasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="openSettingsDetail('about')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/About%20Us.PNG" alt=""><span class="font-bold text-sm">Tentang Kami</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="openSettingsDetail('privacy')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Privacy%20Policy.png" alt=""><span class="font-bold text-sm">Kebijakan Privasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="openSettingsDetail('terms')" class="settings-row"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Terms%20and%20Conditions.png" alt=""><span class="font-bold text-sm">Syarat & Ketentuan</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                </div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Data Akun</p><div class="settings-section">
+                    <button onclick="resetData('progress')" class="settings-row text-orange-600"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Reset%20Learning%20Skills.PNG" alt=""><span class="font-bold text-sm">Reset Kemajuan Belajar</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                    <button onclick="resetData('all')" class="settings-row text-red-600"><img class="settings-icon" src="assets/Icon%20Packs/Setting%20Icons/Delete%20All%20and%20Logout.png" alt=""><span class="font-bold text-sm">Hapus Semua & Logout</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button>
+                </div></div>
             </div>
             <div class="mb-6">
                 <label class="text-xs font-semibold uppercase tracking-wider block mb-3" style="color: var(--text-muted)">Mode Layar</label>
                 <div class="grid grid-cols-3 gap-2 bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-2xl">
-                    <button onclick="setTheme('light')" id="theme-light-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="sun" class="w-4 h-4"></i> Terang</button>
-                    <button onclick="setTheme('dark')" id="theme-dark-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="moon" class="w-4 h-4"></i> Gelap</button>
-                    <button onclick="setTheme('auto')" id="theme-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i> Auto</button>
+                    <button onclick="setTheme('light')" id="theme-light-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Light%20Mode.PNG" alt=""> Terang</button>
+                    <button onclick="setTheme('dark')" id="theme-dark-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Dark%20Mode.PNG" alt=""> Gelap</button>
+                    <button onclick="setTheme('auto')" id="theme-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/System%20Mode.png" alt=""> Auto</button>
                 </div>
             </div>
 
             <div class="mb-6">
                 <label class="text-xs font-semibold uppercase tracking-wider block mb-3" style="color: var(--text-muted)">Tata Letak</label>
                 <div class="grid grid-cols-2 gap-2 bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-2xl mb-2">
-                    <button onclick="setOrientationMode('auto')" id="orientation-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="rotate-cw" class="w-4 h-4"></i> Auto</button>
-                    <button onclick="setOrientationMode('manual')" id="orientation-manual-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><i data-lucide="touchpad" class="w-4 h-4"></i> Manual</button>
+                    <button onclick="setOrientationMode('auto')" id="orientation-auto-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Auto%20Rotation.png" alt=""> Auto</button>
+                    <button onclick="setOrientationMode('manual')" id="orientation-manual-btn" class="py-2.5 rounded-xl text-xs font-semibold flex justify-center items-center gap-1.5"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Manual.png" alt=""> Manual</button>
                 </div>
-                <button onclick="toggleOrientationView()" id="orientation-toggle-btn" class="w-full ios-glass py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="panel-top" class="w-4 h-4"></i> Ubah ke Portrait</button>
+                <button onclick="toggleOrientationView()" id="orientation-toggle-btn" class="w-full ios-glass py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Manual.png" alt=""> Ubah ke Portrait</button>
             </div>
             
             <div class="mb-6">
@@ -614,8 +740,8 @@
             </div>
 
             <div class="space-y-3">
-                <button onclick="resetData('progress')" class="w-full ios-glass border-orange-500/30 text-orange-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Reset Kemajuan Belajar</button>
-                <button onclick="resetData('all')" class="w-full ios-glass border-red-500/30 text-red-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Semua & Logout</button>
+                <button onclick="resetData('progress')" class="w-full ios-glass border-orange-500/30 text-orange-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Reset%20Learning%20Skills.PNG" alt=""> Reset Kemajuan Belajar</button>
+                <button onclick="resetData('all')" class="w-full ios-glass border-red-500/30 text-red-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Delete%20All%20and%20Logout.png" alt=""> Hapus Semua & Logout</button>
             </div>
         </div>
     </div>
@@ -2106,7 +2232,8 @@ const KANJI_N5_DB = (() => {
             stats: { 
                 correct: 0, wrong: 0, history: [], 
                 hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0,
-                bunpouCompleted: [] // Array of completed bunpou IDs
+                bunpouCompleted: [], // Array of completed bunpou IDs
+                kanaCompleted: [] // Kunci kelompok kana yang telah selesai dilatih
             },
             quiz: { currentQuestion: 0, questions: [], correctCount: 0, wrongCount: 0, total: 0, timerObj: null }
         };
@@ -2123,8 +2250,10 @@ const KANJI_N5_DB = (() => {
                 try { 
                     const parsed = JSON.parse(saved);
                     if(parsed.coins === undefined) parsed.coins = 0;
+                    parsed.stats = { ...state.stats, ...(parsed.stats || {}) };
                     if(!parsed.unlockedThemes) parsed.unlockedThemes = ['default', 'haru', 'natsu', 'aki', 'fuyu'];
                     if(!parsed.stats.bunpouCompleted) parsed.stats.bunpouCompleted = [];
+                    if(!parsed.stats.kanaCompleted) parsed.stats.kanaCompleted = [];
                     if(!parsed.orientationMode) parsed.orientationMode = 'auto';
                     if(!parsed.orientationView) parsed.orientationView = 'landscape';
                     if(!parsed.kotobaPracticeMode) parsed.kotobaPracticeMode = 'input';
@@ -2776,26 +2905,219 @@ const KANJI_N5_DB = (() => {
         /* ================= QUIZ & EXAM ================= */
         function renderLatihanTabs() {
             const coinIcon = getCoinIcon();
+            const kanjiUnlocked = isKanaStageCompleted('katakana', 'tokushuon');
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
                     <h2 class="text-xl font-bold tracking-tight">Menu Latihan</h2>
-                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Uji ingatan dan kumpulkan ${coinIcon}!</p>
+                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Setiap sesi berisi 10 soal acak. Selesaikan kelompok untuk membuka tahap berikutnya.</p>
                     <div class="space-y-3">
                         ${renderPracticeDivider('Latihan Hiragana', 'Mulai dari huruf dasar sampai lengkap.', "openWritingMenu('hiragana')")}
-                         ${renderStartBtn("Level 1 - Hiragana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dasar')")}
-                         ${renderStartBtn("Level 2 - Hiragana + Dakuon", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-dakuon')")}
-                         ${renderStartBtn("Level 3 - Hiragana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('hira-lengkap')")}
-                        ${renderPracticeDivider('Latihan Katakana', 'Mulai dari huruf dasar sampai lengkap.', "openWritingMenu('katakana')")}
-                        ${renderStartBtn("Level 4 - Katakana Dasar", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-dasar')")}
-                        ${renderStartBtn("Level 5 - Katakana Lengkap", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('kata-lengkap')")}
-                        ${renderStartBtn("Level 6 - Campuran Huruf", `+5 ${coinIcon} per jawaban`, "startLevelQuiz('campuran')")}
+                        ${renderKanaStageCard('hiragana', 'basic')}
+                        ${renderKanaStageCard('hiragana', 'voiced')}
+                        ${renderKanaStageCard('hiragana', 'yoon')}
+                        ${renderKanaStageCard('hiragana', 'all')}
+                        ${renderPracticeDivider('Latihan Katakana', 'Mulai setelah Hiragana Yoon selesai.', "openWritingMenu('katakana')")}
+                        ${renderKanaStageCard('katakana', 'basic')}
+                        ${renderKanaStageCard('katakana', 'voiced')}
+                        ${renderKanaStageCard('katakana', 'yoon')}
+                        ${renderKanaStageCard('katakana', 'tokushuon')}
+                        ${renderKanaStageCard('katakana', 'all')}
+                        ${renderKanaMasterCard()}
                         ${renderPracticeDivider('Latihan Kosakata', 'Uji arti kata dari semua pelajaran.')}
                         ${renderStartBtn("Level 7 - Kosakata Lengkap", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kotoba-campuran')")}
                         ${renderPracticeDivider('Latihan Kanji', 'Pilih, ketik, atau berlatih menulis Kanji N5.', "openWritingMenu('kanji')")}
-                        ${renderStartBtn("Level 8 - Kanji N5", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kanji-n5')")}
+                        ${kanjiUnlocked ? renderStartBtn("Level Kanji N5", `+10 ${coinIcon} per jawaban`, "startLevelQuiz('kanji-n5')") : renderLockedPracticeCard('Level Kanji N5', 'Selesaikan Katakana Dasar, Dakuon, Yoon, dan Tokushuon lebih dahulu.')}
                     </div>
                 </div>`;
+            lucide.createIcons();
         }
+
+        /* Latihan kana bersifat bertahap: setiap kelompok membuka kelompok berikutnya. */
+        let kanaPracticeSession = { script: 'hiragana', stage: 'basic', mode: 'choice', customKeys: [] };
+        // Konteks ini menjaga tombol kembali pada setiap sesi latihan tetap menuju menu asalnya.
+        let quizSessionContext = { returnView: null, returnLabel: 'Menu Latihan', completionKey: '', completionMessage: '' };
+        const KANA_STAGE_META = {
+            hiragana: [
+                { key: 'basic', level: 'Level 1', title: 'Hiragana Dasar', subtitle: 'A–O, KA–KO, SA–SO sampai WA–N.', prerequisite: null },
+                { key: 'voiced', level: 'Level 2', title: 'Hiragana Dakuon + Handakuon', subtitle: 'GA–GO sampai PA–PO.', prerequisite: 'hiragana:basic' },
+                { key: 'yoon', level: 'Level 3', title: 'Hiragana Yoon', subtitle: 'KYA–KYO sampai PYA–PYO.', prerequisite: 'hiragana:voiced' },
+                { key: 'all', level: 'Level 4', title: 'Semua Hiragana', subtitle: 'Latihan acak semua huruf atau pilih sendiri.', prerequisite: 'hiragana:yoon', all: true }
+            ],
+            katakana: [
+                { key: 'basic', level: 'Level 1', title: 'Katakana Dasar', subtitle: 'A–O, KA–KO, SA–SO sampai WA–N.', prerequisite: 'hiragana:yoon' },
+                { key: 'voiced', level: 'Level 2', title: 'Katakana Dakuon + Handakuon', subtitle: 'GA–GO sampai PA–PO.', prerequisite: 'katakana:basic' },
+                { key: 'yoon', level: 'Level 3', title: 'Katakana Yoon', subtitle: 'KYA–KYO sampai PYA–PYO.', prerequisite: 'katakana:voiced' },
+                { key: 'tokushuon', level: 'Level 4', title: 'Katakana Tokushuon', subtitle: 'Bunyi asing seperti FA, TI, WI, dan VA.', prerequisite: 'katakana:yoon' },
+                { key: 'all', level: 'Level 5', title: 'Semua Katakana', subtitle: 'Latihan acak semua huruf atau pilih sendiri.', prerequisite: 'katakana:tokushuon', all: true }
+            ]
+        };
+        function cleanKanaItems(items) { return (items || []).filter(item => item && item.j && item.r); }
+        function getKanaStage(script, stageKey) { return (KANA_STAGE_META[script] || []).find(stage => stage.key === stageKey); }
+        function kanaProgressKey(script, stageKey, groupKey = '') { return `${script}:${stageKey}${groupKey ? ':' + groupKey : ''}`; }
+        function hasKanaProgress(key) { return (state.stats.kanaCompleted || []).includes(key); }
+        function getKanaGroups(script, stageKey) {
+            const db = script === 'hiragana' ? HIRAGANA_DB : KATAKANA_DB;
+            const seionLabels = ['A – O', 'KA – KO', 'SA – SO', 'TA – TO', 'NA – NO', 'HA – HO', 'MA – MO', 'YA – YO', 'RA – RO', 'WA – N'];
+            const voicedLabels = ['GA – GO', 'ZA – ZO', 'DA – DO', 'BA – BO', 'PA – PO'];
+            const yoonLabels = ['KYA – KYO', 'SHA – SHO', 'CHA – CHO', 'NYA – NYO', 'HYA – HYO', 'MYA – MYO', 'RYA – RYO', 'GYA – GYO', 'JA – JO', 'BYA – BYO', 'PYA – PYO'];
+            if (stageKey === 'basic') return seionLabels.map((label, index) => ({ key: `row-${index + 1}`, label, items: cleanKanaItems(db.seion.slice(index * 5, index * 5 + 5)) })).filter(group => group.items.length);
+            if (stageKey === 'voiced') {
+                const source = [...cleanKanaItems(db.dakuon), ...cleanKanaItems(db.handakuon)];
+                return voicedLabels.map((label, index) => ({ key: `row-${index + 1}`, label, items: source.slice(index * 5, index * 5 + 5) })).filter(group => group.items.length);
+            }
+            if (stageKey === 'yoon') return yoonLabels.map((label, index) => ({ key: `row-${index + 1}`, label, items: cleanKanaItems(db.yoon.slice(index * 3, index * 3 + 3)) })).filter(group => group.items.length);
+            if (stageKey === 'tokushuon') {
+                const source = cleanKanaItems(db.tokushuon);
+                return Array.from({ length: Math.ceil(source.length / 5) }, (_, index) => ({ key: `row-${index + 1}`, label: `Bunyi asing ${index + 1}`, items: source.slice(index * 5, index * 5 + 5) })).filter(group => group.items.length);
+            }
+            return [];
+        }
+        function allKanaItems(script) {
+            const db = script === 'hiragana' ? HIRAGANA_DB : KATAKANA_DB;
+            return cleanKanaItems([...(db.seion || []), ...(db.dakuon || []), ...(db.handakuon || []), ...(db.yoon || []), ...(db.tokushuon || [])]);
+        }
+        function isKanaStageCompleted(script, stageKey) {
+            const stage = getKanaStage(script, stageKey);
+            if (!stage) return false;
+            if (stage.all) return hasKanaProgress(kanaProgressKey(script, stageKey, 'all'));
+            const groups = getKanaGroups(script, stageKey);
+            return groups.length > 0 && groups.every(group => hasKanaProgress(kanaProgressKey(script, stageKey, group.key)));
+        }
+        function prerequisiteFinished(prerequisite) {
+            if (!prerequisite) return true;
+            const [script, stage] = prerequisite.split(':');
+            return isKanaStageCompleted(script, stage);
+        }
+        function isKanaStageUnlocked(script, stageKey) {
+            const stage = getKanaStage(script, stageKey);
+            return !!stage && prerequisiteFinished(stage.prerequisite);
+        }
+        function markKanaComplete(key) {
+            if (!key || hasKanaProgress(key)) return false;
+            state.stats.kanaCompleted = [...(state.stats.kanaCompleted || []), key];
+            const done = state.stats.kanaCompleted;
+            state.stats.hiraganaProgress = Math.min(100, Math.round((done.filter(key => key.startsWith('hiragana:')).length / 27) * 100));
+            state.stats.katakanaProgress = Math.min(100, Math.round((done.filter(key => key.startsWith('katakana:')).length / 35) * 100));
+            return true;
+        }
+        function renderLockedPracticeCard(title, subtitle) {
+            return `<div class="ios-glass p-4 rounded-3xl flex justify-between items-center opacity-55 border-dashed"><div><h3 class="font-bold text-sm" style="color:var(--text-muted)">${title}</h3><p class="text-[10px]" style="color:var(--text-muted)">${subtitle}</p></div><i data-lucide="lock-keyhole" class="w-5 h-5" style="color:var(--text-muted)"></i></div>`;
+        }
+        function renderKanaStageCard(script, stageKey) {
+            const stage = getKanaStage(script, stageKey); if (!stage) return '';
+            const unlocked = isKanaStageUnlocked(script, stageKey);
+            const completed = isKanaStageCompleted(script, stageKey);
+            if (!unlocked) return renderLockedPracticeCard(`${stage.level} — ${stage.title}`, 'Terkunci: selesaikan tahap sebelumnya.');
+            return `<button onclick="openKanaStage('${script}', '${stageKey}')" class="w-full ios-glass p-4 rounded-3xl flex justify-between items-center text-left hover:border-accent active:scale-[.98] transition-all"><div><span class="text-[10px] font-black uppercase tracking-widest text-accent">${stage.level}${completed ? ' · Selesai' : ''}</span><h3 class="font-bold text-sm text-main mt-0.5">${stage.title}</h3><p class="text-[10px]" style="color:var(--text-muted)">${stage.subtitle}</p></div><span class="w-9 h-9 rounded-2xl flex items-center justify-center ${completed ? 'bg-emerald-500/15 text-emerald-500' : 'bg-accent-light text-accent'}"><i data-lucide="${completed ? 'check' : 'chevron-right'}" class="w-5 h-5"></i></span></button>`;
+        }
+        function renderKanaMasterCard() {
+            const unlocked = isKanaStageCompleted('hiragana', 'yoon') && isKanaStageCompleted('katakana', 'tokushuon');
+            if (!unlocked) return renderLockedPracticeCard('Mode Mahir — Campuran Kana', 'Selesaikan Hiragana Yoon dan Katakana Tokushuon untuk membukanya.');
+            return `<button onclick="openKanaMaster()" class="w-full ios-glass p-4 rounded-3xl flex justify-between items-center text-left hover:border-accent active:scale-[.98] transition-all"><div><span class="text-[10px] font-black uppercase tracking-widest text-accent">Mode Mahir</span><h3 class="font-bold text-sm text-main mt-0.5">Campuran Hiragana + Katakana</h3><p class="text-[10px]" style="color:var(--text-muted)">Pilih semua huruf atau atur sendiri materi latihan.</p></div><span class="w-9 h-9 rounded-2xl flex items-center justify-center bg-accent-light text-accent"><i data-lucide="sparkles" class="w-5 h-5"></i></span></button>`;
+        }
+
+        /* Halaman detail level Kana. Kartu pada menu utama tetap ringkas; di sini
+           pengguna memilih kelompok A-O, KA-KO, dan seterusnya secara bertahap. */
+        function isKanaGroupUnlocked(script, stageKey, groupKey) {
+            const groups = getKanaGroups(script, stageKey);
+            const index = groups.findIndex(group => group.key === groupKey);
+            return index === 0 || (index > 0 && hasKanaProgress(kanaProgressKey(script, stageKey, groups[index - 1].key)));
+        }
+        function renderKanaModeSelector() {
+            const mode = kanaPracticeSession.mode;
+            return `<div class="ios-glass rounded-2xl p-1 grid grid-cols-2 gap-1">
+                <button onclick="setKanaPracticeMode('choice')" class="py-2.5 rounded-xl text-xs font-black transition-all ${mode === 'choice' ? 'bg-accent text-white shadow-sm' : 'text-main'}"><i data-lucide="list-checks" class="w-4 h-4 inline mr-1"></i>Pilihan Ganda</button>
+                <button onclick="setKanaPracticeMode('input')" class="py-2.5 rounded-xl text-xs font-black transition-all ${mode === 'input' ? 'bg-accent text-white shadow-sm' : 'text-main'}"><i data-lucide="keyboard" class="w-4 h-4 inline mr-1"></i>Isian</button>
+            </div>`;
+        }
+        function setKanaPracticeMode(mode) {
+            kanaPracticeSession.mode = mode;
+            if (kanaPracticeSession.script === 'master') openKanaMaster();
+            else openKanaStage(kanaPracticeSession.script, kanaPracticeSession.stage);
+        }
+        function openKanaStage(script, stageKey) {
+            const stage = getKanaStage(script, stageKey);
+            if (!stage || !isKanaStageUnlocked(script, stageKey)) { renderLatihanTabs(); return; }
+            kanaPracticeSession = { ...kanaPracticeSession, script, stage: stageKey, customKeys: [] };
+            if (stage.all) { renderKanaAllHub(script, stage); return; }
+            const groups = getKanaGroups(script, stageKey);
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-5 pb-24">
+                <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke menu latihan" style="color:var(--text-muted)" class="active:scale-90"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">${stage.level}</p><h2 class="text-xl font-bold text-main">${stage.title}</h2></div></div>
+                <p class="text-xs -mt-3" style="color:var(--text-muted)">${stage.subtitle} Setiap kelompok berisi 10 soal acak.</p>
+                ${renderKanaModeSelector()}
+                <div class="space-y-3">${groups.map(group => renderKanaGroupCard(script, stageKey, group)).join('')}</div>
+            </div>`;
+            lucide.createIcons();
+        }
+        function renderKanaGroupCard(script, stageKey, group) {
+            const progressKey = kanaProgressKey(script, stageKey, group.key);
+            const completed = hasKanaProgress(progressKey);
+            if (!isKanaGroupUnlocked(script, stageKey, group.key)) return renderLockedPracticeCard(group.label, 'Selesaikan kelompok sebelumnya untuk membukanya.');
+            return `<button onclick="startKanaGroupQuiz('${script}', '${stageKey}', '${group.key}')" class="w-full ios-glass p-4 rounded-3xl flex items-center justify-between text-left border border-glassborder hover:border-accent active:scale-[.98] transition-all">
+                <div><span class="text-[10px] font-black uppercase tracking-widest text-accent">${completed ? 'Selesai' : `${group.items.length} huruf`}</span><h3 class="font-bold text-base text-main mt-0.5">${group.label}</h3><p class="text-[10px]" style="color:var(--text-muted)">${group.items.map(item => item.j).join(' · ')}</p></div>
+                <span class="w-10 h-10 shrink-0 rounded-2xl flex items-center justify-center ${completed ? 'bg-emerald-500/15 text-emerald-500' : 'bg-accent-light text-accent'}"><i data-lucide="${completed ? 'check' : (kanaPracticeSession.mode === 'choice' ? 'list-checks' : 'keyboard')}" class="w-5 h-5"></i></span>
+            </button>`;
+        }
+        function startKanaGroupQuiz(script, stageKey, groupKey) {
+            const group = getKanaGroups(script, stageKey).find(item => item.key === groupKey);
+            const stage = getKanaStage(script, stageKey);
+            if (!group || !stage) return;
+            startKanaQuiz(group.items, `${stage.title} - ${group.label}`, kanaPracticeSession.mode, {
+                completionKey: kanaProgressKey(script, stageKey, groupKey),
+                completionMessage: `${group.label} selesai. Kelompok berikutnya terbuka.`,
+                returnLabel: stage.title,
+                returnView: () => openKanaStage(script, stageKey)
+            });
+        }
+        function renderKanaAllHub(script, stage) {
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-5 pb-24">
+                <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke menu latihan" style="color:var(--text-muted)" class="active:scale-90"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">${stage.level}</p><h2 class="text-xl font-bold text-main">${stage.title}</h2></div></div>
+                <p class="text-xs -mt-3" style="color:var(--text-muted)">Latih semua huruf secara acak, atau pilih sendiri materi yang ingin kamu ulang.</p>
+                ${renderKanaModeSelector()}
+                <div class="space-y-3"><button onclick="startKanaAllQuiz('${script}', '${stage.key}')" class="w-full bg-accent text-white p-5 rounded-3xl text-left flex justify-between items-center active:scale-[.98] transition-all shadow-md"><div><span class="text-[10px] font-black uppercase tracking-widest text-white/70">Sesi 10 soal</span><h3 class="font-black text-base mt-1">Latih Semua Huruf</h3><p class="text-xs text-white/80 mt-1">Huruf dipilih acak dari seluruh ${script}.</p></div><i data-lucide="shuffle" class="w-6 h-6"></i></button><button onclick="openKanaCustom('${script}', '${stage.key}')" class="w-full ios-glass p-5 rounded-3xl text-left flex justify-between items-center hover:border-accent active:scale-[.98] transition-all"><div><span class="text-[10px] font-black uppercase tracking-widest text-accent">Mode Kustom</span><h3 class="font-black text-base text-main mt-1">Pilih Huruf Sendiri</h3><p class="text-xs mt-1" style="color:var(--text-muted)">Atur huruf yang ingin kamu latih.</p></div><i data-lucide="sliders-horizontal" class="w-6 h-6 text-accent"></i></button></div>
+            </div>`;
+            lucide.createIcons();
+        }
+        function startKanaAllQuiz(script, stageKey) {
+            const stage = getKanaStage(script, stageKey);
+            if (!stage) return;
+            startKanaQuiz(allKanaItems(script), `${stage.title} - Semua Huruf`, kanaPracticeSession.mode, {
+                completionKey: kanaProgressKey(script, stageKey, 'all'), completionMessage: `${stage.title} selesai!`, returnLabel: stage.title,
+                returnView: () => openKanaStage(script, stageKey)
+            });
+        }
+        function openKanaMaster() {
+            if (!(isKanaStageCompleted('hiragana', 'yoon') && isKanaStageCompleted('katakana', 'tokushuon'))) { renderLatihanTabs(); return; }
+            kanaPracticeSession = { ...kanaPracticeSession, script: 'master', stage: 'all', customKeys: [] };
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-5 pb-24">
+                <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke menu latihan" style="color:var(--text-muted)" class="active:scale-90"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Mode Mahir</p><h2 class="text-xl font-bold text-main">Campuran Kana</h2></div></div>
+                <p class="text-xs -mt-3" style="color:var(--text-muted)">Gabungkan hiragana dan katakana dalam satu sesi pilihan ganda atau isian.</p>
+                ${renderKanaModeSelector()}
+                <div class="space-y-3"><button onclick="startKanaMasterQuiz()" class="w-full bg-accent text-white p-5 rounded-3xl text-left flex justify-between items-center active:scale-[.98] transition-all shadow-md"><div><span class="text-[10px] font-black uppercase tracking-widest text-white/70">Semua Kana</span><h3 class="font-black text-base mt-1">Latihan Campuran</h3><p class="text-xs text-white/80 mt-1">10 soal acak dari seluruh level kana.</p></div><i data-lucide="sparkles" class="w-6 h-6"></i></button><button onclick="openKanaCustom('master', 'all')" class="w-full ios-glass p-5 rounded-3xl text-left flex justify-between items-center hover:border-accent active:scale-[.98] transition-all"><div><span class="text-[10px] font-black uppercase tracking-widest text-accent">Mode Kustom</span><h3 class="font-black text-base text-main mt-1">Buat Sesi Sendiri</h3><p class="text-xs mt-1" style="color:var(--text-muted)">Pilih campuran huruf sesukamu.</p></div><i data-lucide="sliders-horizontal" class="w-6 h-6 text-accent"></i></button></div>
+            </div>`;
+            lucide.createIcons();
+        }
+        function startKanaMasterQuiz() {
+            startKanaQuiz([...allKanaItems('hiragana'), ...allKanaItems('katakana')], 'Mode Mahir - Campuran Kana', kanaPracticeSession.mode, { returnLabel: 'Mode Mahir', returnView: openKanaMaster });
+        }
+        function openKanaCustom(script, stageKey) {
+            const isMaster = script === 'master';
+            const items = isMaster ? [...allKanaItems('hiragana'), ...allKanaItems('katakana')] : allKanaItems(script);
+            kanaPracticeSession = { ...kanaPracticeSession, script, stage: stageKey, customKeys: items.map((_, index) => String(index)) };
+            const title = isMaster ? 'Kustom Campuran Kana' : `Kustom ${script === 'hiragana' ? 'Hiragana' : 'Katakana'}`;
+            const backAction = isMaster ? 'openKanaMaster()' : `openKanaStage('${script}', '${stageKey}')`;
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-5 pb-24"><div class="flex items-center gap-2"><button onclick="${backAction}" aria-label="Kembali" style="color:var(--text-muted)" class="active:scale-90"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Mode Kustom</p><h2 class="text-xl font-bold text-main">${title}</h2></div></div><p class="text-xs -mt-3" style="color:var(--text-muted)">Centang huruf yang ingin kamu latih. Sistem akan membuat 10 soal acak.</p>${renderKanaModeSelector()}<div class="flex gap-2"><button onclick="setKanaCustomSelection(true)" class="flex-1 ios-glass rounded-xl py-2 text-xs font-bold text-accent">Pilih Semua</button><button onclick="setKanaCustomSelection(false)" class="flex-1 ios-glass rounded-xl py-2 text-xs font-bold" style="color:var(--text-muted)">Kosongkan</button></div><div id="kana-custom-form" class="grid grid-cols-5 gap-2">${items.map((item, index) => `<label class="ios-glass rounded-2xl p-2.5 text-center cursor-pointer active:scale-95"><input type="checkbox" class="sr-only kana-custom-check" data-index="${index}" checked><span class="block text-xl font-black text-main">${item.j}</span><span class="block text-[9px] font-bold mt-1" style="color:var(--text-muted)">${item.r}</span></label>`).join('')}</div><button onclick="startKanaCustomQuiz('${script}', '${stageKey}')" class="w-full bg-accent text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[.98]"><i data-lucide="play" class="w-5 h-5"></i> Mulai 10 Soal</button></div>`;
+            lucide.createIcons();
+        }
+        function setKanaCustomSelection(selected) { document.querySelectorAll('.kana-custom-check').forEach(input => input.checked = selected); }
+        function startKanaCustomQuiz(script, stageKey) {
+            const isMaster = script === 'master';
+            const source = isMaster ? [...allKanaItems('hiragana'), ...allKanaItems('katakana')] : allKanaItems(script);
+            const selected = [...document.querySelectorAll('.kana-custom-check:checked')].map(input => source[Number(input.dataset.index)]).filter(Boolean);
+            if (!selected.length) { alert('Pilih minimal satu huruf terlebih dahulu.'); return; }
+            startKanaQuiz(selected, `Mode Kustom - ${isMaster ? 'Campuran Kana' : (script === 'hiragana' ? 'Hiragana' : 'Katakana')}`, kanaPracticeSession.mode, { returnLabel: 'Mode Kustom', returnView: isMaster ? openKanaMaster : () => openKanaStage(script, stageKey) });
+        }
+        function startKanaQuiz(items, title, mode, context = {}) { setupQuizFlow(items, title, false, mode, 5, { ...context, normalCount: 10 }); }
 
         function renderPracticeDivider(title, desc, writingAction = '') {
             const writingButton = writingAction ? `<button onclick="${writingAction}" class="shrink-0 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 px-2.5 py-2 text-[10px] font-black leading-tight text-left"><i data-lucide="pen-line" class="w-3.5 h-3.5 inline mr-1"></i>Latihan<br>Menulis</button>` : '';
@@ -2939,7 +3261,7 @@ const KANJI_N5_DB = (() => {
             closeKotobaPracticePanel();
             kotobaPracticeMenu.launchTimer = setTimeout(() => {
                 kotobaPracticeMenu.launchTimer = null;
-                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode);
+                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode, 5, { normalCount: 10, returnLabel: `Bab ${bab}`, returnView: () => openKotobaBab(bab) });
             }, 320);
         }
         /* Dismiss lifecycle: panel tidak menghalangi tap atau scroll di halaman. */
@@ -3007,14 +3329,26 @@ const KANJI_N5_DB = (() => {
             setupQuizFlow(p, t, true, 'choice', type === 'bunpou' ? 15 : 5);
         }
 
-        function setupQuizFlow(items, title, isExam, mode = 'choice', timeLimit = 5) {
+        function setupQuizFlow(items, title, isExam, mode = 'choice', timeLimit = 5, context = {}) {
             if (items.length === 0) return;
-            const shuffled = [...items].sort(() => Math.random() - 0.5);
-            const questions = isExam ? Array.from({ length: 150 }, (_, i) => shuffled[i % shuffled.length]) : shuffled;
+            const questionCount = isExam ? 150 : Number(context.normalCount || 10);
+            const questions = [];
+            while (questions.length < questionCount) questions.push(...[...items].sort(() => Math.random() - 0.5));
+            questions.length = questionCount;
             state.quiz.currentQuestion = 0; state.quiz.questions = questions;
-            state.quiz.correctCount = 0; state.quiz.wrongCount = 0; state.quiz.total = questions.length; state.quiz.mode = mode; state.quiz.timeLimit = timeLimit;
+            state.quiz.correctCount = 0; state.quiz.wrongCount = 0; state.quiz.total = questions.length; state.quiz.mode = mode; state.quiz.timeLimit = timeLimit; state.quiz.title = title;
+            quizSessionContext = { returnView: null, returnLabel: isExam ? 'Mode Ujian' : 'Menu Latihan', completionKey: '', completionMessage: '', ...context };
             MusicEngine.setExamMode(isExam);
             renderQuizQuestion(title, isExam);
+        }
+
+        function exitQuizSession() {
+            if (state.quiz.timerObj) { clearInterval(state.quiz.timerObj); state.quiz.timerObj = null; }
+            MusicEngine.setExamMode(false);
+            state.quiz.currentQuestion = 0;
+            const returnView = quizSessionContext.returnView;
+            quizSessionContext = { returnView: null, returnLabel: 'Menu Latihan', completionKey: '', completionMessage: '' };
+            if (typeof returnView === 'function') returnView(); else if (state.activeTab === 'ujian-menu') renderUjianTabs(); else renderLatihanTabs();
         }
 
         function isKanjiQuizItem(item) {
@@ -3082,8 +3416,9 @@ const KANJI_N5_DB = (() => {
 
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in flex flex-col justify-between h-full space-y-5 pb-24 relative">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted)">${title}</span>
+                    <div class="flex items-center justify-between gap-3">
+                        <button onclick="exitQuizSession()" class="shrink-0 flex items-center gap-1 text-xs font-bold" style="color:var(--text-muted)" aria-label="Kembali ke ${quizSessionContext.returnLabel}"><i data-lucide="arrow-left" class="w-4 h-4"></i><span class="hidden min-[390px]:inline">Kembali</span></button>
+                        <span class="text-xs font-bold uppercase tracking-widest text-center truncate" style="color: var(--text-muted)">${title}</span>
                         <span class="text-xs font-bold bg-accent-light text-accent px-3 py-1 rounded-full">${q + 1} / ${state.quiz.total}</span>
                     </div>
 
@@ -3222,7 +3557,7 @@ const KANJI_N5_DB = (() => {
 
             setTimeout(() => {
                 state.quiz.currentQuestion++;
-                if (state.quiz.currentQuestion < state.quiz.total) renderQuizQuestion(document.querySelector('.tracking-widest').innerText, MusicEngine.isExamMode);
+                if (state.quiz.currentQuestion < state.quiz.total) renderQuizQuestion(state.quiz.title, MusicEngine.isExamMode);
                 else renderQuizResults();
             }, isKanji ? 2400 : 1200);
         }
@@ -3248,6 +3583,8 @@ const KANJI_N5_DB = (() => {
         function renderQuizResults() {
             MusicEngine.setExamMode(false);
             const pct = Math.round((state.quiz.correctCount / state.quiz.total) * 100);
+            const newlyCompleted = quizSessionContext.completionKey ? markKanaComplete(quizSessionContext.completionKey) : false;
+            const completionMessage = newlyCompleted ? (quizSessionContext.completionMessage || 'Tahap latihan selesai!') : '';
             let grade = 'E', color = 'text-red-500';
             if (pct >= 90) { grade = 'A'; color = 'text-emerald-500'; }
             else if (pct >= 80) { grade = 'B'; color = 'text-accent'; }
@@ -3262,6 +3599,7 @@ const KANJI_N5_DB = (() => {
 
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-6 pb-24 text-center">
+                    <div class="flex items-center justify-between text-left"><button onclick="exitQuizSession()" class="flex items-center gap-1 text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="arrow-left" class="w-4 h-4"></i> ${quizSessionContext.returnLabel}</button><span class="text-[10px] font-black uppercase tracking-widest text-accent">Hasil Latihan</span></div>
                     <h2 class="text-xl font-bold tracking-tight">Selesai!</h2>
                     <div class="ios-glass p-8 rounded-[3rem] border-accent flex flex-col items-center">
                         <div class="w-36 h-36 rounded-full border-[10px] border-glassborder flex items-center justify-center mb-4"><span class="text-4xl font-black">${pct}%</span></div>
@@ -3272,9 +3610,65 @@ const KANJI_N5_DB = (() => {
                         <div class="ios-glass p-4 rounded-3xl text-left"><span class="text-[10px] uppercase font-bold" style="color: var(--text-muted)">Benar</span><span class="block text-2xl font-bold text-emerald-500 mt-1">${state.quiz.correctCount}</span></div>
                         <div class="ios-glass p-4 rounded-3xl text-left"><span class="text-[10px] uppercase font-bold" style="color: var(--text-muted)">Salah</span><span class="block text-2xl font-bold text-red-500 mt-1">${state.quiz.wrongCount}</span></div>
                     </div>
-                    <button onclick="switchTab('home')" class="w-full bg-accent text-white py-4 rounded-2xl font-bold shadow-md flex items-center justify-center gap-2"><i data-lucide="home" class="w-5 h-5"></i> Kembali Beranda</button>
+                    ${completionMessage ? `<div class="ios-glass border border-emerald-500/35 bg-emerald-500/10 p-3 rounded-2xl text-xs font-bold text-emerald-500"><i data-lucide="unlock" class="w-4 h-4 inline mr-1"></i>${completionMessage}</div>` : ''}
+                    <button onclick="exitQuizSession()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold shadow-md flex items-center justify-center gap-2"><i data-lucide="arrow-left" class="w-5 h-5"></i> Kembali ke ${quizSessionContext.returnLabel}</button>
                 </div>`;
             lucide.createIcons();
+        }
+
+        /* ================= NAVIGASI BAWAH ================= */
+        const navMotion = { collapsed: false, positions: new WeakMap(), wheelTimer: null };
+        function collapseBottomNav() {
+            const nav = document.getElementById('bottom-nav');
+            const restore = document.getElementById('bottom-nav-restore');
+            if (!nav || navMotion.collapsed) return;
+            navMotion.collapsed = true;
+            nav.classList.remove('nav-returning');
+            nav.classList.add('nav-collapsed');
+            nav.setAttribute('aria-hidden', 'true');
+            restore?.classList.add('is-visible');
+            closeKotobaPracticePanel();
+        }
+        function restoreBottomNav() {
+            const nav = document.getElementById('bottom-nav');
+            const restore = document.getElementById('bottom-nav-restore');
+            if (!nav) return;
+            navMotion.collapsed = false;
+            nav.classList.remove('nav-collapsed');
+            nav.classList.remove('nav-returning');
+            void nav.offsetWidth;
+            nav.classList.add('nav-returning');
+            nav.setAttribute('aria-hidden', 'false');
+            restore?.classList.remove('is-visible');
+            setTimeout(() => nav.classList.remove('nav-returning'), 540);
+        }
+        function getScrollTop(source) {
+            if (!source || source === document || source === document.body || source === document.documentElement) return window.scrollY || document.documentElement.scrollTop || 0;
+            return Number(source.scrollTop || 0);
+        }
+        function handleNavScroll(event) {
+            const source = event?.target || document;
+            const current = getScrollTop(source);
+            const previous = navMotion.positions.get(source) ?? current;
+            navMotion.positions.set(source, current);
+            const delta = current - previous;
+            if (delta > 8) collapseBottomNav();
+            else if (delta < -8) restoreBottomNav();
+        }
+        function initBottomNavMotion() {
+            document.addEventListener('scroll', handleNavScroll, true);
+            document.addEventListener('wheel', event => {
+                if (event.deltaY > 8) collapseBottomNav();
+                else if (event.deltaY < -8) restoreBottomNav();
+            }, { passive: true });
+            let touchStartY = 0;
+            document.addEventListener('touchstart', event => { touchStartY = event.touches[0]?.clientY || 0; }, { passive: true });
+            document.addEventListener('touchmove', event => {
+                const y = event.touches[0]?.clientY || touchStartY;
+                if (touchStartY - y > 10) collapseBottomNav();
+                else if (y - touchStartY > 10) restoreBottomNav();
+                touchStartY = y;
+            }, { passive: true });
         }
 
         /* ================= HELPERS, COINS, & THEME SYSTEM ================= */
@@ -3414,12 +3808,22 @@ const KANJI_N5_DB = (() => {
         function refreshSettingsSummary() {
             const names = { default: 'Umum', haru: 'Haru', natsu: 'Natsu', aki: 'Aki', fuyu: 'Fuyu', kyoto: 'Kyoto Zen', inari: 'Inari Shrine', tropis: 'Hutan Tropis', space: 'Luar Angkasa', natal: 'Natal', ios6: 'iOS 6', xpaero: 'XP Aero' };
             const set = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+            const isDark = document.documentElement.classList.contains('dark');
             set('current-theme-label', names[state.season] || 'Tema');
-            set('dark-mode-label', state.theme === 'auto' ? 'Auto' : state.theme === 'dark' ? 'Aktif' : 'Mati');
+            set('dark-mode-label', state.theme === 'auto' ? `Auto · ${isDark ? 'Gelap' : 'Terang'}` : isDark ? 'Aktif' : 'Mati');
             set('auto-theme-label', state.theme === 'auto' ? 'Aktif' : 'Pilih Auto');
             set('orientation-mode-label', state.orientationMode === 'auto' ? 'Aktif' : 'Manual');
             set('reminder-label', state.reminderOn ? 'Aktif' : 'Mati');
             set('target-label', `${state.dailyTarget || 10} menit`);
+            const modeTitle = document.getElementById('settings-darkmode-title');
+            const modeIcon = document.getElementById('settings-darkmode-icon');
+            const modeButton = document.getElementById('settings-darkmode-button');
+            if (modeTitle) modeTitle.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+            if (modeIcon) {
+                modeIcon.src = isDark ? 'assets/Icon%20Packs/Setting%20Icons/Light%20Mode.PNG' : 'assets/Icon%20Packs/Setting%20Icons/Dark%20Mode.PNG';
+                modeIcon.alt = isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap';
+            }
+            if (modeButton) modeButton.setAttribute('aria-label', isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
         }
         function closeSettingsDetail() { const el = document.getElementById('settings-detail-modal'); if(el) el.remove(); refreshSettingsSummary(); }
         function openSettingsDetail(type) {
@@ -3596,7 +4000,7 @@ const KANJI_N5_DB = (() => {
             const orientationToggle = document.getElementById('orientation-toggle-btn');
             if (orientationToggle) {
                 const nextLabel = state.orientationView === 'landscape' ? 'Ubah ke Portrait' : 'Ubah ke Landscape';
-                orientationToggle.innerHTML = `<i data-lucide="${state.orientationView === 'landscape' ? 'panel-top' : 'panel-left'}" class="w-4 h-4"></i> ${nextLabel}`;
+                orientationToggle.innerHTML = `<img class="settings-action-icon" src="assets/Icon%20Packs/Setting%20Icons/Manual.png" alt=""> ${nextLabel}`;
                 orientationToggle.classList.toggle('opacity-50', state.orientationMode === 'auto');
             }
             
@@ -3687,7 +4091,7 @@ const KANJI_N5_DB = (() => {
 
         function resetData(type) {
             if (type === 'progress') { 
-                state.stats = { correct: 0, wrong: 0, history: [], hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0, bunpouCompleted: [] }; 
+                state.stats = { correct: 0, wrong: 0, history: [], hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0, bunpouCompleted: [], kanaCompleted: [] }; 
                 saveState(); alert("Kemajuan di-reset! Koin dan Tema tidak hilang."); closeThemeModal(); switchTab('home');
             } else { 
                 if (!confirm('Hapus seluruh data aplikasi dan logout? Tindakan ini tidak dapat dibatalkan.')) return;
@@ -3697,6 +4101,7 @@ const KANJI_N5_DB = (() => {
 
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
+            initBottomNavMotion();
             let favoritePressTimer = null;
             document.addEventListener('pointerdown', e => {
                 const card = e.target.closest('[data-favorite]');
@@ -3712,7 +4117,7 @@ const KANJI_N5_DB = (() => {
                 }, 650);
             });
             ['pointerup', 'pointercancel', 'pointerleave'].forEach(eventName => document.addEventListener(eventName, () => { if (favoritePressTimer) { clearTimeout(favoritePressTimer); favoritePressTimer = null; } }));
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyTheme(); });
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') { applyTheme(); refreshSettingsSummary(); } });
             window.addEventListener('resize', () => {
                 if (state.orientationMode === 'auto') { applyOrientation(); updateThemeBtns(); }
                 positionKotobaPracticePanel();
