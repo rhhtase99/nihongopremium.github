@@ -2912,6 +2912,7 @@ const KANJI_N5_DB = (() => {
         function completeWritingPractice() { if (!writingSession.hasInk) { alert('Tulis hurufnya terlebih dahulu, lalu tekan tombol Sudah Menulis.'); return; } const reward = writingSession.type === 'kanji' ? 10 : 5; state.coins += reward; if (writingSession.type === 'hiragana') state.stats.hiraganaProgress = Math.min(100, (state.stats.hiraganaProgress || 0) + 1); else if (writingSession.type === 'katakana') state.stats.katakanaProgress = Math.min(100, (state.stats.katakanaProgress || 0) + 1); else state.stats.kanjiProgress = Math.min(100, (state.stats.kanjiProgress || 0) + 1); saveState(); updateCoinUI(); writingSession.index++; writingSession.hasInk = false; renderWritingPractice(); }
 
         function renderUjianTabs() {
+            stopJlptTimer();
             const isH = state.examDifficulty === 'hard';
             const proBtnClass = isH 
                 ? 'bg-red-600 shadow-[0_0_30px_rgba(220,38,38,0.7)] border-2 border-red-400' 
@@ -2919,8 +2920,7 @@ const KANJI_N5_DB = (() => {
 
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
-                    <h2 class="text-xl font-bold tracking-tight">Mode Ujian</h2>
-                    <p class="text-xs -mt-3" style="color: var(--text-muted)">Selesaikan ujian untuk bonus presisi.</p>
+                    <div class="flex items-start justify-between gap-3"><div><h2 class="text-xl font-bold tracking-tight">Mode Ujian</h2><p class="text-xs mt-1" style="color: var(--text-muted)">Selesaikan ujian untuk bonus presisi.</p></div><button onclick="openJlptMenu()" class="shrink-0 bg-accent text-white px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95"><i data-lucide="graduation-cap" class="w-4 h-4"></i> JLPT</button></div>
                     
                     <div class="flex justify-center mb-6 bg-glassborder p-1 rounded-2xl relative">
                         <div class="absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-accent rounded-xl transition-transform duration-300 shadow-sm" style="transform: translateX(${isH ? '100%' : '0'})"></div>
@@ -2952,6 +2952,148 @@ const KANJI_N5_DB = (() => {
         }
 
         function setExamModeToggle(m) { state.examDifficulty = m; saveState(); renderUjianTabs(); }
+
+        /* ================= JLPT ================= */
+        const JLPT_N5_SESSIONS = [
+            { id:1, title:'Kosakata', jp:'文字・語彙', minutes:20, questions:21, icon:'languages', color:'bg-blue-500/15 text-blue-600 dark:text-blue-300' },
+            { id:2, title:'Tata Bahasa & Membaca', jp:'文法・読解', minutes:40, questions:22, icon:'book-open-check', color:'bg-violet-500/15 text-violet-600 dark:text-violet-300' },
+            { id:3, title:'Menyimak', jp:'聴解', minutes:30, questions:24, icon:'headphones', color:'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300' }
+        ];
+        const JLPT_N5_VOCAB_TYPES = [
+            { title:'問題1', jp:'＿＿のことばは どう よみますか。', instruction:'1・2・3・4から いちばん いいものを ひとつ えらんで ください。', questions:[
+                { sentence:'新しい くるまですね。', target:'新しい', choices:['あたらしい','あだらしい','あらたしい','あらだしい'], key:1 },
+                { sentence:'電気を つけて ください。', target:'電気', choices:['てんぎ','てんき','でんぎ','でんき'], key:4 },
+                { sentence:'あの ひとは 有名な せんせいです。', target:'有名', choices:['ゆめ','ゆうめ','ゆうめい','ゆめい'], key:3 },
+                { sentence:'もう いちど 言って ください。', target:'言って', choices:['いって','まって','きって','しって'], key:1 },
+                { sentence:'けさ、駅で ともだちと あいました。', target:'駅', choices:['えき','みせ','やま','うみ'], key:1 }
+            ]},
+            { title:'問題2', jp:'＿＿の ことばは どう かきますか。', instruction:'1・2・3・4から いちばん いいものを ひとつ えらんで ください。', questions:[
+                { sentence:'そとで まちましょう。', target:'そと', choices:['列','外','列','外'], key:2 },
+                { sentence:'あの ほてるは ゆうめいです。', target:'ほてる', choices:['ホラル','ホテル','ホラハ','ホテハ'], key:2 },
+                { sentence:'まいあさ ５じに おきます。', target:'まいあさ', choices:['今朝','今日','毎日','毎朝'], key:4 },
+                { sentence:'ここで たばこを すわないで ください。', target:'すわない', choices:['吸わない','及わない','扱わない','吹わない'], key:1 },
+                { sentence:'いつも じゅうじはんに ねます。', target:'じゅうじはん', choices:['十時羊','十時半','十時米','十時火'], key:2 }
+            ]},
+            { title:'問題3', jp:'（　）に なにを いれますか。', instruction:'1・2・3・4から いちばん いいものを ひとつ えらんで ください。', questions:[
+                { sentence:'あそこで タクシーに（　）。', target:'（　）', choices:['のりました','あがりました','つきました','はいりました'], key:1 },
+                { sentence:'ここは（　）です。べんきょうできません。', target:'（　）', choices:['くらい','さむい','うるさい','あぶない'], key:3, image:'assets/Bank%20Soal/Moji%20Goi/Soal%201.jpeg' },
+                { sentence:'わたしは よる ねるまえに はを（　）。', target:'（　）', choices:['あらいます','つかいます','あびます','みがきます'], key:4 },
+                { sentence:'つぎの かどを みぎに（　）。', target:'（　）', choices:['まがります','わたります','のぼります','とまります'], key:1 }
+            ]},
+            { title:'問題4', jp:'＿＿の ことばは どう かきますか。', instruction:'1・2・3・4から いちばん いいものを ひとつ えらんで ください。', questions:[
+                { sentence:'いっしょに わいんを のみましょう。', target:'わいん', choices:['ワイソ','ウイン','ワイン','ウイソ'], key:3 },
+                { sentence:'まいにち、じょぎんぐを します。', target:'じょぎんぐ', choices:['ザョギング','ズョギング','ジョギング','ヅョギング'], key:3 },
+                { sentence:'らーめんを たべました。', target:'らーめん', choices:['ラーメン','ワーミン','フーミン','ワーメン'], key:1 },
+                { sentence:'テレビで にゅーすを ききました。', target:'にゅーす', choices:['ナュース','ナウース','ニウース','ニュース'], key:4 },
+                { sentence:'コンビニで ぱんを かいました。', target:'ぱん', choices:['パン','ポン','ハン','バン'], key:1 },
+                { sentence:'まいあさ、こーひーを のみます。', target:'こーひー', choices:['コーヒー','コーピー','ゴーヒー','コヒー'], key:1 },
+                { sentence:'すこし つかれましたね。', target:'すこし', choices:['小し','少し','秒し','歩し'], key:2 }
+            ]}
+        ];
+        let jlptTimer = null, jlptRemainingSeconds = 0, jlptN5VocabularyProgress = { typeIndex:0, correct:0, wrong:0, answers:{}, typeScores:{}, types:[] };
+        function stopJlptTimer() { if (jlptTimer) { clearInterval(jlptTimer); jlptTimer = null; } }
+        function formatJlptTime(seconds) { const safe = Math.max(0, Number(seconds) || 0), minutes = Math.floor(safe / 60), remainder = safe % 60; return `${String(minutes).padStart(2,'0')}:${String(remainder).padStart(2,'0')}`; }
+        function openJlptMenu() {
+            stopJlptTimer();
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="renderUjianTabs()" aria-label="Kembali ke menu ujian" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Japanese-Language Proficiency Test</p><h2 class="text-xl font-bold">JLPT</h2></div></div><p class="text-xs" style="color:var(--text-muted)">Pilih level ujian. Tampilan sesi dibuat terpisah dari mode latihan biasa.</p><button onclick="openJlptN5()" class="w-full bg-accent text-white p-5 rounded-[2rem] text-left flex items-center gap-4 shadow-lg shadow-blue-500/20 active:scale-[.98]"><span class="w-12 h-12 rounded-2xl bg-white/18 flex items-center justify-center text-xl font-black">N5</span><span class="min-w-0 flex-1"><span class="block text-[10px] uppercase tracking-widest font-black text-white/70">Tersedia</span><span class="block text-base font-extrabold mt-0.5">JLPT N5</span><span class="block text-[11px] mt-1 text-white/80">3 sesi · 90 menit · sekitar 67 soal</span></span><i data-lucide="chevron-right" class="w-5 h-5"></i></button><button onclick="showJlptN4Unavailable()" class="w-full ios-glass p-5 rounded-[2rem] text-left flex items-center gap-4 hover:border-accent active:scale-[.98]"><span class="w-12 h-12 rounded-2xl bg-glassborder text-main flex items-center justify-center text-xl font-black">N4</span><span class="min-w-0 flex-1"><span class="block text-[10px] uppercase tracking-widest font-black text-accent">Segera hadir</span><span class="block text-base font-extrabold mt-0.5">JLPT N4</span><span class="block text-[11px] mt-1" style="color:var(--text-muted)">Fitur dan bank soal belum tersedia.</span></span><i data-lucide="lock-keyhole" class="w-5 h-5" style="color:var(--text-muted)"></i></button></div>`;
+            lucide.createIcons();
+        }
+        function showJlptN4Unavailable() { alert('JLPT N4 belum tersedia. Saat ini kamu bisa mencoba JLPT N5.'); }
+        function openJlptN5() {
+            stopJlptTimer();
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="openJlptMenu()" aria-label="Kembali ke JLPT" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Japanese-Language Proficiency Test</p><h2 class="text-xl font-bold">JLPT N5</h2></div></div><div class="ios-glass p-4 rounded-3xl"><div class="grid grid-cols-3 gap-2 text-center"><div><span class="block text-lg font-black text-accent">3</span><span class="block text-[9px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Sesi</span></div><div><span class="block text-lg font-black text-accent">90</span><span class="block text-[9px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Menit</span></div><div><span class="block text-lg font-black text-accent">±67</span><span class="block text-[9px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Soal</span></div></div></div><p class="text-[10px] font-black uppercase tracking-widest px-1" style="color:var(--text-muted)">Pilih Sesi</p><div class="space-y-3">${JLPT_N5_SESSIONS.map(session => `<button onclick="openJlptN5Session(${session.id})" class="w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-3 hover:border-accent active:scale-[.98] transition-all"><span class="w-11 h-11 rounded-2xl ${session.color} flex items-center justify-center shrink-0 font-black">${session.id}</span><span class="min-w-0 flex-1"><span class="block text-[10px] font-black text-accent uppercase tracking-widest">Sesi ${session.id} · ${session.jp}</span><span class="block text-sm font-extrabold mt-0.5">${session.title}</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">${session.minutes} menit · ±${session.questions} soal</span></span><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--text-muted)"></i></button>`).join('')}</div><div class="ios-glass p-4 rounded-3xl text-xs"><div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-2 items-center"><span class="font-bold">Total</span><span class="font-bold text-accent">90 menit</span><span class="font-bold text-accent">±67 soal</span></div></div></div>`;
+            lucide.createIcons();
+        }
+        function startJlptCountdown() {
+            stopJlptTimer();
+            jlptTimer = setInterval(() => {
+                jlptRemainingSeconds = Math.max(0, jlptRemainingSeconds - 1);
+                const timer = document.getElementById('jlpt-countdown');
+                if (timer) timer.textContent = formatJlptTime(jlptRemainingSeconds);
+                if (!jlptRemainingSeconds) stopJlptTimer();
+            }, 1000);
+        }
+        function openJlptN5Session(id) {
+            const session = JLPT_N5_SESSIONS.find(item => item.id === Number(id));
+            if (!session) return;
+            stopJlptTimer(); jlptRemainingSeconds = session.minutes * 60;
+            if (session.id === 1) {
+                jlptN5VocabularyProgress = { typeIndex:0, correct:0, wrong:0, answers:{}, typeScores:{}, types:createJlptN5VocabularyTypes() };
+                renderJlptN5VocabularyQuestion();
+                startJlptCountdown();
+                return;
+            }
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in flex flex-col min-h-full space-y-5 pb-24"><div class="flex items-center justify-between"><button onclick="openJlptN5()" class="text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5 inline"></i> JLPT N5</button><span class="text-xs font-black text-accent">SESI ${session.id}</span></div><div class="ios-glass p-6 rounded-[2rem] text-center border-accent"><span class="w-12 h-12 rounded-2xl ${session.color} inline-flex items-center justify-center mb-3"><i data-lucide="${session.icon}" class="w-6 h-6"></i></span><p class="text-[10px] font-black uppercase tracking-widest text-accent">${session.jp}</p><h2 class="text-xl font-extrabold mt-1">${session.title}</h2><div id="jlpt-countdown" class="text-5xl font-black tracking-tight mt-6 text-main">${formatJlptTime(jlptRemainingSeconds)}</div><p class="text-[10px] mt-2" style="color:var(--text-muted)">${session.minutes} menit · perkiraan ±${session.questions} soal</p></div><div class="ios-glass p-5 rounded-[2rem] text-center"><i data-lucide="file-question" class="w-8 h-8 text-accent mx-auto mb-3"></i><p class="font-extrabold">Bank soal belum ditambahkan</p><p class="text-xs mt-2 leading-relaxed" style="color:var(--text-muted)">Timer sesi sudah berjalan sebagai tampilan ujian. Soal JLPT N5 akan dimasukkan setelah materi diberikan.</p></div><button onclick="openJlptN5()" class="mt-auto ios-glass py-4 rounded-2xl text-sm font-bold"><i data-lucide="arrow-left" class="w-5 h-5 inline mr-1"></i> Kembali ke Sesi JLPT N5</button></div>`;
+            lucide.createIcons(); startJlptCountdown();
+        }
+        function createJlptN5VocabularyTypes() {
+            return JLPT_N5_VOCAB_TYPES.map(type => {
+                const questions = [...type.questions].sort(() => Math.random() - .5);
+                return { ...type, questions };
+            });
+        }
+        function currentJlptN5VocabularyType() { return jlptN5VocabularyProgress.types[jlptN5VocabularyProgress.typeIndex]; }
+        function jlptN5VocabularyDisplayNumber(questionIndex) {
+            const previousQuestionCount = jlptN5VocabularyProgress.types
+                .slice(0, jlptN5VocabularyProgress.typeIndex)
+                .reduce((total, type) => total + type.questions.length, 0);
+            return previousQuestionCount + questionIndex + 1;
+        }
+        function renderJlptN5VocabularyQuestion() {
+            const progress = jlptN5VocabularyProgress, type = currentJlptN5VocabularyType();
+            if (!type) { finishJlptN5Vocabulary(); return; }
+            const answered = type.questions.filter((_, index) => Number.isInteger(progress.answers[index])).length;
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-5 pb-28"><div class="flex items-center justify-between"><button onclick="openJlptN5()" class="text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5 inline"></i> Keluar JLPT</button><span id="jlpt-countdown" class="text-sm font-black text-accent tabular-nums">${formatJlptTime(jlptRemainingSeconds)}</span></div><div class="flex items-end justify-between gap-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">JLPT N5 · 文字・語彙</p><h2 class="text-xl font-black">${type.title}</h2></div><span id="jlpt-answer-count" class="text-[10px] font-bold px-3 py-1.5 rounded-full bg-accent-light text-accent">${answered} / ${type.questions.length} terisi</span></div><div class="ios-glass p-5 rounded-[2rem] border-accent"><p class="text-sm font-bold leading-relaxed text-main">${type.jp}</p><p class="text-xs mt-2" style="color:var(--text-muted)">${type.instruction}</p><p class="text-[10px] font-bold mt-3 text-accent">Isi soal diacak, tetapi nomor tetap urut. Scroll ke bawah dan isi semuanya untuk lanjut.</p></div><div class="space-y-4">${type.questions.map((question, questionIndex) => renderJlptN5VocabularyCard(question, questionIndex, progress.answers[questionIndex], jlptN5VocabularyDisplayNumber(questionIndex))).join('')}</div><div class="ios-glass p-4 rounded-3xl text-center"><p class="text-xs font-bold">Semua jawaban harus terisi sebelum lanjut.</p><p class="text-[10px] mt-1" style="color:var(--text-muted)">Jawaban akan diperiksa sekaligus saat tombol di bawah ditekan.</p></div><button id="jlpt-vocab-submit" onclick="submitJlptN5VocabularyType()" ${answered === type.questions.length ? '' : 'disabled'} class="w-full py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-all ${answered === type.questions.length ? 'bg-accent text-white shadow-lg shadow-blue-500/20 active:scale-[.98]' : 'bg-glassborder text-main opacity-55 cursor-not-allowed'}">${answered === type.questions.length ? `Periksa ${type.title}` : `Isi semua jawaban (${answered}/${type.questions.length})`}<i data-lucide="arrow-down" class="w-5 h-5"></i></button></div>`;
+            lucide.createIcons();
+        }
+        function renderJlptN5VocabularyCard(question, questionIndex, selectedIndex, displayNumber) {
+            const image = question.image ? `<img src="${question.image}" alt="Ilustrasi pendukung soal" class="w-full max-w-sm mx-auto rounded-2xl border border-glassborder bg-white object-contain" loading="lazy">` : '';
+            return `<section data-jlpt-card="${questionIndex}" class="ios-glass p-5 rounded-[2rem] scroll-mt-4"><div class="flex items-start gap-3"><span class="w-8 h-8 shrink-0 rounded-xl bg-accent text-white flex items-center justify-center text-xs font-black">${displayNumber}</span><div class="min-w-0"><p class="text-[10px] font-black uppercase tracking-widest text-accent">${question.target}</p><p class="text-lg font-bold leading-relaxed text-main mt-1">${question.sentence}</p></div></div>${image ? `<div class="mt-4">${image}</div>` : ''}<div class="grid grid-cols-1 gap-2 mt-4">${question.choices.map((choice, optionIndex) => `<button onclick="selectJlptN5VocabularyAnswer(${questionIndex},${optionIndex})" data-jlpt-choice="${optionIndex}" class="w-full p-3 rounded-2xl text-left flex items-center gap-3 transition-all ${selectedIndex === optionIndex ? 'bg-accent text-white shadow-md border border-accent' : 'bg-appbg/30 border border-glassborder text-main hover:border-accent active:scale-[.99]'}"><span class="w-7 h-7 rounded-lg ${selectedIndex === optionIndex ? 'bg-white/20 text-white' : 'bg-accent-light text-accent'} flex items-center justify-center text-[10px] font-black">${optionIndex + 1}</span><span class="text-sm font-bold">${choice}</span></button>`).join('')}</div></section>`;
+        }
+        function selectJlptN5VocabularyAnswer(questionIndex, selectedIndex) {
+            const progress = jlptN5VocabularyProgress, type = currentJlptN5VocabularyType();
+            if (!type || !type.questions[questionIndex]) return;
+            progress.answers[questionIndex] = selectedIndex;
+            const card = document.querySelector(`[data-jlpt-card="${questionIndex}"]`);
+            card?.querySelectorAll('[data-jlpt-choice]').forEach(button => {
+                const selected = Number(button.dataset.jlptChoice) === selectedIndex;
+                button.className = `w-full p-3 rounded-2xl text-left flex items-center gap-3 transition-all ${selected ? 'bg-accent text-white shadow-md border border-accent' : 'bg-appbg/30 border border-glassborder text-main hover:border-accent active:scale-[.99]'}`;
+                const marker = button.querySelector('span');
+                if (marker) marker.className = `w-7 h-7 rounded-lg ${selected ? 'bg-white/20 text-white' : 'bg-accent-light text-accent'} flex items-center justify-center text-[10px] font-black`;
+            });
+            updateJlptN5VocabularySubmitState();
+        }
+        function updateJlptN5VocabularySubmitState() {
+            const progress = jlptN5VocabularyProgress, type = currentJlptN5VocabularyType();
+            if (!type) return;
+            const answered = type.questions.filter((_, index) => Number.isInteger(progress.answers[index])).length;
+            const count = document.getElementById('jlpt-answer-count');
+            if (count) count.textContent = `${answered} / ${type.questions.length} terisi`;
+            const submit = document.getElementById('jlpt-vocab-submit');
+            if (!submit) return;
+            const ready = answered === type.questions.length;
+            submit.disabled = !ready;
+            submit.className = `w-full py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-all ${ready ? 'bg-accent text-white shadow-lg shadow-blue-500/20 active:scale-[.98]' : 'bg-glassborder text-main opacity-55 cursor-not-allowed'}`;
+            submit.innerHTML = `${ready ? `Periksa ${type.title}` : `Isi semua jawaban (${answered}/${type.questions.length})`}<i data-lucide="arrow-down" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+        }
+        function submitJlptN5VocabularyType() {
+            const progress = jlptN5VocabularyProgress, type = currentJlptN5VocabularyType();
+            if (!type) return;
+            const unanswered = type.questions.filter((_, index) => !Number.isInteger(progress.answers[index]));
+            if (unanswered.length) { alert(`Masih ada ${unanswered.length} jawaban yang belum diisi.`); return; }
+            const score = type.questions.reduce((result, question, index) => result + (progress.answers[index] === question.key - 1 ? 1 : 0), 0);
+            progress.typeScores[progress.typeIndex] = { correct:score, wrong:type.questions.length - score };
+            progress.correct += score; progress.wrong += type.questions.length - score;
+            renderJlptN5VocabularyTypeComplete(progress.typeIndex);
+        }
+        function renderJlptN5VocabularyTypeComplete(typeIndex) {
+            const progress = jlptN5VocabularyProgress, completedType = progress.types[typeIndex], nextType = progress.types[typeIndex + 1], score = progress.typeScores[typeIndex];
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in flex flex-col min-h-full space-y-5 pb-24"><div class="flex items-center justify-between"><button onclick="openJlptN5()" class="text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5 inline"></i> Keluar JLPT</button><span id="jlpt-countdown" class="text-sm font-black text-accent tabular-nums">${formatJlptTime(jlptRemainingSeconds)}</span></div><div class="ios-glass p-7 rounded-[2.5rem] text-center border-accent"><span class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 inline-flex items-center justify-center"><i data-lucide="check" class="w-7 h-7"></i></span><p class="text-[10px] uppercase tracking-widest font-black text-accent mt-4">${completedType.title} selesai</p><h2 class="text-2xl font-black mt-1">${score.correct} benar · ${score.wrong} salah</h2><p class="text-xs mt-3" style="color:var(--text-muted)">Total sementara: ${progress.correct} benar · ${progress.wrong} salah. Kunci jawaban digunakan saat semua jawaban dikumpulkan.</p></div>${nextType ? `<button onclick="continueJlptN5VocabularyType()" class="mt-auto w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98] flex justify-center items-center gap-2">Lanjut ke ${nextType.title}<i data-lucide="arrow-right" class="w-5 h-5"></i></button>` : `<button onclick="finishJlptN5Vocabulary()" class="mt-auto w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98] flex justify-center items-center gap-2">Lanjut ke Sesi 2<i data-lucide="arrow-right" class="w-5 h-5"></i></button>`}</div>`;
+            lucide.createIcons();
+        }
+        function continueJlptN5VocabularyType() { jlptN5VocabularyProgress.typeIndex++; jlptN5VocabularyProgress.answers = {}; renderJlptN5VocabularyQuestion(); }
+        function finishJlptN5Vocabulary() { openJlptN5Session(2); }
 
         function closeKotobaPracticePanel() {
             const panel = document.getElementById('kotoba-practice-panel');
@@ -3346,6 +3488,7 @@ const KANJI_N5_DB = (() => {
         /* ================= HELPERS, COINS, & THEME SYSTEM ================= */
         function switchTab(tabId) {
             closeKotobaPracticePanel();
+            stopJlptTimer();
             restoreBottomNav();
             state.activeTab = tabId; saveState();
             if (tabId !== 'ujian-menu' && state.quiz.currentQuestion === 0) MusicEngine.setExamMode(false);
