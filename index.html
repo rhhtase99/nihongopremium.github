@@ -482,9 +482,123 @@
             #c-grid { gap: .65rem; }
             .quiz-choice { padding: 1rem; font-size: .78rem; line-height: 1.25; border-radius: 1.35rem; }
         }
+
+        /* ===== BAR BAWAH — liquid glass ala iOS 26 / WhatsApp (hanya bar yang diubah) ===== */
+        /* Kaca bar ada di ::before agar lensa membaca latar asli. Elemen nav sendiri TIDAK di-scale (menjaga posisi kapsul). */
+        #bottom-nav { will-change: transform !important; overflow: visible !important; border: 0 !important; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: 0 10px 26px -14px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.06) !important; transition: opacity .32s ease, transform .5s cubic-bezier(.2,.86,.2,1), box-shadow .4s ease; }
+        #bottom-nav::before { inset: 0; padding: 0; -webkit-mask: none; mask: none; opacity: 1; border-radius: inherit; background: color-mix(in srgb, var(--glass-bg) 62%, transparent); backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%); box-shadow: inset 0 1px 0 rgba(255,255,255,.7); transition: scale .5s cubic-bezier(.34,1.56,.5,1), background .35s ease; }
+        #bottom-nav::after { inset: 0; border: 1px solid rgba(255,255,255,.55); transition: scale .5s cubic-bezier(.34,1.56,.5,1); }
+        .dark #bottom-nav::before { background: color-mix(in srgb, var(--glass-bg) 58%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,.22); }
+        .dark #bottom-nav::after { border-color: rgba(255,255,255,.16); }
+
+        /* Kapsul pilihan saat diam: blok abu lembut seperti WhatsApp */
+        #bottom-nav-indicator { transform: translate3d(var(--nav-liquid-x), 0, 0) scaleX(clamp(1, var(--nav-liquid-scale), 1.02)); background: rgba(0,0,0,.075) !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none; -webkit-backdrop-filter: none; filter: none; opacity: 1; transition: transform .58s cubic-bezier(.18,1.12,.24,1), scale .45s cubic-bezier(.34,1.6,.5,1), background .3s ease, box-shadow .3s ease; }
+        .dark #bottom-nav-indicator { background: rgba(255,255,255,.14) !important; }
+        /* Tepi lensa = pembiasan: teks yang lewat di pinggir lensa tampak terbias/berkilau seperti kena kaca */
+        #bottom-nav-indicator::before { content: ''; position: absolute; inset: -1px; width: auto; height: auto; border-radius: inherit; pointer-events: none; opacity: 0; filter: none; transition: opacity .25s ease; background: linear-gradient(135deg, rgba(255,255,255,.3), transparent 38%, transparent 62%, rgba(255,255,255,.2)); backdrop-filter: blur(2px) saturate(230%) brightness(1.16); -webkit-backdrop-filter: blur(2px) saturate(230%) brightness(1.16); -webkit-mask: radial-gradient(farthest-side, transparent 72%, #000 100%); mask: radial-gradient(farthest-side, transparent 72%, #000 100%); }
+        @supports (backdrop-filter: url(#lg-edge)) { #bottom-nav-indicator::before { backdrop-filter: blur(1px) url(#lg-edge) saturate(230%) brightness(1.14); } }
+        #bottom-nav-indicator::after { content: ''; position: absolute; inset: 0; border: 0; border-radius: inherit; padding: 1.2px; pointer-events: none; opacity: 0; filter: blur(.4px); background: conic-gradient(from 210deg, #ff6a4d, #ffc94d, #5dff9f, #4dc3ff, #8a6bff, #ff6ad0, #ff6a4d); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; transition: opacity .25s ease; }
+        #bottom-nav button.nav-tab-preview { text-shadow: none; }
+        #bottom-nav button svg { fill: color-mix(in srgb, var(--accent) 0%, transparent); transition: transform .38s cubic-bezier(.34,1.7,.5,1), fill .3s ease, stroke .3s ease; }
+        #bottom-nav button span { transition: transform .38s cubic-bezier(.34,1.7,.5,1); }
+        /* Tab yang dipakai: ikon terisi warna tema dengan garis putih (rumah biru bergaris putih) */
+        #bottom-nav:not(.is-liquid-dragging) button.nav-tab-active svg, #bottom-nav button.nav-tab-lens svg { fill: var(--accent); stroke: #fff; }
+        #bottom-nav button#tab-belajar svg { fill: transparent !important; stroke: currentColor !important; }
+
+        /* Saat disentuh / digeser: kaca bar membesar, kapsul jadi lensa yang meleber keluar bar */
+        #bottom-nav.is-liquid-dragging { background: transparent !important; box-shadow: 0 20px 38px -16px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.08) !important; }
+        #bottom-nav.is-liquid-dragging::before, #bottom-nav.is-liquid-dragging::after { scale: 1.02 1.14; }
+        #bottom-nav.is-liquid-dragging::before { background: color-mix(in srgb, var(--glass-bg) 72%, transparent); }
+        #bottom-nav.is-liquid-dragging #bottom-nav-indicator { transition: scale .4s cubic-bezier(.34,1.6,.5,1), opacity .2s ease !important; scale: 1.12 1.7; background: radial-gradient(ellipse at 50% 14%, rgba(255,255,255,.62), rgba(255,255,255,.14) 58%, rgba(255,255,255,.05)) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.8), inset 0 2px 4px rgba(255,255,255,.9), inset 0 -3px 7px rgba(255,255,255,.35), 0 18px 32px -10px rgba(0,0,0,.38), 0 3px 7px rgba(0,0,0,.12) !important; }
+        .dark #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: radial-gradient(ellipse at 50% 14%, rgba(255,255,255,.3), rgba(255,255,255,.07) 58%, rgba(255,255,255,.03)) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), inset 0 2px 4px rgba(255,255,255,.5), 0 18px 32px -10px rgba(0,0,0,.6) !important; }
+        #bottom-nav.is-liquid-dragging #bottom-nav-indicator::before { opacity: 1; }
+        #bottom-nav.is-liquid-dragging #bottom-nav-indicator::after { opacity: .65; }
+        #bottom-nav.is-liquid-dragging button.nav-tab-lens svg { transform: translateY(-3px) scale(1.3); }
+        #bottom-nav.is-liquid-dragging button.nav-tab-lens span { transform: translateY(1px) scale(1.15); }
+        @media (prefers-reduced-motion: reduce) { #bottom-nav.is-liquid-dragging::before, #bottom-nav.is-liquid-dragging::after, #bottom-nav.is-liquid-dragging #bottom-nav-indicator { scale: 1; } }
+
+        /* Tema Natal: bar pekat agar tulisan terbaca, dengan tepi permen khas Natal */
+        [data-season="natal"] #bottom-nav::before { background: linear-gradient(rgba(255,255,255,.95), rgba(255,244,244,.92)); }
+        .dark[data-season="natal"] #bottom-nav::before { background: linear-gradient(rgba(63,22,22,.97), rgba(36,15,15,.95)); }
+        [data-season="natal"] #bottom-nav::after { inset: -2px; padding: 2px; border: 0; background: repeating-linear-gradient(135deg, #d71920 0 8px, #fff 8px 16px, #168b45 16px 24px, #fff 24px 32px); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; }
+        [data-season="natal"] #bottom-nav-indicator { background: rgba(215,25,32,.10) !important; }
+        .dark[data-season="natal"] #bottom-nav-indicator { background: rgba(255,225,176,.18) !important; }
+        .dark[data-season="natal"] #bottom-nav button:not(.nav-tab-active):not(.nav-tab-preview) { color: #f6e3cc !important; }
+        [data-season="natal"] #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: radial-gradient(ellipse at 50% 14%, rgba(255,255,255,.55), rgba(255,255,255,.12) 58%, rgba(255,255,255,.05)) !important; }
+
+        /* Mode desktop / landscape: bar lebih kecil, ikon di samping tulisan (Home, T Huruf, ...) */
+        [data-orientation-view="landscape"] #bottom-nav { width: min(38rem, 66vw) !important; max-width: none !important; bottom: max(.9rem, env(safe-area-inset-bottom)) !important; padding: .3rem .25rem !important; }
+        [data-orientation-view="landscape"] #bottom-nav button { flex-direction: row !important; justify-content: center; gap: .4rem !important; padding-block: .5rem !important; }
+        [data-orientation-view="landscape"] #bottom-nav button span { font-size: 11px !important; white-space: nowrap; }
+        [data-orientation-view="landscape"] #bottom-nav button svg, [data-orientation-view="landscape"] #bottom-nav button i { width: 1.15rem !important; height: 1.15rem !important; flex: none; }
+
+        /* iOS 6 & Windows XP: bar biasa menempel di bawah; kapsul pilihan "naik" keluar bar saat digeser */
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav { left: 0 !important; right: 0 !important; width: 100% !important; max-width: none !important; transform: none !important; bottom: 0 !important; border-radius: 0 !important; border-top: 1px solid #000 !important; padding: .3rem .24rem calc(.3rem + env(safe-area-inset-bottom)) !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.nav-collapsed { transform: translate3d(0,110%,0) !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav::before { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none; background: none !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav::after, :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav-indicator::after { display: none; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-dragging::before, :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-dragging::after { scale: 1; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav-indicator { transform-origin: 50% 100%; border-radius: .5rem !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav-indicator::before { display: none; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-dragging #bottom-nav-indicator { scale: 1.1 1.55; }
+        [data-season="ios6"] #bottom-nav, [data-season="ios6"] #bottom-nav.is-liquid-dragging { background: linear-gradient(180deg,#5d6269 0%,#2d3035 49%,#0d0e10 50%,#1b1d21 100%) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 -2px 6px rgba(0,0,0,.35) !important; }
+        [data-season="ios6"] #bottom-nav-indicator { background: linear-gradient(180deg,#6f747c 0%,#454950 49%,#2a2d32 50%,#3d4147 100%) !important; border: 1px solid #0b0c0e !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 8px rgba(0,0,0,.5) !important; }
+        [data-season="ios6"] #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: linear-gradient(180deg,#a3c4ee 0%,#4f82c9 49%,#2b5ba7 50%,#4a7dc2 100%) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 -6px 16px rgba(93,184,255,.5), 0 4px 10px rgba(0,0,0,.5) !important; }
+        [data-season="ios6"] #bottom-nav button { color: #a9afb8 !important; text-shadow: 0 -1px 0 #000; }
+        [data-season="ios6"] #bottom-nav button:is(.nav-tab-active,.nav-tab-preview) { color: #5db8ff !important; }
+        [data-season="ios6"] #bottom-nav.is-liquid-dragging button.nav-tab-lens { color: #fff !important; }
+        [data-season="ios6"] #bottom-nav:not(.is-liquid-dragging) button.nav-tab-active svg { fill: #5db8ff; stroke: #0d0e10; }
+        [data-season="ios6"] #bottom-nav button.nav-tab-lens svg { fill: #fff; stroke: #2b5ba7; }
+        [data-season="xpaero"] #bottom-nav, [data-season="xpaero"] #bottom-nav.is-liquid-dragging { background: linear-gradient(180deg,#3f8cf3 0%,#245edb 10%,#1f55d1 55%,#1941a5 100%) !important; border-top-color: #5a9bff !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 -2px 8px rgba(0,40,120,.4) !important; }
+        [data-season="xpaero"] #bottom-nav-indicator { background: linear-gradient(180deg,#1a3f9e,#2759cc) !important; border: 1px solid #0b2a85 !important; box-shadow: inset 1px 1px 3px rgba(0,0,0,.55), inset -1px -1px 0 rgba(255,255,255,.18) !important; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: linear-gradient(180deg,#9ccaff 0%,#3b80ee 48%,#1458d4 52%,#2f74e8 100%) !important; border: 1.5px solid #fff !important; box-shadow: 0 0 0 1px #0b2a85, 0 -5px 14px rgba(40,120,255,.55), 0 4px 10px rgba(0,30,110,.5) !important; }
+        [data-season="xpaero"] #bottom-nav button { color: #e8f2ff !important; text-shadow: 1px 1px 0 rgba(0,20,90,.7); }
+        [data-season="xpaero"] #bottom-nav button:is(.nav-tab-active,.nav-tab-preview) { color: #fff !important; }
+        [data-season="xpaero"] #bottom-nav:not(.is-liquid-dragging) button.nav-tab-active svg { fill: #fff; stroke: #1941a5; }
+        [data-season="xpaero"] #bottom-nav button.nav-tab-lens svg { fill: #fff; stroke: #1458d4; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav button span { transform: none; }
+
+        /* Windows XP: tab Home berplat hijau (seperti tombol Start), tab lain tetap biru */
+        [data-season="xpaero"] #tab-home { color: #fff !important; font-style: italic; border: 1px solid #1a5a1a; border-radius: .6rem 1.1rem 1.1rem .6rem !important; background: linear-gradient(180deg,#78dc78 0%,#43ad43 14%,#2f8f2f 55%,#237023 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.35); text-shadow: 1px 1px 0 rgba(0,50,0,.7); }
+        [data-season="xpaero"] #tab-home.nav-tab-active { background: linear-gradient(180deg,#237023 0%,#2f8f2f 50%,#3a9d3a 100%); box-shadow: inset 1px 1px 3px rgba(0,40,0,.65), inset -1px -1px 0 rgba(255,255,255,.2); }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging[data-nav-i="0"] #tab-home { background: transparent; border-color: transparent; box-shadow: none; }
+        [data-season="xpaero"] #bottom-nav[data-nav-i="0"] #bottom-nav-indicator { background: linear-gradient(180deg,#237023,#3a9d3a) !important; border-color: #1a5a1a !important; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging[data-nav-i="0"] #bottom-nav-indicator { background: linear-gradient(180deg,#b9f5a4 0%,#55c555 48%,#2a8f2a 52%,#3fae3f 100%) !important; border: 1.5px solid #fff !important; box-shadow: 0 0 0 1px #1a5a1a, 0 -5px 14px rgba(60,200,60,.55), 0 4px 10px rgba(0,60,0,.5) !important; }
+        [data-season="xpaero"] #bottom-nav:not(.is-liquid-dragging) #tab-home.nav-tab-active svg { fill: #fff; stroke: #237023; }
+        [data-season="xpaero"] #bottom-nav #tab-home svg { stroke: #fff; }
+
+
+        /* ===== LENSA LIQUID GLASS ala iOS 26 — digerakkan fisika pegas (JS) ===== */
+        #bottom-nav { --lens-sx: 1; --lens-sy: 1; --lens-rot: 0deg; --lens-hl: 0%; }
+        #bottom-nav.is-liquid-spring #bottom-nav-indicator { transition: opacity .2s ease, background .3s ease, box-shadow .3s ease, backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease !important; will-change: transform, scale; }
+        #bottom-nav.is-liquid-spring #bottom-nav-indicator { scale: var(--lens-sx) var(--lens-sy) !important; }
+        #bottom-nav.is-liquid-dragging #bottom-nav-indicator {
+            background:
+                radial-gradient(120% 85% at calc(50% + var(--lens-hl)) -12%, rgba(255,255,255,.62), rgba(255,255,255,.16) 46%, rgba(255,255,255,.03) 78%),
+                linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 42%, rgba(255,255,255,.13)) !important;
+            backdrop-filter: saturate(190%) brightness(1.1) contrast(1.05) blur(.4px);
+            -webkit-backdrop-filter: saturate(190%) brightness(1.1) contrast(1.05) blur(.4px);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 1.5px 2px rgba(255,255,255,.95), inset 0 -1.5px 3px rgba(255,255,255,.5), inset 3px 0 6px -3px rgba(255,255,255,.6), inset -3px 0 6px -3px rgba(255,255,255,.6), 0 16px 30px -12px rgba(0,0,0,.36), 0 2px 6px rgba(0,0,0,.10) !important;
+        }
+        .dark #bottom-nav.is-liquid-dragging #bottom-nav-indicator {
+            background:
+                radial-gradient(120% 85% at calc(50% + var(--lens-hl)) -12%, rgba(255,255,255,.34), rgba(255,255,255,.08) 46%, rgba(255,255,255,.02) 78%),
+                linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0) 42%, rgba(255,255,255,.07)) !important;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.34), inset 0 1.5px 2px rgba(255,255,255,.5), inset 0 -1.5px 3px rgba(255,255,255,.22), 0 16px 30px -12px rgba(0,0,0,.65), 0 2px 6px rgba(0,0,0,.25) !important;
+        }
+        /* Tepi pelangi tipis (dispersi cahaya) ikut berputar mengikuti kecepatan geser */
+        #bottom-nav-indicator::after { background: conic-gradient(from calc(210deg + var(--lens-rot)), #ff6a4d, #ffc94d, #5dff9f, #4dc3ff, #8a6bff, #ff6ad0, #ff6a4d); }
+        #bottom-nav.is-liquid-dragging #bottom-nav-indicator::after { opacity: .5; }
+        #bottom-nav.is-liquid-dragging button.nav-tab-lens svg { transform: translateY(-2px) scale(1.24); }
+        #bottom-nav.is-liquid-dragging button.nav-tab-lens span { transform: translateY(1px) scale(1.1); }
+        /* iOS 6 & XP tetap memakai gaya lamanya, hanya posisi yang berpegas */
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring #bottom-nav-indicator { scale: 1 1 !important; transition: scale .4s cubic-bezier(.34,1.6,.5,1), opacity .2s ease !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring.is-liquid-dragging #bottom-nav-indicator { scale: 1.1 1.55 !important; }
+        @media (prefers-reduced-motion: reduce) { #bottom-nav.is-liquid-spring #bottom-nav-indicator { scale: 1 1 !important; } }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative flex flex-col">
+    <svg width="0" height="0" style="position:fixed" aria-hidden="true"><filter id="lg-edge" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="5" result="n"/><feGaussianBlur in="n" stdDeviation=".8" result="b"/><feDisplacementMap in="SourceGraphic" in2="b" scale="22" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 
     <!-- Background Layers -->
     <div id="season-art-bg"></div>
@@ -545,7 +659,7 @@
         <button onclick="switchTab('belajar-menu')" id="tab-belajar" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="type" class="w-5 h-5"></i><span class="text-[8px] font-bold">Huruf</span></button>
         <button onclick="switchTab('kotoba')" id="tab-kotoba" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="layers" class="w-5 h-5"></i><span class="text-[8px] font-bold">Kosakata</span></button>
         <button onclick="switchTab('bunpou')" id="tab-bunpou" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="book-open-check" class="w-5 h-5"></i><span class="text-[8px] font-bold">Pola</span></button>
-        <button onclick="switchTab('latihan')" id="tab-latihan" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="gamepad-2" class="w-5 h-5"></i><span class="text-[8px] font-bold">Latihan</span></button>
+        <button onclick="switchTab('latihan')" id="tab-latihan" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="gamepad-2" class="w-5 h-5"></i><span class="text-[8px] font-bold">Games</span></button>
         <button onclick="switchTab('ujian-menu')" id="tab-ujian" class="flex-1 flex flex-col items-center gap-1 py-1 transition-all duration-300" style="color: var(--text-muted)"><i data-lucide="award" class="w-5 h-5"></i><span class="text-[8px] font-bold">Ujian</span></button>
     </nav>
     <button id="bottom-nav-restore" onclick="restoreBottomNav()" aria-label="Tampilkan navigasi"><i data-lucide="chevron-up" class="w-6 h-6"></i></button>
@@ -2255,7 +2369,7 @@ const KANJI_N5_DB = (() => {
                         ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
                         ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-20')}
-                        ${renderMenuBtn('latihan', 'gamepad-2', 'Latihan', `Kumpulkan ${coinIcon}`)}
+                        ${renderMenuBtn('latihan', 'gamepad-2', 'Games', `Kumpulkan ${coinIcon}`)}
                     </div>
                     <button onclick="switchTab('ujian-menu')" class="w-full bg-accent text-white p-4 rounded-3xl font-bold flex items-center justify-between active:scale-95 shadow-md shadow-blue-500/20">
                         <div class="flex items-center gap-3"><i data-lucide="award" class="w-6 h-6"></i> Mode Ujian Presisi</div>
@@ -2812,7 +2926,7 @@ const KANJI_N5_DB = (() => {
             const coinIcon = getCoinIcon();
             document.getElementById('app-viewport').innerHTML = `
                 <div class="animate-fade-in space-y-5 pb-6">
-                    <h2 class="text-xl font-bold tracking-tight">Menu Latihan</h2>
+                    <h2 class="text-xl font-bold tracking-tight">Games</h2>
                     <p class="text-xs -mt-3" style="color: var(--text-muted)">Uji ingatan dan kumpulkan ${coinIcon}!</p>
                     <div class="space-y-3">
                         ${renderPracticeDivider('Latihan Hiragana', 'Mulai dari huruf dasar sampai lengkap.', "openWritingMenu('hiragana')")}
@@ -3277,7 +3391,9 @@ const KANJI_N5_DB = (() => {
             closeKotobaPracticePanel();
             kotobaPracticeMenu.launchTimer = setTimeout(() => {
                 kotobaPracticeMenu.launchTimer = null;
-                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode, 5, { normalCount:10, returnLabel:`Kembali ke Bab ${bab}`, returnView:() => openKotobaBab(bab) });
+                // Latihan dari halaman Bab selalu mencakup seluruh kosakata bab tersebut,
+                // satu kali per putaran dan tetap diacak urutannya.
+                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode, 5, { normalCount:KOTOBA_DB[bab].length, returnLabel:`Kembali ke Bab ${bab}`, returnView:() => openKotobaBab(bab) });
             }, 320);
         }
         /* Dismiss lifecycle: panel tidak menghalangi tap atau scroll di halaman. */
@@ -4177,7 +4293,7 @@ const KANJI_N5_DB = (() => {
             return `<div class="ios-glass p-4 rounded-[2rem] space-y-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Latihan Menulis</p><p class="text-[11px] mt-1" style="color:var(--text-muted)">Pilih aksara untuk latihan dengan jari atau stylus.</p></div><div class="grid grid-cols-3 gap-2"><button onclick="openWritingMenu('hiragana','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Hiragana</span></button><button onclick="openWritingMenu('katakana','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Katakana</span></button><button onclick="openWritingMenu('kanji','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Kanji</span></button></div></div>`;
         }
         function renderLatihanTabs() {
-            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div><h2 class="text-xl font-bold tracking-tight">Menu Latihan</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Sesi kelompok berisi 10 soal; mode All berisi 60 soal acak.</p></div><div class="space-y-3">${renderKanaCourseCard('hiragana')}${renderKanaCourseCard('katakana')}${renderWritingShortcuts()}${renderKanaMasterCard()}${renderKanjiPracticeCard()}${renderPracticeDivider('Kosakata', 'Uji arti kata dari semua pelajaran.')}${renderStartBtn('Kosakata Campuran', '+10 🪙 per jawaban', 'openKotobaMixedHub()')}</div></div>`;
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div><h2 class="text-xl font-bold tracking-tight">Games</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Sesi kelompok berisi 10 soal; mode All berisi 60 soal acak.</p></div><div class="space-y-3">${renderKanaCourseCard('hiragana')}${renderKanaCourseCard('katakana')}${renderWritingShortcuts()}${renderKanaMasterCard()}${renderKanjiPracticeCard()}${renderPracticeDivider('Kosakata', 'Uji arti kata dari semua pelajaran.')}${renderStartBtn('Kosakata Campuran', '+10 🪙 per jawaban', 'openKotobaMixedHub()')}</div></div>`;
             lucide.createIcons();
         }
         function renderKanaModeSelector(mode, choiceAction, inputAction) {
@@ -4187,7 +4303,7 @@ const KANJI_N5_DB = (() => {
             const stages = KANA_STAGE_META[script];
             const finalIndex = stages.length - 1, finalComplete = isKanaStageComplete(script, finalIndex);
             const allButton = finalComplete ? `<button onclick="openKanaAllHub('${script}','choice',${finalIndex})" class="w-full bg-accent text-white p-5 rounded-[2rem] text-left flex items-center justify-between shadow-lg shadow-blue-500/20 active:scale-[.98]"><span><span class="block font-extrabold">All ${kanaLabel(script)} & Kustom</span><span class="block text-xs text-white/80 mt-1">60 soal acak atau pilih sendiri hurufmu.</span></span><i data-lucide="sparkles" class="w-6 h-6"></i></button>` : '';
-            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke latihan" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Jalur Belajar</p><h2 class="text-xl font-bold">${kanaLabel(script)}</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Selesaikan seluruh kelompok dalam tahap untuk membuka tahap berikutnya.</p></div></div><div class="space-y-3">${stages.map((stage, index) => { const open = isKanaStageReady(script,index), complete = isKanaStageComplete(script,index); return `<button ${open ? `onclick="openKanaStage('${script}',${index})"` : 'disabled'} class="w-full ios-glass p-5 rounded-[2rem] text-left flex items-center gap-4 transition-all ${open ? 'hover:border-accent active:scale-[.98]' : 'opacity-50 cursor-not-allowed'}"><span class="w-11 h-11 rounded-2xl ${complete ? 'bg-emerald-500/15 text-emerald-500' : 'bg-accent-light text-accent'} flex items-center justify-center shrink-0"><i data-lucide="${complete ? 'check-circle-2' : open ? 'play-circle' : 'lock'}" class="w-5 h-5"></i></span><span class="min-w-0 flex-1"><span class="block text-sm font-extrabold">${stage.title}</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">${complete ? 'Selesai · dapat diulang' : open ? `${kanaStageProgress(script,index)}/${stage.groups.length} kelompok selesai` : 'Selesaikan tahap sebelumnya'}</span></span><i data-lucide="${open ? 'chevron-right' : 'lock-keyhole'}" class="w-5 h-5" style="color:var(--text-muted)"></i></button>`; }).join('')}</div>${allButton}</div>`;
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Jalur Belajar</p><h2 class="text-xl font-bold">${kanaLabel(script)}</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Selesaikan seluruh kelompok dalam tahap untuk membuka tahap berikutnya.</p></div></div><div class="space-y-3">${stages.map((stage, index) => { const open = isKanaStageReady(script,index), complete = isKanaStageComplete(script,index); return `<button ${open ? `onclick="openKanaStage('${script}',${index})"` : 'disabled'} class="w-full ios-glass p-5 rounded-[2rem] text-left flex items-center gap-4 transition-all ${open ? 'hover:border-accent active:scale-[.98]' : 'opacity-50 cursor-not-allowed'}"><span class="w-11 h-11 rounded-2xl ${complete ? 'bg-emerald-500/15 text-emerald-500' : 'bg-accent-light text-accent'} flex items-center justify-center shrink-0"><i data-lucide="${complete ? 'check-circle-2' : open ? 'play-circle' : 'lock'}" class="w-5 h-5"></i></span><span class="min-w-0 flex-1"><span class="block text-sm font-extrabold">${stage.title}</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">${complete ? 'Selesai · dapat diulang' : open ? `${kanaStageProgress(script,index)}/${stage.groups.length} kelompok selesai` : 'Selesaikan tahap sebelumnya'}</span></span><i data-lucide="${open ? 'chevron-right' : 'lock-keyhole'}" class="w-5 h-5" style="color:var(--text-muted)"></i></button>`; }).join('')}</div>${allButton}</div>`;
             lucide.createIcons();
         }
         function openKanaStage(script, stageIndex, mode = 'choice') {
@@ -4273,7 +4389,7 @@ const KANJI_N5_DB = (() => {
             }
             state.quiz.currentQuestion = 0; state.quiz.questions = questions;
             state.quiz.correctCount = 0; state.quiz.wrongCount = 0; state.quiz.total = questions.length; state.quiz.mode = mode; state.quiz.timeLimit = timeLimit;
-            quizSessionContext = { title, isExam, returnView:null, returnLabel:'Kembali ke Latihan', ...context };
+            quizSessionContext = { title, isExam, returnView:null, returnLabel:'Kembali ke Games', ...context };
             MusicEngine.setExamMode(isExam);
             renderQuizQuestion(title, isExam);
         }
@@ -4330,6 +4446,40 @@ const KANJI_N5_DB = (() => {
         const NAV_TABS = ['home', 'belajar-menu', 'kotoba', 'bunpou', 'latihan', 'ujian-menu'];
         let navLastScrollY = 0, navMotionReady = false, navLiquidGesture = null, navSuppressClickUntil = 0;
         function normalizedNavTab(tabId) { return tabId === 'belajar-menu' || tabId === 'ujian-menu' ? tabId : tabId; }
+        /* Mesin pegas lensa: posisi mengejar jari dengan sedikit tertinggal, melar searah gerak, memantul saat dilepas. */
+        const navLens = { on:false, raf:0, last:0, x:0, vx:0, tx:0, sx:1, vsx:0, sy:1, vsy:0, pressed:false, reduce:false, m:null, nav:null };
+        function navLensKick() { if (!navLens.raf && navLens.on) navLens.raf = requestAnimationFrame(navLensTick); }
+        function navLensTick(t) {
+            const L = navLens; L.raf = 0;
+            const nav = L.nav; if (!nav || !L.on) return;
+            const dt = Math.min(.032, L.last ? (t - L.last) / 1000 : .016) || .016; L.last = t;
+            const steps = 3, h = dt / steps;
+            for (let i = 0; i < steps; i++) {
+                L.vx += ((L.tx - L.x) * 380 - L.vx * 27) * h; L.x += L.vx * h;
+                const stretch = L.reduce ? 0 : Math.min(.3, Math.abs(L.vx) / 2600);
+                const tsx = (L.pressed && !L.reduce ? 1.22 : 1) + stretch;
+                const tsy = (L.pressed && !L.reduce ? 1.32 : 1) - stretch * .55;
+                L.vsx += ((tsx - L.sx) * 340 - L.vsx * 15) * h; L.sx += L.vsx * h;
+                L.vsy += ((tsy - L.sy) * 340 - L.vsy * 15) * h; L.sy += L.vsy * h;
+            }
+            const st = nav.style;
+            st.setProperty('--nav-liquid-x', L.x.toFixed(2) + 'px');
+            st.setProperty('--nav-liquid-scale', '1');
+            st.setProperty('--lens-sx', L.sx.toFixed(4));
+            st.setProperty('--lens-sy', L.sy.toFixed(4));
+            st.setProperty('--lens-rot', Math.max(-70, Math.min(70, L.vx / 22)).toFixed(1) + 'deg');
+            st.setProperty('--lens-hl', Math.max(-26, Math.min(26, -L.vx / 40)).toFixed(1) + '%');
+            const settled = !L.pressed && Math.abs(L.tx - L.x) < .15 && Math.abs(L.vx) < 4 && Math.abs(L.sx - 1) < .003 && Math.abs(L.sy - 1) < .003 && Math.abs(L.vsx) < .05 && Math.abs(L.vsy) < .05;
+            if (settled) {
+                L.on = false; L.last = 0;
+                nav.classList.remove('is-liquid-spring');
+                st.setProperty('--nav-liquid-x', L.tx.toFixed(2) + 'px');
+                st.setProperty('--lens-sx', '1'); st.setProperty('--lens-sy', '1');
+                st.setProperty('--lens-rot', '0deg'); st.setProperty('--lens-hl', '0%');
+                return;
+            }
+            L.raf = requestAnimationFrame(navLensTick);
+        }
         function getBottomNavMetrics() {
             const nav = document.getElementById('bottom-nav');
             if (!nav) return null;
@@ -4343,6 +4493,7 @@ const KANJI_N5_DB = (() => {
             if (!metrics) return;
             const targetIndex = Math.min(NAV_TABS.length - 1, Math.max(0, index));
             const x = options.x ?? (metrics.inset + (targetIndex * metrics.tabWidth));
+            if (navLens.on && !options.fromLens) { navLens.tx = x; navLensKick(); return; }
             metrics.nav.style.setProperty('--nav-liquid-x', `${x}px`);
             metrics.nav.style.setProperty('--nav-liquid-width', `${metrics.tabWidth}px`);
             metrics.nav.style.setProperty('--nav-liquid-scale', String(options.scale ?? 1));
@@ -4389,57 +4540,82 @@ const KANJI_N5_DB = (() => {
             }, { passive:true });
             const nav = document.getElementById('bottom-nav');
             if (!nav) return;
+            const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            const L = navLens;
+            L.nav = nav;
             nav.addEventListener('pointerdown', event => {
                 if (event.pointerType === 'mouse' && event.button !== 0) return;
                 const metrics = getBottomNavMetrics();
                 if (!metrics) return;
                 const activeIndex = Math.max(0, NAV_TABS.indexOf(state.activeTab));
+                const localX = event.clientX - metrics.rect.left;
+                const touchedIndex = Math.min(NAV_TABS.length - 1, Math.max(0, Math.floor((localX - metrics.inset) / metrics.tabWidth)));
+                L.m = metrics;
+                if (!L.on) {
+                    L.x = metrics.inset + activeIndex * metrics.tabWidth;
+                    L.vx = 0; L.sx = L.sy = 1; L.vsx = L.vsy = 0; L.last = 0;
+                }
+                L.tx = metrics.inset + touchedIndex * metrics.tabWidth;
+                L.pressed = true; L.reduce = !!reduceMotion;
                 navLiquidGesture = {
-                    pointerId: event.pointerId,
-                    startX: event.clientX,
-                    startY: event.clientY,
-                    activeIndex,
-                    centerX: metrics.rect.left + metrics.inset + (activeIndex * metrics.tabWidth) + (metrics.tabWidth / 2),
-                    candidateIndex: activeIndex,
-                    moved: false
+                    pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+                    activeIndex, touchedIndex,
+                    center0: metrics.inset + touchedIndex * metrics.tabWidth + metrics.tabWidth / 2,
+                    candidateIndex: touchedIndex, moved: false
                 };
-                nav.classList.add('is-liquid-dragging');
+                nav.classList.add('is-liquid-dragging', 'is-liquid-spring');
                 nav.setPointerCapture?.(event.pointerId);
+                setBottomNavPreview(touchedIndex);
+                nav.setAttribute('data-nav-i', touchedIndex);
+                L.on = true; navLensKick();
             }, { passive:true });
             nav.addEventListener('pointermove', event => {
-                if (!navLiquidGesture || navLiquidGesture.pointerId !== event.pointerId) return;
-                const metrics = getBottomNavMetrics();
-                if (!metrics) return;
-                const dx = event.clientX - navLiquidGesture.startX;
-                const dy = event.clientY - navLiquidGesture.startY;
-                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 14) return;
-                if (Math.abs(dx) > 8) navLiquidGesture.moved = true;
-                const minCenter = metrics.rect.left + metrics.inset + (metrics.tabWidth / 2);
-                const maxCenter = metrics.rect.right - metrics.inset - (metrics.tabWidth / 2);
-                const center = Math.min(maxCenter, Math.max(minCenter, navLiquidGesture.centerX + dx));
-                const localIndex = Math.round((center - minCenter) / metrics.tabWidth);
-                const candidateIndex = Math.min(NAV_TABS.length - 1, Math.max(0, localIndex));
-                const pull = Math.min(.46, Math.abs(dx) / Math.max(metrics.tabWidth * 2.2, 1));
-                placeBottomNavLiquid(candidateIndex, {
-                    x: center - metrics.rect.left - (metrics.tabWidth / 2),
-                    scale: 1 + pull
-                });
-                navLiquidGesture.candidateIndex = candidateIndex;
-                setBottomNavPreview(candidateIndex);
+                const g = navLiquidGesture;
+                if (!g || g.pointerId !== event.pointerId) return;
+                const m = L.m; if (!m) return;
+                const dx = event.clientX - g.startX;
+                const dy = event.clientY - g.startY;
+                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 14 && !g.moved) return;
+                if (Math.abs(dx) > 8) g.moved = true;
+                const minC = m.inset + m.tabWidth / 2;
+                const maxC = m.rect.width - m.inset - m.tabWidth / 2;
+                const raw = g.center0 + dx;
+                const clamped = Math.min(maxC, Math.max(minC, raw));
+                /* Karet di ujung bar: semakin ditarik keluar, semakin berat */
+                const over = raw < minC ? minC - raw : raw > maxC ? raw - maxC : 0;
+                const rubber = 22 * (1 - Math.exp(-over / 45));
+                const center = raw < minC ? minC - rubber : raw > maxC ? maxC + rubber : raw;
+                L.tx = center - m.tabWidth / 2;
+                const ci = Math.min(NAV_TABS.length - 1, Math.max(0, Math.round((clamped - minC) / m.tabWidth)));
+                if (ci !== g.candidateIndex) {
+                    g.candidateIndex = ci;
+                    setBottomNavPreview(ci);
+                    nav.setAttribute('data-nav-i', ci);
+                    navigator.vibrate?.(6);
+                }
             }, { passive:true });
             const finishBottomNavLiquidGesture = event => {
-                if (!navLiquidGesture || (event && navLiquidGesture.pointerId !== event.pointerId)) return;
-                const gesture = navLiquidGesture;
+                const g = navLiquidGesture;
+                if (!g || (event && g.pointerId !== event.pointerId)) return;
                 navLiquidGesture = null;
                 nav.classList.remove('is-liquid-dragging');
-                nav.releasePointerCapture?.(gesture.pointerId);
-                setBottomNavPreview();
-                if (gesture.moved) navSuppressClickUntil = Date.now() + 450;
-                if (gesture.moved && gesture.candidateIndex !== gesture.activeIndex) {
-                    switchTab(NAV_TABS[gesture.candidateIndex]);
-                } else {
-                    placeBottomNavLiquid(gesture.activeIndex);
+                nav.releasePointerCapture?.(g.pointerId);
+                L.pressed = false;
+                const m = L.m || getBottomNavMetrics();
+                let idx = g.candidateIndex;
+                if (g.moved && m) {
+                    /* Lemparan: lensa memperhitungkan kecepatan saat jari dilepas */
+                    const minC = m.inset + m.tabWidth / 2, maxC = m.rect.width - m.inset - m.tabWidth / 2;
+                    const predicted = Math.min(maxC, Math.max(minC, L.x + m.tabWidth / 2 + L.vx * .11));
+                    idx = Math.min(NAV_TABS.length - 1, Math.max(0, Math.round((predicted - minC) / m.tabWidth)));
                 }
+                if (event && event.type === 'pointercancel') idx = g.activeIndex;
+                if (m) L.tx = m.inset + idx * m.tabWidth;
+                setBottomNavPreview();
+                nav.setAttribute('data-nav-i', idx);
+                if (g.moved) navSuppressClickUntil = Date.now() + 450;
+                navLensKick();
+                if (idx !== g.activeIndex) switchTab(NAV_TABS[idx]);
             };
             nav.addEventListener('pointerup', finishBottomNavLiquidGesture, { passive:true });
             nav.addEventListener('pointercancel', finishBottomNavLiquidGesture, { passive:true });
@@ -4473,5 +4649,390 @@ const KANJI_N5_DB = (() => {
             });
         });
     </script>
+    <script>
+    /* Bar liquid glass: tandai tab yang sedang berada di bawah lensa agar ikonnya ikut membesar */
+    (function(){
+      var nav=document.getElementById('bottom-nav'); if(!nav) return;
+      var clear=function(){ nav.querySelectorAll('.nav-tab-lens').forEach(function(b){ b.classList.remove('nav-tab-lens'); }); };
+      nav.addEventListener('pointerdown',function(){ clear(); var a=nav.querySelector('button.nav-tab-active'); if(a) a.classList.add('nav-tab-lens'); },{passive:true});
+      var orig=window.setBottomNavPreview;
+      if(typeof orig==='function') window.setBottomNavPreview=function(i){
+        var r=orig.apply(this,arguments); clear();
+        if(i!==undefined&&i!==null){ var b=nav.querySelectorAll('button[id^="tab-"]')[i]; if(b) b.classList.add('nav-tab-lens'); }
+        return r;
+      };
+      /* Ganti tab: bisa diketuk langsung ATAU digeser (ketukan dibaca dari posisi jari, karena pointer capture mengalihkan klik ke bar) */
+      nav.addEventListener('pointerup',function(e){
+        var g=(typeof navLiquidGesture!=='undefined')?navLiquidGesture:null;
+        if(!g||g.pointerId!==e.pointerId||g.moved) return;
+        var x=e.clientX;
+        setTimeout(function(){
+          var m=getBottomNavMetrics(); if(!m) return;
+          var idx=Math.max(0,Math.min(NAV_TABS.length-1,Math.floor((x-m.rect.left-m.inset)/m.tabWidth)));
+          if(idx!==NAV_TABS.indexOf(normalizedNavTab(state.activeTab))) switchTab(NAV_TABS[idx]);
+        },0);
+      },{passive:true});
+      /* Tandai posisi lensa agar tema XP bisa mewarnai kapsul hijau di atas Home */
+      var po=window.placeBottomNavLiquid;
+      if(typeof po==='function') window.placeBottomNavLiquid=function(i){ nav.setAttribute('data-nav-i',Math.max(0,Math.min(5,Math.round(i)))); return po.apply(this,arguments); };
+    })();
+    </script>
+<style>
+/* ===== Games baru: Sambung Kata & Listening Kalimat ===== */
+.sk-card { position:relative; min-height:3.7rem; padding:.6rem .7rem; border-radius:1.15rem; display:flex; flex-direction:column; justify-content:center; text-align:center; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; transition:transform .25s cubic-bezier(.34,1.6,.5,1), background .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.sk-card .sk-dot { position:absolute; top:50%; width:.7rem; height:.7rem; margin-top:-.35rem; border-radius:999px; background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); opacity:.55; transition:transform .25s cubic-bezier(.34,1.6,.5,1), opacity .2s ease; }
+.sk-card[data-side="l"] .sk-dot { right:-.35rem; }
+.sk-card[data-side="r"] .sk-dot { left:-.35rem; }
+.sk-card.sk-src { transform:scale(1.05); border-color:var(--accent); box-shadow:0 .6rem 1.4rem -.8rem color-mix(in srgb, var(--accent) 70%, transparent); }
+.sk-card.sk-src .sk-dot, .sk-card.sk-hot .sk-dot { transform:scale(1.5); opacity:1; }
+.sk-card.sk-hot { transform:scale(1.07); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); }
+.sk-card.sk-done { cursor:default; background:rgba(16,185,129,.16) !important; border-color:#10B981 !important; }
+.sk-card.sk-done .sk-dot { background:#10B981; box-shadow:0 0 0 3px rgba(16,185,129,.25); opacity:1; }
+.sk-card.sk-bad { animation:skShake .38s ease; border-color:#ef4444 !important; background:rgba(239,68,68,.14) !important; }
+@keyframes skShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)} }
+.sk-main { font-weight:800; font-size:1rem; line-height:1.2; }
+.sk-sub { font-size:.62rem; margin-top:.15rem; color:var(--text-muted); }
+.sk-meaning { font-weight:700; font-size:.78rem; line-height:1.25; }
+.ls-play { width:6.2rem; height:6.2rem; border-radius:999px; display:grid; place-items:center; color:#fff; background:var(--accent); box-shadow:0 1rem 2rem -1rem color-mix(in srgb, var(--accent) 80%, transparent), inset 0 2px 3px rgba(255,255,255,.45); transition:transform .3s cubic-bezier(.34,1.6,.5,1); }
+.ls-play:active { transform:scale(.92); }
+.ls-play.is-playing { animation:lsPulse 1s ease-in-out infinite; }
+@keyframes lsPulse { 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent), 0 1rem 2rem -1rem color-mix(in srgb, var(--accent) 80%, transparent); } 50%{ box-shadow:0 0 0 1.1rem transparent, 0 1rem 2rem -1rem color-mix(in srgb, var(--accent) 80%, transparent); } }
+</style>
+<script>
+/* =====================================================================
+   GAMES: Sambung Kata (tarik garis kata ↔ arti) + Listening Kalimat
+   ===================================================================== */
+(function () {
+  const $vp = () => document.getElementById('app-viewport');
+  const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const addCoins = (n, anchor) => {
+    state.coins += n;
+    try { updateCoinUI(); saveState(); if (anchor) showFloatingCoin(anchor, n); } catch (e) {}
+  };
+  const bumpStat = ok => { try { state.stats[ok ? 'correct' : 'wrong'] = (state.stats[ok ? 'correct' : 'wrong'] || 0) + 1; saveState(); } catch (e) {} };
+  const chime = ok => { try { playChime(ok); } catch (e) {} };
+
+  /* ---------- Menu Games: tambah kartu game baru di atas ---------- */
+  const origLatihan = window.renderLatihanTabs;
+  window.renderLatihanTabs = function () {
+    origLatihan.apply(this, arguments);
+    const box = document.querySelector('#app-viewport .space-y-3');
+    if (!box) return;
+    const sec = document.createElement('div');
+    sec.className = 'space-y-3';
+    sec.innerHTML = `
+      <div class="bg-accent text-white px-4 py-3 rounded-2xl shadow-md shadow-blue-500/15 flex items-center gap-3"><i data-lucide="gamepad-2" class="w-5 h-5 shrink-0"></i><div class="min-w-0"><span class="text-xs font-black uppercase tracking-widest block">Game Seru</span><span class="text-[10px] text-white/80">Main sambil belajar, kumpulkan koin.</span></div></div>
+      <button onclick="openSambungKata()" class="w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-4 hover:border-accent active:scale-[.98] transition-all"><span class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center shrink-0"><i data-lucide="git-commit-horizontal" class="w-6 h-6"></i></span><span class="min-w-0 flex-1"><span class="block font-extrabold text-sm text-accent">Sambung Kata</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">Tarik garis dari kotoba ke artinya. Selesaikan 5 pasangan per ronde.</span></span><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--text-muted)"></i></button>
+      <button onclick="openListeningKalimat()" class="w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-4 hover:border-accent active:scale-[.98] transition-all"><span class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center shrink-0"><i data-lucide="headphones" class="w-6 h-6"></i></span><span class="min-w-0 flex-1"><span class="block font-extrabold text-sm text-accent">Listening Kalimat</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">Dengarkan satu kalimat, lalu tulis ulang persis seperti yang kamu dengar.</span></span><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--text-muted)"></i></button>`;
+    box.insertBefore(sec, box.firstChild);
+    icons();
+  };
+
+  /* =====================================================================
+     1) SAMBUNG KATA
+     ===================================================================== */
+  const SK = { bab: 'all', rounds: 5, round: 0, pairs: [], done: new Set(), wrongIds: new Set(), correct: 0, firstTry: 0, mistakes: 0, coins: 0, drag: null, lines: [] };
+
+  function skPool() {
+    const babs = SK.bab === 'all' ? Object.keys(KOTOBA_DB) : [SK.bab];
+    return babs.flatMap(b => KOTOBA_DB[b] || []).filter(it => it && it.arti && (it.kana || it.kanji));
+  }
+  window.openSambungKata = function () {
+    const babs = Object.keys(KOTOBA_DB).map(Number).sort((a, b) => a - b);
+    const chip = (v, label, active, fn) => `<button onclick="${fn}" class="rounded-xl py-2.5 text-xs font-bold transition-all ${active ? 'bg-accent text-white shadow-sm' : 'ios-glass text-main'}">${label}</button>`;
+    $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
+      <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Game</p><h2 class="text-xl font-bold">Sambung Kata</h2></div></div>
+      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Sentuh sebuah kartu, <b>tarik garis</b> ke kartu pasangannya, lalu lepas. Garis hijau berarti benar. Tebakan pertama yang tepat memberi 10 koin.</p></div>
+      <div class="ios-glass p-4 rounded-[2rem] space-y-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Sumber kosakata</p>
+        <select id="sk-bab" onchange="SKsetBab(this.value)" class="mt-2 w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-3 text-sm font-bold text-main outline-none"><option value="all" ${SK.bab === 'all' ? 'selected' : ''}>Semua Bab</option>${babs.map(b => `<option value="${b}" ${String(SK.bab) === String(b) ? 'selected' : ''}>Bab ${b}</option>`).join('')}</select></div>
+        <div><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah ronde</p><div class="grid grid-cols-4 gap-2">${[3, 5, 8, 10].map(n => chip(n, n, SK.rounds === n, `SKsetRounds(${n})`)).join('')}</div></div></div>
+      <button onclick="startSambungKata()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]"><i data-lucide="play" class="w-5 h-5 inline mr-1"></i> Mulai · ${SK.rounds} ronde</button></div>`;
+    icons();
+  };
+  window.SKsetBab = v => { SK.bab = v === 'all' ? 'all' : Number(v); };
+  window.SKsetRounds = n => { SK.rounds = n; openSambungKata(); };
+
+  window.startSambungKata = function () {
+    if (skPool().length < 5) { alert('Kosakata bab ini kurang dari 5 kata.'); return; }
+    Object.assign(SK, { round: 0, correct: 0, firstTry: 0, mistakes: 0, coins: 0 });
+    skNextRound();
+  };
+
+  function skPickPairs() {
+    const seenA = new Set(), seenK = new Set(), out = [];
+    for (const it of shuffle(skPool())) {
+      const a = it.arti.trim().toLowerCase(), k = (it.kanji || it.kana);
+      if (seenA.has(a) || seenK.has(k)) continue;
+      seenA.add(a); seenK.add(k); out.push(it);
+      if (out.length === 5) break;
+    }
+    return out.map((it, i) => ({ id: i, it }));
+  }
+  function skNextRound() {
+    SK.round++; SK.pairs = skPickPairs(); SK.done = new Set(); SK.wrongIds = new Set(); SK.lines = [];
+    skRender();
+  }
+  function skRender() {
+    const left = shuffle(SK.pairs), right = shuffle(SK.pairs);
+    const L = p => `<div class="sk-card ios-glass" data-sk data-side="l" data-id="${p.id}"><span class="sk-main text-main">${esc(p.it.kanji || p.it.kana)}</span><span class="sk-sub">${esc(p.it.kanji ? p.it.kana : (p.it.romaji || ''))}</span><i class="sk-dot"></i></div>`;
+    const R = p => `<div class="sk-card ios-glass" data-sk data-side="r" data-id="${p.id}"><span class="sk-meaning text-main">${esc(p.it.arti)}</span><i class="sk-dot"></i></div>`;
+    $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
+      <div class="flex items-center justify-between"><button onclick="openSambungKata()" class="flex items-center gap-1 text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5"></i>Keluar</button><span class="text-xs font-bold bg-accent-light text-accent px-3 py-1 rounded-full">Ronde ${SK.round} / ${SK.rounds}</span></div>
+      <div class="flex justify-between text-[10px] font-black uppercase tracking-widest px-1" style="color:var(--text-muted)"><span>Kotoba</span><span>Arti</span></div>
+      <div id="sk-board" style="position:relative;touch-action:none">
+        <svg id="sk-svg" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;z-index:5;pointer-events:none"></svg>
+        <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;column-gap:3rem;align-items:start"><div style="display:flex;flex-direction:column;gap:.75rem">${left.map(L).join('')}</div><div style="display:flex;flex-direction:column;gap:.75rem">${right.map(R).join('')}</div></div>
+      </div>
+      <div class="flex justify-between items-center text-xs font-bold px-1" style="color:var(--text-muted)"><span id="sk-progress">0 / 5 terhubung</span><span>${SK.coins} ${getCoinIcon()} didapat</span></div></div>`;
+    icons(); skBind();
+  }
+
+  const skCard = (side, id) => document.querySelector(`#sk-board .sk-card[data-side="${side}"][data-id="${id}"]`);
+  function skAnchor(card) {
+    const b = document.getElementById('sk-board').getBoundingClientRect(), r = card.getBoundingClientRect();
+    const side = card.dataset.side;
+    return { x: (side === 'l' ? r.right : r.left) - b.left, y: r.top + r.height / 2 - b.top };
+  }
+  const skPath = (a, bx, by) => { const dx = (bx - a.x) * .5; return `M${a.x},${a.y} C${a.x + dx},${a.y} ${bx - dx},${by} ${bx},${by}`; };
+  function skRedraw(preview) {
+    const svg = document.getElementById('sk-svg'); if (!svg) return;
+    let html = `<defs><linearGradient id="sk-grad" x1="0" x2="1"><stop offset="0" stop-color="#10B981"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>`;
+    for (const ln of SK.lines) {
+      const a = skCard('l', ln.id), b = skCard('r', ln.id); if (!a || !b) continue;
+      const pa = skAnchor(a), pb = skAnchor(b);
+      html += `<path d="${skPath(pa, pb.x, pb.y)}" fill="none" stroke="url(#sk-grad)" stroke-width="4.5" stroke-linecap="round" style="filter:drop-shadow(0 2px 5px rgba(16,185,129,.45))"/>`;
+    }
+    if (preview) {
+      const col = preview.bad ? '#ef4444' : 'var(--accent)';
+      html += `<path d="${skPath(preview.from, preview.x, preview.y)}" fill="none" stroke="${col}" stroke-width="4.5" stroke-linecap="round" stroke-opacity=".9" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))"/><circle cx="${preview.x}" cy="${preview.y}" r="8" fill="${col}" fill-opacity=".9" stroke="#fff" stroke-width="2.5"/>`;
+    }
+    svg.innerHTML = html;
+  }
+  window.addEventListener('resize', () => { if (document.getElementById('sk-board')) skRedraw(); });
+
+  function skTargetAt(x, y, side) {
+    const el = document.elementFromPoint(x, y)?.closest?.('#sk-board .sk-card');
+    if (el && el.dataset.side !== side && !el.classList.contains('sk-done')) return el;
+    return null;
+  }
+  function skBind() {
+    const board = document.getElementById('sk-board');
+    board.addEventListener('pointerdown', e => {
+      const card = e.target.closest('.sk-card'); if (!card || card.classList.contains('sk-done') || SK.drag) return;
+      e.preventDefault(); board.setPointerCapture(e.pointerId);
+      const br = board.getBoundingClientRect();
+      SK.drag = { pid: e.pointerId, card, side: card.dataset.side, id: card.dataset.id, from: skAnchor(card), hot: null };
+      card.classList.add('sk-src');
+      skRedraw({ from: SK.drag.from, x: e.clientX - br.left, y: e.clientY - br.top });
+    });
+    board.addEventListener('pointermove', e => {
+      const d = SK.drag; if (!d || d.pid !== e.pointerId) return;
+      const br = board.getBoundingClientRect();
+      const t = skTargetAt(e.clientX, e.clientY, d.side);
+      if (t !== d.hot) { d.hot?.classList.remove('sk-hot'); t?.classList.add('sk-hot'); d.hot = t; }
+      let x = e.clientX - br.left, y = e.clientY - br.top;
+      if (t) { const p = skAnchor(t); x = p.x; y = p.y; }   // garis "menempel" ke kartu saat dekat
+      skRedraw({ from: d.from, x, y });
+    });
+    const end = e => {
+      const d = SK.drag; if (!d || (e && d.pid !== e.pointerId)) return;
+      SK.drag = null; board.releasePointerCapture?.(d.pid);
+      d.card.classList.remove('sk-src'); d.hot?.classList.remove('sk-hot');
+      const t = e.type === 'pointercancel' ? null : skTargetAt(e.clientX, e.clientY, d.side);
+      const br = board.getBoundingClientRect();
+      if (!t) return skRetract(d.from, e.clientX - br.left, e.clientY - br.top, false);
+      const ok = t.dataset.id === d.id;
+      if (ok) skMatch(d.id, t);
+      else {
+        const lid = d.side === 'l' ? d.id : t.dataset.id; SK.wrongIds.add(lid); SK.mistakes++; bumpStat(false); chime(false);
+        d.card.classList.add('sk-bad'); t.classList.add('sk-bad');
+        setTimeout(() => { d.card.classList.remove('sk-bad'); t.classList.remove('sk-bad'); }, 420);
+        const p = skAnchor(t); skRetract(d.from, p.x, p.y, true);
+      }
+    };
+    board.addEventListener('pointerup', end); board.addEventListener('pointercancel', end);
+  }
+  /* Garis ditarik kembali ke asalnya seperti karet */
+  function skRetract(from, x, y, bad) {
+    const t0 = performance.now(), dur = 260, sx = x, sy = y;
+    (function step(t) {
+      if (!document.getElementById('sk-svg') || SK.drag) return;
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      if (k >= 1) { skRedraw(); return; }
+      skRedraw({ from, x: sx + (from.x - sx) * e, y: sy + (from.y - sy) * e, bad });
+      requestAnimationFrame(step);
+    })(t0);
+  }
+  function skMatch(id, targetCard) {
+    SK.done.add(id); SK.lines.push({ id });
+    const a = skCard('l', id), b = skCard('r', id);
+    [a, b].forEach(c => { c.classList.add('sk-done'); });
+    const first = !SK.wrongIds.has(id), gain = first ? 10 : 5;
+    SK.correct++; if (first) SK.firstTry++; SK.coins += gain; bumpStat(true); chime(true);
+    addCoins(gain, b);
+    skRedraw();
+    const pr = document.getElementById('sk-progress'); if (pr) pr.textContent = `${SK.done.size} / 5 terhubung`;
+    if (SK.done.size === 5) setTimeout(() => { SK.round >= SK.rounds ? skFinish() : skNextRound(); }, 950);
+  }
+  function skFinish() {
+    const total = SK.rounds * 5, acc = Math.round(SK.firstTry / total * 100);
+    $vp().innerHTML = `<div class="animate-fade-in space-y-5 pb-24 text-center pt-6">
+      <div class="text-6xl">🎉</div><div><h2 class="text-2xl font-black">Selesai!</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Sambung Kata · ${SK.rounds} ronde</p></div>
+      <div class="grid grid-cols-3 gap-3"><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-accent">${acc}%</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Sekali tebak benar</p></div><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-red-500">${SK.mistakes}</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Salah tarik</p></div><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-yellow-500">${SK.coins}</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Koin ${getCoinIcon()}</p></div></div>
+      <button onclick="startSambungKata()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]">Main Lagi</button>
+      <button onclick="renderLatihanTabs()" class="w-full ios-glass py-4 rounded-2xl font-bold active:scale-[.98]">Kembali ke Games</button></div>`;
+    icons();
+  }
+
+  /* =====================================================================
+     2) LISTENING KALIMAT  (dengar kalimat → tulis ulang)
+     ===================================================================== */
+  const KANA_ONLY = /^[\u3040-\u309f\u30a0-\u30ffー\s、。？！「」『』～〜・…!?,.]+$/;
+  const PUNCT = /[、。？！「」『』～〜・…!?,.\s"'“”]/g;
+  const TABLE = { あ:'a',い:'i',う:'u',え:'e',お:'o',か:'ka',き:'ki',く:'ku',け:'ke',こ:'ko',さ:'sa',し:'shi',す:'su',せ:'se',そ:'so',た:'ta',ち:'chi',つ:'tsu',て:'te',と:'to',な:'na',に:'ni',ぬ:'nu',ね:'ne',の:'no',は:'ha',ひ:'hi',ふ:'fu',へ:'he',ほ:'ho',ま:'ma',み:'mi',む:'mu',め:'me',も:'mo',や:'ya',ゆ:'yu',よ:'yo',ら:'ra',り:'ri',る:'ru',れ:'re',ろ:'ro',わ:'wa',を:'o',ん:'n',が:'ga',ぎ:'gi',ぐ:'gu',げ:'ge',ご:'go',ざ:'za',じ:'ji',ず:'zu',ぜ:'ze',ぞ:'zo',だ:'da',ぢ:'ji',づ:'zu',で:'de',ど:'do',ば:'ba',び:'bi',ぶ:'bu',べ:'be',ぼ:'bo',ぱ:'pa',ぴ:'pi',ぷ:'pu',ぺ:'pe',ぽ:'po',ぁ:'a',ぃ:'i',ぅ:'u',ぇ:'e',ぉ:'o',ゔ:'vu' };
+  const toHira = s => s.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  function kanaToRomaji(src) {
+    const toks = toHira(src).replace(/[、。？！「」『』～〜・…!?,.]/g, ' ').split(/\s+/).filter(Boolean);
+    return toks.map(tok => {
+      const ch = [...tok]; let out = '', sokuon = false;
+      for (let i = 0; i < ch.length; i++) {
+        let c = ch[i]; const last = i === ch.length - 1;
+        if (c === 'っ') { sokuon = true; continue; }
+        if (c === 'ー') { const m = out.match(/[aiueo]$/); out += m ? m[0] : ''; continue; }
+        let r = TABLE[c]; if (!r) continue;
+        if (last && ch.length >= 1 && c === 'は') r = 'wa';
+        if (last && c === 'へ') r = 'e';
+        const nx = ch[i + 1];
+        if (nx && 'ゃゅょ'.includes(nx) && /i$/.test(r)) {
+          const v = { ゃ: 'a', ゅ: 'u', ょ: 'o' }[nx], stem = r.slice(0, -1);
+          r = (/h$/.test(stem) || stem === 'j') ? stem + v : stem + 'y' + v; i++;
+        }
+        if (sokuon) { r = (r.startsWith('ch') ? 't' : r[0]) + r; sokuon = false; }
+        out += r;
+      }
+      return out;
+    }).join(' ');
+  }
+  function canonRomaji(s) {
+    s = String(s || '').toLowerCase().replace(/ā/g, 'aa').replace(/ī/g, 'ii').replace(/ū/g, 'uu').replace(/ē/g, 'ee').replace(/ō/g, 'oo').replace(/[^a-z]/g, '');
+    return s.replace(/wo/g, 'o')
+      .replace(/sy([auo])/g, 'sh$1').replace(/ty([auo])/g, 'ch$1').replace(/(zy|jy)([auo])/g, 'j$2')
+      .replace(/s(?=i)/g, 'sh').replace(/t(?=i)/g, 'ch').replace(/t(?=u)/g, 'ts').replace(/(^|[^sc])hu/g, '$1fu').replace(/z(?=i)/g, 'j')
+      .replace(/ou|oo/g, 'o').replace(/uu/g, 'u').replace(/aa/g, 'a').replace(/ii/g, 'i').replace(/ee|ei/g, 'e');
+  }
+  const canonKana = s => toHira(String(s || '')).replace(PUNCT, '');
+
+  function lsnPool() {
+    const out = [], seen = new Set();
+    const eat = ex => {
+      if (!ex || !ex.j) return; const j = String(ex.j).trim();
+      if (!KANA_ONLY.test(j)) return;            // hanya kalimat kana: bisa diketik huruf Jepang maupun romaji
+      const key = canonKana(j); if (seen.has(key) || key.length < 4) return; seen.add(key);
+      out.push({ j, auto: kanaToRomaji(j), r: ex.r || '', i: ex.i || '' });
+    };
+    Object.values(BUNPOU_DB).forEach(list => (Array.isArray(list) ? list : []).forEach(item => (item && Array.isArray(item.examples)) && item.examples.forEach(eat)));
+    return out;
+  }
+
+  const LSN = { total: 10, items: [], idx: 0, correct: 0, wrong: 0, coins: 0, hint: false, answered: false, pool: [] };
+  window.LSN = LSN; window.SK = SK; window.LSNutil = { canonRomaji, kanaToRomaji };
+  let jaVoice = null;
+  function pickVoice() {
+    try { const v = speechSynthesis.getVoices(); jaVoice = v.find(x => /^ja/i.test(x.lang) && /google|kyoko|o-ren|haruka|ichiro|nanami|kyoko/i.test(x.name)) || v.find(x => /^ja/i.test(x.lang)) || null; } catch (e) {}
+  }
+  try { speechSynthesis.addEventListener('voiceschanged', pickVoice); pickVoice(); } catch (e) {}
+  function speak(text, rate = .85) {
+    if (!('speechSynthesis' in window)) { alert('Perangkat ini belum mendukung suara. Coba browser lain.'); return; }
+    speechSynthesis.cancel(); pickVoice();
+    const u = new SpeechSynthesisUtterance(text.replace(/\s+/g, ''));
+    u.lang = 'ja-JP'; u.rate = rate; u.pitch = 1; if (jaVoice) u.voice = jaVoice;
+    const btn = document.getElementById('ls-play');
+    u.onstart = () => btn && btn.classList.add('is-playing');
+    u.onend = u.onerror = () => btn && btn.classList.remove('is-playing');
+    speechSynthesis.speak(u);
+  }
+
+  window.openListeningKalimat = function () {
+    LSN.pool = lsnPool();
+    const chip = n => `<button onclick="LSNsetTotal(${n})" class="rounded-xl py-2.5 text-xs font-bold transition-all ${LSN.total === n ? 'bg-accent text-white shadow-sm' : 'ios-glass text-main'}">${n}</button>`;
+    $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
+      <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Game · Kosakata</p><h2 class="text-xl font-bold">Listening Kalimat</h2></div></div>
+      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Kamu akan mendengar <b>satu kalimat utuh</b>. Putar sebanyak yang kamu mau, lalu <b>tulis ulang kalimat itu</b> dengan huruf Jepang (hiragana/katakana) atau romaji. Spasi dan tanda baca tidak dinilai.</p></div>
+      <div class="ios-glass p-4 rounded-[2rem]"><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah kalimat</p><div class="grid grid-cols-4 gap-2">${[5, 10, 15, 20].map(chip).join('')}</div><p class="text-[10px] mt-3" style="color:var(--text-muted)">${LSN.pool.length} kalimat tersedia dari contoh di menu Pola. Benar = 10 koin; jika memakai petunjuk arti = 5 koin.</p></div>
+      <button onclick="startListeningKalimat()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]"><i data-lucide="headphones" class="w-5 h-5 inline mr-1"></i> Mulai</button></div>`;
+    icons();
+  };
+  window.LSNsetTotal = n => { LSN.total = n; openListeningKalimat(); };
+  window.startListeningKalimat = function () {
+    LSN.pool = LSN.pool.length ? LSN.pool : lsnPool();
+    if (!LSN.pool.length) { alert('Belum ada kalimat tersedia.'); return; }
+    Object.assign(LSN, { items: shuffle(LSN.pool).slice(0, LSN.total), idx: 0, correct: 0, wrong: 0, coins: 0 });
+    lsnQuestion();
+  };
+  function lsnQuestion() {
+    const it = LSN.items[LSN.idx]; LSN.hint = false; LSN.answered = false;
+    $vp().innerHTML = `<div class="animate-fade-in space-y-5 pb-24">
+      <div class="flex items-center justify-between"><button onclick="LSNexit()" class="flex items-center gap-1 text-xs font-bold" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-5 h-5"></i>Keluar</button><span class="text-xs font-bold bg-accent-light text-accent px-3 py-1 rounded-full">${LSN.idx + 1} / ${LSN.items.length}</span></div>
+      <div class="ios-glass p-6 rounded-[2.5rem] text-center space-y-4"><p class="text-xs font-bold uppercase tracking-widest" style="color:var(--text-muted)">Dengarkan kalimatnya</p>
+        <button id="ls-play" onclick="LSNplay(.85)" class="ls-play mx-auto" aria-label="Putar kalimat"><i data-lucide="volume-2" class="w-10 h-10"></i></button>
+        <div class="flex justify-center gap-2"><button onclick="LSNplay(.85)" class="ios-glass px-4 py-2 rounded-full text-xs font-bold"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline mr-1"></i>Putar lagi</button><button onclick="LSNplay(.55)" class="ios-glass px-4 py-2 rounded-full text-xs font-bold"><i data-lucide="turtle" class="w-3.5 h-3.5 inline mr-1"></i>Pelan</button></div></div>
+      <div class="ios-glass p-4 rounded-[1.8rem] space-y-3" id="ls-answer-box">
+        <label class="text-[10px] font-black uppercase tracking-widest text-accent" for="ls-input">Tulis ulang kalimat tadi</label>
+        <textarea id="ls-input" rows="2" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Contoh: これはほんです / kore wa hon desu" class="w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-3 text-center font-bold text-main outline-none focus:border-accent resize-none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();LSNcheck();}"></textarea>
+        <div id="ls-hint" class="hidden text-xs font-bold text-center text-accent"></div>
+        <button id="ls-check" onclick="LSNcheck()" class="w-full bg-accent text-white py-3 rounded-2xl font-bold active:scale-[.98]">Cek Jawaban</button>
+        <div class="grid grid-cols-2 gap-2"><button onclick="LSNhint()" class="ios-glass py-2.5 rounded-2xl text-xs font-bold"><i data-lucide="lightbulb" class="w-4 h-4 inline mr-1"></i>Petunjuk arti</button><button onclick="LSNskip()" class="ios-glass py-2.5 rounded-2xl text-xs font-bold"><i data-lucide="skip-forward" class="w-4 h-4 inline mr-1"></i>Lewati</button></div></div>
+      <div id="ls-result" class="hidden"></div></div>`;
+    icons();
+    setTimeout(() => speak(it.j, .85), 250);
+  }
+  window.LSNplay = rate => speak(LSN.items[LSN.idx].j, rate);
+  window.LSNhint = () => { const it = LSN.items[LSN.idx], h = document.getElementById('ls-hint'); LSN.hint = true; h.textContent = '“' + it.i + '”'; h.classList.remove('hidden'); };
+  window.LSNexit = () => { try { speechSynthesis.cancel(); } catch (e) {} renderLatihanTabs(); };
+  function lsnJudge(input, it) {
+    const t = input.trim(); if (!t) return null;
+    if (/[a-zA-Zāīūēō]/.test(t) && !/[\u3040-\u30ff\u4e00-\u9fff]/.test(t)) {
+      const c = canonRomaji(t); return c && (c === canonRomaji(it.auto) || (it.r && c === canonRomaji(it.r)));
+    }
+    return canonKana(t) === canonKana(it.j);
+  }
+  window.LSNcheck = function () {
+    if (LSN.answered) return;
+    const it = LSN.items[LSN.idx], v = document.getElementById('ls-input').value, ok = lsnJudge(v, it);
+    if (ok === null) { document.getElementById('ls-input').focus(); return; }
+    lsnReveal(ok, it, v);
+  };
+  window.LSNskip = function () { if (!LSN.answered) lsnReveal(false, LSN.items[LSN.idx], '', true); };
+  function lsnReveal(ok, it, typed, skipped) {
+    LSN.answered = true; try { speechSynthesis.cancel(); } catch (e) {}
+    const gain = ok ? (LSN.hint ? 5 : 10) : 0;
+    ok ? LSN.correct++ : LSN.wrong++; bumpStat(ok); chime(ok);
+    if (ok) { LSN.coins += gain; addCoins(gain, document.getElementById('ls-check')); }
+    const box = document.getElementById('ls-answer-box'); box.style.opacity = .6; box.style.pointerEvents = 'none';
+    const last = LSN.idx >= LSN.items.length - 1;
+    const res = document.getElementById('ls-result'); res.classList.remove('hidden');
+    res.innerHTML = `<div class="ios-glass p-5 rounded-[2rem] space-y-3 text-center animate-fade-in" style="border:1.5px solid ${ok ? '#10B981' : '#ef4444'}">
+      <p class="text-sm font-black ${ok ? 'text-emerald-500' : 'text-red-500'}">${ok ? 'Benar! +' + gain + ' ' + getCoinIcon() : (skipped ? 'Dilewati' : 'Belum tepat')}</p>
+      ${!ok && typed ? `<p class="text-xs" style="color:var(--text-muted)">Jawabanmu: <span class="font-bold text-main">${esc(typed)}</span></p>` : ''}
+      <div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Kalimatnya</p><p class="text-xl font-black mt-1 text-main">${esc(it.j)}</p><p class="text-xs mt-1" style="color:var(--text-muted)">${esc(it.r || it.auto)}</p><p class="text-sm font-bold mt-2 text-main">${esc(it.i)}</p></div>
+      <div class="flex gap-2 justify-center"><button onclick="LSNplay(.85)" class="ios-glass px-4 py-2 rounded-full text-xs font-bold"><i data-lucide="volume-2" class="w-3.5 h-3.5 inline mr-1"></i>Dengar lagi</button></div>
+      <button onclick="${last ? 'LSNfinish()' : 'LSNnext()'}" class="w-full bg-accent text-white py-3 rounded-2xl font-bold active:scale-[.98]">${last ? 'Lihat Hasil' : 'Lanjut'}</button></div>`;
+    icons(); res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  window.LSNnext = () => { LSN.idx++; lsnQuestion(); };
+  window.LSNfinish = function () {
+    const n = LSN.items.length, acc = Math.round(LSN.correct / n * 100);
+    $vp().innerHTML = `<div class="animate-fade-in space-y-5 pb-24 text-center pt-6">
+      <div class="text-6xl">${acc >= 80 ? '🎧' : '💪'}</div><div><h2 class="text-2xl font-black">${acc >= 80 ? 'Telinga tajam!' : 'Terus berlatih!'}</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Listening Kalimat · ${n} soal</p></div>
+      <div class="grid grid-cols-3 gap-3"><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-emerald-500">${LSN.correct}</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Benar</p></div><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-red-500">${LSN.wrong}</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Salah</p></div><div class="ios-glass p-4 rounded-3xl"><p class="text-2xl font-black text-yellow-500">${LSN.coins}</p><p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">Koin ${getCoinIcon()}</p></div></div>
+      <button onclick="startListeningKalimat()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]">Main Lagi</button>
+      <button onclick="renderLatihanTabs()" class="w-full ios-glass py-4 rounded-2xl font-bold active:scale-[.98]">Kembali ke Games</button></div>`;
+    icons();
+  };
+})();
+</script>
+
 </body>
 </html>
