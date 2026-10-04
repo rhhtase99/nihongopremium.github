@@ -595,6 +595,59 @@
         :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring #bottom-nav-indicator { scale: 1 1 !important; transition: scale .4s cubic-bezier(.34,1.6,.5,1), opacity .2s ease !important; }
         :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring.is-liquid-dragging #bottom-nav-indicator { scale: 1.1 1.55 !important; }
         @media (prefers-reduced-motion: reduce) { #bottom-nav.is-liquid-spring #bottom-nav-indicator { scale: 1 1 !important; } }
+    
+        /* ===== TEMA iOS 6 & WINDOWS XP — tombol kembali, ubin ikon menu, latar linen (header/ikon atas & pengaturan TIDAK diubah) ===== */
+        /* iOS 6: latar linen */
+        [data-season="ios6"] body { background: repeating-linear-gradient(90deg, rgba(255,255,255,.22) 0 1px, transparent 1px 4px), repeating-linear-gradient(0deg, rgba(0,0,0,.04) 0 1px, transparent 1px 4px), linear-gradient(#d3d8de, #c5cbd2); }
+        .dark[data-season="ios6"] body { background: repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 4px), repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 4px), linear-gradient(#323a44, #272e37); }
+
+        /* Tombol kembali — iOS 6: biru berujung panah; XP: bulat hijau seperti Explorer */
+        [data-season="ios6"] button:not([class]):has(> svg.lucide-chevron-left):not(:is(#theme-modal, #settings-detail-modal) *) { display: inline-flex; align-items: center; flex: none; width: auto; height: 1.85rem; padding: 0 .75rem 0 1.15rem; border: 0; border-radius: 0; color: #fff !important; font: 700 .72rem/1 system-ui, -apple-system, sans-serif; text-shadow: 0 -1px 0 rgba(0,0,0,.5); background: linear-gradient(180deg,#8fb0dc 0%,#5f87c0 48%,#4a74b3 50%,#4f7bb9 100%); clip-path: polygon(.8rem 0, 100% 0, 100% 100%, .8rem 100%, 0 50%); }
+        [data-season="ios6"] button:not([class]):has(> svg.lucide-chevron-left):not(:is(#theme-modal, #settings-detail-modal) *) svg { display: none; }
+        [data-season="ios6"] button:not([class]):has(> svg.lucide-chevron-left):not(:is(#theme-modal, #settings-detail-modal) *)::after { content: 'Kembali'; }
+        [data-season="xpaero"] button:not([class]):has(> svg.lucide-chevron-left):not(:is(#theme-modal, #settings-detail-modal) *) { display: inline-grid; place-items: center; flex: none; width: 2.3rem; height: 2.3rem; border-radius: 999px; color: #fff !important; border: 2px solid #fff; background: radial-gradient(circle at 35% 25%, #b9f5a0 0, #54c23c 38%, #1f8a1f 100%); box-shadow: 0 0 0 1px #1a6b1a, 0 3px 6px rgba(0,60,0,.45), inset 0 -3px 5px rgba(0,80,0,.35); }
+        [data-season="xpaero"] button:not([class]):has(> svg.lucide-chevron-left):not(:is(#theme-modal, #settings-detail-modal) *) svg { width: 1.3rem; height: 1.3rem; stroke-width: 3; filter: drop-shadow(0 1px 1px rgba(0,60,0,.7)); }
+
+        /* Ubin ikon menu: iOS 6 = ikon aplikasi glossy; XP = tombol Luna berwarna */
+        [data-season="ios6"] .main-menu-card .menu-icon { border-radius: 1.05rem; border: 1px solid rgba(0,0,0,.45); color: #fff; background: linear-gradient(180deg, rgba(255,255,255,.62) 0, rgba(255,255,255,.14) 50%, transparent 50%), linear-gradient(180deg,#58a6f2,#1566c8); box-shadow: 0 3px 5px -1px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.75), inset 0 -2px 3px rgba(0,0,0,.3); }
+        [data-season="ios6"] .main-menu-card:nth-child(4n+2) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.62) 0, rgba(255,255,255,.14) 50%, transparent 50%), linear-gradient(180deg,#8bd35e,#2f9a2a); }
+        [data-season="ios6"] .main-menu-card:nth-child(4n+3) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.62) 0, rgba(255,255,255,.14) 50%, transparent 50%), linear-gradient(180deg,#ffbb55,#e0661a); }
+        [data-season="ios6"] .main-menu-card:nth-child(4n+4) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.62) 0, rgba(255,255,255,.14) 50%, transparent 50%), linear-gradient(180deg,#f27575,#b81c1c); }
+        [data-season="xpaero"] .main-menu-card .menu-icon { border-radius: .9rem; border: 2px solid #fff; color: #fff; background: linear-gradient(180deg, rgba(255,255,255,.7) 0, rgba(255,255,255,.12) 52%, transparent 52%), linear-gradient(180deg,#3d95ff,#0850d0); box-shadow: 0 0 0 1px #0a3aa6, 0 5px 9px -3px rgba(0,50,140,.6), inset 0 -3px 6px rgba(0,30,110,.35); }
+        [data-season="xpaero"] .main-menu-card:nth-child(4n+2) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.7) 0, rgba(255,255,255,.12) 52%, transparent 52%), linear-gradient(180deg,#78e05a,#1d8f22); box-shadow: 0 0 0 1px #15701a, 0 5px 9px -3px rgba(0,80,20,.6), inset 0 -3px 6px rgba(0,60,10,.35); }
+        [data-season="xpaero"] .main-menu-card:nth-child(4n+3) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.7) 0, rgba(255,255,255,.12) 52%, transparent 52%), linear-gradient(180deg,#ffb454,#e26a00); box-shadow: 0 0 0 1px #a84c00, 0 5px 9px -3px rgba(120,60,0,.6), inset 0 -3px 6px rgba(120,50,0,.35); }
+        [data-season="xpaero"] .main-menu-card:nth-child(4n+4) .menu-icon { background: linear-gradient(180deg, rgba(255,255,255,.7) 0, rgba(255,255,255,.12) 52%, transparent 52%), linear-gradient(180deg,#ff7b6b,#c4261a); box-shadow: 0 0 0 1px #8f1a10, 0 5px 9px -3px rgba(120,20,10,.6), inset 0 -3px 6px rgba(110,10,0,.35); }
+        :is([data-season="ios6"],[data-season="xpaero"]) .main-menu-card .menu-icon svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
+    
+        /* ===== iOS 6 & XP (v2): bar atas (nav bar / title bar), bar bawah biasa tanpa efek timbul, posisi kapsul aktif ===== */
+        /* Bar atas — hanya latar bar; ikon & tombol di header tidak diubah */
+        [data-season="ios6"] header, [data-season="xpaero"] header { position: relative; isolation: isolate; padding-block: .5rem; margin-top: -.5rem; color: #fff; }
+        [data-season="ios6"] header::before, [data-season="xpaero"] header::before { content: ''; position: absolute; z-index: -1; top: calc(-1rem - env(safe-area-inset-top)); bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%); pointer-events: none; }
+        [data-season="ios6"] header { text-shadow: 0 -1px 0 rgba(0,0,0,.45); }
+        [data-season="ios6"] header::before { background: linear-gradient(180deg,#b3c3da 0%,#8fa5c6 48%,#7790b6 50%,#6f89b0 100%); border-bottom: 1px solid #2e4468; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 5px rgba(0,0,0,.35); }
+        [data-season="xpaero"] header { text-shadow: 1px 1px 0 rgba(0,20,90,.6); }
+        [data-season="xpaero"] header::before { background: linear-gradient(180deg,#3d95ff 0%,#0a5bea 12%,#0054e3 55%,#0a5fe8 88%,#0044b8 100%); border-bottom: 2px solid #0a3aa6; box-shadow: inset 0 1px 0 rgba(255,255,255,.6); }
+        :is([data-season="ios6"],[data-season="xpaero"]) header :is(h2, span, p):not(.ios-glass *) { color: #fff !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) header .ios-glass { text-shadow: none; }
+
+        /* Posisi kapsul aktif pas dengan tab (termasuk area aman iPhone) */
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav-indicator { top: .26rem; bottom: calc(.26rem + env(safe-area-inset-bottom)); transform-origin: 50% 50%; }
+
+        /* Bukan liquid glass: saat digeser hanya bergeser biasa — tanpa membesar, tanpa gelembung, tanpa ikon membesar */
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring #bottom-nav-indicator,
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-spring.is-liquid-dragging #bottom-nav-indicator,
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-dragging #bottom-nav-indicator { scale: 1 1 !important; filter: none !important; }
+        :is([data-season="ios6"],[data-season="xpaero"]) #bottom-nav.is-liquid-dragging button.nav-tab-lens :is(svg, span) { transform: none !important; }
+        [data-season="ios6"] #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: linear-gradient(180deg,#6f747c 0%,#454950 49%,#2a2d32 50%,#3d4147 100%) !important; border: 1px solid #0b0c0e !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 8px rgba(0,0,0,.5) !important; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging #bottom-nav-indicator { background: linear-gradient(180deg,#1a3f9e,#2759cc) !important; border: 1px solid #0b2a85 !important; box-shadow: inset 1px 1px 3px rgba(0,0,0,.55), inset -1px -1px 0 rgba(255,255,255,.18) !important; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging[data-nav-i="0"] #bottom-nav-indicator { background: linear-gradient(180deg,#237023,#3a9d3a) !important; border-color: #1a5a1a !important; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging[data-nav-i="0"] #tab-home { background: linear-gradient(180deg,#237023 0%,#2f8f2f 50%,#3a9d3a 100%); border-color: #1a5a1a; box-shadow: inset 1px 1px 3px rgba(0,40,0,.65), inset -1px -1px 0 rgba(255,255,255,.2); }
+        /* Warna tab saat digeser = sama seperti saat diam (yang menyala hanya tab di bawah kapsul) */
+        [data-season="ios6"] #bottom-nav.is-liquid-dragging button.nav-tab-lens { color: #5db8ff !important; }
+        [data-season="ios6"] #bottom-nav.is-liquid-dragging button.nav-tab-active:not(.nav-tab-lens) { color: #a9afb8 !important; }
+        [data-season="ios6"] #bottom-nav button.nav-tab-lens svg { fill: #5db8ff; stroke: #0d0e10; }
+        [data-season="xpaero"] #bottom-nav.is-liquid-dragging button.nav-tab-active:not(.nav-tab-lens) { color: #e8f2ff !important; }
+        [data-season="xpaero"] #bottom-nav button.nav-tab-lens svg { fill: #fff; stroke: #1941a5; }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative flex flex-col">
@@ -4456,6 +4509,7 @@ const KANJI_N5_DB = (() => {
             const steps = 3, h = dt / steps;
             for (let i = 0; i < steps; i++) {
                 L.vx += ((L.tx - L.x) * 380 - L.vx * 27) * h; L.x += L.vx * h;
+                if (L.m) { const minX = L.m.inset, maxX = L.m.rect.width - L.m.inset - L.m.tabWidth; if (L.x > maxX) { L.x = maxX; if (L.vx > 0) L.vx = 0; } else if (L.x < minX) { L.x = minX; if (L.vx < 0) L.vx = 0; } }
                 const stretch = L.reduce ? 0 : Math.min(.3, Math.abs(L.vx) / 2600);
                 const tsx = (L.pressed && !L.reduce ? 1.22 : 1) + stretch;
                 const tsy = (L.pressed && !L.reduce ? 1.32 : 1) - stretch * .55;
@@ -4465,7 +4519,8 @@ const KANJI_N5_DB = (() => {
             const st = nav.style;
             st.setProperty('--nav-liquid-x', L.x.toFixed(2) + 'px');
             st.setProperty('--nav-liquid-scale', '1');
-            st.setProperty('--lens-sx', L.sx.toFixed(4));
+            let sxe = L.sx; if (L.m) { const room = Math.max(0, Math.min(L.x, L.m.rect.width - L.x - L.m.tabWidth)); sxe = Math.min(L.sx, 1 + 2 * room / L.m.tabWidth); }
+            st.setProperty('--lens-sx', sxe.toFixed(4));
             st.setProperty('--lens-sy', L.sy.toFixed(4));
             st.setProperty('--lens-rot', Math.max(-70, Math.min(70, L.vx / 22)).toFixed(1) + 'deg');
             st.setProperty('--lens-hl', Math.max(-26, Math.min(26, -L.vx / 40)).toFixed(1) + '%');
@@ -4583,7 +4638,7 @@ const KANJI_N5_DB = (() => {
                 const clamped = Math.min(maxC, Math.max(minC, raw));
                 /* Karet di ujung bar: semakin ditarik keluar, semakin berat */
                 const over = raw < minC ? minC - raw : raw > maxC ? raw - maxC : 0;
-                const rubber = 22 * (1 - Math.exp(-over / 45));
+                const rubber = 0; /* mentok di ujung bar */
                 const center = raw < minC ? minC - rubber : raw > maxC ? maxC + rubber : raw;
                 L.tx = center - m.tabWidth / 2;
                 const ci = Math.min(NAV_TABS.length - 1, Math.max(0, Math.round((clamped - minC) / m.tabWidth)));
