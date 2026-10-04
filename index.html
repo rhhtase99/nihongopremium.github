@@ -667,6 +667,10 @@
                 <label class="text-[10px] font-bold uppercase tracking-widest block mb-2 text-left text-accent">Siapa namamu?</label>
                 <input type="text" id="setup-name" class="w-full px-5 py-4 rounded-2xl ios-glass border-none outline-none focus:ring-2 focus:ring-accent text-lg shadow-inner text-main font-bold text-center" placeholder="Ketik nama di sini...">
             </div>
+            <div class="w-full mb-6">
+                <label class="text-[10px] font-bold uppercase tracking-widest block mb-2 text-left text-accent">Token <span style="color: var(--text-muted)">(opsional)</span></label>
+                <input type="text" id="setup-token" autocomplete="off" autocapitalize="characters" spellcheck="false" class="w-full px-5 py-3 rounded-2xl ios-glass border-none outline-none focus:ring-2 focus:ring-accent text-sm shadow-inner text-main font-bold text-center tracking-widest" placeholder="Masukkan token jika ada">
+            </div>
             <div class="w-full mb-8">
                 <label class="text-[10px] font-bold uppercase tracking-widest block mb-3 text-left text-accent">Pilih Avatar</label>
                 <div class="grid grid-cols-5 gap-2" id="setup-avatars"></div>
@@ -740,7 +744,14 @@
             <div class="w-12 h-1 bg-neutral-300 dark:bg-neutral-700 rounded-full mx-auto mb-4" onclick="closeProfileModal()"></div>
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold">Edit Profil</h3>
-                <button onclick="closeProfileModal()" style="color: var(--text-muted)"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <div class="flex items-center gap-2">
+                    <button id="token-capsule" onclick="toggleTokenBox()" class="px-3 py-1.5 rounded-full bg-accent text-white text-[11px] font-bold ios-btn-press flex items-center gap-1.5 shadow-md whitespace-nowrap"><i data-lucide="lock-keyhole" class="w-3.5 h-3.5"></i><span id="token-capsule-text">Masukkan Token</span></button>
+                    <button onclick="closeProfileModal()" style="color: var(--text-muted)"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+            </div>
+            <div id="token-box" class="hidden mb-5 -mt-2 flex gap-2">
+                <input type="text" id="profile-token" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Masukkan token" class="flex-1 min-w-0 px-4 py-3 rounded-2xl ios-glass border-none outline-none focus:ring-2 focus:ring-accent text-sm shadow-inner text-main font-bold tracking-widest text-center">
+                <button onclick="activateToken()" class="px-5 rounded-2xl bg-accent text-white text-sm font-bold ios-btn-press">Aktifkan</button>
             </div>
             <div class="flex flex-col items-center gap-4 mb-6">
                 <div id="edit-avatar-preview" class="w-20 h-20 rounded-full ios-glass border-2 border-accent flex items-center justify-center text-4xl shadow-md">🌸</div>
@@ -2300,7 +2311,7 @@ const KANJI_N5_DB = (() => {
             isFirstLogin: true, activeTab: 'home', user: { name: '', avatar: '🌸' },
             theme: 'auto', season: 'default', musicOn: false, backgroundVolume: 32, systemVolume: 70, customMusicName: '', examDifficulty: 'normal',
             orientationMode: 'auto', orientationView: 'landscape', kotobaPracticeMode: 'input', reminderOn: false, dailyTarget: 10, rating: 0, favorites: [],
-            coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'],
+            coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'], devMode: false,
             stats: { 
                 correct: 0, wrong: 0, history: [], 
                 hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0,
@@ -2315,6 +2326,34 @@ const KANJI_N5_DB = (() => {
         let kotobaPracticeMenu = { isOpen: false, closeTimer: null, launchTimer: null };
 
         const getCoinIcon = () => state.season === 'natal' ? '🔔' : '🪙';
+
+        /* Token developer: buka semua tema & latihan, koin 5000 (untuk uji coba) */
+        const DEV_TOKEN = 'NPJ2026';
+        function applyDevMode(fresh) {
+            if (!state.devMode) return;
+            state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), ...SHOP_ITEMS.map(i => i.id)])];
+            if (fresh) state.coins = 5000;
+            updateCoinUI();
+        }
+        function refreshTokenCapsule() {
+            const t = document.getElementById('token-capsule-text'); if (!t) return;
+            t.textContent = state.devMode ? 'Token Aktif' : 'Masukkan Token';
+            document.getElementById('token-box')?.classList.add('hidden');
+        }
+        function toggleTokenBox() {
+            if (state.devMode) { alert('Token developer sudah aktif: semua tema dan latihan terbuka.'); return; }
+            const box = document.getElementById('token-box'); box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) document.getElementById('profile-token').focus();
+        }
+        function activateToken() {
+            const v = (document.getElementById('profile-token').value || '').trim().toUpperCase();
+            if (!v) { alert('Masukkan token dulu ya.'); return; }
+            if (v !== DEV_TOKEN) { alert('Token tidak valid.'); return; }
+            state.devMode = true; applyDevMode(true); saveState();
+            document.getElementById('profile-token').value = '';
+            refreshTokenCapsule(); updateHeaderUI();
+            alert('Token diterima! Semua tema dan latihan terbuka, koin 5000.');
+        }
 
         function initApp() {
             const saved = localStorage.getItem('nihongo_premium_v8');
@@ -2337,6 +2376,7 @@ const KANJI_N5_DB = (() => {
                     state = { ...state, ...parsed }; 
                 } catch (e) {} 
             }
+            applyDevMode(false);
             applyTheme(); applyOrientation(); applySeason(); updateCoinUI(); syncMusicUI();
             
             if (state.isFirstLogin) renderOnboardingAvatars();
@@ -2369,6 +2409,9 @@ const KANJI_N5_DB = (() => {
         function finishOnboarding() {
             const nameInput = document.getElementById('setup-name').value.trim();
             if (!nameInput) { alert("Tolong isi nama kamu dulu ya!"); return; }
+            const tokenInput = (document.getElementById('setup-token')?.value || '').trim().toUpperCase();
+            if (tokenInput && tokenInput !== DEV_TOKEN) { alert("Token tidak valid. Kosongkan kolom token jika tidak punya."); return; }
+            if (tokenInput === DEV_TOKEN) { state.devMode = true; applyDevMode(true); }
             state.user.name = nameInput; state.isFirstLogin = false; saveState();
             
             document.getElementById('onboarding-screen').style.opacity = '0';
@@ -3878,7 +3921,7 @@ const KANJI_N5_DB = (() => {
 
         // Profile Editing Logic
         function openProfileModal() {
-            document.getElementById('edit-name-input').value = state.user.name;
+            document.getElementById('edit-name-input').value = state.user.name; refreshTokenCapsule();
             document.getElementById('edit-avatar-preview').innerText = state.user.avatar;
             document.getElementById('edit-avatars').innerHTML = AVATARS.map(a => `
                 <button onclick="editSelectAvatar('${a}')" class="p-3 text-2xl rounded-2xl ios-glass hover:scale-105 transition-all text-center border-2 border-transparent ${a === state.user.avatar ? 'border-accent bg-accent-light' : ''}">
@@ -4228,7 +4271,7 @@ const KANJI_N5_DB = (() => {
         function kanaStage(script, index) { return (KANA_STAGE_META[script] || [])[index]; }
         function kanaStagePool(script, index) { const stage = kanaStage(script, index), db = kanaDb(script); return stage ? stage.sources.flatMap(key => db[key] || []).filter(item => item.j) : []; }
         function kanaCompletionKey(script, stageIndex, groupKey) { return `kana:${script}:${kanaStage(script, stageIndex).key}:${groupKey}`; }
-        function isKanaComplete(key) { ensureKanaProgress(); return state.stats.kanaCompleted.includes(key); }
+        function isKanaComplete(key) { ensureKanaProgress(); return !!state.devMode || state.stats.kanaCompleted.includes(key); }
         function isKanaStageComplete(script, stageIndex) { const stage = kanaStage(script, stageIndex); return !!stage && stage.groups.every(group => isKanaComplete(kanaCompletionKey(script, stageIndex, group[0]))); }
         function isKanaStageReady(script, stageIndex) {
             if (stageIndex < 0) return false;
@@ -4979,13 +5022,34 @@ const KANJI_N5_DB = (() => {
   }
   const canonKana = s => toHira(String(s || '')).replace(PUNCT, '');
 
+  /* romaji → hiragana (untuk mencocokkan jawaban hiragana pada kalimat berkanji) */
+  const R2H = { a:'あ',i:'い',u:'う',e:'え',o:'お',ka:'か',ki:'き',ku:'く',ke:'け',ko:'こ',sa:'さ',shi:'し',si:'し',su:'す',se:'せ',so:'そ',ta:'た',chi:'ち',ti:'ち',tsu:'つ',tu:'つ',te:'て',to:'と',na:'な',ni:'に',nu:'ぬ',ne:'ね',no:'の',ha:'は',hi:'ひ',fu:'ふ',hu:'ふ',he:'へ',ho:'ほ',ma:'ま',mi:'み',mu:'む',me:'め',mo:'も',ya:'や',yu:'ゆ',yo:'よ',ra:'ら',ri:'り',ru:'る',re:'れ',ro:'ろ',wa:'わ',wo:'を',ga:'が',gi:'ぎ',gu:'ぐ',ge:'げ',go:'ご',za:'ざ',ji:'じ',zi:'じ',zu:'ず',ze:'ぜ',zo:'ぞ',da:'だ',de:'で',do:'ど',ba:'ば',bi:'び',bu:'ぶ',be:'べ',bo:'ぼ',pa:'ぱ',pi:'ぴ',pu:'ぷ',pe:'ぺ',po:'ぽ',kya:'きゃ',kyu:'きゅ',kyo:'きょ',sha:'しゃ',shu:'しゅ',sho:'しょ',cha:'ちゃ',chu:'ちゅ',cho:'ちょ',nya:'にゃ',nyu:'にゅ',nyo:'にょ',hya:'ひゃ',hyu:'ひゅ',hyo:'ひょ',mya:'みゃ',myu:'みゅ',myo:'みょ',rya:'りゃ',ryu:'りゅ',ryo:'りょ',gya:'ぎゃ',gyu:'ぎゅ',gyo:'ぎょ',ja:'じゃ',ju:'じゅ',jo:'じょ',bya:'びゃ',byu:'びゅ',byo:'びょ',pya:'ぴゃ',pyu:'ぴゅ',pyo:'ぴょ',n:'ん' };
+  function romajiToHira(rom) {
+    const base = String(rom || '').toLowerCase().replace(/ā/g, 'aa').replace(/ī/g, 'ii').replace(/ū/g, 'uu').replace(/ē/g, 'ee').replace(/ō/g, 'ou');
+    return base.split(/\s+/).filter(Boolean).map(tok => {
+      if (tok === 'wa') return 'は'; if (tok === 'o') return 'を'; if (tok === 'e') return 'へ';
+      tok = tok.replace(/[^a-z']/g, ''); let out = '', i = 0;
+      while (i < tok.length) {
+        const c = tok[i], nx = tok[i + 1];
+        if (c === "'") { i++; continue; }
+        if (c === 'n' && (!nx || !/[aiueoy]/.test(nx))) { out += 'ん'; i++; if (tok[i] === "'") i++; continue; }
+        if (nx && c === nx && !/[aiueon]/.test(c)) { out += 'っ'; i++; continue; }
+        let hit = false;
+        for (const len of [3, 2, 1]) { const k = tok.substr(i, len); if (R2H[k] && k !== 'n') { out += R2H[k]; i += len; hit = true; break; } }
+        if (!hit) i++;
+      }
+      return out;
+    }).join('');
+  }
+
   function lsnPool() {
     const out = [], seen = new Set();
     const eat = ex => {
       if (!ex || !ex.j) return; const j = String(ex.j).trim();
-      if (!KANA_ONLY.test(j)) return;            // hanya kalimat kana: bisa diketik huruf Jepang maupun romaji
+      const kanaOnly = KANA_ONLY.test(j);
+      if (!kanaOnly && !ex.r) return;            // kalimat berkanji dipakai bila ada romaji (dasar penilaian hiragana/romaji)
       const key = canonKana(j); if (seen.has(key) || key.length < 4) return; seen.add(key);
-      out.push({ j, auto: kanaToRomaji(j), r: ex.r || '', i: ex.i || '' });
+      out.push({ j, auto: kanaOnly ? kanaToRomaji(j) : '', r: ex.r || '', hira: kanaOnly ? toHira(j) : romajiToHira(ex.r), i: ex.i || '' });
     };
     Object.values(BUNPOU_DB).forEach(list => (Array.isArray(list) ? list : []).forEach(item => (item && Array.isArray(item.examples)) && item.examples.forEach(eat)));
     return out;
@@ -5014,7 +5078,7 @@ const KANJI_N5_DB = (() => {
     const chip = n => `<button onclick="LSNsetTotal(${n})" class="rounded-xl py-2.5 text-xs font-bold transition-all ${LSN.total === n ? 'bg-accent text-white shadow-sm' : 'ios-glass text-main'}">${n}</button>`;
     $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
       <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Game · Kosakata</p><h2 class="text-xl font-bold">Listening Kalimat</h2></div></div>
-      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Kamu akan mendengar <b>satu kalimat utuh</b>. Putar sebanyak yang kamu mau, lalu <b>tulis ulang kalimat itu</b> dengan huruf Jepang (hiragana/katakana) atau romaji. Spasi dan tanda baca tidak dinilai.</p></div>
+      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Kamu akan mendengar <b>satu kalimat utuh</b>. Putar sebanyak yang kamu mau, lalu <b>tulis ulang kalimat itu</b> dengan hiragana, katakana, kanji, atau romaji. Kemiripan <b>90% ke atas</b> dianggap benar (salah ketik kecil dimaklumi, \u201ctoukyou\u201d = \u201ctokyo\u201d). Spasi dan tanda baca tidak dinilai.</p></div>
       <div class="ios-glass p-4 rounded-[2rem]"><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah kalimat</p><div class="grid grid-cols-4 gap-2">${[5, 10, 15, 20].map(chip).join('')}</div><p class="text-[10px] mt-3" style="color:var(--text-muted)">${LSN.pool.length} kalimat tersedia dari contoh di menu Pola. Benar = 10 koin; jika memakai petunjuk arti = 5 koin.</p></div>
       <button onclick="startListeningKalimat()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]"><i data-lucide="headphones" class="w-5 h-5 inline mr-1"></i> Mulai</button></div>`;
     icons();
@@ -5046,21 +5110,32 @@ const KANJI_N5_DB = (() => {
   window.LSNplay = rate => speak(LSN.items[LSN.idx].j, rate);
   window.LSNhint = () => { const it = LSN.items[LSN.idx], h = document.getElementById('ls-hint'); LSN.hint = true; h.textContent = '“' + it.i + '”'; h.classList.remove('hidden'); };
   window.LSNexit = () => { try { speechSynthesis.cancel(); } catch (e) {} renderLatihanTabs(); };
-  function lsnJudge(input, it) {
+  /* Penilaian berbasis persentase kemiripan: ≥ 90% dianggap benar (salah ketik kecil dimaklumi) */
+  const LSN_PASS = 90;
+  function ratio(a, b) {
+    if (!a && !b) return 1; if (!a || !b) return 0;
+    const m = a.length, n = b.length; let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) { const cur = [i]; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+    return 1 - prev[n] / Math.max(m, n);
+  }
+  function lsnScore(input, it) {
     const t = input.trim(); if (!t) return null;
-    if (/[a-zA-Zāīūēō]/.test(t) && !/[\u3040-\u30ff\u4e00-\u9fff]/.test(t)) {
-      const c = canonRomaji(t); return c && (c === canonRomaji(it.auto) || (it.r && c === canonRomaji(it.r)));
+    let best = 0;
+    if (/[a-zA-Zāīūēō]/.test(t) && !/[\u3040-\u30ff\u4e00-\u9fff]/.test(t)) {      // romaji (toukyou = tokyo)
+      const c = canonRomaji(t); [it.auto, it.r].filter(Boolean).forEach(x => { best = Math.max(best, ratio(c, canonRomaji(x))); });
+    } else {                                                                  // hiragana / katakana / kanji
+      const c = canonKana(t); [it.j, it.hira].filter(Boolean).forEach(x => { best = Math.max(best, ratio(c, canonKana(x))); });
     }
-    return canonKana(t) === canonKana(it.j);
+    const pct = Math.round(best * 100); return { pct, ok: pct >= LSN_PASS };
   }
   window.LSNcheck = function () {
     if (LSN.answered) return;
-    const it = LSN.items[LSN.idx], v = document.getElementById('ls-input').value, ok = lsnJudge(v, it);
-    if (ok === null) { document.getElementById('ls-input').focus(); return; }
-    lsnReveal(ok, it, v);
+    const it = LSN.items[LSN.idx], v = document.getElementById('ls-input').value, r = lsnScore(v, it);
+    if (!r) { document.getElementById('ls-input').focus(); return; }
+    lsnReveal(r.ok, it, v, false, r.pct);
   };
   window.LSNskip = function () { if (!LSN.answered) lsnReveal(false, LSN.items[LSN.idx], '', true); };
-  function lsnReveal(ok, it, typed, skipped) {
+  function lsnReveal(ok, it, typed, skipped, pct) {
     LSN.answered = true; try { speechSynthesis.cancel(); } catch (e) {}
     const gain = ok ? (LSN.hint ? 5 : 10) : 0;
     ok ? LSN.correct++ : LSN.wrong++; bumpStat(ok); chime(ok);
@@ -5070,7 +5145,8 @@ const KANJI_N5_DB = (() => {
     const res = document.getElementById('ls-result'); res.classList.remove('hidden');
     res.innerHTML = `<div class="ios-glass p-5 rounded-[2rem] space-y-3 text-center animate-fade-in" style="border:1.5px solid ${ok ? '#10B981' : '#ef4444'}">
       <p class="text-sm font-black ${ok ? 'text-emerald-500' : 'text-red-500'}">${ok ? 'Benar! +' + gain + ' ' + getCoinIcon() : (skipped ? 'Dilewati' : 'Belum tepat')}</p>
-      ${!ok && typed ? `<p class="text-xs" style="color:var(--text-muted)">Jawabanmu: <span class="font-bold text-main">${esc(typed)}</span></p>` : ''}
+      ${pct != null ? `<p class="text-4xl font-black ${ok ? 'text-emerald-500' : 'text-red-500'}">${pct}%</p><p class="text-[10px] font-bold" style="color:var(--text-muted)">${ok ? (pct < 100 ? 'Salah ketik kecil dimaklumi (batas ' + LSN_PASS + '%)' : 'Sempurna!') : 'Butuh minimal ' + LSN_PASS + '% agar dianggap benar'}</p>` : ''}
+      ${typed && pct !== 100 ? `<p class="text-xs" style="color:var(--text-muted)">Jawabanmu: <span class="font-bold text-main">${esc(typed)}</span></p>` : ''}
       <div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Kalimatnya</p><p class="text-xl font-black mt-1 text-main">${esc(it.j)}</p><p class="text-xs mt-1" style="color:var(--text-muted)">${esc(it.r || it.auto)}</p><p class="text-sm font-bold mt-2 text-main">${esc(it.i)}</p></div>
       <div class="flex gap-2 justify-center"><button onclick="LSNplay(.85)" class="ios-glass px-4 py-2 rounded-full text-xs font-bold"><i data-lucide="volume-2" class="w-3.5 h-3.5 inline mr-1"></i>Dengar lagi</button></div>
       <button onclick="${last ? 'LSNfinish()' : 'LSNnext()'}" class="w-full bg-accent text-white py-3 rounded-2xl font-bold active:scale-[.98]">${last ? 'Lihat Hasil' : 'Lanjut'}</button></div>`;
@@ -5089,5 +5165,989 @@ const KANJI_N5_DB = (() => {
 })();
 </script>
 
+<script>
+/* =====================================================================
+   Penghubung kecil untuk modul Teman & Chat (disalin dari New_Dg_Ai.html)
+   - Lv   : modul chat membaca bank materi lewat Lv.baseOf(); di sini langsung diarahkan ke KOTOBA_DB / BUNPOU_DB
+   - toast: notifikasi singkat bila belum ada
+   ===================================================================== */
+window.Lv = window.Lv || {
+  baseOf: function (kind) { try { return kind === 'bunpou' ? BUNPOU_DB : KOTOBA_DB; } catch (e) { return {}; } },
+  lv: function () { return { kotoba: {}, bunpou: {} }; }
+};
+window.showDevToast = window.showDevToast || (function (msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;top:1.1rem;transform:translate(-50%,-12px);z-index:400;padding:.7rem 1.1rem;border-radius:999px;background:#3B82F6;color:#fff;font:700 .78rem system-ui,sans-serif;box-shadow:0 .8rem 1.8rem -.8rem rgba(59,130,246,.8);opacity:0;transition:all .35s cubic-bezier(.34,1.6,.5,1);max-width:90vw;text-align:center';
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = 1; t.style.transform = 'translate(-50%,0)'; });
+  setTimeout(() => { t.style.opacity = 0; t.style.transform = 'translate(-50%,-12px)'; setTimeout(() => t.remove(), 400); }, 2600);
+});
+</script>
+
+<script>
+/* =====================================================================
+   RAMA-SAN (ラマさん) — asisten materi Jepang bawaan NihonGo
+   Basis pengetahuan lokal: bahasa, tata bahasa, JLPT, budaya, sejarah, musim,
+   festival, makanan, etiket, + pencarian di kosakata/pola/kanji aplikasi.
+   Untuk AI sungguhan, ganti Rama.backend dengan fungsi async (teks) => string.
+   ===================================================================== */
+const Rama = (function () {
+  const MONTHS = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+  const MONTH_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const FEST = [
+    ['Oshōgatsu (Tahun Baru, 1–3 Jan): hatsumode ke kuil, osechi, ozōni, otoshidama', 'Seijin no Hi (Hari Kedewasaan, Senin ke-2 Januari)', 'Turnamen sumo Hatsu basho (Tokyo)'],
+    ['Setsubun (sekitar 3 Feb): melempar kacang sambil berseru "Oni wa soto! Fuku wa uchi!"', 'Sapporo Yuki Matsuri (Festival Salju Sapporo, awal Februari)', 'Otaru Yuki Akari no Michi (jalur lilin salju, Februari)', 'Yokote Kamakura (rumah salju, pertengahan Februari)'],
+    ['Hinamatsuri (3 Mar): Hari Anak Perempuan, boneka hina', 'Omizutori di Tōdai-ji Nara (1–14 Mar)', 'White Day (14 Mar): balasan hadiah untuk Valentine', 'Hanami mulai di Jepang barat dan Kanto (akhir Maret)'],
+    ['Hanami (melihat sakura) di sebagian besar Jepang', 'Takayama Haru no Matsuri (14–15 Apr)', 'Golden Week mulai 29 April (Showa no Hi)'],
+    ['Golden Week (hingga 5 Mei), Kodomo no Hi (5 Mei) dengan koinobori', 'Aoi Matsuri, Kyoto (15 Mei)', 'Sanja Matsuri, Asakusa (akhir pekan ke-3 Mei)', 'Kanda Matsuri, Tokyo (Mei, tahun ganjil)'],
+    ['Yosakoi Soran Festival, Sapporo (awal–pertengahan Juni)', 'Musim ajisai (hydrangea) dan tsuyu (musim hujan) di sebagian besar Jepang'],
+    ['Tanabata (7 Jul): menulis harapan di tanzaku', 'Gion Matsuri, Kyoto (sepanjang Juli; puncak Yamaboko Junkō 17 & 24 Jul)', 'Tenjin Matsuri, Osaka (24–25 Jul)', 'Pesta kembang api Sumidagawa, Tokyo (akhir Juli)', 'Lavender Furano, Hokkaido (puncak Juli)'],
+    ['Obon (sekitar 13–15 Agu): menyambut arwah leluhur, tarian Bon Odori', 'Nebuta Matsuri, Aomori (2–7 Agu)', 'Kantō Matsuri, Akita (3–6 Agu)', 'Sendai Tanabata (6–8 Agu)', 'Awa Odori, Tokushima (12–15 Agu)', 'Hanabi taikai (pesta kembang api) di seluruh negeri'],
+    ['Tsukimi (melihat bulan purnama, sekitar pertengahan September) dengan dango', 'Turnamen sumo Aki basho (Tokyo)', 'Mulai musim kōyō di pegunungan Hokkaido'],
+    ['Takayama Aki no Matsuri (9–10 Okt)', 'Jidai Matsuri, Kyoto (22 Okt)', 'Momiji/kōyō (daun musim gugur) di Hokkaido dan Tohoku', 'Halloween modern di Shibuya'],
+    ['Shichi-Go-San (15 Nov): perayaan anak usia 3, 5, 7 tahun', 'Tori no Ichi (pasar Otori, Tokyo)', 'Puncak momiji di Kyoto (akhir November)', 'Turnamen sumo Kyushu basho (Fukuoka)'],
+    ['Omisoka (31 Des): toshikoshi soba dan lonceng Joya no Kane 108 kali', 'Natal bergaya Jepang: kue stroberi, ayam goreng KFC', 'Illumination (lampu hias) di kota-kota besar']
+  ];
+  const FEST_NOTE = 'Tanggal bisa bergeser tiap tahun, jadi cek jadwal resmi penyelenggara sebelum merencanakan perjalanan.';
+  const SEASON = {
+    haru: '🌸 **Haru (春) — musim semi, Maret–Mei.** Sakura mekar bergelombang dari selatan ke utara (Okinawa Jan–Feb, Tokyo akhir Maret–awal April, Hokkaido akhir April–awal Mei). Tradisi: hanami. Cuaca hangat, ada Golden Week di akhir April–awal Mei.',
+    natsu: '🌻 **Natsu (夏) — musim panas, Juni–Agustus.** Diawali tsuyu (musim hujan) sekitar awal Juni–pertengahan Juli di Honshu, lalu panas dan lembap. Banyak matsuri, hanabi, dan Obon. Hokkaido jauh lebih sejuk dan hampir tanpa tsuyu.',
+    aki: '🍁 **Aki (秋) — musim gugur, September–November.** Awal musim masih ada topan. Daun memerah (kōyō/momiji) dari utara ke selatan: Hokkaido Sep–Okt, Kyoto dan Tokyo sekitar November. Musim panen: kuri (kastanye), matsutake, kaki, nasi baru.',
+    fuyu: '❄️ **Fuyu (冬) — musim dingin, Desember–Februari.** Sisi Laut Jepang dan Hokkaido bersalju lebat, sisi Pasifik (Tokyo) kering dan cerah. Ada Oshōgatsu, onsen, nabe, dan festival salju.'
+  };
+  const seasonOf = m => (m >= 2 && m <= 4) ? 'haru' : (m >= 5 && m <= 7) ? 'natsu' : (m >= 8 && m <= 10) ? 'aki' : 'fuyu';
+  const HOKKAIDO_NOW = [
+    'Januari: puncak musim dingin; Sapporo sekitar −4 hingga −3 °C rata-rata, daerah pedalaman bisa jauh lebih dingin. Waktu ski dan es laut (ryūhyō) di Abashiri.',
+    'Februari: masih sangat dingin, salju tebal. Sapporo Yuki Matsuri dan Otaru Yuki Akari no Michi.',
+    'Maret: salju mulai mencair perlahan, tapi masih dingin dan bersalju di pegunungan.',
+    'April: salju mencair (yukidoke), tanah becek; sakura mulai mekar di Hakodate dan Matsumae akhir April.',
+    'Mei: musim semi sungguhan; sakura Sapporo sekitar akhir April–awal Mei, bunga bermekaran serentak.',
+    'Juni: sejuk dan cerah, hampir tanpa tsuyu; Yosakoi Soran dan musim hijau segar.',
+    'Juli: sejuk-hangat dan kering; lavender Furano di puncaknya.',
+    'Agustus: musim panas hangat (sekitar 20-an °C), nyaman dibanding Honshu yang panas lembap.',
+    'September: mulai sejuk; daun di pegunungan Daisetsuzan mulai berubah warna.',
+    'Oktober: musim gugur (kōyō) dan udara mulai dingin; salju pertama bisa turun di pegunungan dan dataran rendah menyusul akhir Oktober–November.',
+    'November: salju pertama turun di banyak kota, awal musim dingin yang panjang.',
+    'Desember: musim dingin sudah dalam; salju menumpuk, Sapporo bernuansa lampu Natal (Munich Christmas Market & White Illumination).'
+  ];
+
+  /* ---------- alat bantu ---------- */
+  const esc = s => String(s ?? '');
+  const strip = h => String(h || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const STOP = new Set(['arti', 'artinya', 'apa', 'bahasa', 'jepang', 'jepangnya', 'dalam', 'itu', 'kata', 'bagaimana', 'gimana', 'cara', 'mengucapkan', 'bilang', 'mengatakan', 'ngomong', 'yang', 'dari', 'ke', 'dong', 'ya', 'tolong', 'bantu', 'saya', 'aku', 'kamu', 'ini', 'nama', 'sebut', 'disebut', 'namanya', 'kalau', 'dan', 'atau', 'di', 'untuk', 'sama', 'itu', 'tentang', 'jelaskan', 'jelasin', 'rama', 'san', 'ada', 'adalah', 'sih', 'kah', 'nih', 'lah', 'tulis', 'tuliskan', 'ubah', 'jadikan', 'jadi', 'menjadi', 'hiragana', 'katakana', 'romaji', 'kanji', 'huruf', 'pakai', 'dengan', 'bisa', 'mau', 'ingin', 'tahu']);
+  function allKotoba() {
+    const out = [];
+    try {
+      Object.values(Lv.baseOf('kotoba', 'N5')).forEach(a => out.push(...a));
+      ['N5', 'N4', 'N3', 'N2', 'N1'].forEach(L => Object.values(Lv.lv(L).kotoba).forEach(a => out.push(...a)));
+    } catch (e) {}
+    return out;
+  }
+  function allBunpou() {
+    const out = [];
+    try {
+      Object.values(Lv.baseOf('bunpou', 'N5')).forEach(a => out.push(...a));
+      ['N5', 'N4', 'N3', 'N2', 'N1'].forEach(L => Object.values(Lv.lv(L).bunpou).forEach(a => out.push(...a)));
+    } catch (e) {}
+    return out;
+  }
+  const JP = /[\u3040-\u30ff\u4e00-\u9fff]/;
+  const tokens = q => q.toLowerCase().replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff\s'-]/g, ' ').split(/\s+/).filter(t => t && !STOP.has(t));
+  function vocabSearch(q) {
+    const toks = tokens(q), all = allKotoba(), scored = [];
+    const latin = toks.filter(t => /^[a-z'-]{3,}$/.test(t)), jp = toks.filter(t => JP.test(t));
+    if (!latin.length && !jp.length) return [];
+    all.forEach(it => {
+      const arti = String(it.arti || '').toLowerCase(), rom = String(it.romaji || '').toLowerCase().replace(/\s+/g, ' '); let sc = 0;
+      latin.forEach(t => { if (rom === t) sc += 4; else if (new RegExp('(^|[^a-z])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)').test(arti)) sc += 3; else if (arti.includes(t)) sc += 1; else if (rom.includes(t) && t.length >= 4) sc += 1; });
+      jp.forEach(t => { const k = String(it.kana || '').replace(/\s/g, ''), kj = String(it.kanji || '').replace(/\s/g, ''); if (k === t || kj === t) sc += 4; else if (k.includes(t) || kj.includes(t)) sc += 2; });
+      if (sc) scored.push([sc, it]);
+    });
+    scored.sort((a, b) => b[0] - a[0]);
+    const seen = new Set(), out = [];
+    for (const [, it] of scored) { const key = it.kana + '|' + it.arti; if (seen.has(key)) continue; seen.add(key); out.push(it); if (out.length >= 6) break; }
+    return out;
+  }
+  const fmtVocab = it => `• ${it.kana}${it.kanji && it.kanji !== it.kana ? '（' + it.kanji + '）' : ''} — ${it.romaji}: ${it.arti}`;
+  function kanjiSearch(q) {
+    const out = [], seen = new Set();
+    try { for (const ch of q) { if (!/[\u4e00-\u9fff]/.test(ch) || seen.has(ch)) continue; seen.add(ch); KANJI_N5_DB.filter(k => k.kanji === ch || String(k.kanji).includes(ch)).slice(0, 3).forEach(k => out.push(k)); } } catch (e) {}
+    return out.slice(0, 6);
+  }
+  function bunpouSearch(q) {
+    const toks = tokens(q).filter(t => t.length >= 2 && !['pola', 'bunpou', 'tata', 'bahasa', 'grammar', 'partikel'].includes(t));
+    if (!toks.length) return null;
+    let best = null, bs = 0;
+    allBunpou().forEach(b => { const hay = (strip(b.title) + ' ' + strip(b.subtitle)).toLowerCase(); let s = 0; toks.forEach(t => { if (hay.includes(t)) s += 2; }); if (s > bs) { bs = s; best = b; } });
+    return bs ? best : null;
+  }
+  function kanaTool(q) {
+    const hira = /hiragana/.test(q), kata = /katakana/.test(q);
+    if (!hira && !kata) return null;
+    const quoted = q.match(/["'“”‘’]([^"'“”‘’]+)["'“”‘’]/);
+    let word = quoted ? quoted[1] : tokens(q).filter(t => /^[a-z'-]+$/.test(t)).join(' ');
+    word = (word || '').trim(); if (!word) return null;
+    const h = LSNutil.romajiToHira(word); if (!h) return null;
+    const toKata = s => s.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+    return `Romaji **${word}** ditulis:\n• Hiragana: ${h}\n• Katakana: ${toKata(h)}\n\nKatakana dipakai untuk kata serapan dan nama asing. Hiragana untuk kata asli Jepang dan akhiran/partikel. Tips: partikel は dibaca "wa", を dibaca "o", dan へ dibaca "e".`;
+  }
+
+/* ===== KB A: BAHASA (tata bahasa, kosakata, pelafalan, frasa) ===== */
+const KB_A = [
+['Partikel を (o)','partikel を,partikel wo,partikel o,partikel を,penanda objek,objek langsung','**を (dibaca "o")** menandai **objek langsung** dari kata kerja transitif: りんごを たべます (makan apel), テレビを みます. Juga untuk tempat yang dilalui: こうえんを あるきます (berjalan di taman) dan titik berangkat: いえを でます.'],
+['Partikel に (ni)','partikel に,partikel ni,fungsi に,kegunaan に','**に** punya banyak fungsi: (1) waktu spesifik: 7じに おきます; (2) tujuan: がっこうに いきます; (3) lokasi keberadaan: いすの うえに ねこが います; (4) penerima: ともだちに プレゼントを あげます; (5) tujuan/tujuan akhir: えいがを みに いきます; (6) pelaku pasif/kausatif. Perbedaan dengan で: に = tempat ada/menuju, で = tempat melakukan aksi.'],
+['Partikel で (de)','partikel で,partikel de,fungsi で,kegunaan で','**で** menandai: (1) tempat terjadinya aksi: としょかんで べんきょうします; (2) alat/cara: はしで たべます, バスで いきます; (3) bahan: きで つくります; (4) sebab: びょうきで やすみました; (5) batas/total: ３にんで 1000えん.'],
+['Partikel へ (e)','partikel へ,partikel e,arah へ','**へ** (dibaca "e") menunjukkan **arah tujuan**: にほんへ いきます. Hampir sama dengan に untuk tujuan, tapi へ menekankan arah. Ingat: へ sebagai partikel dibaca "e", bukan "he".'],
+['Partikel と (to)','partikel と,partikel to,bersama dengan と','**と** artinya (1) "dan" untuk menghubungkan kata benda: パンと たまご; (2) "bersama": ともだちと いきます; (3) mengutip: 「ありがとう」と いいました; (4) bentuk kondisi: はるに なると さくらが さきます.'],
+['Partikel の (no)','partikel の,partikel no,kepemilikan の,nominalisasi','**の** menyatakan kepemilikan atau hubungan: わたしの ほん (buku saya), にほんごの せんせい (guru bahasa Jepang). Juga pengganti kata benda: これは わたしのです (ini punyaku), dan nominalisasi: およぐのが すきです (suka berenang). Dalam kalimat santai: ～の？ = bertanya lembut.'],
+['Partikel も (mo)','partikel も,partikel mo,juga も','**も** = "juga/pun": わたしも がくせいです (saya juga mahasiswa). Dengan negatif: なにも ありません (tidak ada apa-apa), だれも いません (tidak ada orang). Menggantikan は/が/を, tapi biasanya tidak menggantikan に/で.'],
+['Partikel から・まで','partikel から,partikel まで,dari sampai,から まで','**から** = dari (waktu/tempat) atau karena; **まで** = sampai. 9じから 5じまで はたらきます (kerja jam 9 sampai jam 5). にほんから きました. Kombinasi: 〜から〜まで.'],
+['Partikel akhir kalimat (か, ね, よ)','partikel akhir,sentence final,か ね よ,ne yo','**か** menandai pertanyaan. **ね** meminta persetujuan ("kan?, ya"): いいてんきですね. **よ** menegaskan info baru ("lho, tahu"): あしたは やすみですよ. **わ, ぞ, ぜ** adalah gaya khas gender/santai. Gabungan: よね = menegaskan sambil minta konfirmasi.'],
+['Partikel や dan とか','partikel や,とか,contoh daftar,dan lain-lain','**や** mendaftar sebagian contoh ("a, b, dan sebagainya"): りんごや バナナを かいました. **とか** lebih santai dengan arti sama: りんごとか バナナとか. Bandingkan と yang menyebut semua.'],
+['Partikel だけ・しか','partikel だけ,しか,hanya,cuma','**だけ** = hanya (positif): ひとりだけ きました. **しか** = hanya, **selalu dengan kata kerja negatif**: ひとりしか きませんでした (cuma satu orang yang datang). しか terdengar menekankan "sedikit/kurang".'],
+['Partikel より dan ほど (perbandingan)','perbandingan,lebih dari,partikel より,ほど,paling','**AはBより〜**: A lebih ~ daripada B (とうきょうは おおさかより おおきいです). **AはBほど〜ない**: A tidak se~ B. **いちばん** = paling: なかで いちばん. Menanyakan: AとBと どちらが〜ですか。'],
+['Partikel は vs が','perbedaan は dan が,wa dan ga,wa vs ga','**は** = topik/kontras; **が** = subjek baru, penegasan "dialah yang…", dipakai dengan kata tanya (だれが), dan dengan すき・きらい・できる・わかる・ほしい・ある. Contoh: わたしは がくせいです / だれが きましたか / ねこが すきです.'],
+['Bentuk ます (sopan)','bentuk masu,masu form,kata kerja sopan,desu masu','Bentuk ます adalah bentuk sopan kata kerja: **たべます** (makan), **たべません** (tidak makan), **たべました** (sudah makan), **たべませんでした** (tidak makan [lampau]). Bentuk ajakan: ～ましょう, tanya: ～ますか.'],
+['Bentuk kamus (jisho-kei)','bentuk kamus,jisho kei,dictionary form,bentuk dasar kata kerja,golongan kata kerja','Bentuk kamus = bentuk dasar di kamus, berakhir bunyi **u**: たべる, いく, かう, する, くる.\n**Golongan I (godan):** akhiran bunyi u selain る tertentu: かく, よむ, のむ, あそぶ.\n**Golongan II (ichidan):** akhiran -iru/-eru: たべる, みる, おきる.\n**Golongan III:** する, くる.\nBeberapa kata berakhir -iru/-eru tapi golongan I: かえる (pulang), はいる (masuk), はしる (lari), しる (tahu), きる (memotong).'],
+['Bentuk ない (negatif biasa)','bentuk nai,bentuk ない,negatif biasa,kata kerja negatif','**Gol. I:** ubah bunyi u → a + ない (かく→かかない, のむ→のまない, かう→かわない). **Gol. II:** buang る + ない (たべる→たべない). **Gol. III:** する→しない, くる→こない. Pengecualian: ある→ない. Pemakaian: ～ないでください (tolong jangan), ～なければなりません (harus), ～ないほうがいいです (sebaiknya jangan).'],
+['Bentuk た (lampau biasa)','bentuk ta,bentuk た,lampau biasa,ta form','Bentuk た dibuat seperti bentuk て, hanya て→た / で→だ: かった, まって→まった, よんだ, かいた, いった (pengecualian), およいだ, はなした, たべた, した, きた. Dipakai untuk: lampau biasa, ～たことがある (pernah), ～たあとで (setelah), ～たほうがいい (sebaiknya), ～たり～たり.'],
+['～たい (ingin melakukan)','～たい,tai form,ingin,mau melakukan,bentuk tai','Ganti ます → **たい**: たべたい (ingin makan), いきたい. Berubah seperti kata sifat い: たくない (tidak ingin), たかった (dulu ingin). Objek bisa を atau が: みずを/が のみたい. Untuk orang ketiga pakai ～たがっている.'],
+['～ましょう・～ませんか (ajakan)','ajakan,ayo,mari,～ましょう,～ませんか,mashou,masenka','**～ましょう** = "mari…": いっしょに たべましょう. **～ませんか** = "maukah…?" (ajakan lebih halus): いっしょに ごはんを たべませんか. Jawab: いいですね / ええ、ぜひ / すみません、ちょっと…(penolakan halus).'],
+['～てください・～ないでください','permintaan,tolong,～てください,～ないでください,teyoshiku,kudasai','**～てください** = tolong lakukan: すわってください. **～ないでください** = tolong jangan: ここで たばこを すわないでください. Lebih sopan: ～ていただけませんか / ～てくださいませんか.'],
+['～てもいいです・～てはいけません','izin,boleh,larangan,tidak boleh,～てもいい,～てはいけません,temoii,tewaikemasen','**～てもいいです** = boleh melakukan: しゃしんを とってもいいですか。 **～てはいけません** = dilarang: ここに はいってはいけません. Jawaban penolakan halus: ちょっと…, すみません、だめです.'],
+['～なければなりません (harus)','harus,kewajiban,～なければならない,～なくてはいけません,nakereba narimasen','**Bentuk ない → ～なければなりません** = harus: あした はやく おきなければなりません. Variasi: ～なくてはいけません, ～ないといけません (santai). Tidak perlu: ～なくてもいいです.'],
+['～ことができます (bisa)','bisa,dapat,kemampuan,potential,～ことができる,koto ga dekimasu','**Kata kerja kamus + ことができます** = bisa/mampu: にほんごを はなすことができます. Lebih singkat: **bentuk potensial** (かける, よめる, たべられる). Bentuk potensial gol. I: u→eru (かく→かける), gol. II: る→られる (たべる→たべられる), する→できる, くる→こられる.'],
+['～たことがあります (pengalaman)','pernah,pengalaman,～たことがある,takoto ga arimasu','**Bentuk た + ことがあります** = pernah: にほんへ いったことがあります (pernah ke Jepang). Negatif: ～たことがありません (belum pernah). Bandingkan ～ことがある (kadang-kadang).'],
+['～たり～たりします','～たり,tari tari,melakukan ini itu,daftar aktivitas','**～たり～たりします** = melakukan ini dan itu (contoh bergantian): やすみの ひは、ほんを よんだり ともだちと あそんだりします. Pakai bentuk た + り.'],
+['～つもりです (rencana)','rencana,niat,～つもり,berniat,tsumori','**Kamus + つもりです** = berencana/berniat: らいねん にほんへ いくつもりです. Negatif: ～ないつもりです / ～つもりはありません (tidak berniat).'],
+['～でしょう・～と思います','dugaan,kira-kira,sepertinya,～でしょう,～と思います,deshou,to omoimasu,omou','**～でしょう** = mungkin/bukan? (dugaan atau minta konfirmasi): あしたは あめでしょう. **～と おもいます** = saya pikir: にほんごは おもしろいと おもいます. Untuk orang lain: ～と おもっています.'],
+['～前に・～てから・～たあとで','sebelum,sesudah,～まえに,～てから,～あとで,urutan kegiatan','**Kamus + まえに** = sebelum: ねるまえに はを みがきます. **て + から** = setelah (langsung): たべてから ねます. **た + あとで** = setelah: しごとの あとで. **～ながら** = sambil.'],
+['～から・～ので (sebab)','karena,sebab,alasan,～から,～ので,kara,node','**～から** = karena (subjektif, juga di akhir): あついから、まどを あけます. **～ので** = karena (lebih sopan/objektif): びょうきなので、やすみます. Dengan kata benda/na-adj: ～なので.'],
+['～が・～けど (tetapi)','tetapi,tapi,namun,～が,～けど,けれども,ga kedo','**～が** (sopan) dan **～けど/けれども** (lebih santai) = tetapi: にほんごは むずかしいですが、おもしろいです. Juga dipakai membuka percakapan: すみませんが…'],
+['～ながら (sambil)','sambil,～ながら,bersamaan,nagara','**Bentuk ます (tanpa ます) + ながら** = sambil: おんがくを ききながら べんきょうします. Dua aksi dilakukan bersamaan oleh orang yang sama; aksi utama di klausa akhir.'],
+['～ほうがいいです (sebaiknya)','sebaiknya,saran,～ほうがいい,houga ii','**Bentuk た + ほうがいいです** = sebaiknya melakukan: くすりを のんだほうがいいです. **Bentuk ない + ほうがいいです** = sebaiknya tidak: ねないほうがいいです.'],
+['～そうです (tampaknya / katanya)','tampaknya,sepertinya,katanya,～そうです,souda,denpun','**Stem + そうです** = tampaknya: おいしそうです (kelihatan enak), ふりそうです (mau hujan). **Bentuk biasa + そうです** = katanya (kabar): あしたは あめだそうです. Kata sifat いい→よさそう, ない→なさそう.'],
+['～らしい・～みたい (kelihatannya)','～らしい,～みたい,kelihatannya,konon,rashii,mitai','**～らしい** = tampaknya/konon (berdasar info), juga "khas": おとこらしい (maskulin). **～みたい** (santai) = seperti/tampaknya: ゆめみたい (seperti mimpi). Lebih formal: ～ようです.'],
+['Bentuk pasif (受身)','pasif,dipukul,diperlakukan,ukemi,～れる,～られる','**Pasif**: Gol. I: u→aれる (かく→かかれる); Gol. II: る→られる (たべる→たべられる); する→される, くる→こられる. Contoh: せんせいに ほめられました (dipuji guru). Pasif "korban/gangguan": あめに ふられた (kehujanan).'],
+['Bentuk kausatif (使役)','kausatif,menyuruh,membiarkan,shieki,～せる,～させる','**Kausatif** = menyuruh/membiarkan: Gol. I: u→aせる (のむ→のませる); Gol. II: る→させる (たべる→たべさせる); する→させる, くる→こさせる. Contoh: ははは こどもに やさいを たべさせます. Pasif-kausatif: ～させられる = dipaksa.'],
+['Bentuk kondisional (たら・ば・と・なら)','kondisional,jika,kalau,～たら,～ば,～と,～なら,tara ba to nara','**～たら**: jika/ketika (paling serbaguna): あめが ふったら いきません. **～ば**: jika (kondisi umum): やすければ かいます. **～と**: jika/setiap kali (hasil otomatis): はるに なると あたたかくなります. **～なら**: kalau memang/untuk topik yang disebut lawan bicara: にほんへ いくなら、きょうとが おすすめです.'],
+['Bentuk volisional (意向形)','volisional,ayo kita,ou,～よう,～おう,ishikei','**Bentuk volisional** = "ayo / aku akan": Gol. I: u→o+う (いく→いこう, のむ→のもう); Gol. II: る→よう (たべる→たべよう); する→しよう, くる→こよう. ～ようと おもいます = berniat untuk. Santai dari ～ましょう.'],
+['Bentuk perintah dan larangan','imperatif,perintah kasar,larangan,～な,命令形,meireikei','**Imperatif:** Gol. I: u→e (いく→いけ), Gol. II: る→ろ (たべる→たべろ), する→しろ, くる→こい. **Larangan:** kamus + **な** (いくな = jangan pergi). Terdengar kasar; dipakai di tanda dan laki-laki sebaya, bukan untuk percakapan sopan.'],
+['～てあげる・くれる・もらう (memberi/menerima)','memberi,menerima,ageru,kureru,morau,あげる,くれる,もらう,bantu','**あげる** (aku/seseorang memberi ke orang lain), **くれる** (orang lain memberi ke aku/kelompokku), **もらう** (menerima). Dengan て: ～てあげる (melakukan demi orang lain), ～てくれる (orang lain melakukan untuk saya), ～てもらう (dibantu orang lain). Sopan: さしあげる, くださる, いただく.'],
+['～ておく・～てしまう・～てみる','ておく,てしまう,てみる,sudah dilakukan,coba melakukan,teoku teshimau temiru','**～ておく** = melakukan terlebih dahulu (persiapan). **～てしまう** = selesai sepenuhnya atau menyesal (わすれてしまった = terlanjur lupa; santai: ～ちゃう). **～てみる** = mencoba melakukan: たべてみます.'],
+['～ている (sedang / keadaan)','teiru,sedang,keadaan,～ている,progresif,hasil','**～ている** (sopan ～ています): (1) aksi sedang berlangsung, (2) kebiasaan, (3) keadaan hasil tindakan (けっこんしている = sudah menikah, すんでいる = tinggal). Banyak kata kerja perubahan keadaan memakai (3).'],
+['～ようにする・～ようになる','youni suru,youni naru,berusaha,menjadi bisa,～ようになる,～ようにする','**～ようにする** = berusaha agar (kebiasaan): まいにち はやく ねるようにしています. **～ようになる** = jadi (bisa/biasa) melakukan: にほんごが はなせるように なりました. **～ように** = agar (tujuan): わすれないように メモします.'],
+['～ことにする・～ことになる','koto ni suru,koto ni naru,memutuskan,diputuskan,jadi,～ことになる','**～ことにする** = memutuskan (oleh saya): にほんへ いくことにしました. **～ことになる** = diputuskan/jadinya (oleh keadaan/orang lain): らいしゅう しゅっちょうに いくことになりました.'],
+['～はずです・～かもしれません','hasu,kamoshiremasen,pasti,mungkin,seharusnya,～はず,～かもしれない','**～はずです** = seharusnya/pasti (berdasar dasar logis): もう つくはずです. **～かもしれません** = mungkin (peluang kecil): あめが ふるかもしれません. **～にちがいない** = pasti sekali.'],
+['～ために・～のに・～ても','tame ni,noni,temo,demi,padahal,walaupun,～ために,～のに,～ても','**～ために** = untuk/demi (tujuan) atau karena. **～のに** = padahal/meskipun (hasil mengejutkan): べんきょうしたのに ごうかくしなかった. **～ても/でも** = walaupun: あめでも いきます.'],
+['～すぎる・～やすい・～にくい','sugiru,yasui,nikui,terlalu,mudah,sulit,～すぎる,～やすい,～にくい','**Stem + すぎる** = terlalu: たべすぎました, たかすぎます. **Stem + やすい** = mudah ~: よみやすい. **Stem + にくい** = sulit ~: かきにくい.'],
+['～ところ (hampir/sedang/baru saja)','tokoro,baru saja,sedang,hampir,～ところです,～たところ','**Kamus + ところです** = hampir akan; **～ているところです** = sedang; **～たところです** = baru saja selesai. Contoh: いま でかけるところです.'],
+['～し (menyebut beberapa alasan)','shi,beberapa alasan,～し～し','**～し** menyusun beberapa alasan/fakta: あのみせは やすいし、おいしいし、よく いきます (murah, enak, jadi sering ke sana).'],
+['～ばかり (hanya / baru saja)','bakari,hanya,baru saja,～ばかり,～たばかり','**N + ばかり** = hanya/melulu: マンガばかり よみます. **Bentuk た + ばかり** = baru saja: たべたばかりです (baru makan).'],
+['Kata sifat い (i-adjective)','kata sifat i,i adjektiva,adjektiva i,kata sifat い,conjugasi i','**Kata sifat い** berakhir い: たかい (mahal/tinggi). Negatif: **～くない** (たかくない). Lampau: **～かった** (たかかった). Lampau neg.: **～くなかった**. Menyambung: **～くて** (たかくて おいしい). Kata keterangan: **～く** (はやく あるく). Pengecualian: いい → **よ**くない, よかった.'],
+['Kata sifat な (na-adjective)','kata sifat na,na adjektiva,adjektiva na,kata sifat な,konjugasi na','**Kata sifat な** (きれい, しずか, ゆうめい): sebelum kata benda tambah な (きれいな はな). Predikat: きれいです / きれいじゃありません / きれいでした / きれいじゃありませんでした. Menyambung: きれいで. Keterangan: きれいに. Waspada: きれい, きらい tampak seperti い-adj tapi な-adj.'],
+['Ada: あります dan います','ada,aru,iru,あります,います,keberadaan','**います** untuk makhluk hidup bergerak (orang, hewan), **あります** untuk benda dan tumbuhan: へやに ねこが います / つくえの うえに ほんが あります. Negatif: いません / ありません. Menyatakan memiliki: AにはBがあります. Tanya jumlah: なんにん / いくつ.'],
+['Kata ganti penunjuk (こそあど)','kosoado,kore sore are,kono sono ano,koko soko asoko,penunjuk,demonstratif','**Kosoado:** こ- dekat pembicara, そ- dekat lawan bicara, あ- jauh dari keduanya, ど- tanya. **Benda:** これ・それ・あれ・どれ. **Sebelum kata benda:** この・その・あの・どの. **Tempat:** ここ・そこ・あそこ・どこ. **Arah/sopan:** こちら・そちら・あちら・どちら. **Jenis:** こんな・そんな・あんな.'],
+['Kata tanya (疑問詞)','kata tanya,apa siapa kapan,nani dare itsu doko naze,question words','なに/なん (apa), だれ (siapa), どこ (di mana), いつ (kapan), なぜ/どうして (mengapa), どう/いかが (bagaimana), どれ/どの (yang mana), いくつ (berapa [benda/umur]), いくら (berapa harga), どのくらい (berapa lama/jauh), なんじ (jam berapa), なんにん (berapa orang).'],
+['Penghitung (助数詞)','penghitung,counter,josuushi,～人,～本,～枚,～個,～冊,～台,～匹','**Umum:** ひとつ, ふたつ, みっつ… (1–10) dan ～こ. **Orang:** ひとり, ふたり, さんにん… **Benda tipis:** ～まい. **Benda panjang:** ～ほん (いっぽん, にほん, さんぼん). **Buku:** ～さつ. **Mesin/kendaraan:** ～だい. **Hewan kecil:** ～ひき (いっぴき, にひき, さんびき). **Hewan besar:** ～とう. **Lantai:** ～かい. **Kali:** ～かい. **Gelas:** ～はい. **Usia:** ～さい (20 tahun = はたち).'],
+['Tanggal dan nama hari','tanggal,hari dalam bulan,ついたち,ふつか,tsuitachi,futsuka,tanggal berapa','**Tanggal khusus:** 1 ついたち, 2 ふつか, 3 みっか, 4 よっか, 5 いつか, 6 むいか, 7 なのか, 8 ようか, 9 ここのか, 10 とおか, 14 じゅうよっか, 20 はつか, 24 にじゅうよっか. Selain itu angka + にち (11 じゅういちにち). **Bulan:** いちがつ… じゅうにがつ (4 しがつ, 7 しちがつ, 9 くがつ).'],
+['Waktu relatif','kemarin,besok,lusa,minggu depan,tahun lalu,きのう,あした,らいしゅう,kata waktu','きょう (hari ini), あした (besok), あさって (lusa), きのう (kemarin), おととい (kemarin lusa), けさ (pagi ini), こんばん (malam ini), せんしゅう/こんしゅう/らいしゅう (minggu lalu/ini/depan), せんげつ/こんげつ/らいげつ (bulan), きょねん/ことし/らいねん (tahun), まいにち/まいあさ/まいばん (tiap hari/pagi/malam).'],
+['Kosakata warna','warna,iro,色,merah,biru,kuning,hijau,putih,hitam','あか (赤, merah), あお (青, biru), きいろ (黄色, kuning), みどり (緑, hijau), しろ (白, putih), くろ (黒, hitam), ちゃいろ (茶色, cokelat), ピンク (merah muda), オレンジ (oranye), むらさき (紫, ungu), はいいろ (灰色, abu-abu). Kata sifat: あかい, あおい, しろい, くろい, きいろい, ちゃいろい.'],
+['Anggota tubuh','anggota tubuh,bagian tubuh,からだ,tubuh,kepala,mata,tangan','あたま (kepala), かお (wajah), め (mata), はな (hidung), くち (mulut), みみ (telinga), は (gigi), かみ (rambut), て (tangan), ゆび (jari), あし (kaki), おなか (perut), せなか (punggung), のど (tenggorokan), かた (bahu), こし (pinggang). **Sakit:** ～が いたいです: あたまが いたいです.'],
+['Keluarga (家族)','keluarga,kazoku,ayah,ibu,kakak,adik,otousan,okaasan,saudara','Menyebut keluarga **sendiri** vs **orang lain**: ayah ちち/おとうさん, ibu はは/おかあさん, kakak lk あに/おにいさん, kakak pr あね/おねえさん, adik lk おとうと/おとうとさん, adik pr いもうと/いもうとさん, kakek そふ/おじいさん, nenek そぼ/おばあさん, orang tua りょうしん/ごりょうしん, anak こども/おこさん, suami おっと/ごしゅじん, istri つま/おくさん. Memanggil keluarga sendiri langsung memakai bentuk "orang lain".'],
+['Arah dan posisi','arah,posisi,atas,bawah,depan,belakang,kiri,kanan,うえ,した,みぎ,ひだり','うえ (atas), した (bawah), なか (dalam), そと (luar), まえ (depan), うしろ (belakang), よこ (samping), となり (sebelah), ちかく (dekat), あいだ (antara), みぎ (kanan), ひだり (kiri), まっすぐ (lurus), きた/みなみ/ひがし/にし (utara/selatan/timur/barat). Pola: AのBに (di B-nya A): つくえの うえに.'],
+['Cuaca (天気)','cuaca,tenki,hujan,panas,dingin,topan,はれ,あめ,ゆき,kosakata cuaca','はれ (cerah), くもり (berawan), あめ (hujan), ゆき (salju), かぜ (angin), かみなり (petir), たいふう (topan), きり (kabut), にじ (pelangi). **Rasa:** あつい (panas), さむい (dingin), すずしい (sejuk), あたたかい (hangat), むしあつい (gerah). Tanya: きょうの てんきは どうですか。'],
+['Hewan (どうぶつ)','hewan,doubutsu,anjing,kucing,burung,ikan,いぬ,ねこ,とり,さかな','いぬ (anjing), ねこ (kucing), とり (burung), さかな (ikan), うま (kuda), うし (sapi), ぶた (babi), ひつじ (domba), さる (monyet), うさぎ (kelinci), ぞう (gajah), くま (beruang), きつね (rubah), たぬき (rakun jepang), しか (rusa), かえる (katak), へび (ular), かめ (kura-kura).'],
+['Zodiak Jepang (干支, eto)','zodiak,eto,干支,shio,tahun tikus,12 hewan','12 hewan **eto**: ね (tikus), うし (sapi), とら (harimau), う (kelinci), たつ (naga), み (ular), うま (kuda), ひつじ (domba), さる (monyet), とり (ayam), いぬ (anjing), い (babi hutan; bukan babi). Dipakai untuk kartu tahun baru (nengajō). Orang bertanya "なにどし?" untuk tahu tahun kelahiran.'],
+['Kata kerja sehari-hari N5','kata kerja dasar,kosakata kata kerja,verba n5,kata kerja umum','たべる (makan), のむ (minum), みる (lihat), きく (dengar/tanya), よむ (baca), かく (tulis), はなす (bicara), いく (pergi), くる (datang), かえる (pulang), あう (bertemu), かう (beli), とる (ambil/foto), おきる (bangun), ねる (tidur), はたらく (kerja), べんきょうする (belajar), あそぶ (bermain), すむ (tinggal), しる (tahu), わかる (mengerti), おしえる (mengajar), ならう (belajar dari guru), かける (menelepon/pasang), あける/しめる (buka/tutup), つける/けす (nyalakan/matikan).'],
+['Frasa belanja','belanja,berbelanja,beli,harga,mahal,murah,いくらですか,ください,shopping','・これは いくらですか — Berapa harga ini?\n・これを ください — Saya minta ini.\n・たかいですね／やすいですね — Mahal ya／murah ya.\n・もっと やすいのは ありますか — Ada yang lebih murah?\n・ぜんぶで いくらですか — Total berapa?\n・カードは つかえますか — Bisa pakai kartu?\n・ふくろは いりません — Tidak perlu kantong.\n・しちゃくしても いいですか — Boleh dicoba?'],
+['Frasa di restoran','restoran,makan di restoran,memesan,menu,お会計,okaikei,おすすめ','・メニューを おねがいします — Tolong menu.\n・おすすめは なんですか — Rekomendasi apa?\n・これと これを ください — Saya minta ini dan ini.\n・ベジタリアン／ハラルは ありますか — Ada yang vegetarian／halal?\n・ぶたにくは はいっていますか — Apakah ada daging babi?\n・みずを ください — Minta air putih.\n・おかいけい(おかんじょう)を おねがいします — Tolong bill.\n・ごちそうさまでした — Terima kasih, makanannya enak.'],
+['Frasa bertanya arah dan transportasi','arah,tanya jalan,stasiun,kereta,dimana,えきはどこですか,naik kereta,transportasi,kippu','・えきは どこですか — Stasiunnya di mana?\n・まっすぐ いって、みぎに まがって ください — Lurus lalu belok kanan.\n・この でんしゃは ～に いきますか — Kereta ini ke ～?\n・～まで いくらですか — Ke ～ berapa?\n・きっぷは どこで かいますか — Beli tiket di mana?\n・つぎの えきは どこですか — Stasiun berikutnya?\n・のりかえは どこですか — Pindah (kereta) di mana?\n・みちに まよいました — Saya tersesat.'],
+['Frasa darurat dan kesehatan','darurat,sakit,rumah sakit,dokter,tolong,pencuri,119,110,たすけて,びょうき,obat','**Darurat:** たすけて！(Tolong!), どろぼう！(Pencuri!), けいさつを よんでください (panggil polisi), きゅうきゅうしゃを よんでください (panggil ambulans). **Nomor:** **110** polisi, **119** ambulans/pemadam.\n**Kesehatan:** あたまが いたいです (sakit kepala), ねつが あります (demam), きぶんが わるいです (mual/tak enak badan), アレルギーが あります (alergi), くすりは どこで かえますか (beli obat di mana?), びょういんへ いきたいです.'],
+['Kata-kata gaul (スラング)','gaul,slang,yabai,sugoi,kawaii,maji,mecha,bahasa santai,bahasa anak muda','**やばい** (gawat/keren), **すごい** (hebat), **かわいい** (imut), **めっちゃ** (sangat; Kansai→umum), **マジ**／**まじで** (serius?), **ウケる** (lucu), **エモい** (emosional/sentimental), **ありえない** (tidak masuk akal), **お疲れ** (terima kasih sudah bekerja), **だるい** (lemas/malas). Hati-hati: tidak cocok untuk situasi formal.'],
+['Wasei-eigo (bahasa Inggris buatan Jepang)','wasei eigo,kata serapan,katakana,bahasa inggris jepang,マンション,サラリーマン','Banyak kata katakana yang **berbeda makna** dari Inggris: マンション (apartemen mewah, bukan mansion), サラリーマン (karyawan kantoran), コンセント (stopkontak), ガソリンスタンド (SPBU), ホッチキス (stapler), ノートパソコン (laptop), ペットボトル (botol plastik), ゲームセンター (arcade), アルバイト (kerja paruh waktu, dari Jerman Arbeit).'],
+['Pelafalan: mora dan vokal panjang','pelafalan,pengucapan,mora,vokal panjang,おう,ええ,ー,pronunciation','Bahasa Jepang berirama **mora** (tiap kana ± sama panjang). **Vokal panjang** mengubah arti: おばさん (bibi) vs おばあさん (nenek), ゆき (salju) vs ゆうき (keberanian). Ditulis あ+あ, い+い, う+う, え+い/え, お+う/お; katakana pakai **ー** (コーヒー). **っ** = jeda konsonan ganda: きって (perangko) vs きて. **ん** menyesuaikan bunyi berikutnya (n/m/ng).'],
+['Pitch accent dan intonasi','pitch accent,intonasi,aksen,nada,はし,かき,accent','Jepang memakai **pitch accent** (tinggi-rendah nada), bukan tekanan. Contoh: はし (HA-shi = sumpit) vs はし (ha-SHI = jembatan), あめ (hujan) vs あめ (permen) beda nada. Pelajari lewat mendengar dan shadowing; kamus seperti OJAD / NHK Accent Dictionary menunjukkan pola nada. Untuk awal, pelafalan mora yang jelas lebih penting.'],
+['Dakuten, handakuten, dan kana kecil','dakuten,handakuten,゛,゜,ゃゅょ,kana kecil,ga gi gu,pa pi pu','**Dakuten (゛)** mengubah bunyi: か→が, さ→ざ, た→だ, は→ば. **Handakuten (゜)**: は→ぱ. **Kana kecil:** ゃ ゅ ょ menggabung: き+ゃ=きゃ (kya); **っ** kecil = konsonan ganda; ぁぃぅぇぉ untuk bunyi asing di katakana (ファ fa, ティ ti). Pasangan: じ/ぢ dan ず/づ dibaca sama (ji, zu).'],
+['Urutan goresan dan radikal kanji','urutan goresan,stroke order,radikal,bushu,部首,214 radikal,cara menulis kanji','**Aturan goresan:** dari atas ke bawah, kiri ke kanan; horizontal sebelum vertikal (十); tegak lurus di tengah sebelum sayap (小); luar sebelum isi (月・国 bingkai dulu, penutup terakhir). **Radikal (部首):** sistem Kangxi memiliki 214 radikal, misalnya 氵 (air), 木 (pohon), 亻 (orang), 言 (kata), 心 (hati). Mengenal radikal mempermudah menebak makna.'],
+['On-yomi dan kun-yomi','on yomi,kun yomi,onyomi,kunyomi,bacaan kanji,cara baca kanji','**On-yomi** (音読み): bacaan Tionghoa, biasanya dalam kata majemuk (山 → サン, 学校 → ガッコウ). **Kun-yomi** (訓読み): bacaan Jepang asli, biasanya berdiri sendiri atau dengan okurigana (山 → やま, 食べる → たべる). Satu kanji bisa punya beberapa bacaan; hafalkan sebagai bagian kata, bukan sendirian.'],
+['Cara mengetik bahasa Jepang (IME)','mengetik jepang,ime,keyboard jepang,romaji input,input hiragana,mengetik kanji,ketik jepang','Aktifkan **keyboard Jepang** (Android: Gboard → tambah bahasa Jepang; iPhone: Pengaturan → Keyboard → Jepang-Romaji). Ketik romaji (ni-ho-n-go) lalu pilih kanji dari saran. **Tips:** n+n untuk ん, ketik "xtu"/"ltu" untuk っ kecil, "-" untuk ー. Untuk game Listening, kamu boleh jawab dengan romaji kalau belum punya keyboard Jepang.'],
+['Bahasa sopan vs santai (です/だ)','sopan,santai,formal,informal,です,だ,futsuukei,teineigo,tingkat bahasa','**Sopan (teineigo):** です・ます. **Biasa/santai:** だ・bentuk kamus (たべる, ある, だ). Dipakai dengan keluarga, teman dekat. Situasi bisnis atau orang baru: pakai です・ます atau keigo. Perbandingan: たべます/たべる, いきません/いかない, がくせいです/がくせいだ.'],
+['Sumber belajar bahasa Jepang','sumber belajar,buku,minna no nihongo,genki,tae kim,anki,wanikani,nhk easy,aplikasi belajar,jisho','**Buku:** *Minna no Nihongo* (basis banyak kursus Indonesia, bab 1–50), *Genki*, *Marugoto*. **Kamus:** Jisho.org, Weblio. **Hafalan:** Anki (SRS), WaniKani (kanji). **Membaca:** NHK News Web Easy (berita sederhana dengan furigana). **Mendengar:** podcast untuk pemula, anime dengan subtitle Jepang. **Tata bahasa:** Tae Kim, Bunpro. Konsisten 20–30 menit sehari lebih efektif daripada maraton.'],
+['Katakana: aturan penulisan serapan','katakana,kata serapan,aturan katakana,ー panjang,ティ,ファ,serapan inggris,penulisan nama asing','Katakana dipakai untuk kata serapan, nama asing, onomatope, dan penekanan. **Aturan:** vokal panjang pakai ー (ケーキ, コーヒー); bunyi asing: ファ (fa), ティ (ti), ディ (di), ウェ (we), ヴ (vu). Nama sendiri: Budi → ブディ (Budi), Indonesia → インドネシア. Cek ejaan resmi untuk nama; katakan nama dengan bunyi mendekati.'],
+['Menulis alamat dan nama dalam bahasa Jepang','nama jepang,urutan nama,alamat jepang,marga,nama keluarga,menulis nama','**Urutan nama Jepang:** marga dulu lalu nama diri (Yamada Tarō). Banyak orang asing memakai urutan nama sendiri atau menulis nama dalam katakana. **Alamat:** dari besar ke kecil: kode pos → prefektur → kota → distrik → nomor blok → bangunan (kebalikan Indonesia). Contoh: 〒100-0001 東京都千代田区千代田1-1.'],
+['Honorifik: san, sama, kun, chan, sensei','san,sama,kun,chan,sensei,senpai,panggilan,honorifik,-san,-chan','**-san** (netral sopan, laki/perempuan), **-sama** (sangat hormat, pelanggan), **-kun** (laki-laki lebih muda/bawahan, juga akrab), **-chan** (imut/akrab, anak, teman dekat), **-sensei** (guru, dokter, penulis), **-senpai/-kōhai** (senior/junior), **-dono/-shi** (formal tertulis). Jangan pakai -san untuk diri sendiri.'],
+['Menghitung uang dan angka besar','yen,uang jepang,angka besar,ribu,puluh ribu,man,sen,menyebut harga','Satuan: 100 ひゃく, 1.000 せん, **10.000 まん (万)**, 100 juta おく (億). Jepang menghitung per **10.000**: 100.000 = じゅうまん; 1 juta = ひゃくまん. Contoh harga: 1,500円 = せんごひゃくえん; 12,000円 = いちまんにせんえん. Pelafalan khusus: 300 さんびゃく, 600 ろっぴゃく, 800 はっぴゃく, 3.000 さんぜん, 8.000 はっせん.']
+];
+
+/* ===== KB B: BUDAYA, MAKANAN, POP, MASYARAKAT, PRAKTIS ===== */
+const KB_B = [
+['Hari libur nasional Jepang','hari libur nasional,libur jepang,kokumin no shukujitsu,tanggal merah,libur','Jepang punya **16 hari libur nasional**: 1 Jan Ganjitsu (Tahun Baru); Senin ke-2 Jan Seijin no Hi; 11 Feb Kenkoku Kinen no Hi; 23 Feb Ulang Tahun Kaisar; ±20 Mar Shunbun no Hi; 29 Apr Shōwa no Hi; 3 Mei Kenpō Kinenbi; 4 Mei Midori no Hi; 5 Mei Kodomo no Hi; Senin ke-3 Jul Umi no Hi; 11 Agu Yama no Hi; Senin ke-3 Sep Keirō no Hi; ±23 Sep Shūbun no Hi; Senin ke-2 Okt Sports no Hi; 3 Nov Bunka no Hi; 23 Nov Kinrō Kansha no Hi. Jika jatuh Minggu, libur pindah ke Senin. Rangkaian akhir April–awal Mei = Golden Week; Obon dan akhir tahun bukan libur nasional resmi tapi banyak kantor libur.'],
+['Sistem pendidikan Jepang','sekolah jepang,sistem pendidikan,sd smp sma,tahun ajaran,ujian masuk,kuliah jepang,juku','Sistem **6-3-3-4**: SD 6 tahun, SMP 3 tahun (wajib 9 tahun), SMA 3 tahun, universitas 4 tahun. **Tahun ajaran mulai April** (bunga sakura bertepatan dengan upacara masuk), tiga semester, libur panjang musim panas dan musim dingin/semi. Seragam, membersihkan kelas sendiri (**sōji**), makan siang bersama (kyūshoku), dan klub ekstrakurikuler (bukatsu) sangat khas. Banyak siswa ikut **juku** (bimbel) untuk persiapan ujian masuk SMA/universitas.'],
+['Budaya kerja di Jepang','budaya kerja,kerja di jepang,karoshi,nomikai,shuukatsu,salaryman,lembur,nenkou,hou ren sou','• **Shūkatsu**: berburu kerja serentak saat tahun terakhir kuliah; perekrutan lulusan baru tiap April.\n• **Hō-Ren-Sō**: lapor (hōkoku), kabari (renraku), konsultasi (sōdan).\n• **Nomikai**: pesta minum bersama rekan kerja; **bōnenkai** di akhir tahun.\n• **Lembur** dan **karōshi** (meninggal karena kerja berlebihan) menjadi isu sosial; pemerintah mendorong reformasi gaya kerja.\n• Tradisi **senpai–kōhai**, rapat panjang, dan kartu nama (**meishi**).\n• Trend kini: kerja jarak jauh, jam fleksibel, dan pekerja asing meningkat (visa Tokutei Ginō).'],
+['Uang Jepang (yen) dan pembayaran','yen,uang jepang,mata uang,koin,uang kertas,pembayaran,tunai,kartu,suica,paypay,atm','Mata uang **yen (円, ¥)**. **Koin:** 1, 5, 10, 50, 100, 500 yen (5 dan 50 berlubang). **Uang kertas:** 1.000, 5.000, 10.000 yen (seri baru terbit Juli 2024 dengan tokoh Kitasato Shibasaburō, Tsuda Umeko, dan Shibusawa Eiichi). **Tunai** masih umum, tapi kartu dan QR (PayPay, dll.) kian banyak. **Kartu IC** (Suica, Pasmo, ICOCA) bisa untuk kereta dan konbini. ATM konbini (7-Eleven) mudah dipakai orang asing. Kurs berubah; cek kurs terbaru.'],
+['Zona waktu dan selisih dengan Indonesia','zona waktu,selisih waktu,jst,perbedaan jam,wib,wita,wit,jam jepang','Jepang memakai **JST (UTC+9)** sepanjang tahun, **tanpa daylight saving**. Selisih dengan Indonesia: **WIB +2 jam**, **WITA +1 jam**, **WIT sama** (UTC+9). Contoh: pukul 10.00 WIB = pukul 12.00 di Tokyo. Penerbangan Jakarta–Tokyo sekitar 7 jam.'],
+['Nomor darurat dan keamanan','nomor darurat,polisi,ambulans,110,119,keamanan jepang,gempa,tsunami,kecelakaan','**110** polisi, **119** ambulans & pemadam kebakaran (di Jepang ambulans gratis). Jepang termasuk negara sangat aman, tapi **gempa**, **tsunami**, dan **topan** adalah risiko. Saat gempa: lindungi kepala, jauhi jendela/rak, cari tempat terbuka; ikuti info JMA dan aplikasi peringatan (mis. Safety tips). Jika tersesat, **kōban** (pos polisi kecil) siap membantu.'],
+['Transportasi: kereta dan Shinkansen','kereta jepang,shinkansen,jr,tokaido,transportasi umum,naik kereta,metro,bus,ic card,jam kereta,tiket kereta','Jaringan kereta Jepang terkenal tepat waktu. **JR** dan banyak perusahaan swasta/metro. **Shinkansen** (sejak 1964, Tōkaidō Shinkansen Tokyo–Osaka) melayani Tōkaidō/Sanyō, Tōhoku, Jōetsu, Hokuriku, Kyūshū, Hokkaidō, dst., kecepatan komersial sekitar 285–320 km/jam. Kelas Nozomi (tercepat), Hikari, Kodama. Gunakan **kartu IC** untuk transportasi lokal; untuk antarkota beli tiket di loket Midori-no-Madoguchi/mesin atau aplikasi. Jam sibuk padat; etiket: tenang, telepon dilarang di dalam kereta. Harga dan pass wisata berubah, cek situs JR resmi.'],
+['Rumah dan gaya hidup tradisional','rumah jepang,tatami,futon,genkan,kotatsu,washitsu,shoji,fusuma,apartemen jepang,rumah tradisional','• **Genkan**: pintu masuk tempat melepas sepatu.\n• **Tatami**: lantai anyaman jerami; ukuran kamar dihitung dalam jō (tatami).\n• **Futon**: kasur lipat yang disimpan di lemari (oshiire) siang hari.\n• **Shōji/Fusuma**: pintu geser kertas.\n• **Kotatsu**: meja berselimut dengan pemanas di bawahnya untuk musim dingin.\n• **Ofuro**: mandi rendam; cuci badan dulu di luar bak, air bak dipakai bersama.\n• **Toilet** modern (washlet) berpemanas dengan bidet.'],
+['Toilet, vending machine, dan konbini','toilet jepang,washlet,vending machine,jidouhanbaiki,konbini,minimarket,7-eleven,lawson,familymart,kenyamanan','Jepang terkenal dengan **vending machine (jidōhanbaiki)** di sudut jalan: minuman panas/dingin, makanan, bahkan payung. **Konbini** (7-Eleven, Lawson, FamilyMart) buka 24 jam: onigiri, bento, kopi, ATM, bayar tagihan, tiket. **Toilet umum** sangat bersih dan sering punya tombol bilas, suara penyamar, dan bidet.'],
+['Etiket makan khas Jepang','etiket makan,makan sumpit,itadakimasu,gochisousama,menyeruput mi,tidak boleh sumpit,tata cara makan','• **Itadakimasu** sebelum makan, **gochisōsama** sesudahnya.\n• **Menyeruput mi** (ramen, soba) dianggap wajar bahkan pujian.\n• Jangan tancapkan sumpit tegak di nasi atau oper makanan antar sumpit.\n• Jangan menuang soy sauce ke nasi putih biasa.\n• Hindari menunjuk dengan sumpit atau menggaruk piring.\n• Minum dengan menuang untuk orang lain dulu (budaya omotenashi). \n• Mangkuk sup (miso) boleh diangkat dan diminum langsung.'],
+['Sushi dan sashimi','sushi,sashimi,nigiri,maki,temaki,chirashi,jenis sushi,ikan mentah,kaiten,omakase','**Sashimi** = irisan ikan/seafood mentah tanpa nasi. **Sushi** = nasi cuka dengan topping. Jenis: **nigiri** (nasi kepal dengan topping), **maki** (gulung rumput laut), **temaki** (hand roll), **inari** (kantung tahu goreng), **chirashi** (nasi dengan potongan ikan di atasnya), **gunkan** (kapal perang, untuk ikura/uni). Restoran **kaiten-zushi** menyajikan di ban berjalan; **omakase** = chef menentukan hidangan. Tuang sedikit shōyu (kecap) pada topping, bukan nasi; jahe (gari) pembersih lidah.'],
+['Ramen dan mi Jepang','ramen,udon,soba,somen,mi jepang,tonkotsu,shoyu ramen,miso ramen,tsukemen,jenis ramen','**Ramen** (mi gandum dalam kuah): **shōyu** (kecap, Tokyo), **miso** (Sapporo), **shio** (garam), **tonkotsu** (kuah tulang babi, Hakata/Fukuoka). **Tsukemen** = mi dicelup kuah kental. **Udon** (mi tebal, Sanuki di Kagawa), **soba** (buckwheat/gandum hitam, dingin zaru soba atau panas kake), **somen** (mi halus dingin musim panas). Menyeruput boleh. Muslim: kuah ramen sering mengandung babi; cari ramen halal atau tanyakan.'],
+['Tempura, tonkatsu, dan gorengan Jepang','tempura,tonkatsu,karaage,korokke,katsu,gorengan,katsudon,ebi fry,furai','**Tempura**: sayur/seafood digoreng tepung tipis renyah. **Tonkatsu**: daging babi berbalut panko (tepung roti) goreng; **katsu kare** (dengan kari), **katsudon** (di atas nasi dengan telur). **Karaage**: ayam goreng bumbu. **Korokke**: kroket. **Ebi furai**: udang goreng panko. Bagi muslim, periksa bahan (babi, minyak, mirin).'],
+['Yakitori, yakiniku, sukiyaki, shabu-shabu','yakitori,yakiniku,sukiyaki,shabu shabu,nabe,oden,teppanyaki,barbekyu jepang,hot pot','**Yakitori**: tusuk ayam panggang. **Yakiniku**: panggang daging di meja. **Sukiyaki**: daging dan sayur dimasak kuah manis-asin lalu dicelup telur mentah. **Shabu-shabu**: iris tipis daging dicelup kuah dashi. **Nabe**: aneka hot pot musim dingin. **Oden**: aneka bahan direbus dashi (konbini di musim dingin). **Teppanyaki**: dimasak di atas besi panas.'],
+['Okonomiyaki, takoyaki, monjayaki','okonomiyaki,takoyaki,monjayaki,osaka makanan,hiroshima okonomiyaki,street food jepang,jajanan','**Okonomiyaki**: "panekuk sesuai selera", Osaka (adonan dicampur) dan Hiroshima (berlapis dengan mi). **Takoyaki**: bola adonan berisi gurita (khas Osaka). **Monjayaki**: versi cair khas Tokyo (Tsukishima). Jajanan festival lain: yakisoba, ikayaki, taiyaki, yakitori, kakigōri (es serut), ringo-ame (apel gula).'],
+['Nasi, onigiri, donburi, kari','onigiri,donburi,gyudon,oyakodon,katsudon,curry rice,nasi jepang,bento,ekiben,umeboshi','**Onigiri**: nasi kepal isi (ume/umeboshi, sake/salmon, tuna-mayo) berbalut nori. **Donburi**: nasi dengan lauk di atas (gyūdon daging sapi, oyakodon ayam-telur, katsudon, tendon). **Karē raisu**: nasi kari manis-gurih (adaptasi dari Inggris/India). **Bento**: kotak makan bekal; **ekiben** = bento stasiun dengan menu daerah. **Natto** (kedelai fermentasi lengket) khas sarapan.'],
+['Wagashi, mochi, dan manisan Jepang','wagashi,mochi,dango,daifuku,dorayaki,taiyaki,anko,manisan jepang,kue jepang,matcha','**Wagashi**: kue tradisional dengan pasta kacang merah (**anko**), mochi, dan musiman. **Mochi**: kue ketan tumbuk. **Daifuku**: mochi isi anko (ichigo daifuku dengan stroberi). **Dango**: bola mochi tusuk. **Dorayaki**: dua pancake isi anko (favorit Doraemon). **Taiyaki**: kue berbentuk ikan tai. **Yōkan**: agar-agar kacang. Dinikmati dengan **matcha** atau sencha.'],
+['Teh Jepang (ocha)','teh jepang,ocha,matcha,sencha,hojicha,genmaicha,gyokuro,mugicha,jenis teh,teh hijau','**Sencha** (teh hijau harian), **gyokuro** (teh naungan, manis, premium), **matcha** (bubuk teh untuk upacara teh dan kue), **hōjicha** (disangrai, cokelat, rendah kafein), **genmaicha** (campur beras panggang), **bancha**, **mugicha** (teh jelai tanpa kafein, dingin di musim panas). Shizuoka dan Uji (Kyoto) terkenal sebagai penghasil teh.'],
+['Sake, shochu, dan minuman Jepang','sake,nihonshu,shochu,umeshu,whisky jepang,bir jepang,minuman alkohol,junmai,ginjo,daiginjo,ramune,calpis','**Sake (nihonshu)**: fermentasi beras; tingkat **junmai, ginjō, daiginjō** menunjukkan penggilingan beras. **Shōchū** (sulingan; imo=ubi, mugi=jelai, kome=beras). **Umeshu** (likuer plum). Bir populer: Asahi, Kirin, Sapporo, Suntory. **Whisky** Jepang (Yamazaki, Nikka) mendunia. Non-alkohol: **ramune** (soda kelereng), **calpis**, **mugicha**, kopi kaleng. Usia minum: 20 tahun. Muslim perlu menghindari mirin/sake dalam masakan.'],
+['Makanan halal dan vegetarian di Jepang','halal jepang,halal di jepang,makanan halal,vegetarian jepang,muslim di jepang,mushola,sertifikat halal,restoran halal,vegan jepang','Makanan halal makin mudah ditemukan di kota besar (Tokyo, Osaka, Kyoto) lewat restoran halal, toko halal, dan label di konbini besar. Waspada: **dashi** dari ikan bonito (aman), tapi **mirin, sake, dan kaldu babi** (tonkotsu, gyoza) sering ada. Kata kunci: ぶたにく (babi), アルコール (alkohol), ラード (lemak babi). Cari masjid dan tempat shalat (Tokyo Camii, Kobe Mosque). Aplikasi/peta halal dan label vegan sangat membantu; selalu konfirmasi bahan.'],
+['Bonenkai, hanami, dan tradisi sosial','nomikai,bonenkai,shinnenkai,hanami kantor,tradisi sosial,pesta,omiyage,oseibo,hadiah,hadiah jepang','**Omiyage** (oleh-oleh khas daerah) dibawa untuk rekan kerja setelah bepergian. **Oseibo/Ochūgen** hadiah musiman (Des/Juli) untuk orang berjasa. **Shinnenkai/Bōnenkai** pesta tahun baru dan akhir tahun. **Hanami** kantor di bawah sakura. Memberi hadiah dibungkus rapi dengan dua tangan; menerima dengan rendah hati (tsumaranai mono desu ga = "ini hanya hal kecil, tapi...").'],
+['Pernikahan dan pemakaman di Jepang','pernikahan jepang,pemakaman jepang,upacara pernikahan,shinto wedding,tsuya,sosiki,kremasi,koden,upacara adat','**Pernikahan**: bisa Shinto (kimono shiromuku), gaya gereja (bergaya Barat), atau sipil (daftar di kantor kota). Tamu memberi uang dalam amplop **goshūgi** (nominal ganjil, bukan 4/9). **Pemakaman**: umumnya Buddha dan **kremasi** (hampir 100%); tamu membawa uang duka (**kōden**) dalam amplop hitam-putih; baju hitam. Tulang abu dipindahkan dengan sumpit (**kotsuage**), karena itu mengoper makanan antar sumpit dihindari.'],
+['Tato dan aturan di tempat umum','tato jepang,irezumi,tattoo,onsen tato,sento,merokok,larangan,aturan umum','Tato (**irezumi**) secara historis terkait yakuza, sehingga banyak **onsen, sento, kolam renang, dan gym membatasi tato** (cek kebijakan; ada yang membolehkan dengan penutup atau menyediakan kamar pribadi). Merokok biasanya hanya di area khusus; berjalan sambil merokok dilarang di banyak kota. Tidak boleh makan sambil berjalan di beberapa tempat wisata; bawa sampah pulang.'],
+['Gaya hidup anak muda: kawaii dan otaku','kawaii,otaku,harajuku,akihabara,gyaru,lolita,maid cafe,subkultur,budaya pop jepang','**Kawaii** (imut) memengaruhi desain, makanan, dan maskot (Hello Kitty, Sanrio). **Harajuku** (Tokyo) pusat mode kreatif. **Akihabara** pusat elektronik, anime, game, dan **maid cafe**. **Otaku** = penggemar berat (anime/manga/game). Subkultur: gyaru, lolita, visual kei, cosplay. **Purikura** (foto stiker) dan **karaoke** juga hiburan populer.'],
+['Anime dan manga','anime,manga,sejarah anime,doraemon,dragon ball,naruto,one piece,studio ghibli,tezuka,astro boy,manga populer','**Manga** berkembang dari ukiyo-e dan komik pascaperang; **Tezuka Osamu** ("dewa manga", Astro Boy 1952/63) memodernisasinya. Anime klasik: Astro Boy, Doraemon, Dragon Ball, Sailor Moon, Neon Genesis Evangelion, One Piece, Naruto. **Studio Ghibli** (Miyazaki Hayao & Takahata Isao): Spirited Away (Oscar 2003), My Neighbor Totoro, Princess Mononoke. Majalah mingguan Shōnen Jump dan Weekly Shōnen Magazine adalah wadah manga. Anime menggunakan banyak bahasa santai; jangan jadikan satu-satunya model tutur.'],
+['Game dan Nintendo','nintendo,game jepang,mario,pokemon,zelda,famicom,playstation,sega,konami,capcom,sejarah game,sony','Jepang pusat industri game: **Nintendo** (Famicom 1983, Super Mario 1985, Zelda, Pokémon 1996, Switch), **Sony** (PlayStation 1994), **Sega** (Sonic), **Capcom** (Street Fighter, Resident Evil), **Square Enix** (Final Fantasy, Dragon Quest), **Konami**, **Bandai Namco**. Game center (arcade) dan kartu koleksi juga populer. Banyak game memuat bahasa Jepang dasar; bagus untuk latihan baca kana.'],
+['Musik Jepang','musik jepang,j-pop,enka,city pop,vocaloid,hatsune miku,idol,visual kei,koto,shamisen,taiko,musik tradisional','**J-Pop** dan idol group (AKB48, Arashi), **enka** (balada tradisional bergaya sendu), **city pop** (1980-an, kembali populer secara global), **J-Rock/visual kei**, **Vocaloid** (Hatsune Miku sejak 2007), dan lagu anime. Alat tradisional: **koto**, **shamisen**, **shakuhachi**, **taiko**. **Karaoke** (kara = kosong, oke = orkestra) adalah hiburan sosial. Lagu bagus untuk latihan dengar dan kosakata; lirik berhak cipta, jadi cari lewat sumber resmi.'],
+['Film dan Godzilla','film jepang,godzilla,kurosawa,seven samurai,akira kurosawa,ozu,kaiju,tokusatsu,ultraman,sinema jepang','**Akira Kurosawa** (Rashomon 1950, Seven Samurai 1954) memengaruhi sinema dunia. **Ozu Yasujirō** (Tokyo Story 1953). **Godzilla** (1954, Honda Ishirō) memulai genre kaiju; **tokusatsu** seperti Ultraman dan Super Sentai. Anime film modern: Your Name (2016), Spirited Away. Jepang punya pemenang Oscar film animasi dan live action internasional.'],
+['Olahraga di Jepang','olahraga jepang,baseball,sepak bola,j league,judo,karate,kendo,aikido,olimpiade tokyo,ohtani,martial arts,seni bela diri','**Bisbol** (baseball) paling populer: liga profesional NPB, turnamen SMA nasional di **Kōshien** (Agustus). **Sepak bola**: J.League sejak 1993. **Sumo** (olahraga nasional). **Seni bela diri (budō):** judo (Kanō Jigorō, 1882), karate (Okinawa), kendo, aikido, kyudo (panahan). Jepang menjadi tuan rumah Olimpiade Tokyo 1964, Sapporo 1972 (musim dingin), Nagano 1998 (musim dingin), dan Tokyo 2020 (digelar 2021).'],
+['Politik dan pemerintahan Jepang','pemerintahan jepang,politik jepang,kaisar,perdana menteri,diet,konstitusi,monarki konstitusional,naruhito,pemilu','Jepang adalah **monarki konstitusional** dengan **Kaisar** sebagai simbol negara (Kaisar Naruhito sejak 1 Mei 2019) tanpa kuasa politik. Parlemen disebut **Diet (Kokkai)** dengan dua majelis: Majelis Rendah dan Majelis Tinggi. **Perdana Menteri** memimpin pemerintahan. Konstitusi 1947 menjamin hak asasi dan **Pasal 9** (menolak perang sebagai hak berdaulat). Jabatan pejabat berganti; cek sumber resmi untuk nama terkini.'],
+['Penduduk dan masyarakat modern','penduduk jepang,populasi,masyarakat menua,angka kelahiran,kota besar,urbanisasi,ekonomi jepang,tokyo terbesar','Penduduk Jepang sekitar **124 juta** dan **menyusut**; salah satu populasi tertua di dunia (lebih dari seperempat berusia 65+) dengan angka kelahiran rendah. Area metropolitan **Tokyo** adalah salah satu yang terbesar di dunia (puluhan juta). Ekonomi Jepang termasuk yang terbesar di dunia dengan industri otomotif (Toyota, Honda), elektronik, robotik, dan manga/game. Kekurangan tenaga kerja mendorong penerimaan pekerja asing.'],
+['Belajar dan bekerja di Jepang','kuliah di jepang,mext,jasso,beasiswa jepang,eju,sekolah bahasa,visa kerja,tokutei ginou,ssw,kerja ke jepang,ginou jisshu,pindah ke jepang','**Kuliah:** beasiswa pemerintah **MEXT**, bantuan **JASSO**, ujian masuk **EJU**, atau lewat sekolah bahasa lalu universitas. **Bahasa:** JLPT N2/N1 sering diminta kampus/perusahaan. **Kerja:** visa Engineer/Specialist in Humanities, **Tokutei Ginō (SSW)** untuk sektor kekurangan tenaga (butuh tes keterampilan dan bahasa, mis. **JFT-Basic** atau JLPT N4), dan program magang. Aturan, kuota, dan biaya berubah; **verifikasi di Kedutaan Jepang/Imigrasi dan hanya lewat lembaga resmi** (waspada penipuan perekrut).'],
+['Ujian bahasa Jepang selain JLPT','jft basic,nat test,j test,kanji kentei,ujian jepang,tes bahasa jepang,ssw tes bahasa','Selain **JLPT**: **JFT-Basic** (Japan Foundation Test for Basic Japanese, untuk visa SSW, tingkat setara ±A2/N4), **NAT-TEST** dan **J-TEST** (lebih sering digelar), **Kanji Kentei** (kemampuan kanji), serta **BJT** (bahasa Jepang bisnis). Pilih ujian sesuai tujuan: sekolah/universitas (JLPT/EJU), kerja SSW (JFT-Basic/JLPT).'],
+['Bahasa Jepang di Indonesia','jepang indonesia,hubungan indonesia jepang,belajar jepang di indonesia,japan foundation,kursus bahasa jepang,sensei indonesia,ijepa,nippon','Bahasa Jepang adalah salah satu bahasa asing populer di sekolah/kampus Indonesia. **Japan Foundation** Jakarta mendukung pengajaran dan JLPT. Hubungan diplomatik Indonesia–Jepang dimulai 1958. Jepang adalah mitra dagang dan investor besar bagi Indonesia. Banyak kata serapan seperti "tsunami", "karaoke", dan "sushi" kini dikenal luas.'],
+['Kata serapan dari bahasa Jepang di Indonesia','serapan jepang,kata jepang di indonesia,kata serapan jepang,serapan bahasa jepang','Beberapa kata Jepang yang dikenal di Indonesia: **tsunami** (津波, ombak pelabuhan), **karaoke**, **sushi**, **ramen**, **bonsai**, **origami**, **kimono**, **sakura**, **bento**, **anime/manga**, **emoji** (絵文字), **judo/karate**, **sensei**, **tamagotchi**.'],
+['Panduan wisata: kapan dan ke mana','kapan ke jepang,tempat wisata,itinerary,golden route,tokyo kyoto osaka,rute wisata,rekomendasi wisata,destinasi','**Golden Route:** Tokyo → Hakone/Fuji → Kyoto/Nara → Osaka/Hiroshima. **Waktu terbaik:** akhir Maret–April (sakura), Oktober–November (momiji); musim panas ramai festival tapi panas lembap; musim dingin untuk ski (Hokkaido, Nagano) dan onsen. Hindari Golden Week (29 Apr–5 Mei), Obon (pertengahan Agustus), dan akhir tahun jika ingin harga murah. Pesan penginapan jauh-jauh hari. Aturan visa dan harga berubah, cek situs resmi.'],
+['Onsen dan ryokan','onsen,ryokan,pemandian air panas,etiket onsen,kaiseki,hakone,beppu,kusatsu,noboribetsu,penginapan tradisional,yukata','**Ryokan** adalah penginapan tradisional dengan kamar tatami, futon, yukata, dan makan malam **kaiseki**; sering dilengkapi **onsen**. Onsen populer: **Hakone**, **Kusatsu**, **Beppu & Yufuin** (Oita, jumlah mata air terbanyak), **Noboribetsu** (Hokkaido), **Dōgo** (Matsuyama, salah satu tertua), **Kinosaki**. Etiket: mandi dulu, tanpa pakaian renang, jangan celup handuk, rambut diikat, tenang. Banyak yang membatasi tato.']
+];
+
+/* ===== KB C: SEJARAH, TOKOH, GEOGRAFI, WISATA, ALAM ===== */
+const KB_C = [
+['Zaman Jōmon dan Yayoi','jomon,yayoi,zaman prasejarah,jepang kuno,himiko,yamatai,padi,tembikar','**Jōmon** (±14.000–300 SM): pemburu-pengumpul menetap dengan tembikar bermotif tali (jōmon = pola tali). **Yayoi** (±300 SM–250 M): masuknya budidaya padi basah, perunggu dan besi dari daratan Asia, masyarakat berstrata. Catatan Tiongkok menyebut ratu **Himiko** dari negeri **Yamatai** (abad ke-3), lokasi pastinya masih diperdebatkan.'],
+['Zaman Kofun dan Asuka','kofun,asuka,pangeran shotoku,yamato,makam kofun,daisen,buddhisme masuk,konstitusi 17 pasal,horyuji,taika','**Kofun** (±250–538): gundukan makam berbentuk lubang kunci (zenpō-kōen-fun) seperti **Daisen Kofun** di Sakai. Negara **Yamato** terbentuk. **Asuka** (538–710): agama Buddha masuk (via Baekje), **Pangeran Shōtoku** (574–622) memperkenalkan *Konstitusi 17 Pasal* (604) dan membangun **Hōryū-ji** (bangunan kayu tertua yang masih berdiri). **Reformasi Taika** (645) memusatkan pemerintahan.'],
+['Zaman Nara (710–794)','nara,heijokyo,zaman nara,todaiji,daibutsu,kojiki,nihon shoki,manyoshu,ibu kota nara','Ibu kota **Heijō-kyō** (Nara) meniru Chang\'an. Karya penting: **Kojiki** (712), **Nihon Shoki** (720), antologi puisi **Man\'yōshū**. Kaisar Shōmu membangun **Tōdai-ji** dengan **Daibutsu** (Buddha Besar, peresmian 752). Buddhisme menjadi dukungan negara. Ibu kota pindah ke Nagaoka lalu Heian (794).'],
+['Zaman Heian (794–1185)','heian,heiankyo,genji monogatari,murasaki shikibu,sei shonagon,makura no soshi,kana,fujiwara,zaman heian,kyoto ibu kota','Ibu kota **Heian-kyō (Kyoto)**. Puncak budaya istana: **Genji Monogatari** (Murasaki Shikibu, ±1000–1010), **Makura no Sōshi** (Sei Shōnagon). **Hiragana & katakana** berkembang; wanita istana menulis dengan hiragana. Klan **Fujiwara** mendominasi lewat pernikahan dengan keluarga kekaisaran. Munculnya kelas **samurai** menandai transisi menuju zaman Kamakura.'],
+['Zaman Kamakura (1185–1333)','kamakura,minamoto no yoritomo,yoritomo,shogun pertama,mongol,kamikaze,genpei,hojo,zaman kamakura','Setelah Perang **Genpei** (Taira vs Minamoto), **Minamoto no Yoritomo** mendirikan keshogunan di Kamakura (shogun 1192). Kekuasaan beralih ke samurai (**bakufu**). Klan **Hōjō** menjadi pemegang kekuasaan nyata (shikken). Jepang menahan **invasi Mongol 1274 dan 1281**, dibantu badai yang kemudian disebut **kamikaze** ("angin dewata"). Aliran Zen dan Buddhisme Jōdo berkembang.'],
+['Zaman Muromachi dan Sengoku','muromachi,sengoku,ashikaga,onin,kinkakuji,ginkakuji,kita,noh,zaman sengoku,perang saudara','**Muromachi** (1336–1573): keshogunan Ashikaga di Kyoto; lahirnya **Noh**, upacara teh, taman Zen; **Kinkaku-ji** dan **Ginkaku-ji**. **Perang Ōnin** (1467–77) membuka **Sengoku (zaman perang antarpenguasa)**, ketika daimyō saling berperang sampai akhir abad ke-16. Senapan dan misionaris Portugis tiba pada 1543.'],
+['Oda Nobunaga','oda nobunaga,nobunaga,honnoji,azuchi,okehazama,nagashino,tokoh sengoku','**Oda Nobunaga (1534–1582)**, daimyō dari Owari, menang di **Okehazama (1560)**, memanfaatkan senapan di **Nagashino (1575)**, dan membangun **Kastil Azuchi**. Ia menyingkirkan keshogunan Ashikaga (1573) dan hampir menyatukan Jepang, tapi dikhianati bawahannya **Akechi Mitsuhide** dan meninggal dalam **insiden Honnō-ji (1582)**.'],
+['Toyotomi Hideyoshi','toyotomi hideyoshi,hideyoshi,monyet,osaka castle,sword hunt,pemburuan pedang,invasi korea,kuli','**Toyotomi Hideyoshi (1537–1598)**, putra petani yang naik menjadi penguasa; menyatukan Jepang (1590), membangun **Kastil Osaka**, memberlakukan **perburuan pedang (katanagari, 1588)** dan pemisahan kelas. Ia melancarkan invasi ke Korea (1592, 1597) yang gagal. Setelah wafatnya, kekuasaan direbut **Tokugawa Ieyasu**.'],
+['Tokugawa Ieyasu dan zaman Edo','tokugawa ieyasu,ieyasu,sekigahara,zaman edo,keshogunan tokugawa,sankin kotai,sakoku,edo,edo period,samurai edo','**Tokugawa Ieyasu (1543–1616)** menang di **Sekigahara (1600)**, menjadi shogun (1603) dan mendirikan keshogunan di **Edo**. Zaman Edo (1603–1868): ±250 tahun damai; sistem **kelas** (samurai, petani, pengrajin, pedagang), **sankin-kōtai** (daimyo bergiliran tinggal di Edo), **sakoku** (kebijakan tertutup; hanya Nagasaki/Dejima untuk Belanda dan Tiongkok), kemunculan **kabuki, ukiyo-e, haiku**, dan budaya kota (chōnin). Berakhir dengan Restorasi Meiji (1868).'],
+['Miyamoto Musashi','miyamoto musashi,musashi,ninten ichi ryu,go rin no sho,pendekar pedang,dua pedang','**Miyamoto Musashi (±1584–1645)** pendekar pedang legendaris, pencipta gaya dua pedang **Niten Ichi-ryū**, penulis **Gorin no Sho** (Kitab Lima Cincin). Dikenal pula sebagai pelukis tinta (sumi-e).'],
+['Sakamoto Ryōma dan akhir keshogunan','sakamoto ryoma,ryoma,bakumatsu,satsuma choshu,saigo takamori,satsuma,choshu,akhir edo,shinsengumi','**Bakumatsu** (akhir keshogunan, 1853–1868). **Sakamoto Ryōma (1836–1867)** dari Tosa menengahi aliansi **Satsuma–Chōshū** yang menjatuhkan bakufu. **Saigō Takamori (1828–1877)** pemimpin Satsuma, tokoh restorasi yang kemudian memimpin **Pemberontakan Satsuma (1877)**, sering disebut "samurai terakhir". **Shinsengumi** pasukan pro-shogun di Kyoto.'],
+['Era Meiji sampai Taishō','meiji,kaisar meiji,modernisasi,perang rusia jepang,gempa kanto,taisho,meiji ishin,fukuzawa yukichi,iwakura','**Meiji (1868–1912)**: ibu kota ke Tokyo, kelas samurai dihapus, wajib belajar, wajib militer, kereta pertama (1872), konstitusi **Meiji (1889)** dan Diet (1890). Menang dalam **Perang Tiongkok-Jepang (1894–95)** dan **Perang Rusia-Jepang (1904–05)**. **Fukuzawa Yukichi** menyebarkan pendidikan modern. **Taishō (1912–1926)**: demokrasi Taishō, **Gempa Besar Kantō 1923** yang menghancurkan Tokyo dan Yokohama.'],
+['Era Shōwa dan Jepang pascaperang','showa,perang dunia 2,konstitusi 1947,keajaiban ekonomi,olimpiade 1964,pascaperang,jepang pasca perang,mac arthur,gelembung ekonomi,showa era,heisei,reiwa','**Shōwa (1926–1989)** meliputi militerisme, **Perang Dunia II** (berakhir 15 Agustus 1945), pendudukan Sekutu, **Konstitusi 1947**, dan **keajaiban ekonomi** 1950–1980-an (Shinkansen 1964, **Olimpiade Tokyo 1964**, Expo Osaka 1970). **Heisei (1989–2019)**: pecahnya gelembung ekonomi (awal 1990-an), "dekade yang hilang", gempa Hanshin (1995), Tōhoku (2011). **Reiwa** dimulai 1 Mei 2019.'],
+['Gempa dan tsunami Tōhoku 2011','gempa tohoku,tsunami 2011,fukushima,3.11,gempa besar,bencana jepang,gempa kobe,hanshin','**11 Maret 2011**: gempa berkekuatan 9,0–9,1 (Tōhoku) memicu tsunami besar dan kecelakaan nuklir **Fukushima Daiichi**; korban jiwa dan hilang sekitar 18–20 ribu. Gempa penting lain: **Hanshin–Awaji (Kobe) 1995**, **Kantō 1923**, **Noto 2024**. Jepang punya sistem peringatan dini gempa dan tsunami serta bangunan tahan gempa; **Hari Pencegahan Bencana 1 September** untuk mengenang gempa Kantō.'],
+['Hokusai, Bashō, dan seni klasik Jepang','hokusai,hiroshige,ukiyo e,great wave,basho,matsuo basho,issa,buson,sastra klasik,seni jepang klasik,natsume soseki,kawabata,mishima,murakami','**Katsushika Hokusai (1760–1849)**: ukiyo-e *Gelombang Besar di Kanagawa* (±1831), *36 Pemandangan Gunung Fuji*. **Utagawa Hiroshige** (53 Stasiun Tōkaidō). **Matsuo Bashō (1644–1694)** bapak haiku (*Oku no Hosomichi*). **Sastra modern:** Natsume Sōseki (*Botchan*), Akutagawa Ryūnosuke, **Kawabata Yasunari (Nobel 1968)**, **Ōe Kenzaburō (Nobel 1994)**, Mishima Yukio, Murakami Haruki.'],
+['Tokyo: area dan tempat terkenal','tokyo,tempat wisata tokyo,tokyo tempat,wisata tokyo,shibuya,shinjuku,asakusa,akihabara,harajuku,ueno,ginza,tokyo tower,skytree,senso ji,meiji jingu,odaiba,roppongi,tsukiji','**Tokyo** (ibu kota sejak 1868, dulu Edo): **Shibuya** (persimpangan terpadat), **Shinjuku** (pusat bisnis, kantor pemerintah metropolitan), **Asakusa** (**Sensō-ji**, kuil tertua Tokyo), **Akihabara** (elektronik & anime), **Harajuku** (mode, **Meiji Jingū**), **Ueno** (museum dan taman), **Ginza** (belanja), **Tokyo Skytree** (634 m), **Tokyo Tower** (333 m), **Odaiba**, **Tsukiji/Toyosu** (pasar ikan). Tokyo Disney Resort sebenarnya ada di Urayasu, Chiba.'],
+['Kyoto: kuil dan budaya','kyoto,kuil kyoto,kyoto kuil,tempat wisata kyoto,kinkakuji,fushimi inari,kiyomizudera,arashiyama,gion,nijo,ryoanji,philosopher path,uji,ibu kota lama,kyoto temple','**Kyoto** (ibu kota 794–1868): **Fushimi Inari** (ribuan gerbang torii merah), **Kinkaku-ji** (Paviliun Emas), **Kiyomizu-dera** (panggung kayu), **Arashiyama** (hutan bambu), **Nijō-jō**, **Ryōan-ji** (taman batu), **Gion** (distrik geiko/maiko), **Uji** (teh matcha, **Byōdō-in**). 17 situs Kyoto termasuk Warisan Dunia UNESCO. Puncak musim: sakura awal April dan momiji akhir November; sangat ramai.'],
+['Osaka, Nara, Kobe, dan Kansai','osaka,dotonbori,osaka castle,universal studios japan,nara,deer,kobe,kansai,kuidaore,himeji,sennichimae,shinsekai','**Osaka**: kota kuliner (*kuidaore*), **Dōtonbori**, **Kastil Osaka**, **Universal Studios Japan**; logat Kansai. **Nara**: **Tōdai-ji** dan rusa di Taman Nara. **Kobe**: pelabuhan, daging sapi Kobe, Gempa 1995. **Himeji**: **Kastil Himeji** (Warisan Dunia, kastil terbaik yang masih asli). Kansai (Kyoto, Osaka, Nara, Kobe, Wakayama, Shiga, Mie) terhubung baik oleh kereta JR dan swasta.'],
+['Hiroshima, Miyajima, dan Nagasaki','hiroshima,miyajima,itsukushima,genbaku dome,peace memorial,nagasaki,dejima,gunkanjima,hashima,atomic bomb,perdamaian','**Hiroshima**: **Kubah Bom Atom (Genbaku Dome)** dan Museum Peringatan Perdamaian (Warisan Dunia, simbol perdamaian), okonomiyaki khas, tiram. **Miyajima (Itsukushima)**: gerbang torii terapung, salah satu **Tiga Pemandangan Terindah Jepang**. **Nagasaki**: Taman Perdamaian, **Dejima** (pos dagang Belanda), **Gunkanjima (Pulau Hashima)**, kuliner champon dan castella.'],
+['Hokkaido: kota dan wisata','sapporo,otaru,hakodate,furano,biei,noboribetsu,niseko,asahikawa,asahiyama zoo,shiretoko,wisata hokkaido,lavender,ski','**Sapporo** (ibu kota Hokkaido; Festival Salju, ramen miso, Sapporo Beer), **Otaru** (kanal dan kaca), **Hakodate** (pemandangan malam dari Gunung Hakodate, pasar pagi), **Furano/Biei** (lavender dan ladang bunga, Juli), **Noboribetsu** (onsen & lembah Jigokudani), **Niseko** (ski bubuk salju), **Asahikawa** (kebun binatang Asahiyama), **Shiretoko** (Warisan Dunia, beruang cokelat), **Abashiri** (es laut). Transportasi: Shinkansen sampai Shin-Hakodate-Hokuto, pesawat ke New Chitose.'],
+['Gunung Fuji','gunung fuji,fuji san,fujisan,mendaki fuji,fuji climb,yoshida trail,kawaguchiko,mt fuji,gunung berapi fuji,tinggi fuji','**Gunung Fuji (富士山)** 3.776 m, gunung tertinggi Jepang, gunung berapi aktif (letusan terakhir 1707, Hōei). Warisan Dunia UNESCO (2013, sebagai budaya). **Musim pendakian resmi sekitar awal Juli–awal September**; empat jalur utama (Yoshida, Subashiri, Gotemba, Fujinomiya). Tempat melihat: **Kawaguchiko**, Hakone, Shizuoka. Aturan pendakian (kuota, biaya) bisa berubah; cek situs resmi.'],
+['Situs Warisan Dunia UNESCO di Jepang','unesco jepang,warisan dunia jepang,shirakawago,himeji,hiroshima,iwami ginzan,kumano kodo,yakushima,shiretoko,ogasawara,fuji,gusuku','Jepang memiliki **25+ Warisan Dunia** (sekitar 21 budaya dan 5 alam). Contoh: **Himeji-jō**, **Kyoto bersejarah**, **Nara bersejarah**, **Shirakawa-gō & Gokayama** (desa gassho-zukuri), **Hiroshima Peace Memorial**, **Itsukushima**, **Nikkō Tōshō-gū**, **Kumano Kodō**, **Iwami Ginzan**, **Gusuku Ryukyu**, **Gunung Fuji**, **Yakushima**, **Shirakami-Sanchi**, **Shiretoko**, **Kepulauan Ogasawara**, **Amami–Okinawa**, dan **Hiraizumi**. Daftar terbaru bisa bertambah.'],
+['Tiga Pemandangan Terindah, Tiga Taman, Tiga Kastil','nihon sankei,tiga pemandangan,tiga taman,kenrokuen,korakuen,kairakuen,matsushima,amanohashidate,12 kastil,kastil asli,himeji,matsumoto','**Nihon Sankei (3 Pemandangan Terindah):** Matsushima (Miyagi), Amanohashidate (Kyoto), Miyajima (Hiroshima). **3 Taman Terbesar:** Kenrokuen (Ishikawa), Kōraku-en (Okayama), Kairaku-en (Ibaraki). **Kastil asli (12 bangunan donjon asli):** Hirosaki, Matsumoto, Maruoka, Inuyama, Hikone, Himeji, Matsue, Bitchū-Matsuyama, Marugame, Matsuyama, Uwajima, Kōchi. Terkenal: **Himeji** (putih), **Matsumoto** (hitam), **Kumamoto** (megah, rusak 2016).'],
+['Pulau, sungai, danau, dan pegunungan Jepang','pulau jepang,pulau terbesar,sungai terpanjang,danau terbesar,danau,sungai,danau biwa,shinano,alpen jepang,gunung tertinggi,pegunungan jepang,biwa,aso,sakurajima,volcano,gunung berapi','Jepang terdiri dari ±6.800 pulau; empat utama: **Honshu** (terbesar), **Hokkaido**, **Kyushu**, **Shikoku**. **Danau Biwa** (Shiga) danau terbesar; **Sungai Shinano** (±367 km) terpanjang. **Alpen Jepang** (Nagano/Gifu/Toyama) pegunungan tinggi. **Gunung berapi:** Fuji, **Aso** (kaldera raksasa di Kumamoto), **Sakurajima** (Kagoshima, sering mengeluarkan abu). ±70% daratan berupa pegunungan sehingga kota padat di dataran pesisir.'],
+['Flora dan fauna Jepang','flora jepang,fauna jepang,hewan jepang,sakura,ume,fuji wisteria,tancho,kera salju,tanuki,kitsune,akita inu,shiba inu,beruang,rusa nara','**Flora:** sakura, **ume** (plum, mekar Feb–Mar), wisteria/fuji, azalea, momiji, bambu, **ginkgo**, pinus. **Fauna:** **kera salju (Jigokudani, Nagano)**, **tanuki** (anjing rakun) dan **kitsune** (rubah, tokoh cerita rakyat), **tancho** (bangau jambul merah, Hokkaido), **rusa Nara**, **beruang cokelat (Hokkaido)**, **serow Jepang**. Anjing asli: **Shiba, Akita** (Hachikō), **Kai**. Jepang punya alam beragam dari subtropis sampai subarktik.'],
+['Taman nasional dan alam Jepang','taman nasional jepang,alam jepang,daisetsuzan,kirishima,nikko,fuji hakone izu,shiretoko,aso kuju,seto inland sea,pulau naoshima,seni pulau','Jepang punya 34 taman nasional (jumlah bisa berubah), antara lain **Daisetsuzan** (Hokkaido, pegunungan terluas), **Shiretoko**, **Nikkō**, **Fuji-Hakone-Izu**, **Chūbu-Sangaku (Alpen)**, **Aso-Kuju**, **Kirishima-Kinkōwan**, **Setonaikai** (Laut Pedalaman Seto). **Naoshima** (Kagawa) pulau seni modern.'],
+['Prefektur dan wilayah Jepang','47 prefektur,prefektur jepang,wilayah jepang,tohoku,kanto,chubu,kansai,chugoku,shikoku,kyushu,hokkaido wilayah,region','Jepang dibagi menjadi **47 prefektur** (1 to 都 Tokyo, 1 dō 道 Hokkaido, 2 fu 府 Kyoto dan Osaka, 43 ken 県) dan **8 wilayah**: **Hokkaido**, **Tōhoku** (6 prefektur: Aomori, Iwate, Miyagi, Akita, Yamagata, Fukushima), **Kantō** (7: Ibaraki, Tochigi, Gunma, Saitama, Chiba, Tokyo, Kanagawa), **Chūbu** (9), **Kansai/Kinki** (7), **Chūgoku** (5), **Shikoku** (4), **Kyūshū–Okinawa** (8). Tanya nama prefektur tertentu (mis. "Aomori" atau "khas Kagawa") untuk detail.']
+];
+const PREF = [
+['Hokkaido','北海道','Sapporo','Hokkaido','ski, ramen miso, seafood, lavender Furano, suku Ainu, Festival Salju Sapporo'],
+['Aomori','青森','Aomori','Tōhoku','apel (penghasil terbesar), Nebuta Matsuri, Kastil Hirosaki dan sakura, Shirakami-Sanchi'],
+['Iwate','岩手','Morioka','Tōhoku','Hiraizumi (UNESCO), wanko soba, reimen Morioka, penyair Miyazawa Kenji'],
+['Miyagi','宮城','Sendai','Tōhoku','Matsushima, Sendai Tanabata, gyūtan (lidah sapi panggang), Date Masamune'],
+['Akita','秋田','Akita','Tōhoku','anjing Akita (Hachikō), kiritanpo, Kantō Matsuri, Danau Tazawa, Kakunodate'],
+['Yamagata','山形','Yamagata','Tōhoku','ceri (sakuranbo), Zaō "monster salju", Yamadera, imoni'],
+['Fukushima','福島','Fukushima','Tōhoku','Aizu-Wakamatsu (samurai), buah persik, Ōuchi-juku, sake'],
+['Ibaraki','茨城','Mito','Kantō','natto Mito, Taman Kairakuen, Hitachi Seaside Park (nemophila), pusat sains Tsukuba'],
+['Tochigi','栃木','Utsunomiya','Kantō','Nikkō Tōshō-gū (UNESCO), gyoza Utsunomiya, stroberi'],
+['Gunma','群馬','Maebashi','Kantō','onsen Kusatsu & Ikaho, Tomioka Silk Mill (UNESCO), konnyaku'],
+['Saitama','埼玉','Saitama','Kantō','Kawagoe (kota tua), Chichibu, Museum Kereta Api, permukiman Tokyo'],
+['Chiba','千葉','Chiba','Kantō','Bandara Narita, Tokyo Disney Resort (Urayasu), kacang tanah'],
+['Tokyo','東京','Tokyo (Shinjuku)','Kantō','ibu kota, Skytree, Sensō-ji, Shibuya, Akihabara'],
+['Kanagawa','神奈川','Yokohama','Kantō','Kamakura (Buddha Besar), Hakone, Pecinan Yokohama'],
+['Niigata','新潟','Niigata','Chūbu','beras Koshihikari, sake, Pulau Sado, "negeri salju"'],
+['Toyama','富山','Toyama','Chūbu','Tateyama Kurobe, Gokayama, cumi-cumi cahaya (hotaruika)'],
+['Ishikawa','石川','Kanazawa','Chūbu','Kenrokuen, kertas emas, Semenanjung Noto'],
+['Fukui','福井','Fukui','Chūbu','Eihei-ji, fosil dinosaurus, kepiting Echizen, tebing Tōjinbō'],
+['Yamanashi','山梨','Kōfu','Chūbu','Kawaguchiko (Fuji), anggur dan wine Koshu, hōtō'],
+['Nagano','長野','Nagano','Chūbu','Zenkō-ji, Kastil Matsumoto, Alpen Jepang, kera salju, Olimpiade 1998'],
+['Gifu','岐阜','Gifu','Chūbu','Shirakawa-gō, Takayama, ukai (memancing dengan burung kormoran)'],
+['Shizuoka','静岡','Shizuoka','Chūbu','teh hijau (produsen utama), Fuji, onsen Izu, wasabi, belut Hamamatsu'],
+['Aichi','愛知','Nagoya','Chūbu','Toyota, Kastil Nagoya, hitsumabushi, miso katsu, Ghibli Park'],
+['Mie','三重','Tsu','Kansai','Kuil Agung Ise (Ise Jingū), mutiara Mikimoto, sapi Matsusaka, ninja Iga'],
+['Shiga','滋賀','Ōtsu','Kansai','Danau Biwa (terbesar), Kastil Hikone, Enryaku-ji'],
+['Kyoto','京都','Kyoto','Kansai','ibu kota kuno, Fushimi Inari, Kinkaku-ji, geiko/maiko, matcha Uji'],
+['Osaka','大阪','Osaka','Kansai','Kastil Osaka, Dōtonbori, takoyaki, okonomiyaki, USJ'],
+['Hyogo','兵庫','Kobe','Kansai','Kastil Himeji, sapi Kobe, onsen Arima, Takarazuka'],
+['Nara','奈良','Nara','Kansai','Tōdai-ji, rusa Nara, Hōryū-ji, ibu kota 710–794'],
+['Wakayama','和歌山','Wakayama','Kansai','Kōyasan, Kumano Kodō, jeruk mikan, umeboshi'],
+['Tottori','鳥取','Tottori','Chūgoku','bukit pasir Tottori, Mizuki Shigeru Road, pir, kepiting, prefektur berpenduduk paling sedikit'],
+['Shimane','島根','Matsue','Chūgoku','Izumo Taisha, Kastil Matsue, tambang perak Iwami Ginzan'],
+['Okayama','岡山','Okayama','Chūgoku','Kōraku-en, Kurashiki Bikan, persik, kibi dango, legenda Momotarō'],
+['Hiroshima','広島','Hiroshima','Chūgoku','Genbaku Dome, Itsukushima (Miyajima), okonomiyaki Hiroshima, tiram'],
+['Yamaguchi','山口','Yamaguchi','Chūgoku','Jembatan Kintai (Iwakuni), Akiyoshidai, fugu Shimonoseki, Hagi'],
+['Tokushima','徳島','Tokushima','Shikoku','Awa Odori, pusaran Naruto, jembatan sulur Iya, sudachi'],
+['Kagawa','香川','Takamatsu','Shikoku','udon Sanuki, Ritsurin Garden, Naoshima; prefektur terkecil'],
+['Ehime','愛媛','Matsuyama','Shikoku','Dōgo Onsen, Kastil Matsuyama, mikan, Shimanami Kaidō'],
+['Kochi','高知','Kōchi','Shikoku','Sakamoto Ryōma, katsuo tataki, Sungai Shimanto'],
+['Fukuoka','福岡','Fukuoka','Kyūshū','ramen tonkotsu Hakata, yatai, Dazaifu Tenmangū, mentaiko'],
+['Saga','佐賀','Saga','Kyūshū','porselen Arita/Imari, Yoshinogari, sapi Saga'],
+['Nagasaki','長崎','Nagasaki','Kyūshū','Taman Perdamaian, Dejima, Huis Ten Bosch, champon, castella'],
+['Kumamoto','熊本','Kumamoto','Kyūshū','Kastil Kumamoto, Gunung Aso, maskot Kumamon, basashi'],
+['Oita','大分','Ōita','Kyūshū','onsen Beppu & Yufuin (mata air terbanyak), karaage Nakatsu'],
+['Miyazaki','宮崎','Miyazaki','Kyūshū','Takachiho Gorge, mangga Taiyō no Tamago, chicken nanban, Aoshima'],
+['Kagoshima','鹿児島','Kagoshima','Kyūshū','Sakurajima, Yakushima (UNESCO), kurobuta, shōchū ubi, Saigō Takamori'],
+['Okinawa','沖縄','Naha','Okinawa','Shuri-jō, Aquarium Churaumi, pantai, karate, budaya Ryūkyū']
+];
+
+
+
+const KB_D = [
+['Bentuk potensial (可能形)','bentuk potensial,potensial,可能形,bisa melakukan,kanou kei,bisa makan,bisa baca,kemampuan kata kerja','**Bentuk potensial** = "bisa/mampu": **Gol. I:** u→e+る (かく→かける, よむ→よめる, のむ→のめる); **Gol. II:** る→られる (たべる→たべられる, みる→みられる; santai: たべれる); **する→できる**, **くる→こられる**. Objek biasanya が: にほんごが はなせます. Alternatif: ～ことができる.'],
+['Perbedaan を dan が','beda を dan が,perbedaan を dan が,を が,wo dan ga,o dan ga','**を** menandai objek tindakan (たべる→りんごを). **が** dipakai pada predikat tertentu: すき・きらい・じょうず・へた・わかる・できる・ほしい・ある (ねこが すき). Bentuk **～たい** dan potensial boleh を atau が: みずを/が のみたい. Pegangan: kalau predikat menunjukkan perasaan/kemampuan/keberadaan, biasanya が.'],
+['Kastil di Jepang','kastil,kastil jepang,himeji,matsumoto,osaka castle,kastil osaka,nagoya castle,kumamoto castle,nijo,shiro,jepang kastil,donjon','**Kastil (城, shiro)**: **Himeji-jō** ("Kastil Bangau Putih", Warisan Dunia, paling terawat), **Matsumoto-jō** (hitam, "kastil gagak"), **Osaka-jō** (peninggalan Hideyoshi), **Nagoya-jō** (sepasang shachihoko emas), **Kumamoto-jō**, **Nijō-jō** (Kyoto, lantai "burung bulbul"), **Hirosaki-jō** (sakura). Hanya **12 donjon asli** yang bertahan dari zaman Edo; banyak lainnya direkonstruksi setelah perang.'],
+['Olimpiade di Jepang','olimpiade,olympic,olimpiade tokyo,olimpiade 1964,sapporo 1972,nagano 1998,olimpiade jepang,tokyo 2020','Jepang tuan rumah empat Olimpiade: **Tokyo 1964** (Olimpiade Musim Panas pertama di Asia; Shinkansen diluncurkan), **Sapporo 1972** (Musim Dingin), **Nagano 1998** (Musim Dingin), dan **Tokyo 2020** yang diundur dan digelar pada **Juli–Agustus 2021** tanpa penonton luas karena pandemi. Tokyo menjadi kota pertama yang menggelar Olimpiade Musim Panas dua kali.'],
+['Ninja (shinobi)','ninja,shinobi,iga,koka,kunoichi,mata mata sengoku,ninjutsu,shuriken','**Ninja/shinobi** adalah mata-mata, penyabot, dan pengintai terlatih pada zaman Sengoku, terutama dari daerah **Iga (Mie)** dan **Kōka (Shiga)**. Gambaran berpakaian serba hitam dan menggunakan shuriken banyak dipengaruhi seni pertunjukan dan fiksi modern. Wanita ninja disebut **kunoichi**. Museum ninja ada di Iga-Ueno dan Kōka.'],
+['Kaisar dan keluarga kekaisaran','kaisar,tenno,emperor,naruhito,akihito,kekaisaran jepang,istana kekaisaran,tahta krisan,masako,monarki jepang,keluarga kekaisaran','Kaisar (**tennō 天皇**) adalah simbol negara dan persatuan rakyat menurut Konstitusi 1947, tanpa kuasa politik. **Kaisar Naruhito** naik takhta 1 Mei 2019 (era **Reiwa**) setelah **Kaisar Akihito** turun takhta pada 30 April 2019 (pertama dalam sekitar 200 tahun). Permaisuri **Masako**. Tahta disebut **Tahta Krisan**; lambang kekaisaran bunga krisan. **Istana Kekaisaran** di Tokyo berdiri di bekas Kastil Edo; Kyoto adalah ibu kota kekaisaran sebelumnya. Kekaisaran Jepang sering disebut monarki turun-temurun tertua yang masih ada.'],
+['Benda keberuntungan: omamori, daruma, maneki-neko','omamori,daruma,maneki neko,jimat jepang,ema,omikuji,benda keberuntungan,kucing keberuntungan,jimat,ofuda','**Omamori** (jimat kuil), **ema** (papan harapan kayu), **omikuji** (ramalan kertas; ikat jika buruk), **ofuda** (azimat rumah), **daruma** (boneka harapan; mata kiri digambar saat berharap, kanan saat tercapai), **maneki-neko** (kucing penyambut rezeki; tangan kanan = uang, tangan kiri = pelanggan), **koinobori** dan **teru-teru bōzu** (boneka penolak hujan).'],
+['Kimono, yukata, dan pakaian tradisional','kimono,yukata,hakama,obi,geta,zori,pakaian tradisional,furisode,pakaian jepang,haori','**Kimono** (着物) pakaian tradisional dengan obi; jenis: **furisode** (lengan panjang, gadis lajang), **tomesode**, **houmongi**. **Yukata** katun ringan untuk festival/onsen. **Hakama** (celana lebar, wisuda & seni bela diri). Alas kaki: **zōri** dan **geta**. Dipakai kiri menutup kanan. Menyewa kimono di Kyoto/Asakusa populer untuk turis.'],
+['Rumah makan: izakaya, kissaten, kaiten','izakaya,kissaten,kafe jepang,tipe restoran,kaitenzushi,teishoku,yatai,tachigui,ramen shop,sistem pesan,tiket mesin','Tipe tempat makan: **izakaya** (bar makanan, makan sambil minum), **kissaten** (kafe klasik), **teishoku-ya** (set menu nasi, sup, lauk), **yatai** (kedai pinggir jalan, Fukuoka), **tachigui** (makan sambil berdiri; soba/udon cepat), **kaiten-zushi** (sushi ban berjalan). Banyak ramen shop memakai **mesin tiket** (beli tiket, serahkan ke staf). Jawab "irasshaimase" cukup dengan senyum atau anggukan; **otoshi** (hidangan pembuka wajib di izakaya) dikenakan biaya.'],
+['Cuaca ekstrem dan persiapan bencana','bencana,persiapan gempa,tas siaga,evakuasi,topan jepang,hujan lebat,peringatan dini,jma,j alert,gempa susulan,tsunami','Jepang punya sistem peringatan dini: **Earthquake Early Warning**, peringatan tsunami dan hujan lebat dari **JMA**, serta **J-Alert**. Persiapan: tas siaga (air, makanan, senter, powerbank, obat), tahu **tempat evakuasi (hinanjo)**, ikuti petunjuk pemerintah daerah. Setelah gempa kuat di pantai, segera pindah ke tempat tinggi tanpa menunggu peringatan. **Topan** dan hujan lebat bisa menghentikan kereta dan penerbangan, jadi cek jadwal.'],
+['Menulis surat dan kartu pos Jepang','surat jepang,kartu tahun baru,nengajo,kartu pos,menulis surat,mengirim surat,kartu ucapan,alamat amplop','**Nengajō**: kartu pos Tahun Baru yang dikirim agar tiba 1 Januari (kirim akhir Desember), sering bergambar shio tahun itu. **Surat bergaya formal** memakai pembuka musiman (jikō no aisatsu) dan penutup. Alamat ditulis vertikal atau horizontal dari wilayah besar ke kecil; kode pos 7 digit (〒xxx-xxxx). **Shochū mimai** (musim panas) dan **kanchū mimai** (musim dingin) adalah kartu menanyakan kabar.']
+];
+
+  /* ---------- mesin pencarian basis pengetahuan besar ---------- */
+  const KB = [
+    ...KB_A.map(([title, keys, text]) => ({ title, keys, text, ic: '📘' })),
+    ...KB_B.map(([title, keys, text]) => ({ title, keys, text, ic: '🎌' })),
+    ...KB_C.map(([title, keys, text]) => ({ title, keys, text, ic: '🗾' })),
+    ...KB_D.map(([title, keys, text]) => ({ title, keys, text, ic: '📌' }))
+  ].map(e => ({ ...e, keys: e.keys.split(',').map(x => x.trim().toLowerCase()).filter(Boolean), tl: e.title.toLowerCase() }));
+  const escRe = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const deac = x => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const hasPhrase = (q, k) => (JP.test(k) || k.length > 4 || /\s/.test(k)) ? q.includes(k) : new RegExp('(^|[^a-z0-9])' + escRe(k) + '([^a-z0-9]|$)').test(q);
+  function kbSearch(q) {
+    const qn = deac(q), out = [];
+    KB.forEach(e => { let sc = 0; e.keys.forEach(k => { const kk = deac(k); if (hasPhrase(qn, kk)) sc += kk.length >= 8 ? 5 : (kk.length >= 5 ? 4 : 3); }); if (hasPhrase(qn, deac(e.tl))) sc += 5; if (sc) out.push([sc, e]); });
+    out.sort((a, b) => b[0] - a[0]);
+    return out;
+  }
+  const PREF_SUFFIX = n => n === 'Tokyo' ? '都' : n === 'Hokkaido' ? '' : (n === 'Kyoto' || n === 'Osaka') ? '府' : '県';
+  function prefSearch(q) {
+    const qn = deac(q);
+    const reg = ['hokkaido', 'tohoku', 'kanto', 'chubu', 'kansai', 'chugoku', 'shikoku', 'kyushu', 'okinawa'].find(r => qn.includes(r));
+    const list = /prefektur|daftar|apa saja|wilayah|region|provinsi/.test(qn);
+    if (reg && list && reg !== 'hokkaido' && reg !== 'okinawa') {
+      const rn = { tohoku: 'Tōhoku', kanto: 'Kantō', chubu: 'Chūbu', kansai: 'Kansai', chugoku: 'Chūgoku', shikoku: 'Shikoku', kyushu: 'Kyūshū' }[reg];
+      const rows = PREF.filter(r => deac(r[3]).toLowerCase() === reg);
+      if (rows.length) return { list: `🗾 **Prefektur di wilayah ${rn} (${rows.length}):**\n${rows.map(r => `• **${r[0]}** (${r[1]}${PREF_SUFFIX(r[0])}) — ibu kota ${r[2]}; ${r[4].split(',').slice(0, 2).join(',')}`).join('\n')}` };
+    }
+    const row = PREF.find(r => hasPhrase(qn, r[0].toLowerCase()) || qn.includes(r[1]));
+    if (!row) return null;
+    return { row, text: `🗾 **${row[0]} (${row[1]}${PREF_SUFFIX(row[0])})**\n• Wilayah: ${row[3]}\n• Ibu kota prefektur: ${row[2]}\n• Terkenal dengan: ${row[4]}` };
+  }
+  /* ---------- basis pengetahuan ---------- */
+  const K = (id, keys, ans, more) => ({ id, keys, ans, more: more || [] });
+  const TOPICS = [
+    K('season_now', [[/sekarang|saat ini|musim ini|bulan ini|lagi musim|kapan musim/, 3], [/musim/, 1]], ctx => {
+      const d = new Date(), m = d.getMonth(), s = seasonOf(m), nm = { haru: 'Haru (春, musim semi)', natsu: 'Natsu (夏, musim panas)', aki: 'Aki (秋, musim gugur)', fuyu: 'Fuyu (冬, musim dingin)' }[s];
+      const hok = `🏔️ **Di Hokkaido bulan ${MONTH_ID[m]}:** ${HOKKAIDO_NOW[m]}`, jp = `${SEASON[s]}`, fe = `🎎 **Festival bulan ini:**\n${FEST[m].map(x => '• ' + x).join('\n')}`;
+      const head = `Sekarang bulan **${MONTH_ID[m]} ${d.getFullYear()}**, di Jepang sedang **${nm}**.`;
+      if (/hokkaido|sapporo|otaru|furano|asahikawa|niseko/.test(ctx.q)) return `${head}\n\n${hok}\n\n🗾 **Secara umum di Jepang:** ${jp}\n\nMusim dingin Hokkaido memang panjang (sekitar Nov–Mar); tanya "kenapa winter Hokkaido lama?" untuk alasannya.`;
+      return `${head}\n\n${jp}\n\n${hok}\n\n${fe}\n\n${FEST_NOTE}`;
+    }, ['Kenapa winter Hokkaido lama?', 'Festival Jepang per bulan', 'Empat musim Jepang']),
+    K('hokkaido_winter', [[/hokkaido|sapporo|otaru|furano|asahikawa|niseko|abashiri|hakodate|shiretoko/, 3], [/winter|musim dingin|fuyu|salju|dingin|lama|kenapa|karena/, 2]],
+      `❄️ **Kenapa musim dingin di Hokkaido begitu lama?**\n\n1. **Lintang tinggi.** Hokkaido berada di sekitar 42–45°LU, jauh lebih utara dari Tokyo (±36°LU), jadi sinar matahari musim dingin lemah dan malam panjang.\n2. **Udara dingin Siberia.** Setiap musim dingin angin monsun dari barat laut membawa massa udara beku dari daratan Siberia.\n3. **Salju "bonus" dari laut.** Udara dingin itu melewati Laut Jepang yang relatif lebih hangat, menyerap uap air, lalu jatuh sebagai salju lebat di sisi barat Hokkaido (Sapporo, Otaru, Niseko). Salju Sapporo sekitar 5 meter per tahun.\n4. **Es laut.** Dari Laut Okhotsk, es (ryūhyō) bisa mencapai pantai timur laut sekitar Januari–Maret, mendinginkan daerah Abashiri dan Shiretoko.\n\n📏 **Gambaran:** salju pertama sekitar akhir Oktober–November, salju bertahan sampai Maret–April (di pegunungan lebih lama). Rata-rata Januari di Sapporo sekitar −4 hingga −3 °C, dan wilayah pedalaman seperti Asahikawa jauh lebih dingin. Rekor terdingin resmi Jepang −41,0 °C tercatat di Asahikawa pada 1902.\n\n⛄ **Kosakata:** 雪 yuki = salju, 寒い samui = dingin, 氷 kōri = es, 吹雪 fubuki = badai salju, 氷柱 tsurara = es menggantung.\n\n🎪 Acara musim dingin: Sapporo Yuki Matsuri (awal Februari, sejak 1950), Otaru Yuki Akari no Michi, ski bubuk (powder) di Niseko.`,
+      ['Hokkaido di musim lain', 'Festival salju', 'Kosakata cuaca']),
+    K('hokkaido', [[/hokkaido|sapporo|otaru|furano|asahikawa|niseko|abashiri|hakodate|shiretoko|ainu/, 3], [/iklim|cuaca|suhu|musim/, 1]],
+      `🏔️ **Hokkaido (北海道)** adalah pulau paling utara Jepang dengan iklim paling dingin.\n\n• **Fuyu (musim dingin):** panjang, sekitar akhir Oktober/November sampai Maret, salju lebat.\n• **Haru (semi):** datang lambat; salju mencair April, sakura sekitar akhir April–awal Mei.\n• **Natsu (panas):** sejuk dan kering; hampir tanpa musim hujan (tsuyu). Lavender Furano mekar sekitar Juli.\n• **Aki (gugur):** singkat tapi indah; daun memerah di pegunungan sejak September, di kota sekitar Oktober.\n\n🍜 Makanan khas: ramen miso Sapporo, kepiting (kani), uni, ikura, sup kari (soup curry), jingisukan (daging domba panggang), susu dan keju.\n📜 Hokkaido dulu bernama Ezo, dan diganti nama menjadi Hokkaido pada 1869. Penduduk aslinya adalah suku **Ainu** dengan bahasa dan budayanya sendiri; banyak nama tempat berasal dari bahasa Ainu (misalnya Sapporo).\n\nTanya "kenapa winter Hokkaido lama" untuk penjelasan iklimnya.`,
+      ['Kenapa winter Hokkaido lama?', 'Musim sekarang di Jepang', 'Budaya Ainu']),
+    K('okinawa', [[/okinawa|naha|ishigaki|subtropis|tropis/, 3]],
+      `🌺 **Okinawa (沖縄)** beriklim subtropis: hampir tidak ada musim dingin. Suhu rata-rata Januari di Naha sekitar 17 °C. Sakura (kanhizakura, merah muda tua) mekar sekitar Januari–Februari, jauh lebih awal dari daratan utama. Musim hujan lebih awal (sekitar pertengahan Mei–Juni) dan musim topan sekitar Juni–Oktober. Dulu bernama Kerajaan Ryukyu dengan budaya, bahasa, dan musik sanshin sendiri. Ciri: makanan seperti goya champuru dan soki soba, serta karate yang berasal dari sini.`,
+      ['Topan di Jepang', 'Empat musim Jepang']),
+    K('snowcountry', [[/niigata|yukiguni|tohoku|nagano|akita|yamagata|shirakawa|daerah bersalju|negeri salju/, 3]],
+      `🌨️ **Daerah bersalju selain Hokkaido:** sisi Laut Jepang di Honshu (Niigata, Toyama, Akita, Yamagata, sebagian Nagano dan Gifu) disebut **yukiguni (雪国, negeri salju)**. Alasan sama: udara dingin menyerap uap dari Laut Jepang. Sebaliknya sisi Pasifik, termasuk Tokyo, kering dan cerah di musim dingin. Contoh terkenal: desa rumah gassho di Shirakawa-gō dan kamakura (rumah salju) di Yokote, Akita.`,
+      ['Kenapa winter Hokkaido lama?', 'Onsen']),
+    K('seasons', [[/empat musim|4 musim|musim di jepang|musim jepang|haru|natsu|aki|fuyu|shiki/, 3], [/musim/, 1]],
+      () => `🗾 **Empat musim Jepang (四季, shiki):**\n\n${Object.values(SEASON).join('\n\n')}\n\nSetiap daerah berbeda: Hokkaido lebih dingin dan Okinawa subtropis. Mau tahu musim sekarang atau musim di daerah tertentu? Tanya saja.`,
+      ['Musim sekarang di Jepang', 'Sakura mekar kapan?', 'Musim hujan']),
+    K('sakura', [[/sakura|hanami|bunga ceri|cherry/, 3]],
+      `🌸 **Sakura & Hanami.** Bunga sakura mekar bergelombang dari selatan ke utara ("sakura zensen" atau barisan mekar): Okinawa Januari–Februari, Fukuoka/Tokyo sekitar akhir Maret–awal April, Kyoto awal April, Tohoku pertengahan–akhir April, Hokkaido akhir April–awal Mei. Mekar penuh hanya sekitar satu minggu.\n\n**Hanami (花見)** = piknik di bawah pohon sakura bersama keluarga, teman, atau rekan kerja; sering ada bento, dango, dan minuman. Makanan musiman: sakura mochi. Tanggal mekar tiap tahun diprediksi Badan Meteorologi Jepang dan media.`,
+      ['Empat musim Jepang', 'Festival bulan Maret']),
+    K('koyo', [[/momiji|koyo|kōyō|daun merah|daun gugur|autumn leaves/, 3]],
+      `🍁 **Kōyō/Momiji (紅葉)**: daun berubah merah dan kuning. Dari utara ke selatan: Hokkaido (pegunungan) sekitar September–Oktober, Tohoku Oktober, Tokyo dan Kyoto sekitar akhir November–awal Desember. Tradisi: momijigari (berburu daun musim gugur). Tempat populer: Nikko, Kyoto (Kiyomizu-dera, Arashiyama), Hokkaido (Daisetsuzan).`,
+      ['Empat musim Jepang']),
+    K('tsuyu', [[/tsuyu|musim hujan|ajisai|baiu|hujan/, 3], [/topan|typhoon|taifu/, 3]],
+      `🌧️ **Tsuyu/Baiu (梅雨)** adalah musim hujan Jepang sekitar awal Juni sampai pertengahan Juli (Okinawa lebih awal, sekitar Mei–Juni). Hokkaido hampir tidak mengalaminya. Bunga ajisai (hydrangea) mekar saat ini. **Topan (taifū, 台風)** paling sering Agustus–September (musim topan sekitar Juni–Oktober), terutama di selatan dan Pasifik. Selalu cek peringatan resmi JMA saat bepergian.`,
+      ['Empat musim Jepang']),
+    K('festival_list', [[/festival|matsuri|perayaan|acara tradisional|hari raya/, 3], [/jepang|bulan/, 1]], ctx => {
+      let m = MONTHS.findIndex(x => ctx.q.includes(x));
+      if (/bulan ini/.test(ctx.q)) m = new Date().getMonth();
+      if (m >= 0) return `🎎 **Festival & acara bulan ${MONTH_ID[m]}:**\n${FEST[m].map(x => '• ' + x).join('\n')}\n\n${FEST_NOTE}`;
+      return `🎎 **Festival (祭り, matsuri) di Jepang — ringkasan per bulan:**\n${FEST.map((f, i) => `• **${MONTH_ID[i]}:** ${f[0].split(':')[0]}${f[1] ? '; ' + f[1].split(':')[0].split('(')[0].trim() : ''}`).join('\n')}\n\nSebut nama bulan atau festivalnya (misalnya "festival bulan Agustus" atau "Gion Matsuri") untuk detail.\n${FEST_NOTE}`;
+    }, ['Gion Matsuri', 'Nebuta Matsuri', 'Tanabata', 'Obon', 'Festival bulan ini']),
+    K('f_gion', [[/gion/, 4]], `🛕 **Gion Matsuri (祇園祭), Kyoto.** Berlangsung sepanjang Juli; asalnya tahun 869 untuk menenangkan wabah. Puncaknya **Yamaboku Junkō**, parade kereta hias raksasa (yama dan hoko), sekitar 17 dan 24 Juli, dengan malam "yoiyama" sebelumnya di mana jalanan penuh lampion dan pedagang. Termasuk tiga festival besar Kyoto bersama Aoi Matsuri (15 Mei) dan Jidai Matsuri (22 Oktober).`),
+    K('f_nebuta', [[/nebuta|neputa|kanto matsuri|kantō|tohoku sandai|sandai matsuri/, 4]], `🏮 **Nebuta Matsuri, Aomori (2–7 Agustus):** parade lentera kertas raksasa berbentuk pahlawan dan makhluk mitos yang diarak sambil menari "haneto". Bersama Kantō Matsuri Akita (3–6 Agustus, tiang bambu dengan banyak lampion) dan Tanabata Sendai (6–8 Agustus), disebut tiga festival besar Tohoku.`),
+    K('f_tanabata', [[/tanabata|tanzaku|orihime|hikoboshi/, 4]], `🎋 **Tanabata (七夕), 7 Juli.** Berdasar legenda Orihime (bintang Vega) dan Hikoboshi (Altair) yang hanya boleh bertemu setahun sekali. Orang menulis harapan di kertas **tanzaku** dan menggantungnya di dahan bambu. Sendai merayakannya besar-besaran pada 6–8 Agustus (kalender lama).`),
+    K('f_obon', [[/obon|bon odori|leluhur|arwah/, 4]], `🕯️ **Obon (お盆)**: sekitar 13–15 Agustus (di sebagian Tokyo dan area tertentu pada Juli) untuk menyambut arwah leluhur. Orang pulang kampung, mengunjungi makam, menyalakan lampu penyambut (mukaebi) dan lentera, serta menari **Bon Odori**. Pada akhirnya ada tradisi melepas lentera ke sungai atau laut (tōrō nagashi).`),
+    K('f_newyear', [[/tahun baru|oshogatsu|oshōgatsu|osechi|hatsumode|omisoka|otoshidama|joya no kane|toshikoshi/, 4]], `🎍 **Tahun Baru (お正月, Oshōgatsu).** Hari terpenting di Jepang. **Omisoka** (31 Des): makan toshikoshi soba dan temple membunyikan lonceng **Joya no Kane** 108 kali (melambangkan 108 nafsu duniawi). 1–3 Jan: **hatsumode** (kunjungan pertama ke kuil), **osechi** (hidangan kotak), **ozōni** (sup mochi), kartu nengajō, dan **otoshidama** (uang saku untuk anak-anak).`),
+    K('f_setsubun', [[/setsubun|hinamatsuri|kodomo no hi|koinobori|shichi.?go.?san|golden week|tsukimi|white day|valentine|seijin|natal|christmas/, 4]],
+      ctx => {
+        const q = ctx.q;
+        if (/setsubun/.test(q)) return '👹 **Setsubun (節分), sekitar 3 Februari:** hari sebelum awal musim semi menurut kalender lama. Orang melempar kacang kedelai panggang sambil berseru "Oni wa soto! Fuku wa uchi!" (iblis keluar, keberuntungan masuk), dan makan ehōmaki (sushi gulung) menghadap arah keberuntungan tahun itu.';
+        if (/hinamatsuri/.test(q)) return '🎎 **Hinamatsuri (ひな祭り), 3 Maret:** Hari Anak Perempuan. Keluarga memajang boneka hina berpakaian istana Heian bertingkat, makan chirashi-zushi, hishimochi, dan minum amazake.';
+        if (/kodomo no hi|koinobori/.test(q)) return '🎏 **Kodomo no Hi (こどもの日), 5 Mei:** Hari Anak (tradisinya untuk anak laki-laki). Dipasang **koinobori** (bendera ikan koi) karena koi dianggap gigih berenang melawan arus; makan kashiwamochi dan chimaki. Hari libur dalam rangkaian Golden Week (29 April–5 Mei).';
+        if (/golden week/.test(q)) return '🗓️ **Golden Week:** rangkaian libur sekitar 29 April (Showa no Hi), 3 Mei (Hari Konstitusi), 4 Mei (Hari Hijau), dan 5 Mei (Kodomo no Hi). Salah satu masa tersibuk bagi transportasi dan wisata; harga naik dan tempat penuh.';
+        if (/shichi/.test(q)) return '👘 **Shichi-Go-San (七五三), 15 November:** perayaan anak berusia 3 dan 5 tahun (laki-laki 5, perempuan 3 dan 7). Mereka mengenakan kimono ke kuil untuk didoakan, dan menerima **chitose-ame** (permen panjang tanda umur panjang).';
+        if (/tsukimi/.test(q)) return '🌕 **Tsukimi (月見):** menikmati bulan purnama musim gugur (sekitar pertengahan September) dengan dango, rumput susuki, dan ubi talas sebagai persembahan.';
+        if (/white day|valentine/.test(q)) return '🍫 **Valentine & White Day:** di Jepang, pada 14 Februari biasanya perempuan memberi cokelat (giri-choco untuk kolega, honmei-choco untuk orang spesial). Balasannya, **White Day** pada 14 Maret, laki-laki memberi hadiah balasan.';
+        if (/seijin/.test(q)) return '🎓 **Seijin no Hi (成人の日):** Hari Kedewasaan, Senin ke-2 Januari, untuk yang berusia 20 tahun pada tahun itu (usia dewasa hukum kini 18, namun perayaan tetap untuk usia 20). Peserta berkimono furisode atau berjas.';
+        return '🎄 **Natal di Jepang** bukan hari libur nasional dan lebih bernuansa romantis/keluarga: makan kue stroberi dan ayam goreng (KFC sangat populer), serta melihat illumination.';
+      }, ['Festival Jepang', 'Tahun Baru Jepang']),
+    K('sumo', [[/sumo|yokozuna|rikishi|basho/, 4]], `🤼 **Sumo (相撲):** olahraga nasional dan ritual Shinto. Ada **6 turnamen resmi (honbasho) per tahun**: Januari, Mei, September di Tokyo; Maret di Osaka; Juli di Nagoya; November di Fukuoka. Tiap turnamen 15 hari. Peringkat tertinggi: **yokozuna**. Pegulat disebut rikishi.`),
+    K('history', [[/\b(sejarah|zaman|periode|era|jaman|kerajaan|kekaisaran|restorasi|meiji|edo|heian|nara|kamakura|muromachi|sengoku|showa|shōwa|taisho|reiwa|heisei|jomon|yayoi|kofun)\b/, 3]],
+      `📜 **Garis besar sejarah Jepang:**\n• **Jōmon** (±14.000–300 SM): pemburu-pengumpul, tembikar bermotif tali.\n• **Yayoi** (±300 SM–250 M): pertanian padi dan logam.\n• **Kofun** (±250–538): gundukan makam besar; negara Yamato terbentuk.\n• **Asuka** (538–710): Buddhisme masuk; Pangeran Shōtoku.\n• **Nara** (710–794): ibu kota Heijō-kyō; Kojiki dan Nihon Shoki.\n• **Heian** (794–1185): ibu kota Kyoto; budaya istana, Genji Monogatari, lahirnya kana.\n• **Kamakura** (1185–1333): shogun pertama, kekuasaan samurai; menahan invasi Mongol (1274, 1281).\n• **Muromachi** (1336–1573) lalu **Sengoku** (±1467–1600): era perang antarpenguasa.\n• **Azuchi–Momoyama** (±1573–1600): Oda Nobunaga dan Toyotomi Hideyoshi menyatukan Jepang.\n• **Edo** (1603–1868): keshogunan Tokugawa, kebijakan tertutup (sakoku), kota Edo berkembang.\n• **Meiji** (1868–1912): restorasi, modernisasi, ibu kota pindah ke Tokyo.\n• **Taishō** (1912–1926) dan **Shōwa** (1926–1989): perang dunia, pembangunan pascaperang, Olimpiade Tokyo 1964.\n• **Heisei** (1989–2019) dan **Reiwa** (sejak 1 Mei 2019, Kaisar Naruhito).\n\nSebut zaman atau tokohnya untuk detail lebih lanjut.`,
+      ['Samurai dan shogun', 'Restorasi Meiji', 'Oda Nobunaga', 'Perang Dunia II']),
+    K('samurai', [[/samurai|shogun|bushido|ninja|daimyo|katana|tokugawa|oda nobunaga|nobunaga|hideyoshi|ieyasu|sekigahara/, 4]],
+      `⚔️ **Samurai & Shogun.** Samurai (侍) adalah kelas prajurit yang menguasai politik dari era Kamakura (1185) hingga 1868. **Shogun** (将軍) adalah panglima tertinggi yang memegang kekuasaan nyata, sedangkan kaisar bersifat simbolik/keagamaan. **Daimyō** adalah penguasa wilayah.\n• **Oda Nobunaga** (1534–1582) mulai menyatukan Jepang; wafat di insiden Honnō-ji.\n• **Toyotomi Hideyoshi** meneruskan penyatuan.\n• **Tokugawa Ieyasu** menang di pertempuran Sekigahara (1600) dan mendirikan keshogunan Edo (1603–1868).\n**Bushidō** adalah kode etika samurai: kesetiaan, kehormatan, keberanian. Kelas samurai dihapus pada era Meiji. Ninja (shinobi) adalah mata-mata dan agen rahasia pada era Sengoku, bukan sekadar tokoh film.`,
+      ['Sejarah Jepang', 'Restorasi Meiji']),
+    K('meiji', [[/meiji|restorasi|perry|kapal hitam|sakoku/, 4]],
+      `🏛️ **Restorasi Meiji (1868).** Dipicu kedatangan Komodor Perry dengan "kapal hitam" pada 1853 yang memaksa Jepang membuka diri setelah lebih dari 200 tahun kebijakan tertutup (sakoku). Keshogunan Tokugawa jatuh dan kekuasaan dikembalikan kepada Kaisar Meiji. Edo diganti nama jadi **Tokyo** dan menjadi ibu kota; kelas samurai dihapus; dibangun kereta api, sekolah, pabrik, dan tentara modern. Dalam sekitar 40 tahun Jepang menjadi negara industri modern.`,
+      ['Samurai dan shogun', 'Sejarah Jepang']),
+    K('wwii', [[/perang dunia|ww2|wwii|hiroshima|nagasaki|pendudukan jepang|perang pasifik|menyerah/, 4]],
+      `🕊️ **Jepang pada Perang Dunia II (ringkas, netral):** Jepang terlibat dalam Perang Pasifik 1941–1945 dan menduduki wilayah Asia Tenggara, termasuk Indonesia (1942–1945). Bom atom dijatuhkan di Hiroshima (6 Agustus 1945) dan Nagasaki (9 Agustus 1945); Jepang menyatakan menyerah pada 15 Agustus 1945. Pascaperang Jepang di bawah pendudukan Sekutu, menerima konstitusi baru 1947 (termasuk Pasal 9 yang menolak perang sebagai hak berdaulat), lalu bangkit lewat "keajaiban ekonomi" 1950–1980-an. Hiroshima dan Nagasaki kini menjadi simbol perdamaian.`),
+    K('religion', [[/shinto|buddha|buddhis|kuil|jinja|torii|temizu|omikuji|\bema\b|agama|dewa|berdoa/, 3]],
+      `⛩️ **Agama & kuil.** Mayoritas orang Jepang mempraktikkan **Shintō** (pemujaan kami, roh/dewa alam) dan **Buddhisme** (masuk abad ke-6) sekaligus: pernikahan sering bergaya Shinto, pemakaman bergaya Buddha.\n\n**Tata cara di kuil Shinto (jinja 神社):**\n1. Bungkuk sedikit di bawah torii; jalan di tepi jalan setapak.\n2. Bersihkan tangan dan mulut di **temizuya**.\n3. Masukkan koin, bunyikan lonceng.\n4. **Bungkuk 2 kali, tepuk 2 kali, berdoa, bungkuk 1 kali.**\n\n**Di kuil Buddha (tera/otera 寺):** tidak menepuk tangan; cukup menyatukan telapak tangan dengan tenang. Ada juga omikuji (ramalan kertas), ema (papan harapan), dan omamori (jimat).`,
+      ['Etiket di Jepang', 'Tahun Baru Jepang']),
+    K('etiquette', [[/etiket|sopan santun|adab|aturan|tata krama|manner|budaya|kebiasaan|ojigi|sepatu|sumpit|\btip\b|omotenashi|honne|senpai/, 3]],
+      `🙇 **Etiket & kebiasaan di Jepang:**\n• **Salam:** membungkuk (ojigi) lebih umum daripada berjabat tangan.\n• **Lepas sepatu** saat masuk rumah, ryokan, dan banyak ruang tatami; ada sandal rumah, dan sandal khusus toilet.\n• **Sumpit:** jangan menancapkan tegak di nasi dan jangan mengoper makanan dari sumpit ke sumpit (mengingatkan ritual pemakaman).\n• **Ucapan makan:** "Itadakimasu" sebelum makan, "Gochisōsama deshita" sesudahnya.\n• **Onsen:** cuci badan dulu, masuk tanpa pakaian renang, handuk kecil tidak dicelup; sebagian onsen membatasi tato.\n• **Tip tidak lazim;** pelayanan sudah termasuk (omotenashi).\n• **Kereta:** tenang, hindari bertelepon, berikan prioritas kursi.\n• **Sampah:** dipilah ketat dan tempat sampah umum sedikit; bawa pulang sampahmu.\n• **Kartu nama (meishi):** diberikan dan diterima dengan dua tangan.\n• **Honne & tatemae:** perasaan asli vs sikap di depan umum; menjaga keharmonisan (wa) sangat dihargai.\n• **Senpai–kōhai & keigo:** hierarki umur/jabatan memengaruhi tingkat kesopanan bahasa.`,
+      ['Tingkat kesopanan (keigo)', 'Makanan Jepang', 'Tata cara kuil']),
+    K('food', [[/makanan|masakan|kuliner|sushi|ramen|tempura|washoku|okonomiyaki|takoyaki|udon|soba|bento|wagashi|matcha|mochi|nabe|oden|halal|babi/, 3]],
+      `🍱 **Makanan Jepang (和食, washoku)** diakui UNESCO sebagai warisan budaya tak benda (2013), dengan dasar rasa **umami** dari dashi.\n• **Sushi & sashimi** (ikan mentah), **tempura**, **unagi**, **yakitori**.\n• **Ramen:** miso (Sapporo), tonkotsu (Hakata/Fukuoka), shōyu (Tokyo).\n• **Okonomiyaki** (Osaka/Hiroshima), **takoyaki** (Osaka), **udon** (Kagawa), **soba**.\n• **Wagashi** (kue tradisional), **matcha**, **mochi**.\n• **Musiman:** sakura mochi (semi), kakigōri (panas), matsutake dan kastanye (gugur), nabe dan oden (dingin).\n• **Konbini** (minimarket) menjual onigiri dan bento yang enak dan murah.\n\n⚠️ Bagi muslim: banyak masakan memakai babi, mirin, atau sake. Cari restoran halal atau tanyakan bahan, dan periksa selalu karena label tidak selalu jelas.`,
+      ['Etiket makan', 'Festival Jepang']),
+    K('arts', [[/ikebana|origami|kimono|yukata|kabuki|noh|teh|sado|chado|upacara teh|geisha|maiko|kaligrafi|shodo|bonsai|haiku|anime|manga|cosplay|ukiyo/, 3]],
+      ctx => {
+        const q = ctx.q;
+        if (/geisha|maiko|geiko/.test(q)) return '🎎 **Geisha (芸者)** adalah seniman penghibur tradisional yang mahir menari, musik shamisen, dan percakapan. Di Kyoto disebut **geiko**, dan yang magang disebut **maiko**. Mereka bukan sekadar "pemandu"; mereka menjaga seni tradisional di distrik seperti Gion.';
+        if (/kimono|yukata/.test(q)) return '👘 **Kimono (着物)** adalah pakaian tradisional untuk acara resmi; **yukata** adalah versi katun ringan untuk musim panas, festival, dan onsen. Dikenakan kiri menimpa kanan (kanan menimpa kiri hanya untuk jenazah) dan diikat dengan obi.';
+        if (/teh|sado|chado/.test(q)) return '🍵 **Upacara teh (茶道, sadō/chadō)** adalah seni menyajikan matcha dengan gerakan terukur. Prinsipnya **wa-kei-sei-jaku** (harmoni, hormat, kemurnian, ketenangan), dan berkembang dari ajaran Sen no Rikyū abad ke-16.';
+        if (/anime|manga|cosplay/.test(q)) return '📺 **Anime & manga** adalah bagian besar budaya populer Jepang. Belajar dari anime menyenangkan, tapi waspadai bahasa santai/kasar yang tidak cocok dipakai dalam situasi sopan (misalnya "omae", "~ze"). Gunakan bentuk sopan -masu sebagai dasar.';
+        if (/kabuki|noh/.test(q)) return '🎭 **Kabuki** (drama musikal Edo dengan riasan kumadori dan pemeran pria untuk semua peran) dan **Noh** (drama klasik lebih tua dengan topeng dan gerakan minimal) adalah teater tradisional Jepang yang diakui UNESCO.';
+        if (/origami/.test(q)) return '🕊️ **Origami (折り紙)** adalah seni melipat kertas; bangau (orizuru) simbol harapan dan perdamaian, dan 1000 bangau (senbazuru) melambangkan doa kesembuhan.';
+        if (/haiku/.test(q)) return '🌿 **Haiku (俳句)** adalah puisi 17 mora dalam pola 5-7-5, biasanya memuat kigo (kata musim). Penyair terkenal: Matsuo Bashō.';
+        return '🎨 **Seni tradisional Jepang:** sadō (upacara teh), ikebana (merangkai bunga), shodō (kaligrafi), origami, bonsai, kabuki, noh, ukiyo-e (cetakan kayu), dan haiku. Tanya salah satunya untuk penjelasan lebih lengkap.';
+      }, ['Upacara teh', 'Kimono dan yukata', 'Haiku']),
+    K('geo', [[/geografi|pulau|prefektur|ibu kota|ibukota|fuji|gunung|penduduk|\bluas\b|gempa/, 3], [/shinkansen/, 1]],
+      `🗺️ **Geografi Jepang:** terdiri dari ±6.800 pulau dengan **empat pulau utama**: Hokkaido, Honshu, Shikoku, Kyushu (plus Okinawa di selatan). Ada **47 prefektur**. Ibu kota **Tokyo**; Kyoto menjadi ibu kota kekaisaran 794–1868. **Gunung Fuji** setinggi 3.776 m adalah gunung tertinggi. Penduduk sekitar 124 juta jiwa, terpadat di sekitar Tokyo–Osaka. Jepang berada di Cincin Api Pasifik sehingga rawan **gempa** dan gunung berapi, dan **Shinkansen** (kereta cepat, sejak 1964) menghubungkan kota-kota besar.`,
+      ['Empat musim Jepang', 'Sejarah Jepang']),
+    K('script', [[/hiragana|katakana|kanji|huruf|aksara|romaji|tulisan|on'?yomi|kun'?yomi|furigana/, 2]],
+      `🔤 **Sistem tulisan Jepang:**\n• **Hiragana (ひらがな):** 46 huruf dasar; kata asli Jepang, partikel, dan akhiran.\n• **Katakana (カタカナ):** 46 huruf dasar; kata serapan, nama asing, onomatope.\n• **Kanji (漢字):** aksara dari Tiongkok; makna + bacaan. Daftar Jōyō kanji berisi 2.136 karakter. Tiap kanji biasanya punya bacaan **on'yomi** (bacaan Tionghoa, dalam kata majemuk) dan **kun'yomi** (bacaan Jepang asli).\n• **Romaji:** huruf Latin untuk membantu pelafalan.\n• **Furigana:** hiragana kecil di atas kanji sebagai petunjuk baca.\n\nUrutan belajar yang umum: hiragana → katakana → kosakata dasar + kanji N5. Coba: tanya "hiragana 'sakura'" untuk mengubah romaji ke kana.`,
+      ['Hiragana "sakura"', 'Tips belajar kanji', 'JLPT N5']),
+    K('kanji_tips', [[/belajar kanji|hafal kanji|tips kanji|ingin belajar kanji|susah kanji/, 5]],
+      `✍️ **Tips belajar kanji:**\n1. Mulai dari kanji paling sering (angka, hari, bulan, orang, air, api) lewat menu Belajar di aplikasi.\n2. Pelajari kanji **bersama kosakatanya** (mis. 人 hito di 日本人 nihonjin), bukan sendirian.\n3. Pahami **radikal** (bagian pembentuk): 氵 (air), 木 (pohon), 亻 (orang).\n4. Tulis dengan urutan goresan yang benar, 5–10 kanji per hari.\n5. Ulang berjarak (spaced repetition): 1 hari, 3 hari, 1 minggu, 1 bulan.\n6. Baca kalimat nyata; kanji menempel kalau dipakai.`,
+      ['Kanji N5 di aplikasi', 'JLPT N5']),
+    K('jlpt', [[/jlpt|n5|n4|n3|n2|n1|ujian bahasa|nouryoku|nōryoku|sertifikat/, 3]],
+      `🎓 **JLPT (日本語能力試験)** punya 5 level: **N5 (paling mudah) → N1 (paling sulit)**. Diselenggarakan di Jepang dan banyak negara dua kali setahun, yaitu Juli dan Desember (cek jadwal dan pendaftaran di penyelenggara resmi di negaramu).\n\nPerkiraan kebutuhan (angka resmi tidak dipublikasikan, ini patokan umum):\n• **N5:** ±100 kanji, ±800 kata, kalimat dasar, hiragana dan katakana.\n• **N4:** ±300 kanji, ±1.500 kata, percakapan sehari-hari sederhana.\n• **N3:** ±650 kanji, ±3.750 kata, jembatan menuju bahasa nyata.\n• **N2:** ±1.000 kanji, ±6.000 kata, cukup untuk kuliah/kerja di Jepang.\n• **N1:** ±2.000 kanji, ±10.000 kata, hampir setara penutur terpelajar.\n\nUjian terdiri dari bagian pengetahuan bahasa (kosakata dan tata bahasa), membaca, dan mendengarkan. Nilai lulus ditentukan per bagian dan total. Latihan dengar di game Listening sangat membantu!`,
+      ['Tips lulus N5', 'Tata bahasa dasar', 'Cara melatih listening']),
+    K('n5_tips', [[/tips.*(n5|lulus)|lulus n5|persiapan jlpt|belajar n5/, 5]],
+      `✅ **Tips lulus N5:**\n1. Kuasai **hiragana dan katakana** dulu.\n2. Kuasai ±800 kata (bab 1–25 Minna no Nihongo setara materi N5/N4 awal).\n3. Pahami pola dasar: です/ます, partikel は・が・を・に・で, bentuk て, bentuk kamus dan ない.\n4. Latihan **soal tiap hari** (Ujian di aplikasi) dan **listening 10–15 menit**.\n5. Kerjakan soal tahun lalu dengan batas waktu.\n6. Ulang kesalahan: catat dan tinjau tiap minggu.`,
+      ['Cara melatih listening', 'Tata bahasa dasar']),
+    K('grammar', [[/tata bahasa|grammar|pola kalimat|partikel|\bwa\b.*\bga\b|perbedaan|kata kerja|bentuk te|bentuk て|te-form|masu|kamus|adjektiva|sifat|kata sifat|golongan|kelompok/, 2]],
+      `🧩 **Dasar tata bahasa Jepang:**\n• **Urutan kalimat: S-O-V** (kata kerja di akhir). わたしは りんごを たべます = Saya makan apel.\n• **Partikel:** は (wa, topik), が (subjek/penegasan), を (o, objek), に (tujuan/waktu/keberadaan), で (tempat aksi/alat), へ (e, arah), と (dan/bersama), の (milik), も (juga), から・まで (dari・sampai), か (tanya).\n• **Kata kerja** golongan I (godan), II (ichidan: akhiran -iru/-eru), III (する, くる).\n• **Bentuk ます:** sopan. たべます, いきます.\n• **Bentuk て** (menyambung/permintaan): Gol. I berakhir う・つ・る → って; む・ぶ・ぬ → んで; く → いて (いく→いって); ぐ → いで; す → して. Gol. II buang る + て. する→して, くる→きて.\n• **Kata sifat:** い-adjektiva (たかい) dan な-adjektiva (きれいな).\n\nTanya spesifik, misalnya "beda は dan が", "bentuk te", atau "pola ～ています".`,
+      ['Beda は dan が', 'Beda に dan で', 'Bentuk て']),
+    K('wa_ga', [[/beda.*(wa|は).*(ga|が)|(wa|は).*(ga|が)/, 4]],
+      `🔎 **は (wa) vs が (ga):**\n• **は** menandai **topik** ("tentang X…"), informasi sudah diketahui atau kontras. 私は学生です (Kalau saya, mahasiswa).\n• **が** menandai **subjek baru/penegasan** dan dipakai dengan kata tanya & suka/bisa. だれが きましたか (Siapa yang datang?), 私が やります (Saya yang melakukannya), 犬が すきです (Suka anjing).\nPegangan awal: kalau jawaban adalah "X-lah yang…", pakai が; kalau sekadar "tentang X…", pakai は.`),
+    K('ni_de', [[/beda.*(ni|に).*(de|で)|(ni|に).*(de|で)/, 4]],
+      `🔎 **に (ni) vs で (de):**\n• **に:** tujuan, waktu spesifik, **tempat keberadaan** (ada/ada orang): 学校に いきます, 7じに おきます, つくえの上に ほんが あります.\n• **で:** **tempat terjadinya aksi** dan alat/cara: 学校で べんきょうします, バスで いきます, はしで たべます.`),
+    K('te_form', [[/bentuk te|bentuk て|te-form|\bte\b form|tte|nde/, 4]],
+      `🔧 **Bentuk て (te-form):**\n• Gol. I: **う・つ・る → って** (かう→かって, まつ→まって, とる→とって); **む・ぶ・ぬ → んで** (よむ→よんで); **く → いて** (かく→かいて; pengecualian いく→いって); **ぐ → いで**; **す → して**.\n• Gol. II: buang **る** + **て** (たべる→たべて).\n• Gol. III: する→**して**, くる→**きて**.\nPenggunaan: ～てください (tolong…), ～ています (sedang/kebiasaan), ～てから (setelah), ～てもいいです (boleh).`),
+    K('teimasu', [[/ています|ている|teimasu|te imasu|\bte iru\b/, 5]],
+      `🔁 **～ています (te imasu):**\n• **Aksi sedang berlangsung:** いま ごはんを たべています = Sekarang sedang makan.\n• **Kebiasaan/keadaan berlanjut:** まいにち にほんごを べんきょうしています = Belajar bahasa Jepang tiap hari.\n• **Keadaan hasil:** けっこんしています = Sudah menikah; すんでいます = Tinggal di…\nRumus: bentuk て + います. Negatif: ～ていません; bentuk lampau: ～ていました.`, ['Bentuk て', 'Tata bahasa dasar']),
+    K('numbers', [[/angka|hitung|bilangan|counter|satuan|penghitung|nomor/, 3]],
+      `🔢 **Angka:** 1 いち・2 に・3 さん・4 よん/し・5 ご・6 ろく・7 なな/しち・8 はち・9 きゅう/く・10 じゅう・100 ひゃく・1.000 せん・10.000 まん.\n**Hari:** にちようび (Minggu), げつ(Senin), か(Selasa), すい(Rabu), もく(Kamis), きん(Jumat), ど(Sabtu) + ようび.\n**Jam:** いちじ, にじ, さんじ, よじ (bukan よんじ!), ごじ…くじ (bukan きゅうじ), じゅうじ.\n**Penghitung umum:** ～つ (benda: ひとつ, ふたつ), ～にん (orang: ひとり, ふたり, さんにん), ～まい (lembar), ～ほん (benda panjang), ～ひき (hewan kecil), ～さつ (buku), ～だい (kendaraan/mesin).`),
+    K('greet', [[/\bsalam\b|sapaan|ucapan|selamat pagi|\bmaaf\b|permisi|hajimemashite|ohayou|konnichiwa|arigatou|sumimasen|frasa|ungkapan|kalimat sehari/, 3]],
+      `👋 **Ungkapan sehari-hari:**\n• おはようございます (Ohayō gozaimasu) — Selamat pagi\n• こんにちは (Konnichiwa) — Selamat siang/halo\n• こんばんは (Konbanwa) — Selamat malam\n• おやすみなさい — Selamat tidur\n• ありがとうございます — Terima kasih\n• どういたしまして — Sama-sama\n• すみません — Permisi/maaf (memanggil, minta maaf ringan)\n• ごめんなさい — Maaf (lebih personal)\n• おねがいします — Tolong/mohon\n• いただきます / ごちそうさまでした — sebelum/sesudah makan\n• いってきます / いってらっしゃい — pergi dan balasan\n• ただいま / おかえり — pulang dan balasan\n• おつかれさまです — "terima kasih atas kerja kerasnya"\n• はじめまして。どうぞよろしくおねがいします — Senang bertemu, mohon bantuannya.`,
+      ['Perkenalan diri', 'Angka dan jam']),
+    K('intro', [[/perkenalan diri|memperkenalkan|jikoshoukai|jikoshōkai|self.?intro/, 5]],
+      `🙋 **Contoh perkenalan diri (自己紹介):**\n「はじめまして。わたしは ＿＿＿ です。インドネシアから きました。＿＿さい です。しゅみは ＿＿ です。どうぞ よろしく おねがいします。」\nArti: Senang berkenalan. Saya ＿＿. Saya berasal dari Indonesia. Usia ＿＿ tahun. Hobi saya ＿＿. Mohon bantuannya.\nTinggal isi nama, usia, dan hobi. Latih lisan dengan merekam suaramu!`),
+    K('keigo', [[/keigo|sonkeigo|kenjougo|teineigo|tingkat kesopanan|bahasa sopan|formal/, 4]],
+      `🎩 **Tingkat kesopanan (敬語, keigo):**\n• **Teineigo** (sopan biasa): です・ます.\n• **Sonkeigo** (menghormati lawan bicara): いらっしゃる (pergi/datang/ada), おっしゃる (berkata), めしあがる (makan), なさる.\n• **Kenjōgo** (merendahkan diri): まいる, もうす, いただく, いたす.\n• **Bentuk biasa/kamus** untuk teman dekat.\nPakai です・ます dulu; keigo dipelajari bertahap pada N4–N3 ke atas.`),
+    K('listen_tips', [[/listening|dengar|choukai|chōkai|menyimak|melatih listening|susah dengar|telinga/, 3]],
+      `🎧 **Cara melatih listening:**\n1. Dengarkan **kalimat pendek** berulang, lalu tulis ulang (persis game Listening Kalimat di Games).\n2. Pakai kecepatan **pelan** dulu, lalu normal.\n3. **Shadowing:** tirukan suara sambil mendengar, ikuti ritme dan intonasi.\n4. Kenali pola bunyi: vokal panjang (おう・えい), konsonan ganda (っ), dan ん.\n5. Dengarkan materi yang kamu sudah paham tulisannya, lalu pindah ke materi baru.\n6. 10–15 menit **tiap hari** lebih efektif daripada 2 jam seminggu.`,
+      ['Tips belajar kanji', 'JLPT N5']),
+    K('study', [[/cara belajar|tips belajar|metode|belajar efektif|motivasi|mulai belajar|pemula|dari mana|konsisten|jadwal belajar/, 3]],
+      `📚 **Tips belajar bahasa Jepang untuk pemula:**\n1. **Hiragana & katakana dulu** (1–2 minggu).\n2. **Kosakata + pola dasar** (bab 1–5), latihan dengan Kotoba, Bunpou, dan Games.\n3. **Rutin kecil:** 20–30 menit tiap hari.\n4. **Ulang berjarak** untuk kosakata dan kanji.\n5. **Output:** tulis kalimat sendiri, bicara dengan teman, rekam suara.\n6. **Input menyenangkan:** lagu, anime, drama, tapi tetap pelajari bentuk sopan.\n7. Target kecil mingguan, misalnya 30 kata dan 2 pola.`,
+      ['Cara melatih listening', 'Tips belajar kanji', 'Tips lulus N5']),
+    K('app', [[/aplikasi|fitur|cara pakai|cara main|sambung kata|level otomatis|nihongo/, 3], [/\b(menu|game|koin|tema|pengaturan|chat)\b/, 1]],
+      `📱 **Panduan singkat NihonGo:**\n• **Belajar:** hiragana, katakana, kanji N5.\n• **Kotoba & Bunpou:** kosakata dan pola per bab, ada latihan di tiap bab.\n• **Games:** **Sambung Kata** (tarik garis kotoba ↔ arti) dan **Listening Kalimat** (dengar lalu tulis ulang; jawaban ≥90% mirip dianggap benar).\n• **Ujian:** simulasi soal.\n• **Pengaturan:** tema, bahasa, dan **Profil Sosial & Level** (deskripsi, level otomatis).\n• **Teman & Chat:** cari teman, tambah, dan ngobrol; Rama-San siap bertanya apa saja.`),
+    K('travel', [[/wisata|liburan|traveling|travel|turis|visa|jr pass|suica|pasmo|konbini|transportasi|oleh-oleh|tax free|hotel|ryokan|kapan.*ke jepang|waktu terbaik/, 3], [/tiket|harga|biaya|tarif/, 3]],
+      `✈️ **Tips wisata ke Jepang:**\n• **Waktu terbaik:** semi (Mar–Mei, sakura) dan gugur (Okt–Nov, momiji) paling populer; musim dingin bagus untuk ski/onsen, panas untuk festival tapi lembap.\n• **Transportasi:** kartu IC (Suica/Pasmo/ICOCA) praktis di kereta dan konbini; Shinkansen untuk jarak jauh.\n• **Konbini:** serba ada (makanan, ATM, tiket).\n• **Penginapan:** hotel, **ryokan** (penginapan tradisional dengan onsen dan tatami), kapsul.\n• **Tunai** masih sering dipakai.\n• **Etiket:** tenang di kereta, lepas sepatu, buang sampah di tempatnya.\n\n⚠️ Aturan visa, harga tiket kereta, dan promo sering berubah. Selalu cek situs resmi (kedutaan, JR, penyelenggara) sebelum berangkat.`,
+      ['Etiket di Jepang', 'Empat musim Jepang', 'Makanan Jepang']),
+    K('dialect', [[/dialek|kansai|osaka-ben|hakata|keigo daerah|logat/, 4]],
+      `🗣️ **Dialek Jepang (方言, hōgen):** Bahasa standar (hyōjungo) berbasis Tokyo. **Kansai-ben** (Osaka/Kyoto) terkenal: "akan" = tidak boleh, "ōkini" = terima kasih, "meccha" = sangat. **Hakata-ben** (Fukuoka), **Tōhoku-ben**, dan **Okinawa** (bahasa Ryukyu) juga unik. Belajar bahasa standar dulu, dialek menyusul.`),
+    K('ainu', [[/ainu/, 5]], `🏹 **Ainu (アイヌ)** adalah penduduk asli Hokkaido, Sakhalin, dan Kepulauan Kuril dengan bahasa, kepercayaan (kamuy), dan seni sendiri (ukiran kayu, bordir, musik mukkuri). Banyak nama tempat di Hokkaido berasal dari bahasa Ainu, misalnya Sapporo ("sungai besar yang kering") dan Wakkanai. Jepang mengakui Ainu sebagai masyarakat adat secara hukum pada 2019. Museum dan taman Upopoy di Shiraoi, Hokkaido, memperkenalkan budaya Ainu.`),
+    K('onsen', [[/onsen|sento|pemandian/, 4]], `♨️ **Onsen (温泉)** = pemandian air panas alami; Jepang punya ribuan. **Etiket:** bilas dan cuci badan dulu di area mandi, masuk tanpa pakaian, rambut diikat, handuk kecil jangan dicelup ke air, tenang. Beberapa tempat membatasi tato (cek kebijakan; ada yang menyediakan kamar pribadi). Onsen salju di musim dingin (rotenburo) sangat terkenal di Hokkaido dan Nagano.`),
+    K('who', [[/siapa kamu|kamu siapa|siapa rama|rama.?san|kamu bisa apa|bisa bantu apa|kemampuan|apa itu rama|kamu ai|robot/, 4]],
+      `Aku **Rama-San (ラマさん)**, asisten belajar Jepang di NihonGo 🧑‍🏫\n\nAku bisa membantu soal:\n• Kosakata, pola kalimat, kanji, JLPT, dan cara belajar\n• Mengubah romaji → hiragana/katakana\n• Budaya, etiket, makanan, sejarah, geografi\n• Musim, cuaca daerah (misalnya Hokkaido), dan festival\n\nBasis pengetahuanku mencakup ratusan topik, termasuk 47 prefektur, sejarah, tokoh, kuliner, tata bahasa, dan wisata. Catatan jujur: jawabanku berasal dari pengetahuan yang tertanam di aplikasi (bukan internet langsung). Untuk jadwal, harga, atau aturan resmi, tetap cek sumber resminya, dan beberapa fakta bisa meleset. Kalau aku tidak yakin, aku akan bilang. Coba tanya sesuatu!`,
+      ['Musim sekarang di Jepang', 'Festival bulan ini', 'Sejarah singkat Jepang', 'Tips lulus N5']),
+    K('hello', [[/^\s*(halo|hai|hi|hello|hey|selamat (pagi|siang|sore|malam)|konnichiwa|ohayou|konbanwa|assalamu\w*)\b/, 3]],
+      () => `こんにちは！ Aku Rama-San 😊 Mau belajar apa hari ini? Kamu bisa tanya kosakata, tata bahasa, budaya, sejarah, musim, atau festival Jepang.`,
+      ['Musim sekarang di Jepang', 'Tips lulus N5', 'Festival Jepang']),
+    K('thanks', [[/terima kasih|makasih|thanks|arigatou|arigatō/, 4]], () => 'どういたしまして！(Dō itashimashite) Sama-sama 😄 Semangat belajarnya, がんばって！', ['Tips belajar bahasa Jepang'])
+  ];
+  (() => { const h = TOPICS.find(t => t.id === 'hokkaido'), base = h.ans; h.ans = ctx => { const mi = MONTHS.findIndex(x => ctx.q.includes(x)); return base + (mi >= 0 ? `\n\n📅 **Hokkaido di bulan ${MONTH_ID[mi]}:** ${HOKKAIDO_NOW[mi]}` : ''); }; })();
+  const DEFAULT_CHIPS = ['Musim sekarang di Jepang', 'Kenapa winter Hokkaido lama?', 'Festival Jepang', 'Sejarah singkat Jepang', 'Etiket di Jepang', 'Tips lulus N5'];
+
+  function pickTopic(q) {
+    let best = null, bs = 0;
+    TOPICS.forEach(t => { let sc = 0; t.keys.forEach(([re, w]) => { if (re.test(q)) sc += w; }); if (sc > bs) { bs = sc; best = t; } });
+    return bs >= 2 ? { t: best, s: bs } : null;
+  }
+  function answerOf(t, q) { return typeof t.ans === 'function' ? t.ans({ q }) : t.ans; }
+
+  function reply(text) {
+    const q = String(text || '').toLowerCase().trim();
+    if (!q) return { x: 'Tulis pertanyaanmu ya 🙂', s: DEFAULT_CHIPS };
+    const k = kanaTool(q); if (k) return { x: k, s: ['Katakana "kohi"', 'Tips belajar kanji'] };
+    const hit = pickTopic(q), kb = kbSearch(q), pf = prefSearch(q);
+    const kbTop = kb.length ? kb[0][0] : 0, strong = Math.max(hit ? hit.s : 0, kbTop, pf ? 6 : 0);
+    const askVocab = /\barti\b|artinya|bahasa jepang(nya)?|dalam bahasa jepang|bagaimana (cara )?(bilang|mengucapkan|mengatakan)|bilang apa|apa jepangnya|cara baca/.test(q);
+    /* daftar prefektur per wilayah */
+    if (pf && pf.list) return { x: pf.list, s: ['Prefektur dan wilayah Jepang', 'Tokyo', 'Kyoto'] };
+    /* pencarian kosakata eksplisit */
+    const wantVocab = (askVocab || JP.test(q)) && strong < 5;
+    if (wantVocab) {
+      const v = vocabSearch(q), kj = JP.test(q) ? kanjiSearch(q) : [];
+      if (v.length || kj.length) {
+        let x = '';
+        if (v.length) x += `📖 **Kosakata yang cocok:**\n${v.map(fmtVocab).join('\n')}`;
+        if (kj.length) x += `${x ? '\n\n' : ''}🈁 **Kanji N5:**\n${kj.map(c => `• ${c.kanji} (${c.kana}) — ${c.arti}`).join('\n')}`;
+        return { x, s: ['Tips belajar kanji', 'Tata bahasa dasar'] };
+      }
+      if (JP.test(q) && !hit && !kbTop) {
+        const rom = (() => { try { return LSNutil.kanaToRomaji(q.replace(/[^\u3040-\u30ff\s]/g, '')); } catch (e) { return ''; } })();
+        if (rom) return { x: `Bacaan kana tersebut dalam romaji: **${rom}**.\nKalau itu kata tertentu dan kamu ingin artinya, aku belum menemukannya di daftar kosakata aplikasi.`, s: DEFAULT_CHIPS };
+      }
+    }
+    /* pola bunpou dari aplikasi */
+    if (/pola|bunpou|tata bahasa|partikel|grammar/.test(q) && strong < 5) {
+      const b = bunpouSearch(q);
+      if (b) { const ex = (b.examples || [])[0]; return { x: `🧩 **${strip(b.title)}** — ${strip(b.subtitle)}\n${strip(b.desc).slice(0, 380)}\n\nPola: ${strip(b.pattern)}${ex ? `\nContoh: ${ex.j}\n(${ex.r}) = ${ex.i}` : ''}`, s: ['Tata bahasa dasar', 'Partikel は vs が'] }; }
+    }
+    /* prefektur: dipakai bila disebut jelas, atau tak ada entri yang lebih kuat */
+    const prefWins = pf && (/prefektur|ibu kota|khas|oleh|wilayah|region/.test(q) || (kbTop <= 3 && (!hit || hit.s <= 3)));
+    if (prefWins) return { x: pf.text, s: ['Prefektur dan wilayah Jepang', 'Festival Jepang', 'Musim sekarang di Jepang'] };
+    /* pilih sumber terbaik: topik buatan tangan vs basis pengetahuan */
+    if (kbTop && (!hit || kbTop > hit.s * 1.34)) {
+      const top = kb[0][1], rel = kb.slice(1, 5).filter(r => r[0] >= Math.max(3, kbTop * 0.5) && r[1] !== top).map(r => r[1].title);
+      return { x: `${top.ic} **${top.title}**\n${top.text}${pf && pf.text ? '\n\n' + pf.text : ''}`, s: rel.length ? rel : DEFAULT_CHIPS.slice(0, 4) };
+    }
+    if (hit) return { x: answerOf(hit.t, q), s: hit.t.more.length ? hit.t.more : DEFAULT_CHIPS.slice(0, 4) };
+    const short = tokens(q).length <= 2;
+    if (short) { const v = vocabSearch(q); if (v.length) return { x: `Mungkin yang kamu maksud:\n${v.map(fmtVocab).join('\n')}`, s: DEFAULT_CHIPS.slice(0, 4) }; }
+    return { x: 'Hmm, aku belum punya jawaban yang pasti untuk itu, dan aku tidak mau menebak-nebak 🙏\n\nBeberapa hal yang bisa kujawab: kosakata & tata bahasa, kanji & JLPT, budaya dan etiket, makanan, sejarah dan tokoh, 47 prefektur, tempat wisata, musim & festival, anime/game, hingga tips belajar & kerja/kuliah di Jepang.\nCoba kata kunci spesifik, misalnya "ibu kota Aomori", "partikel に", "sejarah zaman Heian", atau "sushi itu apa".', s: DEFAULT_CHIPS };
+  }
+  const kbCount = () => KB.length + PREF.length + TOPICS.length;
+  const greeting = () => ({ x: 'こんにちは！ Aku **Rama-San** 🧑‍🏫, asisten belajar Jepangmu.\nTanya apa saja: kosakata, tata bahasa, kanji, JLPT, **budaya, sejarah, musim (misalnya musim dingin Hokkaido), dan festival**. Pilih topik di bawah atau ketik sendiri!', s: DEFAULT_CHIPS });
+  return { reply, greeting, DEFAULT_CHIPS, backend: null, kbCount };
+})();
+</script>
+
+<script>
+/* =====================================================================
+   TEMAN & CHAT  (mode demo lokal — data teman contoh, tersimpan di perangkat)
+   Semua akses data lewat Social.api, sehingga nanti bisa diganti dengan server sungguhan
+   (mis. Firebase/Supabase) tanpa mengubah tampilan.
+   ===================================================================== */
+const Social = (function () {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const toast = m => { try { showDevToast(m); } catch (e) { alert(m); } };
+  const icons = () => { try { lucide.createIcons(); } catch (e) {} };
+  const LEVELS = ['Pemula', 'N5', 'N4', 'N3', 'N2', 'N1'];
+  const COLORS = { AI: '#EC4899', Pemula: '#10B981', N5: '#3B82F6', N4: '#14B8A6', N3: '#8B5CF6', N2: '#F59E0B', N1: '#EF4444' };
+  const PRESETS = ['Pemula', 'Ingin belajar kanji', 'Sedang belajar listening', 'Sedang belajar kotoba', 'Sedang belajar bunpou', 'Persiapan JLPT', 'Cari teman belajar'];
+  const DEMO = [
+    { id: 'u1', name: 'Aiko', avatar: '🌸', chips: ['Pemula'], level: 'Pemula' },
+    { id: 'u2', name: 'Budi', avatar: '🐼', chips: ['Ingin belajar kanji'], level: 'N5' },
+    { id: 'u3', name: 'Citra', avatar: '🎧', chips: ['Sedang belajar listening'], level: 'N5' },
+    { id: 'u4', name: 'Daisuke', avatar: '🍙', chips: ['Persiapan JLPT'], level: 'N4' },
+    { id: 'u5', name: 'Eka', avatar: '🦊', chips: ['Ingin belajar kanji', 'Sedang belajar kotoba'], level: 'N4' },
+    { id: 'u6', name: 'Fajar', avatar: '🚀', chips: ['Sedang belajar listening'], level: 'N4' },
+    { id: 'u7', name: 'Gita', avatar: '📚', chips: ['Persiapan JLPT'], level: 'N3' },
+    { id: 'u8', name: 'Haru', avatar: '🍵', chips: ['Ingin belajar kanji'], level: 'N3' },
+    { id: 'u9', name: 'Intan', avatar: '🐱', chips: ['Pemula', 'Ingin belajar kanji'], level: 'Pemula' },
+    { id: 'u10', name: 'Joko', avatar: '🏯', chips: ['Sedang belajar bunpou'], level: 'N5' },
+    { id: 'u11', name: 'Kiara', avatar: '🌙', chips: ['Sedang belajar listening', 'Persiapan JLPT'], level: 'N3' },
+    { id: 'u12', name: 'Lukas', avatar: '⛩️', chips: ['Sedang belajar kotoba'], level: 'N2' },
+    { id: 'u13', name: 'Mei', avatar: '🎴', chips: ['Persiapan JLPT'], level: 'N2' },
+    { id: 'u14', name: 'Nanda', avatar: '🗻', chips: ['Sedang belajar bunpou'], level: 'N1' }
+  ].map(u => ({ ...u, bio: u.chips.join(' · ') }));
+  const RAMA = { id: 'rama', name: 'Rama-San', avatar: '🧑‍🏫', level: 'AI', chips: [], ai: true, bio: 'Asisten AI · tanya soal bahasa, budaya, sejarah, musim & festival Jepang' };
+  DEMO.push(RAMA);
+
+  /* ---------- data profil sendiri ---------- */
+  function S() {
+    const s = (state.social = state.social || {});
+    if (!Array.isArray(s.chips)) s.chips = [];
+    if (typeof s.custom !== 'string') s.custom = '';
+    if (!s.levelMode) s.levelMode = 'auto';
+    if (!Array.isArray(s.friends)) s.friends = [];
+    if (!s.chats) s.chats = {};
+    if (s.showLevel === undefined) s.showLevel = true;
+    if (s.visible === undefined) s.visible = true;
+    if (!s.code) s.code = 'NJ-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+    return s;
+  }
+  const bioText = () => { const s = S(); return [...s.chips, s.custom.trim()].filter(Boolean).join(' · '); };
+  function autoInfo() {
+    const st = state.stats || {}, done = st.bunpouCompleted || [];
+    const kana = ((st.hiraganaProgress || 0) + (st.katakanaProgress || 0)) / 2;
+    const base = Object.values(Lv.baseOf('bunpou', 'N5')).flat();
+    const bp = base.length ? 100 * base.filter(i => done.includes(i.id)).length / base.length : 0;
+    const p = Math.max(0, Math.min(100, Math.round(.2 * kana + .4 * bp + .4 * (st.kotobaProgress || 0))));
+    let idx = p >= 85 ? 2 : p >= 15 ? 1 : 0;
+    [['N4', 2], ['N3', 3], ['N2', 4]].forEach(([L, i]) => { if (done.filter(id => String(id).startsWith('c_' + L + '_')).length >= 10 && idx <= i) idx = i + 1; });
+    return { p, label: LEVELS[idx] };
+  }
+  const myLevel = () => (S().levelMode === 'auto' ? autoInfo().label : S().levelMode);
+  const chip = (L, big) => `<span style="background:${COLORS[L] || '#64748B'};color:#fff;border-radius:999px;padding:${big ? '.28rem .75rem' : '.12rem .5rem'};font-size:${big ? '.72rem' : '.6rem'};font-weight:800;white-space:nowrap">${esc(L)}</span>`;
+
+  /* ---------- header: level + deskripsi + tombol Teman ---------- */
+  (function ensureHeader() {
+    const h2 = $('header-user-name'); if (!h2 || $('header-level-chip')) return;
+    const st = document.createElement('style');
+    st.textContent = '#main-app header > div:last-child{gap:.35rem !important}#main-app header > div:last-child > button{width:2.4rem !important;height:2.4rem !important}#header-bio{font-size:.62rem;color:var(--text-muted);max-width:9.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;margin-top:.1rem}';
+    document.head.appendChild(st);
+    const wrap = document.createElement('div'); wrap.style.cssText = 'display:flex;align-items:center;gap:.4rem;min-width:0';
+    h2.parentNode.insertBefore(wrap, h2); wrap.appendChild(h2);
+    const c = document.createElement('span'); c.id = 'header-level-chip'; wrap.appendChild(c);
+    const bio = document.createElement('p'); bio.id = 'header-bio'; wrap.parentNode.insertBefore(bio, wrap.nextSibling);
+    const music = $('music-btn');
+    if (music) music.insertAdjacentHTML('beforebegin', '<button id="social-btn" onclick="Social.open()" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press relative" style="color:var(--text-muted)" aria-label="Teman & Chat"><i data-lucide="users" class="w-5 h-5"></i></button>');
+  })();
+  function refreshHeader() {
+    const c = $('header-level-chip'), b = $('header-bio'); if (!c) return;
+    c.innerHTML = S().showLevel ? chip(myLevel()) : ''; const t = bioText(); b.textContent = t; b.style.display = t ? '' : 'none';
+  }
+  const uh = window.updateHeaderUI;
+  window.updateHeaderUI = function () { uh.apply(this, arguments); try { refreshHeader(); } catch (e) {} };
+  window.addEventListener('DOMContentLoaded', () => setTimeout(() => { refreshHeader(); icons(); }, 30));
+
+  /* ---------- Rama-San online ----------
+     Utama : kunci API GRATIS milikmu (Google Gemini "AIza…" atau Groq "gsk_…") dipanggil langsung dari browser, dengan streaming
+             (teks muncul sambil diketik, tanpa menunggu jawaban selesai). Tanpa server.
+     Cadangan (bila belum ada kunci): beberapa AI publik tanpa kunci — tidak dijamin selalu hidup. */
+  const RAMA_SYSTEM = 'Kamu adalah Rama-San, asisten belajar bahasa Jepang di aplikasi NihonGo. Jawab dalam bahasa Indonesia yang ramah, jelas, dan ringkas. Kamu ahli bahasa Jepang (kosakata, tata bahasa, kanji, JLPT) serta budaya, sejarah, geografi, musim, festival, makanan, dan kehidupan di Jepang. Sertakan tulisan Jepang beserta romaji dan artinya jika relevan. Jika tidak yakin atau informasinya bisa berubah (jadwal, harga, aturan visa), katakan terus terang dan sarankan cek sumber resmi. Jangan meminta atau menyimpan data pribadi pengguna.';
+  const KEY_LS = 'nihongo_ai_key';              /* disimpan terpisah dari data aplikasi agar tidak ikut cadangan/ekspor */
+  const cleanKey = v => String(v || '').replace(/^[\s"'`]+|[\s"'`]+$/g, '').replace(/\s+/g, '');
+  const getKey = () => { try { return cleanKey(localStorage.getItem(KEY_LS)); } catch (e) { return ''; } };
+  const putKey = v => { try { v ? localStorage.setItem(KEY_LS, v) : localStorage.removeItem(KEY_LS); } catch (e) {} };
+  const keyKind = k => /^(AIza|AQ\.)/.test(k) ? 'gemini' : /^gsk_/.test(k) ? 'groq' : '';
+  const AI_REJECT = /deprecat|migrat|enter\.pollinations|important notice|unauthori[sz]ed|api key|payment required|rate limit|too many requests|insufficient/i;
+  function aiClean(s) {
+    s = String(s == null ? '' : s).trim();
+    if (!s) throw new Error('kosong');
+    if (/^[\[{]/.test(s) && /"error"|"success"\s*:\s*false/i.test(s)) throw new Error('ditolak');
+    if (s.length < 500 && AI_REJECT.test(s)) throw new Error('ditolak');
+    return s;
+  }
+  async function errMsg(r) { try { const x = await r.text(); try { const j = JSON.parse(x); return String((j.error && (j.error.message || j.error)) || j.message || x).slice(0, 90); } catch (e) { return x.slice(0, 90); } } catch (e) { return ''; } }
+  async function readSSE(res, onData, ctrl) {
+    if (!res.body || !res.body.getReader) { (await res.text()).split('\n').forEach(l => { if (l.startsWith('data:')) onData(l.slice(5).trim()); }); return; }
+    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = ''; if (ctrl) ctrl.readers.push(rd);
+    for (;;) {
+      const { done, value } = await rd.read(); if (done) break;
+      buf += dec.decode(value, { stream: true }); let i;
+      while ((i = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, i).replace(/\r$/, ''); buf = buf.slice(i + 1); if (line.startsWith('data:')) onData(line.slice(5).trim()); }
+    }
+    if (buf.startsWith('data:')) onData(buf.slice(5).trim());
+  }
+  const mergeRoles = h => { const o = []; h.forEach(m => { const r = m.role === 'user' ? 'user' : 'model'; if (o.length && o[o.length - 1].role === r) o[o.length - 1].parts[0].text += '\n' + m.content; else o.push({ role: r, parts: [{ text: m.content }] }); }); while (o.length && o[0].role !== 'user') o.shift(); return o; };
+  async function geminiStream(key, hist, text, onChunk, ctrl, arm) {
+    const contents = mergeRoles([...hist, { role: 'user', content: text }]); let lastErr;
+    for (const mdl of ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash']) {
+      const call = viaQuery => fetch('https://generativelanguage.googleapis.com/v1beta/models/' + mdl + ':streamGenerateContent?alt=sse' + (viaQuery ? '&key=' + encodeURIComponent(key) : ''), { method: 'POST', headers: viaQuery ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: RAMA_SYSTEM }] }, contents }) });
+      let r = await call(false);
+      if (r.status === 401 || r.status === 403) { const r2 = await call(true); if (r2.ok) r = r2; }
+      if (!r.ok) { const m = await errMsg(r); if (r.status === 404) { lastErr = new Error('Gemini model ' + mdl + ' tidak ada'); continue; } throw new Error('Gemini ' + r.status + (m ? ': ' + m : '')); }
+      let out = '';
+      await readSSE(r, d => { arm(); if (d === '[DONE]') return; try { const p = JSON.parse(d).candidates; const parts = p && p[0] && p[0].content && p[0].content.parts; if (parts) { out += parts.map(x => x.text || '').join(''); onChunk(out); } } catch (e) {} }, ctrl);
+      if (!out.trim()) throw new Error('Gemini: jawaban kosong'); return out;
+    }
+    throw lastErr || new Error('Gemini: model tidak ditemukan');
+  }
+  async function groqStream(key, hist, text, onChunk, ctrl, arm) {
+    const messages = [{ role: 'system', content: RAMA_SYSTEM }, ...hist, { role: 'user', content: text }]; let lastErr;
+    for (const mdl of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model: mdl, messages, stream: true, temperature: 0.7, max_tokens: 1000 }) });
+      if (!r.ok) { const m = await errMsg(r); if (r.status === 404 || (r.status === 400 && /model|decommission/i.test(m))) { lastErr = new Error('Groq model ' + mdl + ' tidak tersedia'); continue; } throw new Error('Groq ' + r.status + (m ? ': ' + m : '')); }
+      let out = '';
+      await readSSE(r, d => { arm(); if (d === '[DONE]') return; try { const c = JSON.parse(d).choices; const x = c && c[0] && c[0].delta && c[0].delta.content; if (x) { out += x; onChunk(out); } } catch (e) {} }, ctrl);
+      if (!out.trim()) throw new Error('Groq: jawaban kosong'); return out;
+    }
+    throw lastErr || new Error('Groq: model tidak ditemukan');
+  }
+  const netErr = e => e instanceof TypeError || /failed to fetch|networkerror|load failed|network request failed|fetch failed/i.test(String(e && e.message));
+  /* Jalan hanya bila aplikasi dibuka di dalam sandbox yang menyediakan akses Claude tanpa kunci (mis. pratinjau artifact Claude). Di tempat lain gagal diam-diam. */
+  async function claudeSandbox(text, hist) {
+    const msgs = []; [...hist, { role: 'user', content: text }].forEach(m => { const r = m.role === 'user' ? 'user' : 'assistant'; if (msgs.length && msgs[msgs.length - 1].role === r) msgs[msgs.length - 1].content += '\n' + m.content; else msgs.push({ role: r, content: m.content }); });
+    while (msgs.length && msgs[0].role !== 'user') msgs.shift();
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: RAMA_SYSTEM, messages: msgs }) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json(); return aiClean((j.content || []).map(b => (b && b.type === 'text' ? b.text : '')).join(''));
+  }
+  /* cadangan tanpa kunci: beberapa layanan publik dicoba bersamaan, yang tercepat dipakai */
+  async function keylessRace(text, hist, ctrl) {
+    const errs = [], user = text.slice(0, 800);
+    const msgs = [{ role: 'system', content: RAMA_SYSTEM }, ...hist.slice(-6), { role: 'user', content: user }];
+    let ctx = hist.slice(-6).map(m => (m.role === 'user' ? 'Pengguna: ' : 'Rama-San: ') + m.content.replace(/\s+/g, ' ').slice(0, 300)).join('\n'); if (ctx.length > 1000) ctx = ctx.slice(-1000);
+    const pesan = (ctx ? 'Riwayat obrolan:\n' + ctx + '\n\n' : '') + 'Pengguna: ' + user + '\nRama-San:';
+    const getTxt = base => async () => { const r = await fetch(base + encodeURIComponent(pesan) + '?system=' + encodeURIComponent(RAMA_SYSTEM)); if (!r.ok) throw new Error('HTTP ' + r.status); return aiClean(await r.text()); };
+    const chat = (url, model) => async () => { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer unused' }, body: JSON.stringify({ model, messages: msgs, max_tokens: 700 }) }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); return aiClean(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content); };
+    const run = (name, delay, fn) => (async () => { if (delay) await new Promise(r => setTimeout(r, delay)); if (ctrl.aborted) throw new Error('batal'); return await fn(); })().catch(e => { errs.push(name + ' ' + (e && e.message ? e.message : 'gagal')); throw e; });
+    try {
+      return await Promise.any([run('CL', 0, () => claudeSandbox(text, hist)), run('P1', 0, getTxt('https://gen.pollinations.ai/text/')), run('P2', 0, getTxt('https://text.pollinations.ai/')), run('L7', 1500, chat('https://api.llm7.io/v1/chat/completions', 'default')), run('PO', 3000, chat('https://text.pollinations.ai/openai', 'openai'))]);
+    } catch (e) { throw new Error(ctrl.aborted ? 'waktu habis' : (errs.join(', ') || 'gagal').slice(0, 110)); }
+  }
+  /* hist: [{role,content}] riwayat sebelum pesan ini. onChunk(teksSejauhIni) dipanggil saat jawaban mengalir. */
+  async function ramaOnline(text, hist, onChunk) {
+    hist = hist || []; onChunk = onChunk || (() => {});
+    const key = getKey(), kind = keyKind(key); let timer;
+    /* tanpa AbortSignal: sebagian WebView/pembungkus aplikasi meneruskan fetch lewat postMessage dan AbortSignal tidak bisa disalin */
+    const ctrl = { aborted: false, readers: [], onAbort: null, abort() { if (this.aborted) return; this.aborted = true; this.readers.forEach(r => { try { r.cancel(); } catch (e) {} }); if (this.onAbort) this.onAbort(); } };
+    const timeout = new Promise((_, rej) => { ctrl.onAbort = () => rej(new Error('waktu habis')); });
+    timeout.catch(() => {});
+    const arm = () => { clearTimeout(timer); timer = setTimeout(() => ctrl.abort(), key ? 20000 : 15000); }; arm();
+    const work = (async () => {
+      if (key && !kind) throw new Error('format kunci tidak dikenali (harus AQ.…, AIza… atau gsk_…)');
+      if (kind) {
+        try { return await (kind === 'gemini' ? geminiStream : groqStream)(key, hist, text, onChunk, ctrl, arm); }
+        catch (e) {
+          if (!netErr(e)) throw e;
+          try { const o = await claudeSandbox(text, hist); onChunk(o); return o; }
+          catch (e2) { throw new Error('permintaan ke ' + (kind === 'gemini' ? 'Google' : 'Groq') + ' diblokir oleh tempat aplikasi ini dibuka (sandbox/WebView/jaringan), bukan salah kunci. Buka file ini langsung di Chrome atau pasang di GitHub Pages/Netlify. Ketuk Diagnosa di Pengaturan untuk detail.'); }
+        }
+      }
+      const out = await keylessRace(text, hist, ctrl); onChunk(out); return out;
+    })();
+    work.catch(() => {});
+    try { return await Promise.race([work, timeout]); }
+    catch (e) { if (netErr(e)) throw new Error('koneksi diblokir/terputus — Failed to fetch'); throw e; }
+    finally { clearTimeout(timer); ctrl.aborted = true; ctrl.readers.forEach(r => { try { r.cancel(); } catch (e) {} }); }
+  }
+  const histOf = arr => arr.filter(m => m.x && !m.stream).slice(-12).map(m => ({ role: m.f === 'me' ? 'user' : 'assistant', content: String(m.x).replace(/^⚠️[^\n]*\n\n/, '').slice(0, 1200) }));
+  /* ---------- API lokal (ganti objek ini untuk server sungguhan) ---------- */
+  const api = {
+    search(q, level) {
+      q = (q || '').trim().toLowerCase();
+      return DEMO.filter(u => !u.ai && (level === 'Semua' || u.level === level) && (!q || (u.name + ' ' + u.bio + ' ' + u.level).toLowerCase().includes(q)));
+    },
+    get: id => DEMO.find(u => u.id === id),
+    add(id) { const f = S().friends; if (!f.includes(id)) f.push(id); saveState(); },
+    remove(id) { const s = S(); s.friends = s.friends.filter(x => x !== id); saveState(); },
+    history: id => S().chats[id] || [],
+    send(id, text, tick) {
+      const s = S(); (s.chats[id] = s.chats[id] || []).push({ f: 'me', x: text, t: Date.now() }); trim(id);
+      const f = api.get(id);
+      if (f.ai) {
+        const hist = histOf(s.chats[id].slice(0, -1));
+        const m = { f: 'them', x: '', t: Date.now(), s: Rama.DEFAULT_CHIPS, stream: true }; s.chats[id].push(m); saveState();
+        let raf = 0; const paint = () => { raf = 0; if (tick) tick(); };
+        return (async () => {
+          try { const out = await ramaOnline(text, hist, acc => { m.x = acc; if (!raf) raf = requestAnimationFrame(paint); }); m.x = out; }
+          catch (e) {
+            const why = (e && e.message ? e.message : 'gagal'), hint = getKey() ? '' : ' Untuk jawaban yang selalu jalan, pasang kunci AI gratis di Pengaturan › Profil Sosial & Level.';
+            if (m.x && m.x.length > 20) m.x += '\n\n⚠️ (jawaban terputus: ' + why + ')';
+            else { const r = Rama.reply(text); m.x = '⚠️ AI online gagal (' + why + ').' + hint + '\n\n' + r.x; m.s = r.s; }
+          }
+          delete m.stream; m.t = Date.now(); if (raf) cancelAnimationFrame(raf); trim(id); saveState(); return m.x;
+        })();
+      }
+      saveState();
+      return new Promise(res => setTimeout(() => { const m = { f: 'them', x: autoReply(f, text), t: Date.now() }; s.chats[id].push(m); trim(id); saveState(); res(m.x); }, 900 + Math.random() * 900));
+    }
+  };
+  const trim = id => { const c = S().chats[id]; if (c.length > 200) c.splice(0, c.length - 200); };
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  function autoReply(f, text) {
+    const t = text.toLowerCase(), c0 = (f.chips[0] || 'Cari teman belajar').toLowerCase();
+    const focus = c0.startsWith('sedang ') ? 'lagi ' + c0.slice(7) : c0.startsWith('ingin ') ? 'pengen ' + c0.slice(6) : c0 === 'pemula' ? 'masih pemula' : c0.startsWith('persiapan') ? 'lagi ' + c0 : 'cari teman belajar';
+    if (/halo|hai\b|hi\b|konnichiwa|selamat|assalam/.test(t)) return `Halo! こんにちは 😊 Aku ${f.name}, lagi ${focus}. Kamu lagi belajar apa?`;
+    if (/terima kasih|makasih|arigat/.test(t)) return pick(['どういたしまして! (dou itashimashite) 😄', 'Sama-sama! Semangat belajarnya ya 💪']);
+    if (/kanji/.test(t)) return pick(['Untuk kanji, aku biasa belajar 5 huruf per hari dan menulis ulang tiap pagi ✍️', 'Coba hafalkan kanji bersama kosakatanya, misalnya 人 (hito) di 人々. Lebih nempel!']);
+    if (/listening|dengar|choukai/.test(t)) return pick(['Listening: dengarkan kalimat pendek berulang lalu tulis ulang, persis seperti game Listening di sini 🎧', 'Aku suka memutar versi pelan dulu, baru kecepatan normal 🐢→🐇']);
+    if (/jlpt|n5|n4|n3|n2|n1/.test(t)) return `Aku sekarang di level ${f.level}. Targetnya lulus JLPT tahun depan, doakan ya! 🎌`;
+    if (/kotoba|kosakata/.test(t)) return pick(['Kosakata paling cepat nempel kalau dipakai dalam kalimat, bukan dihafal satu-satu 📖', 'Aku pakai Sambung Kata tiap malam, seru buat latihan!']);
+    if (/bunpou|pola|tata bahasa/.test(t)) return pick(['Bunpou itu kayak kerangka kalimat. Hafalkan polanya lalu ganti kata-katanya 🧩', 'Mulai dari は dan です dulu, dari situ lancar semua!']);
+    if (/\?/.test(t)) return pick(['Pertanyaan bagus! Menurutku coba latihan sedikit tapi tiap hari 👍', 'Hmm, aku juga masih belajar. Kita cari tahu bareng yuk!']);
+    return pick(['Wah, setuju! 😄', 'Menarik! Ceritain lagi dong.', 'がんばろう! (ganbarou) Ayo semangat belajar bareng 💪', 'Oke oke, nanti kita latihan bareng ya!', 'そうですね (sou desu ne), betul juga.']);
+  }
+
+  /* ---------- tampilan ---------- */
+  const V = { view: 'friends', level: 'Semua', q: '', chat: null, typing: false };
+  const vp = () => $('app-viewport');
+  const btn = (label, fn, on) => `<button onclick="${fn}" style="padding:.4rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;white-space:nowrap;${on ? 'background:var(--accent);color:#fff' : 'background:rgba(127,127,127,.14)'}">${label}</button>`;
+  const avatarEl = (e, size = 2.8) => `<div class="ios-glass" style="width:${size}rem;height:${size}rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:${size * .5}rem;flex-shrink:0;border:1.5px solid var(--accent)">${e}</div>`;
+  function open(view) { V.view = view || 'friends'; V.chat = null; render(); }
+  function head(title) { return `<div style="display:flex;align-items:center;gap:.5rem"><button onclick="Social.close()" style="font-size:1.8rem;line-height:1;color:var(--text-muted)">‹</button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Komunitas</p><h2 class="text-xl font-bold">${title}</h2></div></div>`; }
+  function me() { return `<div class="ios-glass" style="padding:.9rem;border-radius:1.5rem;display:flex;align-items:center;gap:.8rem">${avatarEl(state.user.avatar || '🌸', 3)}<div style="flex:1;min-width:0"><b style="font-size:.9rem">${esc(state.user.name || 'Kamu')}</b><p style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(bioText()) || 'Belum ada deskripsi'}</p><button onclick="Social.openSettings()" style="font-size:.65rem;font-weight:800;color:var(--accent);margin-top:.15rem">Atur profil & level ›</button></div><div style="align-self:flex-start;text-align:right">${S().showLevel ? chip(myLevel(), true) : ''}${S().levelMode === 'auto' ? '<p style="font-size:.55rem;color:var(--text-muted);margin-top:.2rem">level otomatis</p>' : ''}</div></div>`; }
+  function row(u, mode) {
+    const isF = S().friends.includes(u.id), last = api.history(u.id).slice(-1)[0];
+    const action = u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true));
+    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${esc(u.name)}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
+  }
+  function render() {
+    if (V.view === 'chat') return renderChat();
+    const tabs = `<div style="display:flex;gap:.4rem">${btn('Teman (' + S().friends.length + ')', "Social.open('friends')", V.view === 'friends')}${btn('Cari teman', "Social.open('find')", V.view === 'find')}</div>`;
+    vp().innerHTML = `<div class="animate-fade-in pb-28" style="display:flex;flex-direction:column;gap:.8rem">${head('Teman & Chat')}${me()}${tabs}${V.view === 'friends' ? friendsList() : findBox()}
+      <p style="font-size:.6rem;color:var(--text-muted);text-align:center;line-height:1.5">Mode demo lokal: daftar teman adalah contoh dan obrolan tersimpan di perangkat ini saja. Obrolan antar-pengguna sungguhan memerlukan server.</p></div>`;
+    icons();
+  }
+  function friendsList() {
+    const fr = S().friends.map(api.get).filter(x => x && !x.ai).sort((a, b) => ((api.history(b.id).slice(-1)[0] || {}).t || 0) - ((api.history(a.id).slice(-1)[0] || {}).t || 0));
+    const pinned = row(RAMA, 'friend');
+    if (!fr.length) return pinned + `<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;text-align:center;font-size:.78rem;color:var(--text-muted)">Belum punya teman manusia. Cari dan tambah teman di tab <b>Cari teman</b>.<div style="margin-top:.8rem">${btn('Cari teman', "Social.open('find')", true)}</div></div>`;
+    return pinned + fr.map(u => row(u, 'friend')).join('');
+  }
+  function findBox() {
+    return `<input id="soc-q" type="text" value="${esc(V.q)}" oninput="Social.query(this.value)" placeholder="Cari nama, deskripsi, atau level…" class="ios-glass" style="width:100%;padding:.7rem 1rem;border-radius:1.1rem;font-size:.82rem;font-weight:700;outline:none">
+      <div style="display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.2rem">${['Semua', ...LEVELS].map(L => btn(L, `Social.filter('${L}')`, V.level === L)).join('')}</div>
+      <div id="soc-results" style="display:flex;flex-direction:column;gap:.55rem">${results()}</div>`;
+  }
+  function results() {
+    const r = api.search(V.q, V.level);
+    return r.length ? r.map(u => row(u, 'find')).join('') : `<div class="ios-glass" style="padding:1.4rem;border-radius:1.3rem;text-align:center;font-size:.75rem;color:var(--text-muted)">Tidak ada teman yang cocok.</div>`;
+  }
+  const query = q => { V.q = q; const el = $('soc-results'); if (el) el.innerHTML = results(); };
+  const filter = L => { V.level = L; render(); };
+  const add = id => { api.add(id); toast('Ditambahkan sebagai teman: ' + api.get(id).name); render(); };
+
+  /* ---------- chat ---------- */
+  const time = t => new Date(t).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const fmt = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  function bubbles(id) {
+    const h = api.history(id), ai = api.get(id).ai;
+    if (!h.length) return `<p style="text-align:center;font-size:.72rem;color:var(--text-muted);padding:2rem 0">Belum ada pesan. Sapa ${esc(api.get(id).name)} dulu 👋</p>`;
+    let html = h.filter(m => m.x !== '').map(m => `<div style="display:flex;justify-content:${m.f === 'me' ? 'flex-end' : 'flex-start'}"><div style="max-width:${ai && m.f === 'them' ? '92' : '78'}%;padding:.5rem .8rem;border-radius:1.1rem;font-size:.8rem;line-height:1.45;${m.f === 'me' ? 'background:var(--accent);color:#fff;border-bottom-right-radius:.3rem' : 'background:rgba(127,127,127,.16);border-bottom-left-radius:.3rem'}">${ai && m.f === 'them' ? fmt(m.x) : esc(m.x)}<div style="font-size:.52rem;opacity:.65;text-align:right;margin-top:.15rem">${time(m.t)}</div></div></div>`).join('');
+    const lastM = h[h.length - 1]; if (V.typing) { if (!(lastM && lastM.stream && lastM.x)) html += '<div style="font-size:.65rem;color:var(--text-muted)">sedang mengetik…</div>'; }
+    else if (ai) { const last = h[h.length - 1], sug = (last.f === 'them' && last.s) || Rama.DEFAULT_CHIPS; html += `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.2rem">${sug.map(q => `<button data-q="${esc(q)}" onclick="Social.ask(this.dataset.q)" style="padding:.3rem .65rem;border-radius:999px;font-size:.65rem;font-weight:800;background:rgba(236,72,153,.14);color:#EC4899">${esc(q)}</button>`).join('')}</div>`; }
+    return html;
+  }
+  const ask = q => { const i = $('soc-in'); if (i) { i.value = q; send(); } };
+  function warning(cb) {
+    $('soc-warning')?.remove();
+    const m = document.createElement('div'); m.id = 'soc-warning';
+    m.style.cssText = 'position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem';
+    m.innerHTML = `<div class="bg-appbg" style="width:100%;max-width:24rem;max-height:90vh;overflow-y:auto;border-radius:1.8rem;border:2px solid #F59E0B;padding:1.3rem 1.2rem;box-shadow:0 1.6rem 3rem -1rem rgba(0,0,0,.6)">
+      <div style="text-align:center"><div style="font-size:2.6rem">⚠️</div><h3 class="text-xl font-black" style="color:#F59E0B">Papan Peringatan</h3><p style="font-size:.7rem;color:var(--text-muted);margin-top:.2rem">Baca dulu sebelum mulai mengobrol</p></div>
+      <div style="display:flex;flex-direction:column;gap:.55rem;margin-top:1rem;font-size:.78rem;line-height:1.5">
+        <div class="ios-glass" style="padding:.7rem .85rem;border-radius:1rem">🚫 <b>Jangan bagikan informasi pribadi apa pun</b>: nama lengkap, alamat, nomor telepon, sekolah atau tempat kerja, foto/dokumen identitas, dan data keuangan.</div>
+        <div class="ios-glass" style="padding:.7rem .85rem;border-radius:1rem">🔑 <b>Jangan gunakan chat untuk menyimpan kata sandi</b> media sosial atau akun apa pun, dan jangan kirim kode OTP. Chat bukan tempat penyimpanan yang aman.</div>
+        <div class="ios-glass" style="padding:.7rem .85rem;border-radius:1rem">🔗 <b>Waspada tautan dan permintaan aneh</b>: jangan klik tautan mencurigakan, jangan kirim uang, dan hapus teman yang memaksa meminta data atau memindahkan obrolan ke aplikasi lain.</div>
+        <div class="ios-glass" style="padding:.7rem .85rem;border-radius:1rem">🤝 <b>Gunakan dengan bijak</b> untuk belajar bahasa Jepang bersama teman. Saling hormat, tanpa ujaran kasar atau SARA.</div>
+        <div class="ios-glass" style="padding:.7rem .85rem;border-radius:1rem">🤖 <b>Rama-San adalah asisten AI.</b> Jawabannya bisa keliru, jadi cek ulang info penting (jadwal, harga, aturan resmi). Pesanmu ke Rama-San dikirim ke layanan AI publik gratis (Pollinations / LLM7), jadi jangan menulis data pribadi.</div>
+      </div>
+      <button id="soc-warn-ok" class="bg-accent text-white" style="width:100%;margin-top:1.1rem;padding:.85rem;border-radius:1rem;font-weight:800;font-size:.88rem">Saya mengerti & lanjut</button></div>`;
+    document.body.appendChild(m);
+    $('soc-warn-ok').onclick = () => { S().warned = true; saveState(); m.remove(); if (cb) cb(); };
+  }
+  function chatWith(id) {
+    if (!S().warned) { warning(() => chatWith(id)); return; }
+    V.view = 'chat'; V.chat = id; V.typing = false; const f = api.get(id);
+    if (!f.ai && !S().friends.includes(id)) api.add(id);
+    if (f.ai && !api.history(id).length) { const g = Rama.greeting(); S().chats[id] = [{ f: 'them', x: g.x, t: Date.now(), s: g.s }]; saveState(); }
+    render();
+  }
+  function renderChat() {
+    const f = api.get(V.chat);
+    vp().innerHTML = `<div class="animate-fade-in" style="display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--text-muted)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}</b>${chip(f.level)}</div><p style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.bio)}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
+      <div onclick="Social.warning()" style="cursor:pointer;font-size:.6rem;font-weight:700;text-align:center;padding:.35rem .6rem;border-radius:.8rem;background:rgba(245,158,11,.14);color:#F59E0B">🔒 Jangan bagikan data pribadi atau kata sandi di chat · ketuk untuk membaca aturan</div>
+      ${f.ai && !getKey() ? '<div onclick="Social.openSettings()" style="cursor:pointer;font-size:.62rem;font-weight:800;text-align:center;padding:.45rem .6rem;border-radius:.8rem;background:rgba(59,130,246,.14);color:#3B82F6">⚡ Aktifkan AI penuh: tempel kunci gratis Gemini/Groq (±1 menit) · ketuk di sini</div>' : ''}
+      <div id="soc-msgs" style="display:flex;flex-direction:column;gap:.45rem;min-height:45vh;padding-bottom:7.5rem">${bubbles(V.chat)}</div>
+      <div style="position:sticky;bottom:5.6rem;display:flex;gap:.5rem;padding:.5rem;border-radius:1.4rem;background:var(--bg-app,#fff);border:1px solid var(--glass-border,rgba(0,0,0,.1));box-shadow:0 .6rem 1.4rem -.8rem rgba(0,0,0,.4)"><input id="soc-in" type="text" autocomplete="off" placeholder="Tulis pesan…" onkeydown="if(event.key==='Enter'){event.preventDefault();Social.send();}" style="flex:1;min-width:0;padding:.6rem .9rem;border-radius:1rem;font-size:.85rem;font-weight:600;outline:none;background:rgba(127,127,127,.12);color:inherit"><button onclick="Social.send()" style="padding:.6rem 1rem;border-radius:1rem;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem">Kirim</button></div></div>`;
+    icons(); scrollDown();
+  }
+  const scrollDown = () => setTimeout(() => { const m = $('soc-msgs'); if (m) m.lastElementChild?.scrollIntoView({ block: 'end' }); }, 30);
+  function send() {
+    const inp = $('soc-in'); if (!inp) return; const text = inp.value.trim(); if (!text || V.typing) return;
+    const id = V.chat; inp.value = ''; V.typing = true;
+    const tick = () => { if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { $('soc-msgs').innerHTML = bubbles(id); scrollDown(); } };
+    const p = api.send(id, text, tick); $('soc-msgs').innerHTML = bubbles(id); scrollDown();
+    p.then(() => { V.typing = false; if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { $('soc-msgs').innerHTML = bubbles(id); scrollDown(); } });
+  }
+  function unfriend(id) { if (!confirm('Hapus ' + api.get(id).name + ' dari daftar teman? Riwayat obrolan tetap tersimpan.')) return; api.remove(id); open('friends'); }
+  const close = () => { try { switchTab(state.activeTab); } catch (e) {} };
+
+  /* ---------- pengaturan: profil sosial & level ---------- */
+  function openSettings() {
+    $('social-settings-modal')?.remove();
+    const s = S(), auto = autoInfo(), m = document.createElement('div');
+    m.id = 'social-settings-modal'; m.className = 'fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-end justify-center p-3';
+    m.style.cssText = 'position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:.75rem';
+    m.onclick = e => { if (e.target === m) m.remove(); };
+    const toggle = (key, label, sub) => `<button onclick="Social.toggle('${key}')" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:.8rem;padding:.7rem .9rem;border-radius:1rem;text-align:left" class="ios-glass"><span><b style="font-size:.78rem">${label}</b><span style="display:block;font-size:.62rem;color:var(--text-muted)">${sub}</span></span><span style="width:2.6rem;height:1.5rem;border-radius:999px;background:${s[key] ? 'var(--accent)' : 'rgba(127,127,127,.35)'};position:relative;flex-shrink:0"><i style="position:absolute;top:.15rem;${s[key] ? 'right' : 'left'}:.15rem;width:1.2rem;height:1.2rem;border-radius:999px;background:#fff"></i></span></button>`;
+    m.innerHTML = `<div class="bg-appbg" style="width:100%;max-width:28rem;max-height:86vh;overflow-y:auto;border-radius:2rem;padding:1.2rem 1.1rem 1.4rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Pengaturan</p><h3 class="text-xl font-black">Profil Sosial & Level</h3></div><button onclick="document.getElementById('social-settings-modal').remove()" style="font-size:1.6rem;color:var(--text-muted)">×</button></div>
+      <p style="font-size:.7rem;font-weight:800;margin:.4rem 0">Deskripsi di bawah nama</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem">${PRESETS.map((p, i) => btn(p, `Social.chipToggle(${i})`, s.chips.includes(p))).join('')}</div>
+      <input id="soc-custom" type="text" maxlength="60" value="${esc(s.custom)}" oninput="Social.custom(this.value)" placeholder="Tulis deskripsi sendiri (maks. 60 huruf)" class="ios-glass" style="width:100%;margin-top:.6rem;padding:.65rem .9rem;border-radius:1rem;font-size:.8rem;font-weight:700;outline:none">
+      <p style="font-size:.62rem;color:var(--text-muted);margin-top:.3rem">Tampil di profil: <b id="soc-preview">${esc(bioText()) || '(kosong)'}</b></p>
+      <p style="font-size:.7rem;font-weight:800;margin:.9rem 0 .4rem">Level</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem">${btn('Otomatis', "Social.levelMode('auto')", s.levelMode === 'auto')}${LEVELS.map(L => btn(L, `Social.levelMode('${L}')`, s.levelMode === L)).join('')}</div>
+      <p style="font-size:.62rem;color:var(--text-muted);margin-top:.35rem;line-height:1.5">Level otomatis dihitung dari progres kana, kosakata, dan pola N5 kamu (skor ${auto.p}%) → saat ini <b>${auto.label}</b>. Pilih level tertentu untuk menetapkannya sendiri.</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${toggle('visible', 'Muncul di pencarian teman', 'Pengguna lain bisa menemukan kamu')}</div>
+      <div class="ios-glass" style="margin-top:.9rem;padding:.7rem .9rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between"><span><b style="font-size:.78rem">Kode teman</b><span style="display:block;font-size:.62rem;color:var(--text-muted)">Bagikan agar bisa ditambahkan</span></span><button onclick="Social.copyCode()" style="font-weight:900;letter-spacing:.08em;color:var(--accent)">${esc(s.code)} ⧉</button></div>
+      <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem">
+        <b style="font-size:.78rem">🤖 Kunci AI gratis <span style="font-weight:600;color:var(--text-muted)">(agar Rama-San selalu menjawab)</span></b>
+        <p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;margin:.25rem 0 .5rem">Tempel <b>satu kunci gratis</b> dari Google Gemini (diawali <b>AQ.</b> atau <b>AIza</b>) atau Groq (diawali <b>gsk_</b>). Tanpa server, tanpa kartu kredit. Kunci hanya disimpan di perangkat ini dan hanya dikirim ke Google/Groq.</p>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem"><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="padding:.35rem .7rem;border-radius:.8rem;font-size:.66rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981;text-decoration:none">Ambil kunci Gemini ↗</a><a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="padding:.35rem .7rem;border-radius:.8rem;font-size:.66rem;font-weight:800;background:rgba(245,158,11,.14);color:#F59E0B;text-decoration:none">Ambil kunci Groq ↗</a></div>
+        <input id="soc-ai-key" type="password" value="${esc(getKey())}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AQ.… / AIza… / gsk_…" class="ios-glass" style="width:100%;padding:.55rem .75rem;border-radius:.8rem;font-size:.75rem;font-weight:700;outline:none">
+        <div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.testAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Simpan & uji</button><button onclick="Social.diagAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981">Diagnosa</button><button onclick="Social.aiKey('')" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(239,68,68,.14);color:#ef4444">Hapus</button></div>
+        <p id="soc-ai-msg" style="font-size:.62rem;font-weight:700;margin-top:.35rem">${getKey() ? '✓ Kunci tersimpan (' + (keyKind(getKey()) || 'format tidak dikenali') + ').' : 'Belum ada kunci: memakai layanan cadangan yang kurang stabil.'}</p>
+      </div>
+      <button onclick="Social.warning()" class="ios-glass" style="width:100%;margin-top:.9rem;padding:.7rem;border-radius:1rem;font-weight:800;font-size:.78rem;color:#F59E0B">⚠️ Lihat Papan Peringatan</button>
+      <button onclick="Social.open('friends');document.getElementById('social-settings-modal').remove();try{closeThemeModal()}catch(e){}" class="bg-accent text-white" style="width:100%;margin-top:1rem;padding:.8rem;border-radius:1rem;font-weight:800;font-size:.85rem">Buka Teman & Chat</button></div>`;
+    document.body.appendChild(m);
+  }
+  const reopen = () => { const y = $('social-settings-modal')?.firstElementChild?.scrollTop || 0; openSettings(); const e = $('social-settings-modal')?.firstElementChild; if (e) e.scrollTop = y; };
+  const chipToggle = i => { const s = S(), p = PRESETS[i], k = s.chips.indexOf(p); k >= 0 ? s.chips.splice(k, 1) : s.chips.push(p); saveState(); refreshHeader(); reopen(); };
+  const custom = v => { S().custom = v; saveState(); refreshHeader(); const e = $('soc-preview'); if (e) e.textContent = bioText() || '(kosong)'; };
+  const levelMode = m => { S().levelMode = m; saveState(); refreshHeader(); reopen(); };
+  const toggle = k => { S()[k] = !S()[k]; saveState(); refreshHeader(); reopen(); };
+  const aiKey = v => { v = cleanKey(v); putKey(v); toast(v ? 'Kunci AI disimpan' : 'Kunci AI dihapus'); const i = $('soc-ai-key'); if (i) i.value = v; const m = $('soc-ai-msg'); if (m) { m.style.color = 'var(--text-muted)'; m.textContent = v ? (keyKind(v) ? '✓ Kunci tersimpan (' + keyKind(v) + ').' : '⚠️ Format tidak dikenali: harus diawali AQ., AIza atau gsk_') : 'Belum ada kunci: memakai layanan cadangan yang kurang stabil.'; } };
+  async function testAi() {
+    const i = $('soc-ai-key'), m = $('soc-ai-msg'); if (i) aiKey(i.value);
+    if (m) { m.textContent = 'Menguji…'; m.style.color = 'var(--text-muted)'; }
+    const t0 = Date.now();
+    try { const t = await ramaOnline('Tes sambungan: jawab singkat dengan kata "siap".', [], null); if (m) { m.textContent = '✓ Tersambung (' + ((Date.now() - t0) / 1000).toFixed(1) + ' dtk). Balasan: ' + t.slice(0, 60); m.style.color = '#10B981'; } }
+    catch (e) { if (m) { m.textContent = '✗ Gagal: ' + (e && e.message ? e.message : 'tidak diketahui'); m.style.color = '#ef4444'; } }
+  }
+  async function diagAi() {
+    const m = $('soc-ai-msg'); if (!m) return; m.style.whiteSpace = 'pre-wrap'; m.style.color = 'var(--text-muted)'; m.textContent = 'Mendiagnosa…';
+    const lim = (p, ms) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('waktu habis')), ms))]);
+    const probe = async (name, url) => { try { await lim(fetch(url, { mode: 'no-cors' }), 6000); return '✓ ' + name + ': terjangkau'; } catch (e) { return '✗ ' + name + ': DIBLOKIR (' + ((e && e.message) || 'gagal') + ')'; } };
+    const cors = async () => { try { const r = await lim(fetch('https://generativelanguage.googleapis.com/v1beta/models'), 6000); return '✓ Gemini CORS: boleh (status ' + r.status + ')'; } catch (e) { return '✗ Gemini CORS: ditolak (' + ((e && e.message) || 'gagal') + ')'; } };
+    const env = 'Lingkungan: ' + location.protocol + '//' + (location.host || '(file)') + ' · ' + (window.top !== window ? 'di dalam iframe/sandbox' : 'halaman langsung') + ' · online=' + navigator.onLine;
+    const rs = await Promise.all([probe('Google Gemini', 'https://generativelanguage.googleapis.com/'), cors(), probe('Groq', 'https://api.groq.com/'), probe('Google umum', 'https://www.google.com/generate_204'), probe('Anthropic (sandbox)', 'https://api.anthropic.com/')]);
+    const blocked = rs.slice(0, 4).every(x => x.startsWith('✗'));
+    m.textContent = env + '\n' + rs.join('\n') + '\n' + (blocked ? '→ Semua situs luar diblokir: aplikasi dibuka di lingkungan yang mengunci jaringan. Buka file ini langsung di Chrome (klik dua kali file .html) atau unggah ke GitHub Pages/Netlify.' : '→ Jaringan terbuka; bila AI masih gagal, kirim hasil ini ke pembuat aplikasi.');
+  }
+  const copyCode = () => { const c = S().code; (navigator.clipboard?.writeText(c) || Promise.reject()).then(() => toast('Kode disalin: ' + c), () => prompt('Salin kode:', c)); };
+
+  /* baris di menu Pengaturan */
+  (function () {
+    const tm = $('theme-modal'); if (!tm) return;
+    const lain = [...tm.querySelectorAll('p')].find(p => p.textContent.trim() === 'Lainnya'); if (!lain) return;
+    lain.parentElement.insertAdjacentHTML('beforebegin', '<div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Sosial</p><div class="settings-section"><button onclick="Social.openSettings()" class="settings-row"><i data-lucide="users" class="w-5 h-5"></i><span class="font-bold text-sm">Profil Sosial & Level</span></button><button onclick="Social.open(\'friends\');closeThemeModal()" class="settings-row"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="font-bold text-sm">Teman & Chat</span></button></div></div>');
+    icons();
+  })();
+
+  return { aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
+})();
+</script>
 </body>
 </html>
