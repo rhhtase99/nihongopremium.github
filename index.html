@@ -5761,6 +5761,138 @@ const KB_D = [
    Semua akses data lewat Social.api, sehingga nanti bisa diganti dengan server sungguhan
    (mis. Firebase/Supabase) tanpa mengubah tampilan.
    ===================================================================== */
+/* ---------------------------------------------------------------------
+   Relay teman antar-perangkat (tanpa server sendiri) memakai pub/sub publik ntfy.sh (atau server ntfy lain).
+   - Kode perangkat (NJ-XXXXXXXX) = "alamat" kotak masuk. Menambah teman = kirim salam ke kotak masuk itu.
+   - Obrolan lewat topik khusus berdua; pesan tertahan ±12 jam bila penerima offline.
+   - Koneksi tahan banting: SSE → otomatis pindah ke polling bila SSE diblokir, watchdog, sambung ulang, tes koneksi.
+   --------------------------------------------------------------------- */
+function NHRelay(env) {
+  const DEF = 'https://ntfy.sh/';
+  const base = () => { let u = String((env.url && env.url()) || '').trim(); if (!/^https?:\/\//i.test(u)) u = DEF; return u.endsWith('/') ? u : u + '/'; };
+  const canon = c => { const u = String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return /^NJ[A-Z0-9]{5,10}$/.test(u) ? 'NJ-' + u.slice(2) : ''; };
+  const inbox = c => 'nhgo1-in-' + c.toLowerCase();
+  const dm = (a, b) => 'nhgo1-dm-' + [a, b].map(x => x.toLowerCase()).sort().join('_');
+  const S = () => env.S();
+  const online = () => (env.online ? env.online() : true);
+  const T = Object.assign({ poll: 5000, watch: 20000, stale: 90000, sseRetry: 120000 }, env.timing || {});
+  let es = null, mode = 'idle', errSSE = 0, errPoll = 0, lastEvt = 0, key = '', polling = false, pollT = 0, retryT = 0, wd = 0;
+  const setMode = m => { if (mode !== m) { mode = m; env.status && env.status(mode); } };
+  const mine = () => { const p = env.profile() || {}; return { n: p.n || '', a: p.a || '', l: p.l || '', b: p.b || '' }; };
+  const clean = p => { const o = {}; [['n', 'name', 24], ['a', 'avatar', 8], ['l', 'level', 8], ['b', 'bio', 80]].forEach(([k, f, n]) => { const v = String(p[k] == null ? '' : p[k]).slice(0, n); if (v) o[f] = v; }); return o; };
+  const pub = (topic, obj) => Promise.resolve().then(() => env.fetch(base() + topic, { method: 'POST', body: JSON.stringify(obj) })).then(r => !!(r && r.ok), () => false);
+  const topics = () => { const s = S(); return [inbox(s.code), ...s.friends.filter(id => s.remote[id]).map(id => dm(s.code, id))]; };
+  const closeES = () => { if (es) { try { es.close(); } catch (e) {} es = null; } };
+  const stopPoll = () => { polling = false; clearTimeout(pollT); clearTimeout(retryT); };
+
+  function startSSE(t) {
+    stopPoll(); closeES(); setMode('connecting'); lastEvt = Date.now();
+    if (typeof env.EventSource !== 'function') return startPoll();
+    let cur; try { cur = es = new env.EventSource(base() + t + '/sse?since=' + (S().since || 'all')); } catch (e) { return startPoll(); }
+    cur.onopen = () => { if (es !== cur) return; errSSE = 0; lastEvt = Date.now(); setMode('sse'); };
+    cur.onerror = () => { if (es !== cur) return; errSSE++; if (!online()) setMode('offline'); else if (mode === 'sse') setMode('connecting'); if (errSSE >= 3) { closeES(); startPoll(); } };
+    if (cur.addEventListener) cur.addEventListener('keepalive', () => { lastEvt = Date.now(); });
+    cur.onmessage = ev => { lastEvt = Date.now(); let m; try { m = JSON.parse(ev.data); } catch (e) { return; } if (m && m.event && m.event !== 'message') return; handle(m); };
+  }
+
+  function startPoll() {
+    closeES(); if (polling) return; polling = true; errPoll = 0; setMode('connecting');
+    const tick = async () => {
+      if (!polling) return;
+      try {
+        const r = await env.fetch(base() + key + '/json?poll=1&since=' + (S().since || 'all'));
+        if (!r || !r.ok) throw new Error('http');
+        const txt = await r.text();
+        txt.split('\n').forEach(l => { l = l.trim(); if (!l) return; try { const m = JSON.parse(l); if (m.event === 'message') handle(m); } catch (e) {} });
+        errPoll = 0; lastEvt = Date.now(); setMode('poll');
+      } catch (e) { errPoll++; setMode(online() ? 'blocked' : 'offline'); }
+      if (polling) pollT = setTimeout(tick, errPoll ? Math.min(30000, T.poll * (errPoll + 1)) : T.poll);
+    };
+    tick();
+    retryT = setTimeout(() => { if (polling && mode === 'poll') { stopPoll(); errSSE = 0; startSSE(key); } }, T.sseRetry);
+  }
+
+  function connect(force) {
+    const s = S(); if (!s.code) return;
+    const t = topics().join(',');
+    if (!wd) wd = setInterval(() => { if (mode === 'sse' && Date.now() - lastEvt > T.stale) connect(true); else if (mode === 'blocked' && online() && !polling) connect(true); }, T.watch);
+    if (!force && key === t && mode !== 'idle' && mode !== 'offline') return;
+    key = t; errSSE = 0;
+    if (!online()) { setMode('offline'); return; }
+    startSSE(t);
+  }
+
+  function link(code, info, announce) {
+    const s = S(), had = s.friends.includes(code) && s.remote[code] && !s.remote[code].pending;
+    const r = s.remote[code] = Object.assign({ id: code, code, remote: true, avatar: '👤', level: 'Pemula', bio: '' }, s.remote[code] || {}, clean(info));
+    r.pending = false;
+    if (!s.friends.includes(code)) s.friends.push(code);
+    env.save();
+    if (!had) { connect(true); env.onFriend && env.onFriend(code, r, announce); } else env.onInfo && env.onInfo(code, r);
+    return r;
+  }
+
+  function handle(m) {
+    const s = S(); if (!m || typeof m.message !== 'string') return;
+    if (m.id) { if (s.seen.includes(m.id)) return; s.seen.push(m.id); if (s.seen.length > 400) s.seen.splice(0, s.seen.length - 400); }
+    if (m.time && (!s.since || m.time > s.since)) s.since = m.time;
+    let p; try { p = JSON.parse(m.message); } catch (e) { return; }
+    if (!p || typeof p !== 'object') return;
+    const from = canon(p.c); if (!from || from === s.code || s.blocked[from]) return;
+    if (p.t === 'y') { if (s.friends.includes(from) && (!m.time || m.time * 1000 > Date.now() - 9000)) env.onTyping && env.onTyping(from); return; }
+    if (p.t === 'h') { link(from, p, true); pub(inbox(from), Object.assign({ t: 'k', c: s.code }, mine())); }
+    else if (p.t === 'k') { link(from, p, false); }
+    else if (p.t === 'm') {
+      const r = link(from, p, true), arr = (s.chats[from] = s.chats[from] || []), mid = String(p.id || '');
+      if (mid && arr.some(x => x.mid === mid)) { env.save(); return; }
+      arr.push({ f: 'them', x: String(p.x || '').slice(0, 600), t: m.time ? m.time * 1000 : Date.now(), mid });
+      if (arr.length > 200) arr.splice(0, arr.length - 200);
+      env.save(); env.onMessage && env.onMessage(from, r);
+    }
+    else env.save();
+  }
+
+  function addByCode(raw) {
+    const s = S(), code = canon(raw);
+    if (!code) return { err: 'Kode tidak valid. Contoh: NJ-ABCD2345' };
+    if (code === s.code) return { err: 'Itu kode milikmu sendiri 😄' };
+    delete s.blocked[code];
+    const ex = s.remote[code];
+    if (ex && s.friends.includes(code) && !ex.pending) return { err: 'Kalian sudah berteman.' };
+    if (!ex) s.remote[code] = { id: code, code, remote: true, name: 'Teman ' + code.slice(-4), avatar: '👤', level: 'Pemula', bio: 'Menunggu balasan…', pending: true };
+    if (!s.friends.includes(code)) s.friends.push(code);
+    env.save(); connect(true);
+    pub(inbox(code), Object.assign({ t: 'h', c: s.code }, mine())).then(sent => env.onHello && env.onHello(code, sent));
+    return { ok: true, code, resent: !!ex };
+  }
+
+  function deliver(code, msg) {
+    const s = S(); msg.fail = false; msg.sent = false;
+    return pub(dm(s.code, code), Object.assign({ t: 'm', id: msg.mid, c: s.code, x: String(msg.x).slice(0, 600) }, mine())).then(sent => {
+      msg.sent = sent; msg.fail = !sent; env.save();
+      if (!sent) env.toast && env.toast('Pesan belum terkirim — ketuk pesan untuk kirim ulang');
+      return sent;
+    });
+  }
+  function send(code, text) {
+    const s = S(), arr = (s.chats[code] = s.chats[code] || []), mid = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const msg = { f: 'me', x: text, t: Date.now(), mid }; arr.push(msg);
+    if (arr.length > 200) arr.splice(0, arr.length - 200);
+    env.save(); return deliver(code, msg);
+  }
+  const resend = (code, mid) => { const m = (S().chats[code] || []).find(x => x.mid === mid); return m ? deliver(code, m) : Promise.resolve(false); };
+  const lastTy = {};
+  function typing(code) { const n = Date.now(); if (lastTy[code] && n - lastTy[code] < 6000) return; lastTy[code] = n; pub(dm(S().code, code), { t: 'y', c: S().code }); }
+  async function diagnose() {
+    if (!online()) return { ok: false, err: 'perangkat sedang offline' };
+    const t0 = Date.now();
+    try { const r = await env.fetch(base() + 'v1/health'); if (!r || !r.ok) throw new Error('HTTP ' + (r && r.status)); return { ok: true, ms: Date.now() - t0 }; }
+    catch (e) { return { ok: false, err: (e && e.message) || 'diblokir/terputus' }; }
+  }
+  function remove(code) { const s = S(); s.blocked[code] = true; delete s.remote[code]; env.save(); connect(true); }
+  return { canon, connect, addByCode, send, resend, typing, diagnose, remove, mode: () => mode, ok: () => mode === 'sse' || mode === 'poll', topics, handle, base };
+}
+
 const Social = (function () {
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -5789,6 +5921,7 @@ const Social = (function () {
   DEMO.push(RAMA);
 
   /* ---------- data profil sendiri ---------- */
+  const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = new Uint32Array(8); try { (window.crypto || window.msCrypto).getRandomValues(b); } catch (e) { for (let i = 0; i < 8; i++) b[i] = Math.floor(Math.random() * 4294967296); } return 'NJ-' + Array.from(b, x => A[x % A.length]).join(''); };
   function S() {
     const s = (state.social = state.social || {});
     if (!Array.isArray(s.chips)) s.chips = [];
@@ -5798,7 +5931,8 @@ const Social = (function () {
     if (!s.chats) s.chats = {};
     if (s.showLevel === undefined) s.showLevel = true;
     if (s.visible === undefined) s.visible = true;
-    if (!s.code) s.code = 'NJ-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+    if (!s.code || s.code.length < 11) s.code = newCode();
+    if (!s.remote) s.remote = {}; if (!s.blocked) s.blocked = {}; if (!s.unread) s.unread = {}; if (!Array.isArray(s.seen)) s.seen = [];
     return s;
   }
   const bioText = () => { const s = S(); return [...s.chips, s.custom.trim()].filter(Boolean).join(' · '); };
@@ -5833,7 +5967,7 @@ const Social = (function () {
     c.innerHTML = S().showLevel ? chip(myLevel()) : ''; const t = bioText(); b.textContent = t; b.style.display = t ? '' : 'none';
   }
   const uh = window.updateHeaderUI;
-  window.updateHeaderUI = function () { uh.apply(this, arguments); try { refreshHeader(); } catch (e) {} };
+  window.updateHeaderUI = function () { uh.apply(this, arguments); try { refreshHeader(); badge(); } catch (e) {} };
   window.addEventListener('DOMContentLoaded', () => setTimeout(() => { refreshHeader(); icons(); }, 30));
 
   /* ---------- Rama-San online ----------
@@ -5841,6 +5975,8 @@ const Social = (function () {
              (teks muncul sambil diketik, tanpa menunggu jawaban selesai). Tanpa server.
      Cadangan (bila belum ada kunci): beberapa AI publik tanpa kunci — tidak dijamin selalu hidup. */
   const RAMA_SYSTEM = 'Kamu adalah Rama-San, asisten belajar bahasa Jepang di aplikasi NihonGo. Jawab dalam bahasa Indonesia yang ramah, jelas, dan ringkas. Kamu ahli bahasa Jepang (kosakata, tata bahasa, kanji, JLPT) serta budaya, sejarah, geografi, musim, festival, makanan, dan kehidupan di Jepang. Sertakan tulisan Jepang beserta romaji dan artinya jika relevan. Jika tidak yakin atau informasinya bisa berubah (jadwal, harga, aturan visa), katakan terus terang dan sarankan cek sumber resmi. Jangan meminta atau menyimpan data pribadi pengguna.';
+  let lastVia = '';                               /* penyedia yang menjawab terakhir (ditampilkan di chat) */
+  const VIA = { CL: 'Claude', P1: 'Pollinations', P2: 'Pollinations', L7: 'LLM7', PO: 'Pollinations' };
   const KEY_LS = 'nihongo_ai_key';              /* disimpan terpisah dari data aplikasi agar tidak ikut cadangan/ekspor */
   const cleanKey = v => String(v || '').replace(/^[\s"'`]+|[\s"'`]+$/g, '').replace(/\s+/g, '');
   const getKey = () => { try { return cleanKey(localStorage.getItem(KEY_LS)); } catch (e) { return ''; } };
@@ -5907,9 +6043,16 @@ const Social = (function () {
     const pesan = (ctx ? 'Riwayat obrolan:\n' + ctx + '\n\n' : '') + 'Pengguna: ' + user + '\nRama-San:';
     const getTxt = base => async () => { const r = await fetch(base + encodeURIComponent(pesan) + '?system=' + encodeURIComponent(RAMA_SYSTEM)); if (!r.ok) throw new Error('HTTP ' + r.status); return aiClean(await r.text()); };
     const chat = (url, model) => async () => { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer unused' }, body: JSON.stringify({ model, messages: msgs, max_tokens: 700 }) }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); return aiClean(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content); };
-    const run = (name, delay, fn) => (async () => { if (delay) await new Promise(r => setTimeout(r, delay)); if (ctrl.aborted) throw new Error('batal'); return await fn(); })().catch(e => { errs.push(name + ' ' + (e && e.message ? e.message : 'gagal')); throw e; });
+    const run = (name, delay, fn) => (async () => {
+      if (delay) { const t0 = Date.now(); while (Date.now() - t0 < delay && fails < imm && !ctrl.aborted) await new Promise(r => setTimeout(r, 80)); }
+      if (ctrl.aborted) throw new Error('batal');
+      const out = await fn(); lastVia = VIA[name] || name; try { localStorage.setItem('nihongo_ai_best', name); } catch (e) {} return out;
+    })().catch(e => { fails++; errs.push(name + ' ' + (e && e.message ? e.message : 'gagal')); throw e; });
+    const bestN = (() => { try { return localStorage.getItem('nihongo_ai_best') || ''; } catch (e) { return ''; } })();
+    const dl = (n, b) => (bestN ? (bestN === n ? 0 : b + 900) : b);   /* penyedia yang terakhir berhasil dimulai duluan */
+    let fails = 0; const imm = bestN ? 1 : 3;                          /* bila semua yang pertama gagal, sisanya langsung dicoba */
     try {
-      return await Promise.any([run('CL', 0, () => claudeSandbox(text, hist)), run('P1', 0, getTxt('https://gen.pollinations.ai/text/')), run('P2', 0, getTxt('https://text.pollinations.ai/')), run('L7', 1500, chat('https://api.llm7.io/v1/chat/completions', 'default')), run('PO', 3000, chat('https://text.pollinations.ai/openai', 'openai'))]);
+      return await Promise.any([run('CL', dl('CL', 0), () => claudeSandbox(text, hist)), run('P1', dl('P1', 0), getTxt('https://gen.pollinations.ai/text/')), run('P2', dl('P2', 0), getTxt('https://text.pollinations.ai/')), run('L7', dl('L7', 1500), chat('https://api.llm7.io/v1/chat/completions', 'default')), run('PO', dl('PO', 3000), chat('https://text.pollinations.ai/openai', 'openai'))]);
     } catch (e) { throw new Error(ctrl.aborted ? 'waktu habis' : (errs.join(', ') || 'gagal').slice(0, 110)); }
   }
   /* hist: [{role,content}] riwayat sebelum pesan ini. onChunk(teksSejauhIni) dipanggil saat jawaban mengalir. */
@@ -5924,7 +6067,7 @@ const Social = (function () {
     const work = (async () => {
       if (key && !kind) throw new Error('format kunci tidak dikenali (harus AQ.…, AIza… atau gsk_…)');
       if (kind) {
-        try { return await (kind === 'gemini' ? geminiStream : groqStream)(key, hist, text, onChunk, ctrl, arm); }
+        try { const o = await (kind === 'gemini' ? geminiStream : groqStream)(key, hist, text, onChunk, ctrl, arm); lastVia = kind === 'gemini' ? 'Gemini' : 'Groq'; return o; }
         catch (e) {
           if (!netErr(e)) throw e;
           try { const o = await claudeSandbox(text, hist); onChunk(o); return o; }
@@ -5945,11 +6088,12 @@ const Social = (function () {
       q = (q || '').trim().toLowerCase();
       return DEMO.filter(u => !u.ai && (level === 'Semua' || u.level === level) && (!q || (u.name + ' ' + u.bio + ' ' + u.level).toLowerCase().includes(q)));
     },
-    get: id => DEMO.find(u => u.id === id),
+    get: id => DEMO.find(u => u.id === id) || (S().remote[id] ? { chips: [], level: 'Pemula', avatar: '👤', bio: '', ...S().remote[id], id } : undefined),
     add(id) { const f = S().friends; if (!f.includes(id)) f.push(id); saveState(); },
-    remove(id) { const s = S(); s.friends = s.friends.filter(x => x !== id); saveState(); },
+    remove(id) { const s = S(); s.friends = s.friends.filter(x => x !== id); if (s.remote[id]) net.remove(id); saveState(); },
     history: id => S().chats[id] || [],
     send(id, text, tick) {
+      const rm = api.get(id); if (rm && rm.remote) { const p = net.send(id, text); if (tick) tick(); return p.then(() => { if (tick) tick(); return text; }); }
       const s = S(); (s.chats[id] = s.chats[id] || []).push({ f: 'me', x: text, t: Date.now() }); trim(id);
       const f = api.get(id);
       if (f.ai) {
@@ -5957,11 +6101,11 @@ const Social = (function () {
         const m = { f: 'them', x: '', t: Date.now(), s: Rama.DEFAULT_CHIPS, stream: true }; s.chats[id].push(m); saveState();
         let raf = 0; const paint = () => { raf = 0; if (tick) tick(); };
         return (async () => {
-          try { const out = await ramaOnline(text, hist, acc => { m.x = acc; if (!raf) raf = requestAnimationFrame(paint); }); m.x = out; }
+          try { const out = await ramaOnline(text, hist, acc => { m.x = acc; if (!raf) raf = requestAnimationFrame(paint); }); m.x = out; m.via = lastVia; }
           catch (e) {
             const why = (e && e.message ? e.message : 'gagal'), hint = getKey() ? '' : ' Untuk jawaban yang selalu jalan, pasang kunci AI gratis di Pengaturan › Profil Sosial & Level.';
             if (m.x && m.x.length > 20) m.x += '\n\n⚠️ (jawaban terputus: ' + why + ')';
-            else { const r = Rama.reply(text); m.x = '⚠️ AI online gagal (' + why + ').' + hint + '\n\n' + r.x; m.s = r.s; }
+            else { const r = Rama.reply(text); m.x = '⚠️ AI online gagal (' + why + ').' + hint + '\n\n' + r.x; m.s = r.s; m.fail = true; }
           }
           delete m.stream; m.t = Date.now(); if (raf) cancelAnimationFrame(raf); trim(id); saveState(); return m.x;
         })();
@@ -5987,7 +6131,78 @@ const Social = (function () {
   }
 
   /* ---------- tampilan ---------- */
-  const V = { view: 'friends', level: 'Semua', q: '', chat: null, typing: false };
+
+  (function chatStyle() {
+    if (document.getElementById('soc-style')) return;
+    const st = document.createElement('style'); st.id = 'soc-style';
+    st.textContent = `
+.soc-row{display:flex}.soc-row.me{justify-content:flex-end}.soc-row.them{justify-content:flex-start}.soc-row.newg{margin-top:.55rem}.soc-row.grp{margin-top:.12rem}
+.soc-b{position:relative;max-width:78%;padding:.52rem .85rem;border-radius:1.2rem;font-size:.86rem;line-height:1.38;word-break:break-word;white-space:pre-wrap}
+.soc-b.ai{max-width:92%;white-space:normal}
+.soc-b.me{background:var(--accent);color:#fff}
+.soc-b.them{background:color-mix(in srgb,var(--text-muted) 20%,var(--bg-app,#fff))}
+.soc-b.me.tail{border-bottom-right-radius:.32rem}.soc-b.them.tail{border-bottom-left-radius:.32rem}
+.soc-b.tail::after{content:'';position:absolute;bottom:0;width:.7rem;height:.7rem;background:inherit}
+.soc-b.me.tail::after{right:-.3rem;clip-path:polygon(0 0,100% 100%,0 100%)}
+.soc-b.them.tail::after{left:-.3rem;clip-path:polygon(100% 0,100% 100%,0 100%)}
+.soc-b.failed{background:#ef4444;cursor:pointer}
+.soc-pop{animation:socPop .42s cubic-bezier(.34,1.56,.64,1) both}
+.soc-b.me.soc-pop{transform-origin:100% 100%}.soc-b.them.soc-pop{transform-origin:0 100%}
+@keyframes socPop{0%{opacity:0;transform:translateY(.7rem) scale(.5)}55%{opacity:1}100%{opacity:1;transform:none}}
+.soc-typing{display:inline-flex;align-items:center;gap:.28rem;padding:.7rem .9rem!important}
+.soc-typing i{width:.48rem;height:.48rem;border-radius:50%;background:var(--text-muted);opacity:.4;animation:socDot 1.25s infinite ease-in-out}
+.soc-typing i:nth-child(2){animation-delay:.18s}.soc-typing i:nth-child(3){animation-delay:.36s}
+@keyframes socDot{0%,60%,100%{transform:translateY(0) scale(.8);opacity:.35}30%{transform:translateY(-3px) scale(1.15);opacity:1}}
+.soc-sep{text-align:center;font-size:.6rem;font-weight:700;color:var(--text-muted);margin:.7rem 0 .15rem}
+.soc-status{text-align:right;font-size:.58rem;font-weight:700;color:var(--text-muted);margin:.18rem .25rem 0}.soc-status.bad{color:#ef4444}
+.soc-meta{font-size:.56rem;color:var(--text-muted);margin:.12rem .3rem 0;font-weight:700}
+.soc-retry button{margin-top:.3rem;padding:.35rem .8rem;border-radius:999px;font-size:.68rem;font-weight:800;background:rgba(236,72,153,.14);color:#EC4899}
+.soc-bar{position:sticky;bottom:5.6rem;display:flex;align-items:center;gap:.4rem;padding:.35rem .35rem .35rem .95rem;border-radius:1.7rem;background:var(--bg-app,#fff);border:1px solid var(--glass-border,rgba(0,0,0,.12));box-shadow:0 .6rem 1.4rem -.8rem rgba(0,0,0,.4)}
+.soc-bar input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:inherit;font-size:.9rem;font-weight:600;padding:.45rem 0}
+.soc-send{width:2.15rem;height:2.15rem;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none;opacity:.35;transform:scale(.7);transition:transform .3s cubic-bezier(.34,1.7,.5,1),opacity .2s}
+.soc-send.ready{opacity:1;transform:scale(1)}.soc-send:active{transform:scale(.88)}
+.soc-aicard{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:1rem;background:rgba(59,130,246,.12)}
+.soc-aicard>div{flex:1;min-width:0;display:flex;flex-direction:column;font-size:.62rem;line-height:1.4;color:var(--text-muted)}.soc-aicard b{font-size:.74rem;color:#3B82F6}
+.soc-aicard button{padding:.4rem .8rem;border-radius:999px;background:#3B82F6;color:#fff;font-size:.68rem;font-weight:800;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.soc-pop,.soc-typing i{animation:none!important}}`;
+    document.head.appendChild(st);
+  })();
+  const V = { view: 'friends', level: 'Semua', q: '', chat: null, typing: false, peer: {}, tshown: {} };
+  const shown = new WeakSet();   /* pesan yang sudah ditampilkan — hanya pesan baru yang beranimasi */
+  const net = NHRelay({
+    S, fetch: (u, o) => fetch(u, o), EventSource: window.EventSource, save: () => saveState(), toast,
+    url: () => S().relay || '', online: () => navigator.onLine !== false,
+    profile: () => ({ n: state.user.name, a: state.user.avatar, l: myLevel(), b: bioText() }),
+    status: () => { const e = $('soc-net'); if (e) e.textContent = netLabel(); renderSub(); },
+    onFriend: (c, r, announce) => { if (announce) toast((r.name || 'Seseorang') + ' menambahkanmu sebagai teman 🎉'); socRefresh(); },
+    onInfo: () => socRefresh(),
+    onTyping: c => { V.peer[c] = Date.now() + 5000; refreshChat(c); setTimeout(() => refreshChat(c), 5200); },
+    onMessage: (c, r) => {
+      const s = S(), last = s.chats[c].slice(-1)[0]; V.peer[c] = 0;
+      if (V.view === 'chat' && V.chat === c && $('soc-msgs')) { paintMsgs(c); scrollDown(); s.unread[c] = 0; renderSub(); }
+      else { s.unread[c] = (s.unread[c] || 0) + 1; toast('Pesan baru dari ' + (r.name || 'teman') + ': ' + String(last.x).slice(0, 40)); socRefresh(); }
+      saveState(); badge();
+    },
+    onHello: (c, sent) => toast(sent ? 'Permintaan terkirim. Temanmu terhubung saat ia online.' : 'Gagal mengirim — periksa koneksi internet (ketuk status koneksi)')
+  });
+  const NET_LABEL = { idle: ['⚪', 'Belum terhubung'], connecting: ['🟡', 'Menghubungkan…'], sse: ['🟢', 'Terhubung'], poll: ['🟢', 'Terhubung (mode hemat)'], offline: ['🔴', 'Offline — periksa internet'], blocked: ['🔴', 'Relay tidak terjangkau'] };
+  const netLabel = () => { const m = NET_LABEL[net.mode()] || NET_LABEL.idle; return m[0] + ' ' + m[1]; };
+  const netChip = () => `<button id="soc-net" onclick="Social.reconnect()" style="font-size:.62rem;font-weight:800;padding:.28rem .65rem;border-radius:999px;background:rgba(127,127,127,.14)">${netLabel()}</button>`;
+  function refreshChat(c) { if (V.view === 'chat' && V.chat === c && $('soc-msgs')) { paintMsgs(c); scrollDown(); renderSub(); } }
+  async function reconnect() {
+    const e = $('soc-net'); if (e) e.textContent = '🟡 Memeriksa…';
+    const d = await net.diagnose(); net.connect(true);
+    toast(d.ok ? 'Relay terjangkau (' + d.ms + ' ms). Menyambung ulang…' : 'Relay tidak terjangkau: ' + d.err + '. Coba jaringan lain atau atur relay di Pengaturan › Profil Sosial.');
+  }
+  function socRefresh() { try { if (V.view === 'friends' && vp() && vp().querySelector('#soc-friends-marker')) render(); badge(); } catch (e) {} }
+  function badge() {
+    const b = $('social-btn'); if (!b) return; const n = Object.values(S().unread || {}).reduce((a, c) => a + c, 0); let d = b.querySelector('.soc-badge');
+    if (!n) { if (d) d.remove(); return; }
+    if (!d) { d = document.createElement('span'); d.className = 'soc-badge'; d.style.cssText = 'position:absolute;top:-2px;right:-2px;min-width:1.05rem;height:1.05rem;padding:0 .25rem;border-radius:999px;background:#ef4444;color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center'; b.appendChild(d); }
+    d.textContent = n > 9 ? '9+' : n;
+  }
+  const unreadBadge = id => { const n = (S().unread || {})[id] || 0; return n ? `<span style="background:#ef4444;color:#fff;border-radius:999px;padding:.05rem .45rem;font-size:.62rem;font-weight:900">${n}</span>` : ''; };
+
   const vp = () => $('app-viewport');
   const btn = (label, fn, on) => `<button onclick="${fn}" style="padding:.4rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;white-space:nowrap;${on ? 'background:var(--accent);color:#fff' : 'background:rgba(127,127,127,.14)'}">${label}</button>`;
   const avatarEl = (e, size = 2.8) => `<div class="ios-glass" style="width:${size}rem;height:${size}rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:${size * .5}rem;flex-shrink:0;border:1.5px solid var(--accent)">${e}</div>`;
@@ -5996,14 +6211,14 @@ const Social = (function () {
   function me() { return `<div class="ios-glass" style="padding:.9rem;border-radius:1.5rem;display:flex;align-items:center;gap:.8rem">${avatarEl(state.user.avatar || '🌸', 3)}<div style="flex:1;min-width:0"><b style="font-size:.9rem">${esc(state.user.name || 'Kamu')}</b><p style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(bioText()) || 'Belum ada deskripsi'}</p><button onclick="Social.openSettings()" style="font-size:.65rem;font-weight:800;color:var(--accent);margin-top:.15rem">Atur profil & level ›</button></div><div style="align-self:flex-start;text-align:right">${S().showLevel ? chip(myLevel(), true) : ''}${S().levelMode === 'auto' ? '<p style="font-size:.55rem;color:var(--text-muted);margin-top:.2rem">level otomatis</p>' : ''}</div></div>`; }
   function row(u, mode) {
     const isF = S().friends.includes(u.id), last = api.history(u.id).slice(-1)[0];
-    const action = u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true));
+    const action = unreadBadge(u.id) + (u.pending ? btn('⏳ Kirim ulang', `Social.resend('${u.id}')`) : u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true)));
     return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${esc(u.name)}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
   }
   function render() {
     if (V.view === 'chat') return renderChat();
     const tabs = `<div style="display:flex;gap:.4rem">${btn('Teman (' + S().friends.length + ')', "Social.open('friends')", V.view === 'friends')}${btn('Cari teman', "Social.open('find')", V.view === 'find')}</div>`;
-    vp().innerHTML = `<div class="animate-fade-in pb-28" style="display:flex;flex-direction:column;gap:.8rem">${head('Teman & Chat')}${me()}${tabs}${V.view === 'friends' ? friendsList() : findBox()}
-      <p style="font-size:.6rem;color:var(--text-muted);text-align:center;line-height:1.5">Mode demo lokal: daftar teman adalah contoh dan obrolan tersimpan di perangkat ini saja. Obrolan antar-pengguna sungguhan memerlukan server.</p></div>`;
+    vp().innerHTML = `<div class="animate-fade-in pb-28" style="display:flex;flex-direction:column;gap:.8rem">${head('Teman & Chat')}${me()}${tabs}${V.view === 'friends' ? '<span id="soc-friends-marker" hidden></span>' + myCodeCard() + friendsList() : findBox()}
+      <p style="font-size:.6rem;color:var(--text-muted);text-align:center;line-height:1.5">Teman lewat kode terhubung antar-perangkat memakai relay publik (ntfy.sh); pesan tertahan ±12 jam bila temanmu sedang offline. Daftar nama contoh di tab Cari teman hanyalah demo. </p></div>`;
     icons();
   }
   function friendsList() {
@@ -6012,8 +6227,38 @@ const Social = (function () {
     if (!fr.length) return pinned + `<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;text-align:center;font-size:.78rem;color:var(--text-muted)">Belum punya teman manusia. Cari dan tambah teman di tab <b>Cari teman</b>.<div style="margin-top:.8rem">${btn('Cari teman', "Social.open('find')", true)}</div></div>`;
     return pinned + fr.map(u => row(u, 'friend')).join('');
   }
+  function myCodeCard() {
+    return `<div class="ios-glass" style="padding:.8rem .9rem;border-radius:1.4rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem"><div style="min-width:0"><p style="font-size:.58rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)">Kode temanmu</p><p style="font-size:1.15rem;font-weight:900;letter-spacing:.1em">${esc(S().code)}</p></div><div style="display:flex;gap:.4rem">${btn('Salin', 'Social.copyCode()')}${btn('Bagikan', 'Social.share()', true)}</div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:.55rem;gap:.5rem">${netChip()}${btn('＋ Tambah teman', "Social.open('find')", true)}</div></div>`;
+  }
+  async function pasteCode() { try { const t = await navigator.clipboard.readText(); const i = $('soc-code'); if (i) { i.value = (net.canon(t) || String(t).trim()).slice(0, 14); i.focus(); } } catch (e) { toast('Izin clipboard ditolak — tempel manual ke kolom'); } }
+  const resend = id => { const r = net.addByCode(id); toast(r.ok ? 'Salam dikirim ulang ✓' : r.err); };
+  function share() {
+    const c = S().code, text = 'Tambah aku di NihonGo! Kode teman: ' + c; let url = '';
+    try { if (/^https?:/.test(location.href)) url = location.href.split('#')[0].split('?')[0] + '#add=' + c; } catch (e) {}
+    if (navigator.share) navigator.share(Object.assign({ title: 'NihonGo', text }, url ? { url } : {})).catch(() => {}); else copyCode();
+  }
+  function linkAdd() {
+    try {
+      const m = /[#?&]add=(NJ-?[A-Za-z0-9]{5,10})/i.exec(location.hash + location.search); if (!m) return;
+      const code = net.canon(m[1]); if (!code) return;
+      if (!(state.user && state.user.name)) { S().pendingAdd = code; saveState(); return; }
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      const r = net.addByCode(code); toast(r.ok ? 'Menambahkan teman dari tautan…' : r.err); open('friends');
+    } catch (e) {}
+  }
+  const setRelay = v => { v = String(v || '').trim(); if (v && !/^https?:\/\//i.test(v)) { toast('Alamat harus diawali http:// atau https://'); return; } if (v) S().relay = v; else delete S().relay; saveState(); net.connect(true); toast(v ? 'Relay diganti, menyambung ulang…' : 'Memakai relay bawaan (ntfy.sh)'); };
+  async function pasteKey() { try { const t = cleanKey(await navigator.clipboard.readText()); if (!keyKind(t)) { toast('Isi clipboard bukan kunci Gemini (AQ./AIza) atau Groq (gsk_)'); return; } const i = $('soc-ai-key'); if (i) i.value = t; await testAi(); } catch (e) { toast('Tidak bisa membaca clipboard — tempel manual ke kolom kunci'); } }
+  function codeBox() {
+    return `<div class="ios-glass" style="padding:.85rem;border-radius:1.3rem"><b style="font-size:.8rem">Cari dengan kode teman</b><p style="font-size:.62rem;color:var(--text-muted);margin:.15rem 0 .5rem">Minta kode ke temanmu (ada di Edit Profil), lalu masukkan di sini. Kodemu: <b style="letter-spacing:.06em;color:var(--accent)">${esc(S().code)}</b></p><div style="display:flex;gap:.45rem"><input id="soc-code" type="text" maxlength="14" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="NJ-XXXXXXXX" class="ios-glass" style="flex:1;min-width:0;padding:.65rem .9rem;border-radius:1rem;font-size:.85rem;font-weight:900;letter-spacing:.08em;outline:none;text-transform:uppercase" onkeydown="if(event.key==='Enter'){Social.addCode()}"><button onclick="Social.pasteCode()" class="ios-glass" style="padding:0 .8rem;border-radius:1rem;font-weight:800;font-size:.72rem">Tempel</button><button onclick="Social.addCode()" class="bg-accent text-white" style="padding:0 1rem;border-radius:1rem;font-weight:800;font-size:.8rem">Tambah</button></div><p id="soc-code-msg" style="font-size:.65rem;font-weight:700;margin-top:.4rem"></p></div>`;
+  }
+  const addCode = () => {
+    const i = $('soc-code'), m = $('soc-code-msg'); if (!i) return;
+    const r = net.addByCode(i.value);
+    if (m) { m.style.color = r.ok ? '#10b981' : '#ef4444'; m.textContent = r.ok ? 'Permintaan dikirim. Temanmu akan muncul di daftar Teman.' : r.err; }
+    if (r.ok) { i.value = ''; setTimeout(() => open('friends'), 900); }
+  };
   function findBox() {
-    return `<input id="soc-q" type="text" value="${esc(V.q)}" oninput="Social.query(this.value)" placeholder="Cari nama, deskripsi, atau level…" class="ios-glass" style="width:100%;padding:.7rem 1rem;border-radius:1.1rem;font-size:.82rem;font-weight:700;outline:none">
+    return codeBox() + `<input id="soc-q" type="text" value="${esc(V.q)}" oninput="Social.query(this.value)" placeholder="Cari nama, deskripsi, atau level…" class="ios-glass" style="width:100%;padding:.7rem 1rem;border-radius:1.1rem;font-size:.82rem;font-weight:700;outline:none">
       <div style="display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.2rem">${['Semua', ...LEVELS].map(L => btn(L, `Social.filter('${L}')`, V.level === L)).join('')}</div>
       <div id="soc-results" style="display:flex;flex-direction:column;gap:.55rem">${results()}</div>`;
   }
@@ -6028,12 +6273,37 @@ const Social = (function () {
   /* ---------- chat ---------- */
   const time = t => new Date(t).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const fmt = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  /* Perbarui daftar pesan tanpa mengganti elemen yang tidak berubah → animasi pop/mengetik tidak terputus */
+  function patchList(el, html) {
+    const tpl = document.createElement('template');
+    if (!tpl || !('content' in tpl)) { el.innerHTML = html; return; }
+    tpl.innerHTML = html;
+    const nw = Array.from(tpl.content.children), old = Array.from(el.children), norm = n => n.outerHTML.replace(/ soc-pop/g, '').replace(/ id="soc-live"/g, '');
+    nw.forEach((n, i) => { const o = old[i]; if (o && norm(o) === norm(n)) return; if (o) el.replaceChild(n, o); else el.appendChild(n); });
+    for (let k = old.length - 1; k >= nw.length; k--) el.removeChild(old[k]);
+  }
+  const paintMsgs = id => { const el = $('soc-msgs'); if (el) patchList(el, bubbles(id)); };
+  const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+  const sepLabel = t => (sameDay(t, Date.now()) ? 'Hari ini' : new Date(t).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })) + ' ' + time(t);
+  const peerTyping = id => (V.peer[id] || 0) > Date.now();
+  function showTyping(id) { const f = api.get(id), h = api.history(id), last = h[h.length - 1]; if (f && f.remote) return peerTyping(id); return V.typing && V.chat === id && !(last && last.stream && last.x); }
   function bubbles(id) {
-    const h = api.history(id), ai = api.get(id).ai;
-    if (!h.length) return `<p style="text-align:center;font-size:.72rem;color:var(--text-muted);padding:2rem 0">Belum ada pesan. Sapa ${esc(api.get(id).name)} dulu 👋</p>`;
-    let html = h.filter(m => m.x !== '').map(m => `<div style="display:flex;justify-content:${m.f === 'me' ? 'flex-end' : 'flex-start'}"><div style="max-width:${ai && m.f === 'them' ? '92' : '78'}%;padding:.5rem .8rem;border-radius:1.1rem;font-size:.8rem;line-height:1.45;${m.f === 'me' ? 'background:var(--accent);color:#fff;border-bottom-right-radius:.3rem' : 'background:rgba(127,127,127,.16);border-bottom-left-radius:.3rem'}">${ai && m.f === 'them' ? fmt(m.x) : esc(m.x)}<div style="font-size:.52rem;opacity:.65;text-align:right;margin-top:.15rem">${time(m.t)}</div></div></div>`).join('');
-    const lastM = h[h.length - 1]; if (V.typing) { if (!(lastM && lastM.stream && lastM.x)) html += '<div style="font-size:.65rem;color:var(--text-muted)">sedang mengetik…</div>'; }
-    else if (ai) { const last = h[h.length - 1], sug = (last.f === 'them' && last.s) || Rama.DEFAULT_CHIPS; html += `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.2rem">${sug.map(q => `<button data-q="${esc(q)}" onclick="Social.ask(this.dataset.q)" style="padding:.3rem .65rem;border-radius:999px;font-size:.65rem;font-weight:800;background:rgba(236,72,153,.14);color:#EC4899">${esc(q)}</button>`).join('')}</div>`; }
+    const f = api.get(id), ai = !!f.ai, rem = !!f.remote, all = api.history(id), h = all.filter(m => m.x !== ''), typ = showTyping(id);
+    if (!h.length && !typ) return `<p style="text-align:center;font-size:.72rem;color:var(--text-muted);padding:2rem 0">Belum ada pesan. Sapa ${esc(f.name)} dulu 👋</p>`;
+    let html = '', prev = null, lastMe = -1; h.forEach((m, i) => { if (m.f === 'me') lastMe = i; });
+    h.forEach((m, i) => {
+      const nx = h[i + 1], me = m.f === 'me', newG = !prev || prev.f !== m.f || m.t - prev.t > 120000, tail = !nx || nx.f !== m.f || nx.t - m.t > 120000;
+      if (!prev || m.t - prev.t > 900000) html += `<div class="soc-sep">${sepLabel(m.t)}</div>`;
+      const pop = !shown.has(m); shown.add(m);
+      const body = ai && !me ? `<span${m.stream ? ' id="soc-live"' : ''}>${fmt(m.x)}</span>` : esc(m.x);
+      html += `<div class="soc-row ${me ? 'me' : 'them'} ${newG ? 'newg' : 'grp'}"><div class="soc-b ${me ? 'me' : 'them'}${ai && !me ? ' ai' : ''}${tail ? ' tail' : ''}${pop ? ' soc-pop' : ''}${me && m.fail ? ' failed' : ''}"${me && m.fail && m.mid ? ` onclick="Social.retry('${m.mid}')"` : ''}>${body}</div></div>`;
+      if (ai && !me && tail && m.via && !m.stream) html += `<div class="soc-meta">via ${esc(m.via)}</div>`;
+      if (ai && !me && m.fail && i === h.length - 1 && !typ) html += `<div class="soc-retry"><button onclick="Social.retryAi()">↻ Coba lagi</button></div>`;
+      if (me && rem && i === lastMe) html += `<div class="soc-status${m.fail ? ' bad' : ''}">${m.fail ? 'Gagal terkirim · ketuk pesan untuk kirim ulang' : m.sent ? 'Terkirim' : 'Mengirim…'}</div>`;
+      prev = m;
+    });
+    if (typ) { const pop = !V.tshown[id]; V.tshown[id] = true; html += `<div class="soc-row them newg"><div class="soc-b them tail soc-typing${pop ? ' soc-pop' : ''}" id="soc-typing"><i></i><i></i><i></i></div></div>`; }
+    else { V.tshown[id] = false; if (ai) { const last = all[all.length - 1], sug = (last && last.f === 'them' && last.s) || Rama.DEFAULT_CHIPS; html += `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem">${sug.map(q => `<button data-q="${esc(q)}" onclick="Social.ask(this.dataset.q)" style="padding:.3rem .65rem;border-radius:999px;font-size:.65rem;font-weight:800;background:rgba(236,72,153,.14);color:#EC4899">${esc(q)}</button>`).join('')}</div>`; } }
     return html;
   }
   const ask = q => { const i = $('soc-in'); if (i) { i.value = q; send(); } };
@@ -6056,28 +6326,45 @@ const Social = (function () {
   }
   function chatWith(id) {
     if (!S().warned) { warning(() => chatWith(id)); return; }
-    V.view = 'chat'; V.chat = id; V.typing = false; const f = api.get(id);
+    V.view = 'chat'; V.chat = id; V.typing = false; const f = api.get(id); S().unread[id] = 0; saveState(); badge(); api.history(id).forEach(m => shown.add(m));
     if (!f.ai && !S().friends.includes(id)) api.add(id);
     if (f.ai && !api.history(id).length) { const g = Rama.greeting(); S().chats[id] = [{ f: 'them', x: g.x, t: Date.now(), s: g.s }]; saveState(); }
     render();
   }
+  function subline(f) {
+    if (f.ai) { const k = getKey(), kd = keyKind(k); return k ? '● AI ' + (kd === 'gemini' ? 'Gemini' : kd === 'groq' ? 'Groq' : 'online') + ' · kunci pribadi' : '● AI gratis online' + (lastVia ? ' · ' + lastVia : ''); }
+    if (f.remote) return peerTyping(f.id) ? 'sedang mengetik…' : (f.pending ? 'Menunggu balasan…' : netLabel());
+    return f.bio;
+  }
+  function renderSub() { const e = $('soc-sub'); if (e && V.chat) { const f = api.get(V.chat); if (f) e.textContent = subline(f); } }
   function renderChat() {
     const f = api.get(V.chat);
     vp().innerHTML = `<div class="animate-fade-in" style="display:flex;flex-direction:column;gap:.7rem">
-      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--text-muted)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}</b>${chip(f.level)}</div><p style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.bio)}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
+      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--accent)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}</b>${chip(f.level)}</div><p id="soc-sub" style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subline(f))}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
       <div onclick="Social.warning()" style="cursor:pointer;font-size:.6rem;font-weight:700;text-align:center;padding:.35rem .6rem;border-radius:.8rem;background:rgba(245,158,11,.14);color:#F59E0B">🔒 Jangan bagikan data pribadi atau kata sandi di chat · ketuk untuk membaca aturan</div>
-      ${f.ai && !getKey() ? '<div onclick="Social.openSettings()" style="cursor:pointer;font-size:.62rem;font-weight:800;text-align:center;padding:.45rem .6rem;border-radius:.8rem;background:rgba(59,130,246,.14);color:#3B82F6">⚡ Aktifkan AI penuh: tempel kunci gratis Gemini/Groq (±1 menit) · ketuk di sini</div>' : ''}
-      <div id="soc-msgs" style="display:flex;flex-direction:column;gap:.45rem;min-height:45vh;padding-bottom:7.5rem">${bubbles(V.chat)}</div>
-      <div style="position:sticky;bottom:5.6rem;display:flex;gap:.5rem;padding:.5rem;border-radius:1.4rem;background:var(--bg-app,#fff);border:1px solid var(--glass-border,rgba(0,0,0,.1));box-shadow:0 .6rem 1.4rem -.8rem rgba(0,0,0,.4)"><input id="soc-in" type="text" autocomplete="off" placeholder="Tulis pesan…" onkeydown="if(event.key==='Enter'){event.preventDefault();Social.send();}" style="flex:1;min-width:0;padding:.6rem .9rem;border-radius:1rem;font-size:.85rem;font-weight:600;outline:none;background:rgba(127,127,127,.12);color:inherit"><button onclick="Social.send()" style="padding:.6rem 1rem;border-radius:1rem;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem">Kirim</button></div></div>`;
+      ${f.ai && !getKey() ? '<div class="soc-aicard"><div><b>⚡ AI gratis aktif</b><span>Tanpa kunci memakai layanan publik gratis (kadang lambat atau penuh). Untuk jawaban cepat & stabil, pasang kunci gratis Gemini/Groq (±1 menit).</span></div><button onclick="Social.openSettings()">Pasang kunci</button></div>' : ''}
+      <div id="soc-msgs" style="display:flex;flex-direction:column;min-height:45vh;padding-bottom:7.5rem">${bubbles(V.chat)}</div>
+      <div class="soc-bar"><input id="soc-in" type="text" autocomplete="off" placeholder="${f.ai ? 'Tanya Rama-San…' : 'Tulis pesan…'}" oninput="Social.onType(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();Social.send();}"><button id="soc-send" class="soc-send" onclick="Social.send()" aria-label="Kirim"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>`;
     icons(); scrollDown();
   }
-  const scrollDown = () => setTimeout(() => { const m = $('soc-msgs'); if (m) m.lastElementChild?.scrollIntoView({ block: 'end' }); }, 30);
-  function send() {
-    const inp = $('soc-in'); if (!inp) return; const text = inp.value.trim(); if (!text || V.typing) return;
-    const id = V.chat; inp.value = ''; V.typing = true;
-    const tick = () => { if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { $('soc-msgs').innerHTML = bubbles(id); scrollDown(); } };
-    const p = api.send(id, text, tick); $('soc-msgs').innerHTML = bubbles(id); scrollDown();
-    p.then(() => { V.typing = false; if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { $('soc-msgs').innerHTML = bubbles(id); scrollDown(); } });
+  const scrollDown = () => setTimeout(() => { const m = $('soc-msgs'); if (m && m.lastElementChild) m.lastElementChild.scrollIntoView({ block: 'end', behavior: 'smooth' }); }, 30);
+  const onType = el => { const sb = $('soc-send'); if (sb) sb.classList.toggle('ready', !!el.value.trim()); const f = V.chat && api.get(V.chat); if (f && f.remote && !f.pending && el.value.trim()) net.typing(f.id); };
+  function send() { const inp = $('soc-in'); if (!inp) return; const text = inp.value.trim(); if (!text || V.typing) return; inp.value = ''; onType(inp); sendText(text); }
+  function sendText(text) {
+    const id = V.chat; V.typing = true;
+    const tick = () => { if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { const last = api.history(id).slice(-1)[0], live = $('soc-live'); if (live && last && last.stream) { live.innerHTML = fmt(last.x); scrollDown(); } else { paintMsgs(id); scrollDown(); } } };
+    const p = api.send(id, text, tick); paintMsgs(id); scrollDown();
+    p.then(() => { V.typing = false; if (V.view === 'chat' && V.chat === id && $('soc-msgs')) { paintMsgs(id); scrollDown(); renderSub(); } }, () => { V.typing = false; });
+  }
+  function retry(mid) {
+    const id = V.chat, f = id && api.get(id); if (!f || !f.remote) return; const m = (S().chats[id] || []).find(x => x.mid === mid); if (!m) return;
+    m.fail = false; m.sent = false; paintMsgs(id);
+    net.resend(id, mid).then(() => { if (V.view === 'chat' && V.chat === id && $('soc-msgs')) paintMsgs(id); });
+  }
+  function retryAi() {
+    const id = V.chat, h = S().chats[id] || []; if (V.typing || !h.length) return; const last = h[h.length - 1]; if (!(last.f === 'them' && last.fail)) return;
+    let k = h.length - 2; while (k >= 0 && h[k].f !== 'me') k--; if (k < 0) return;
+    const text = h[k].x; h.splice(k, h.length - k); saveState(); sendText(text);
   }
   function unfriend(id) { if (!confirm('Hapus ' + api.get(id).name + ' dari daftar teman? Riwayat obrolan tetap tersimpan.')) return; api.remove(id); open('friends'); }
   const close = () => { try { switchTab(state.activeTab); } catch (e) {} };
@@ -6101,12 +6388,13 @@ const Social = (function () {
       <p style="font-size:.62rem;color:var(--text-muted);margin-top:.35rem;line-height:1.5">Level otomatis dihitung dari progres kana, kosakata, dan pola N5 kamu (skor ${auto.p}%) → saat ini <b>${auto.label}</b>. Pilih level tertentu untuk menetapkannya sendiri.</p>
       <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${toggle('visible', 'Muncul di pencarian teman', 'Pengguna lain bisa menemukan kamu')}</div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.7rem .9rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between"><span><b style="font-size:.78rem">Kode teman</b><span style="display:block;font-size:.62rem;color:var(--text-muted)">Bagikan agar bisa ditambahkan</span></span><button onclick="Social.copyCode()" style="font-weight:900;letter-spacing:.08em;color:var(--accent)">${esc(s.code)} ⧉</button></div>
+      <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem"><b style="font-size:.78rem">🔗 Relay teman</b><p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;margin:.25rem 0 .5rem">Pesan antar-teman lewat relay publik gratis <b>ntfy.sh</b>. Bila jaringanmu memblokirnya, isi alamat server ntfy lain (harus sama dengan milik temanmu). Kosongkan untuk bawaan.</p><input id="soc-relay" type="text" value="${esc(s.relay || '')}" placeholder="https://ntfy.sh/" onchange="Social.setRelay(this.value)" class="ios-glass" style="width:100%;padding:.55rem .8rem;border-radius:.8rem;font-size:.75rem;font-weight:700;outline:none"><div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.reconnect()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Tes & sambung ulang</button></div></div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem">
         <b style="font-size:.78rem">🤖 Kunci AI gratis <span style="font-weight:600;color:var(--text-muted)">(agar Rama-San selalu menjawab)</span></b>
         <p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;margin:.25rem 0 .5rem">Tempel <b>satu kunci gratis</b> dari Google Gemini (diawali <b>AQ.</b> atau <b>AIza</b>) atau Groq (diawali <b>gsk_</b>). Tanpa server, tanpa kartu kredit. Kunci hanya disimpan di perangkat ini dan hanya dikirim ke Google/Groq.</p>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem"><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="padding:.35rem .7rem;border-radius:.8rem;font-size:.66rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981;text-decoration:none">Ambil kunci Gemini ↗</a><a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="padding:.35rem .7rem;border-radius:.8rem;font-size:.66rem;font-weight:800;background:rgba(245,158,11,.14);color:#F59E0B;text-decoration:none">Ambil kunci Groq ↗</a></div>
         <input id="soc-ai-key" type="password" value="${esc(getKey())}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AQ.… / AIza… / gsk_…" class="ios-glass" style="width:100%;padding:.55rem .75rem;border-radius:.8rem;font-size:.75rem;font-weight:700;outline:none">
-        <div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.testAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Simpan & uji</button><button onclick="Social.diagAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981">Diagnosa</button><button onclick="Social.aiKey('')" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(239,68,68,.14);color:#ef4444">Hapus</button></div>
+        <div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.pasteKey()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981">📋 Tempel &amp; uji</button><button onclick="Social.testAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Simpan & uji</button><button onclick="Social.diagAi()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(16,185,129,.14);color:#10B981">Diagnosa</button><button onclick="Social.aiKey('')" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(239,68,68,.14);color:#ef4444">Hapus</button></div>
         <p id="soc-ai-msg" style="font-size:.62rem;font-weight:700;margin-top:.35rem">${getKey() ? '✓ Kunci tersimpan (' + (keyKind(getKey()) || 'format tidak dikenali') + ').' : 'Belum ada kunci: memakai layanan cadangan yang kurang stabil.'}</p>
       </div>
       <button onclick="Social.warning()" class="ios-glass" style="width:100%;margin-top:.9rem;padding:.7rem;border-radius:1rem;font-weight:800;font-size:.78rem;color:#F59E0B">⚠️ Lihat Papan Peringatan</button>
@@ -6146,7 +6434,21 @@ const Social = (function () {
     icons();
   })();
 
-  return { aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
+  /* ---------- kode teman di Edit Profil (muncul setelah nama dibuat) & sambungan awal ---------- */
+  (function () {
+    const av = $('edit-avatars');
+    if (av && !$('profile-code-box')) av.insertAdjacentHTML('beforebegin', `<div id="profile-code-box" class="ios-glass rounded-2xl p-3 mb-4 flex items-center justify-between gap-3"><div class="min-w-0"><p class="text-[10px] font-black uppercase tracking-widest text-accent">Kode Teman</p><p id="profile-code-text" class="font-black tracking-widest text-lg">NJ-········</p><p class="text-[10px]" style="color:var(--text-muted)">Bagikan kode ini agar temanmu bisa menambahkanmu</p></div><div class="flex flex-col gap-1.5 shrink-0"><button onclick="Social.copyCode()" class="px-3 py-1.5 rounded-full bg-accent text-white text-[11px] font-bold ios-btn-press">Salin</button><button onclick="Social.share()" class="px-3 py-1.5 rounded-full ios-glass text-[11px] font-bold ios-btn-press">Bagikan</button><button onclick="closeProfileModal();setTimeout(function(){Social.open('find')},320)" class="px-3 py-1.5 rounded-full ios-glass text-[11px] font-bold ios-btn-press">Cari teman</button></div></div>`);
+    const op = window.openProfileModal;
+    if (typeof op === 'function') window.openProfileModal = function () { const r = op.apply(this, arguments); try { const t = $('profile-code-text'); if (t) t.textContent = S().code; } catch (e) {} return r; };
+    const fo = window.finishOnboarding;
+    if (typeof fo === 'function') window.finishOnboarding = function () { const r = fo.apply(this, arguments); try { S(); saveState(); net.connect(); const pa = S().pendingAdd; if (pa) { delete S().pendingAdd; net.addByCode(pa); } } catch (e) {} return r; };
+    const boot = () => { try { if (state && state.user && state.user.name && !state.isFirstLogin) { S(); saveState(); net.connect(); badge(); linkAdd(); } } catch (e) {} };
+    window.addEventListener('DOMContentLoaded', () => setTimeout(boot, 80));
+    window.addEventListener('online', () => { try { net.connect(true); } catch (e) {} });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { net.connect(); } catch (e) {} } });
+  })();
+
+  return { reconnect, share, pasteCode, pasteKey, onType, retry, retryAi, resend, setRelay, addCode, aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
 })();
 </script>
 </body>
