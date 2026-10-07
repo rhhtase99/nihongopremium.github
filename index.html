@@ -5733,7 +5733,7 @@ const KB_D = [
     K('ainu', [[/ainu/, 5]], `🏹 **Ainu (アイヌ)** adalah penduduk asli Hokkaido, Sakhalin, dan Kepulauan Kuril dengan bahasa, kepercayaan (kamuy), dan seni sendiri (ukiran kayu, bordir, musik mukkuri). Banyak nama tempat di Hokkaido berasal dari bahasa Ainu, misalnya Sapporo ("sungai besar yang kering") dan Wakkanai. Jepang mengakui Ainu sebagai masyarakat adat secara hukum pada 2019. Museum dan taman Upopoy di Shiraoi, Hokkaido, memperkenalkan budaya Ainu.`),
     K('onsen', [[/onsen|sento|pemandian/, 4]], `♨️ **Onsen (温泉)** = pemandian air panas alami; Jepang punya ribuan. **Etiket:** bilas dan cuci badan dulu di area mandi, masuk tanpa pakaian, rambut diikat, handuk kecil jangan dicelup ke air, tenang. Beberapa tempat membatasi tato (cek kebijakan; ada yang menyediakan kamar pribadi). Onsen salju di musim dingin (rotenburo) sangat terkenal di Hokkaido dan Nagano.`),
     K('who', [[/siapa kamu|kamu siapa|siapa rama|rama.?san|kamu bisa apa|bisa bantu apa|kemampuan|apa itu rama|kamu ai|robot/, 4]],
-      `Aku **Rama-San (ラマさん)**, asisten belajar Jepang di NihonGo 🧑‍🏫\n\nAku bisa membantu soal:\n• Kosakata, pola kalimat, kanji, JLPT, dan cara belajar\n• Mengubah romaji → hiragana/katakana\n• Budaya, etiket, makanan, sejarah, geografi\n• Musim, cuaca daerah (misalnya Hokkaido), dan festival\n\nBasis pengetahuanku mencakup ratusan topik, termasuk 47 prefektur, sejarah, tokoh, kuliner, tata bahasa, dan wisata. Catatan jujur: jawabanku berasal dari pengetahuan yang tertanam di aplikasi (bukan internet langsung). Untuk jadwal, harga, atau aturan resmi, tetap cek sumber resminya, dan beberapa fakta bisa meleset. Kalau aku tidak yakin, aku akan bilang. Coba tanya sesuatu!`,
+      `Aku **Rama-San (ラマさん)**, asisten belajar Jepang di NihonGo 🤖\n\nAku bisa membantu soal:\n• Kosakata, pola kalimat, kanji, JLPT, dan cara belajar\n• Mengubah romaji → hiragana/katakana\n• Budaya, etiket, makanan, sejarah, geografi\n• Musim, cuaca daerah (misalnya Hokkaido), dan festival\n\nBasis pengetahuanku mencakup ratusan topik, termasuk 47 prefektur, sejarah, tokoh, kuliner, tata bahasa, dan wisata. Catatan jujur: jawabanku berasal dari pengetahuan yang tertanam di aplikasi (bukan internet langsung). Untuk jadwal, harga, atau aturan resmi, tetap cek sumber resminya, dan beberapa fakta bisa meleset. Kalau aku tidak yakin, aku akan bilang. Coba tanya sesuatu!`,
       ['Musim sekarang di Jepang', 'Festival bulan ini', 'Sejarah singkat Jepang', 'Tips lulus N5']),
     K('hello', [[/^\s*(halo|hai|hi|hello|hey|selamat (pagi|siang|sore|malam)|konnichiwa|ohayou|konbanwa|assalamu\w*)\b/, 3]],
       () => `こんにちは！ Aku Rama-San 😊 Mau belajar apa hari ini? Kamu bisa tanya kosakata, tata bahasa, budaya, sejarah, musim, atau festival Jepang.`,
@@ -5793,7 +5793,7 @@ const KB_D = [
     return { x: 'Hmm, aku belum punya jawaban yang pasti untuk itu, dan aku tidak mau menebak-nebak 🙏\n\nBeberapa hal yang bisa kujawab: kosakata & tata bahasa, kanji & JLPT, budaya dan etiket, makanan, sejarah dan tokoh, 47 prefektur, tempat wisata, musim & festival, anime/game, hingga tips belajar & kerja/kuliah di Jepang.\nCoba kata kunci spesifik, misalnya "ibu kota Aomori", "partikel に", "sejarah zaman Heian", atau "sushi itu apa".', s: DEFAULT_CHIPS };
   }
   const kbCount = () => KB.length + PREF.length + TOPICS.length;
-  const greeting = () => ({ x: 'こんにちは！ Aku **Rama-San** 🧑‍🏫, asisten belajar Jepangmu.\nTanya apa saja: kosakata, tata bahasa, kanji, JLPT, **budaya, sejarah, musim (misalnya musim dingin Hokkaido), dan festival**. Pilih topik di bawah atau ketik sendiri!', s: DEFAULT_CHIPS });
+  const greeting = () => ({ x: 'こんにちは！ Aku **Rama-San** 🤖, asisten belajar Jepangmu.\nTanya apa saja: kosakata, tata bahasa, kanji, JLPT, **budaya, sejarah, musim (misalnya musim dingin Hokkaido), dan festival**. Pilih topik di bawah atau ketik sendiri!', s: DEFAULT_CHIPS });
   return { reply, greeting, DEFAULT_CHIPS, backend: null, kbCount };
 })();
 </script>
@@ -5960,7 +5960,7 @@ const Social = (function () {
     { id: 'u13', name: 'Mei', avatar: '🎴', chips: ['Persiapan JLPT'], level: 'N2' },
     { id: 'u14', name: 'Nanda', avatar: '🗻', chips: ['Sedang belajar bunpou'], level: 'N1' }
   ].map(u => ({ ...u, bio: u.chips.join(' · ') }));
-  const RAMA = { id: 'rama', name: 'Rama-San', avatar: '🧑‍🏫', level: 'AI', chips: [], ai: true, bio: 'Asisten AI · tanya soal bahasa, budaya, sejarah, musim & festival Jepang' };
+  const RAMA = { id: 'rama', name: 'Rama-San', avatar: '🤖', level: 'AI', chips: [], ai: true, bio: 'Asisten AI · tanya soal bahasa, budaya, sejarah, musim & festival Jepang' };
   DEMO.push(RAMA);
 
   /* ---------- data profil sendiri ---------- */
@@ -6134,7 +6134,7 @@ const Social = (function () {
       /* pengguna asli (dari direktori) tampil lebih dulu, baru nama contoh */
       return [...dirUsers().filter(ok), ...DEMO.filter(u => !u.ai && ok(u))];
     },
-    get: id => DEMO.find(u => u.id === id) || (S().remote[id] ? { chips: [], level: 'Pemula', avatar: '👤', bio: '', ...S().remote[id], id } : undefined) || dirUsers().find(u => u.id === id),
+    get: id => DEMO.find(u => u.id === id) || (S().remote[id] ? { chips: [], level: 'Pemula', avatar: '👤', bio: '', ...S().remote[id], id, dev: !!(S().remote[id].dev || ((S().dir || {})[id] || {}).dev) } : undefined) || dirUsers().find(u => u.id === id),
     add(id) { if (/^NJ-/.test(id)) { net.addByCode(id); return; } const f = S().friends; if (!f.includes(id)) f.push(id); saveState(); },
     remove(id) { const s = S(); s.friends = s.friends.filter(x => x !== id); if (s.remote[id]) net.remove(id); saveState(); },
     history: id => S().chats[id] || [],
@@ -6228,6 +6228,7 @@ const Social = (function () {
       if (V.view === 'chat' && V.chat === c && $('soc-msgs')) { paintMsgs(c); scrollDown(); s.unread[c] = 0; renderSub(); }
       else { s.unread[c] = (s.unread[c] || 0) + 1; toast('Pesan baru dari ' + (r.name || 'teman') + ': ' + String(last.x).slice(0, 40)); socRefresh(); }
       saveState(); badge();
+      try { window.NGStudy && NGStudy.onMessage(r.name, last && last.x); } catch (e) {}
     },
     onHello: (c, sent) => toast(sent ? 'Permintaan terkirim. Temanmu terhubung saat ia online.' : 'Gagal mengirim — periksa koneksi internet (ketuk status koneksi)')
   });
@@ -6267,7 +6268,7 @@ const Social = (function () {
   }
   let dirBusy = false;
   function dirApply(d) {
-    const before = JSON.stringify(S().dir || {}); S().dir = d; saveState();
+    const before = JSON.stringify(S().dir || {}); S().dir = d; Object.keys(d).forEach(c => { if (d[c].dev && S().remote[c]) S().remote[c].dev = 1; }); saveState();
     const el = $('soc-results'); if (el) el.innerHTML = results();
     if (JSON.stringify(d) !== before) socRefresh();   /* segarkan tab Teman hanya bila daftar berubah */
   }
@@ -6320,7 +6321,9 @@ const Social = (function () {
 
   const vp = () => $('app-viewport');
   const btn = (label, fn, on) => `<button onclick="${fn}" style="padding:.4rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;white-space:nowrap;${on ? 'background:var(--accent);color:#fff' : 'background:rgba(127,127,127,.14)'}">${label}</button>`;
-  const avatarEl = (e, size = 2.8) => `<div class="ios-glass" style="width:${size}rem;height:${size}rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:${size * .5}rem;flex-shrink:0;border:1.5px solid var(--accent)">${e}</div>`;
+  const avatarEl = (e, size = 2.8, dev) => `<div class="ios-glass" style="width:${size}rem;height:${size}rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:${size * .5}rem;flex-shrink:0;border:1.5px solid ${dev ? '#FFD700;box-shadow:0 0 14px rgba(255,215,0,.6)' : 'var(--accent)'}">${e}</div>`;
+  const CHECK = '<svg viewBox="0 0 24 24" width="15" height="15" style="display:inline-block;vertical-align:-2px;margin-left:.25rem" aria-label="Developer terverifikasi"><circle cx="12" cy="12" r="11" fill="#1D9BF0"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const nm = u => u.dev ? '<span style="color:#FFD700;background:#2a1f00;border:1px solid rgba(255,215,0,.55);border-radius:.6rem;padding:.1rem .5rem;font-weight:900;text-shadow:0 0 8px rgba(255,215,0,.45)">' + esc(u.name) + '</span>' + CHECK : esc(u.name);
   function open(view) { V.view = view || 'friends'; V.chat = null; render(); dirSync(); dirFetch(); }
   function head(title) { return `<div style="display:flex;align-items:center;gap:.5rem"><button onclick="Social.close()" style="font-size:1.8rem;line-height:1;color:var(--text-muted)">‹</button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Komunitas</p><h2 class="text-xl font-bold">${title}</h2></div></div>`; }
   function me() { return `<div class="ios-glass" style="padding:.9rem;border-radius:1.5rem;display:flex;align-items:center;gap:.8rem">${avatarEl(state.user.avatar || '🌸', 3)}<div style="flex:1;min-width:0"><b style="font-size:.9rem">${esc(state.user.name || 'Kamu')}</b><p style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(bioText()) || 'Belum ada deskripsi'}</p><button onclick="Social.openSettings()" style="font-size:.65rem;font-weight:800;color:var(--accent);margin-top:.15rem">Atur profil & level ›</button></div><div style="align-self:flex-start;text-align:right">${S().showLevel ? chip(myLevel(), true) : ''}${S().levelMode === 'auto' ? '<p style="font-size:.55rem;color:var(--text-muted);margin-top:.2rem">level otomatis</p>' : ''}</div></div>`; }
@@ -6328,7 +6331,7 @@ const Social = (function () {
   function row(u, mode) {
     const isF = S().friends.includes(u.id), last = api.history(u.id).slice(-1)[0];
     const action = unreadBadge(u.id) + (u.pending ? btn('⏳ Kirim ulang', `Social.resend('${u.id}')`) : u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true)));
-    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem${u.dev ? ';background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(245,158,11,.07));border:1px solid rgba(255,215,0,.5)' : ''}">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${u.dev ? '<span style="color:#FFD700;background:#2a1f00;border:1px solid rgba(255,215,0,.55);border-radius:.6rem;padding:.1rem .5rem;font-weight:900;text-shadow:0 0 8px rgba(255,215,0,.45)">★ ' + esc(u.name) + '</span>' : esc(u.name)}${u.ai ? ' ' + BETA : ''}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
+    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem${u.dev ? ';background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(245,158,11,.07));border:1px solid rgba(255,215,0,.5)' : ''}">${avatarEl(u.avatar, 2.8, u.dev)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${nm(u)}${u.ai ? ' ' + BETA : ''}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
   }
   function render() {
     if (V.view === 'chat') return renderChat();
@@ -6337,9 +6340,10 @@ const Social = (function () {
       <p style="font-size:.6rem;color:var(--text-muted);text-align:center;line-height:1.5">Teman lewat kode terhubung antar-perangkat memakai relay publik (ntfy.sh); pesan tertahan ±12 jam bila temanmu sedang offline. Di tab Cari teman, pengguna asli (berlabel) tampil lebih dulu; nama tanpa label hanyalah contoh demo. </p></div>`;
     icons();
   }
+  const sec = t => `<p style="font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:.5rem .3rem 0">${t}</p>`;
   function friendsList() {
     const fr = S().friends.map(api.get).filter(x => x && !x.ai).sort((a, b) => ((api.history(b.id).slice(-1)[0] || {}).t || 0) - ((api.history(a.id).slice(-1)[0] || {}).t || 0));
-    const pinned = row(RAMA, 'friend');
+    const pinned = sec('Asisten AI') + row(RAMA, 'friend') + sec('Teman (' + fr.length + ')');
     if (!fr.length) return pinned + `<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;text-align:center;font-size:.78rem;color:var(--text-muted)">Belum punya teman manusia. Temukan pengguna NihonGo lain lewat tab <b>Cari teman</b>.<div style="margin-top:.8rem">${btn('Cari teman', "Social.open('find')", true)}</div></div>`;
     return pinned + fr.map(u => row(u, 'friend')).join('');
   }
@@ -6456,7 +6460,7 @@ const Social = (function () {
   function renderChat() {
     const f = api.get(V.chat);
     vp().innerHTML = `<div class="animate-fade-in" style="display:flex;flex-direction:column;gap:.7rem">
-      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--accent)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}${f.ai ? ' ' + BETA : ''}</b>${chip(f.level)}</div><p id="soc-sub" style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subline(f))}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
+      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--accent)">‹</button>${avatarEl(f.avatar, 2.6, f.dev)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${nm(f)}${f.ai ? ' ' + BETA : ''}</b>${chip(f.level)}</div><p id="soc-sub" style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subline(f))}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
       <div onclick="Social.warning()" style="cursor:pointer;font-size:.6rem;font-weight:700;text-align:center;padding:.35rem .6rem;border-radius:.8rem;background:rgba(245,158,11,.14);color:#F59E0B">🔒 Jangan bagikan data pribadi atau kata sandi di chat · ketuk untuk membaca aturan</div>
       ${f.ai && !getKey() ? '<div class="soc-aicard"><div><b>⚡ AI gratis aktif</b><span>Tanpa kunci memakai layanan publik gratis (kadang lambat atau penuh). Untuk jawaban cepat & stabil, pasang kunci gratis Gemini/Groq (±1 menit).</span></div><button onclick="Social.openSettings()">Pasang kunci</button></div>' : ''}
       <div id="soc-msgs" style="display:flex;flex-direction:column;min-height:45vh;padding-bottom:7.5rem">${bubbles(V.chat)}</div>
@@ -6643,6 +6647,367 @@ const Social = (function () {
   if (typeof fo === 'function') window.finishOnboarding = function () { const r = fo.apply(this, arguments); setTimeout(boot, 900); return r; };
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { chip(); } catch (e) {} } });
   window.DailyStreak = { open, close, claim: doClaim, _info: info, _claim: claim, REWARDS };
+})();
+</script>
+<script>
+/* ===== PENGINGAT, TARGET BELAJAR & ALARM (NihonGo) ===== */
+(function () {
+  'use strict';
+  const DAY = 864e5;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const save = () => { try { saveState(); } catch (e) {} };
+  const R = () => {
+    const r = (state.rem = state.rem || {});
+    if (!r.alarm) r.alarm = 'haru';
+    if (!(r.sec >= 5 && r.sec <= 10)) r.sec = 8;
+    if (r.away === undefined) r.away = true;
+    if (r.msg === undefined) r.msg = true;
+    if (!r.mode) r.mode = 'preset';
+    return r;
+  };
+
+  /* 5 alarm — diambil dari tema yang sudah ada */
+  const ALARMS = [
+    { id: 'haru',   name: 'Haru · Musim Semi', icon: '🌸', desc: 'Dentingan koto lembut ala sakura' },
+    { id: 'klasik', name: 'Klasik',            icon: '🔔', desc: 'Bel jam weker tradisional' },
+    { id: 'y2k',    name: 'Era 2000-an',       icon: '📟', desc: 'Nada ringtone chiptune nostalgia' },
+    { id: 'zen',    name: 'Zen',               icon: '🎋', desc: 'Mangkuk bernyanyi yang menenangkan' },
+    { id: 'alam',   name: 'Alam',              icon: '🌿', desc: 'Marimba hutan dan kicau burung' }
+  ];
+  const curAlarm = () => ALARMS.find(a => a.id === R().alarm) || ALARMS[0];
+
+  /* ---------- mesin suara (WebAudio, tanpa file) ---------- */
+  const Snd = (() => {
+    let ctx = null, cur = null;
+    const get = () => {
+      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); }
+      if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+      return ctx;
+    };
+    const vol = () => Math.max(.4, Math.min(1, Number(state.systemVolume == null ? 70 : state.systemVolume) / 100));
+    function tone(c, out, o) {
+      const osc = c.createOscillator(), env = c.createGain(), d = o.d, a = o.a || .005, g = o.g || .3;
+      osc.type = o.type || 'sine';
+      osc.frequency.setValueAtTime(o.f, o.t);
+      if (o.f2) osc.frequency.exponentialRampToValueAtTime(o.f2, o.t + d);
+      env.gain.setValueAtTime(0.0001, o.t);
+      env.gain.exponentialRampToValueAtTime(g, o.t + a);
+      env.gain.exponentialRampToValueAtTime(0.0001, o.t + d);
+      osc.connect(env); env.connect(out);
+      osc.start(o.t); osc.stop(o.t + d + .05);
+    }
+    const PAT = {
+      haru(c, out, t0, sec) {
+        const sc = [587.33, 659.25, 739.99, 880, 987.77, 1174.66], seq = [0, 2, 3, 5, 3, 2, 4, 1, 0, 3, 5, 4, 2, 3, 1, 2];
+        for (let i = 0, t = 0; t < sec - .25; i++, t += .3) {
+          const f = sc[seq[i % seq.length]];
+          tone(c, out, { f, t: t0 + t, d: 1.2, g: .3 });
+          tone(c, out, { f: f / 2, t: t0 + t, d: .8, g: .08, type: 'triangle' });
+          if (i % 8 === 7) tone(c, out, { f: f * 2, t: t0 + t + .15, d: .5, g: .08 });
+        }
+      },
+      klasik(c, out, t0, sec) {
+        for (let tb = 0; tb < sec - .1; tb += 1.25) for (let i = 0; i < 12; i++) {
+          const t = tb + i * .058; if (t > sec - .1) break;
+          tone(c, out, { f: i % 2 ? 2217 : 1760, t: t0 + t, d: .07, g: .2, type: 'triangle' });
+          tone(c, out, { f: i % 2 ? 1109 : 880, t: t0 + t, d: .07, g: .1, type: 'square' });
+        }
+      },
+      y2k(c, out, t0, sec) {
+        const m = [523.25, 659.25, 783.99, 659.25, 1046.5, 783.99, 659.25, 783.99, 587.33, 698.46, 880, 698.46, 1174.66, 880, 698.46, 880];
+        for (let i = 0, t = 0; t < sec - .1; i++, t += .13) {
+          tone(c, out, { f: m[i % 16], t: t0 + t, d: .11, g: .13, type: 'square' });
+          if (i % 4 === 0) tone(c, out, { f: (i % 8 ? 146.83 : 130.81), t: t0 + t, d: .45, g: .2, type: 'triangle' });
+        }
+      },
+      zen(c, out, t0, sec) {
+        const base = [293.66, 220, 261.63];
+        for (let k = 0, t = 0; t < sec - .3; k++, t += 2.3) {
+          const f = base[k % 3];
+          tone(c, out, { f, t: t0 + t, d: 4.2, g: .38, a: .02 });
+          tone(c, out, { f: f * 1.005, t: t0 + t, d: 4.2, g: .2, a: .02 });
+          tone(c, out, { f: f * 2.71, t: t0 + t, d: 2.4, g: .12, a: .01 });
+          tone(c, out, { f: f * 5.15, t: t0 + t, d: 1.2, g: .05, a: .01 });
+        }
+      },
+      alam(c, out, t0, sec) {
+        const sc = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66], seq = [0, 2, 4, 2, 3, 5, 4, 2, 1, 3, 6, 4, 3, 2, 0, 1];
+        for (let i = 0, t = 0; t < sec - .2; i++, t += .24) {
+          const f = sc[seq[i % 16]];
+          tone(c, out, { f, t: t0 + t, d: .55, g: .34, a: .003 });
+          tone(c, out, { f: f * 4, t: t0 + t, d: .12, g: .05, a: .002 });
+        }
+        for (let t = .6; t < sec - .5; t += 1.7) for (let j = 0; j < 3; j++)
+          tone(c, out, { f: 2600 + j * 180, f2: 3700 + j * 120, t: t0 + t + j * .13, d: .09, g: .07, a: .01 });
+      }
+    };
+    function stop() {
+      if (!cur) return;
+      clearTimeout(cur.timer);
+      try { cur.out.gain.cancelScheduledValues(0); cur.out.gain.value = 0; cur.out.disconnect(); } catch (e) {}
+      cur = null;
+    }
+    function play(id, sec, onEnd) {
+      stop();
+      const c = get(); if (!c) { if (onEnd) onEnd(); return false; }
+      const out = c.createGain(), v = vol() * .8, t0 = c.currentTime + .05;
+      out.gain.setValueAtTime(v, t0);
+      out.gain.setValueAtTime(v, t0 + sec - .5);
+      out.gain.linearRampToValueAtTime(0.0001, t0 + sec);
+      out.connect(c.destination);
+      try { (PAT[id] || PAT.haru)(c, out, t0, sec); } catch (e) {}
+      const timer = setTimeout(() => { const cb = onEnd; stop(); if (cb) cb(); }, sec * 1000 + 150);
+      cur = { out, timer };
+      return true;
+    }
+    return { unlock: get, play, stop, playing: () => !!cur, running: () => !!ctx && ctx.state === 'running' };
+  })();
+  document.addEventListener('pointerdown', () => { try { Snd.unlock(); } catch (e) {} }, { once: true, passive: true });
+
+  /* ---------- notifikasi ---------- */
+  const permState = () => ('Notification' in window) ? Notification.permission : 'unsupported';
+  async function askPerm() {
+    if (!('Notification' in window)) return 'unsupported';
+    if (Notification.permission !== 'default') return Notification.permission;
+    try { const p = await Notification.requestPermission(); return p || Notification.permission; } catch (e) { return Notification.permission; }
+  }
+  function sys(title, body, tag) {
+    if (permState() !== 'granted') return false;
+    try { const n = new Notification(title, { body, tag }); n.onclick = () => { try { window.focus(); n.close(); } catch (e) {} }; return true; }
+    catch (e) { return false; }
+  }
+  function banner(icon, title, body, ms) {
+    const old = $('ng-banner'); if (old) old.remove();
+    const b = document.createElement('div'); b.id = 'ng-banner'; b.className = 'ios-glass';
+    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + .6rem);width:min(94%,26rem);z-index:350;padding:.75rem .9rem;border-radius:1.2rem;display:flex;gap:.7rem;align-items:flex-start;border:1.5px solid var(--accent);box-shadow:0 10px 30px rgba(0,0,0,.25)';
+    b.innerHTML = '<span style="font-size:1.6rem;line-height:1">' + icon + '</span><div style="flex:1;min-width:0"><b style="font-size:.82rem">' + esc(title) + '</b><p style="font-size:.72rem;color:var(--text-muted);margin-top:.1rem">' + esc(body) + '</p></div><button onclick="this.parentNode.remove()" style="font-size:1rem;padding:0 .3rem">✕</button>';
+    document.body.appendChild(b);
+    setTimeout(() => { if (b.parentNode) b.remove(); }, ms || 9000);
+  }
+
+  /* ---------- pengingat: tidak login 1 hari & pesan baru ---------- */
+  function checkAway(base) {
+    if (!state.reminderOn || state.isFirstLogin || !R().away) return;
+    const n = Date.now(), gap = n - (base || n);
+    if (gap < DAY || n - (R().awayAt || 0) < 20 * 36e5) return;
+    R().awayAt = n; save();
+    const days = Math.max(1, Math.floor(gap / DAY)), a = curAlarm();
+    const body = days + ' hari kamu belum belajar bahasa Jepang. Yuk lanjut sebentar saja!';
+    banner(a.icon, 'Waktunya belajar lagi', body);
+    if (document.hidden) sys(a.icon + ' NihonGo · waktunya belajar', body, 'ng-away');
+  }
+  function touch() { const n = Date.now(); if (n - (state.lastActive || 0) > 60000) { state.lastActive = n; save(); } }
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, touch, { passive: true }));
+
+  function onMessage(name, text) {
+    if (!state.reminderOn || !R().msg) return;
+    if (document.hidden) sys(curAlarm().icon + ' Pesan baru dari ' + (name || 'teman'), String(text || '').slice(0, 90), 'ng-msg');
+  }
+
+  /* ---------- timer target belajar & alarm ---------- */
+  let ringing = false;
+  const fmt = ms => {
+    const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60, p = n => String(n).padStart(2, '0');
+    return h ? h + ':' + p(m) + ':' + p(x) : p(m) + ':' + p(x);
+  };
+  (function css() {
+    const st = document.createElement('style');
+    st.textContent = '@keyframes ngRing{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}';
+    document.head.appendChild(st);
+  })();
+
+  function pill() {
+    const t = state.studyTimer; let p = $('ng-pill');
+    if (!t || ringing || state.isFirstLogin) { if (p) p.remove(); return; }
+    if (!p) {
+      p = document.createElement('button'); p.id = 'ng-pill'; p.className = 'ios-glass';
+      p.style.cssText = 'position:fixed;right:.8rem;bottom:6.4rem;z-index:60;padding:.45rem .8rem;border-radius:999px;font-size:.72rem;font-weight:900;border:1.5px solid var(--accent)';
+      p.onclick = () => open('target');
+      document.body.appendChild(p);
+    }
+    p.textContent = '⏱ ' + fmt(t.endAt - Date.now());
+  }
+  function tick() {
+    const t = state.studyTimer;
+    if (t && !ringing && Date.now() >= t.endAt) ring();
+    pill();
+    const e = $('ng-remain'); if (e && t) e.textContent = fmt(t.endAt - Date.now());
+  }
+
+  function overlay(t) {
+    const old = $('ng-alarm'); if (old) old.remove();
+    const a = curAlarm(), d = document.createElement('div'); d.id = 'ng-alarm';
+    d.style.cssText = 'position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.2rem';
+    const b = 'width:100%;padding:.85rem;border-radius:1.1rem;font-weight:800;font-size:.9rem';
+    d.innerHTML = '<div class="bg-appbg" style="width:100%;max-width:22rem;border-radius:2rem;padding:1.6rem 1.3rem;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)">' +
+      '<div style="font-size:3.4rem;display:inline-block;animation:ngRing .6s ease-in-out infinite">' + a.icon + '</div>' +
+      '<h2 style="font-size:1.35rem;font-weight:900;margin:.5rem 0 .2rem">Waktu belajar habis!</h2>' +
+      '<p style="font-size:.8rem;color:var(--text-muted)">Target ' + t.minutes + ' menit' + (t.snooze ? ' (ditunda ' + t.snooze + '×)' : '') + ' sudah tercapai.</p>' +
+      '<p id="ng-al-s" style="font-size:.7rem;color:var(--accent);font-weight:800;margin:.7rem 0 1rem">🔊 Alarm ' + esc(a.name) + ' berbunyi…</p>' +
+      '<div style="display:flex;flex-direction:column;gap:.5rem">' +
+      '<button onclick="NGStudy.done()" class="ios-glass" style="' + b + '">Selesai</button>' +
+      '<button onclick="NGStudy.snooze()" class="ios-glass" style="' + b + '">Tunda 10 menit</button>' +
+      '<button onclick="NGStudy.back()" class="bg-accent text-white" style="' + b + '">Kembali belajar</button></div></div>';
+    document.body.appendChild(d);
+  }
+  function ring() {
+    const t = state.studyTimer; if (!t || ringing) return;
+    ringing = true; pill(); overlay(t);
+    const sec = R().sec, a = curAlarm();
+    const end = () => { const e = $('ng-al-s'); if (e) e.textContent = 'Alarm berhenti. Pilih salah satu di bawah.'; };
+    Snd.play(a.id, sec, end);
+    try { if (navigator.vibrate) navigator.vibrate([500, 250, 500, 250, 500]); } catch (e) {}
+    if (document.hidden) sys('⏰ Waktu belajar habis!', 'Target ' + t.minutes + ' menit selesai. Buka NihonGo untuk melanjutkan.', 'ng-timer');
+    /* bila browser menahan suara (belum ada interaksi), bunyikan saat layar pertama kali disentuh */
+    if (!Snd.running()) {
+      const retry = () => { if (ringing && !Snd.playing()) Snd.play(a.id, sec, end); };
+      document.addEventListener('pointerdown', retry, { once: true });
+    }
+  }
+  function endRing() {
+    ringing = false; Snd.stop();
+    const o = $('ng-alarm'); if (o) o.remove();
+  }
+
+  /* ---------- tampilan pengaturan ---------- */
+  let mt = null, prev = null;
+  function shell(title) {
+    const old = $('settings-detail-modal'); if (old) old.remove();
+    const m = document.createElement('div'); m.id = 'settings-detail-modal';
+    m.className = 'fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end justify-center p-3';
+    m.innerHTML = '<div class="bg-appbg w-full max-w-md max-h-[86vh] overflow-y-auto rounded-[2rem] p-5 shadow-2xl"><div class="flex justify-between gap-3 mb-4"><h3 class="text-xl font-black">' + title + '</h3><button onclick="NGStudy.close()" style="font-size:1.2rem;line-height:1;padding:.2rem .5rem">✕</button></div><div id="ng-body"></div></div>';
+    document.body.appendChild(m);
+  }
+  const sw = (on, fn, label, sub) => '<button onclick="' + fn + '" class="ios-glass" style="width:100%;display:flex;align-items:center;gap:.7rem;padding:.8rem .9rem;border-radius:1.2rem;text-align:left"><span style="flex:1;min-width:0"><b style="font-size:.85rem;display:block">' + label + '</b>' + (sub ? '<span style="font-size:.68rem;color:var(--text-muted)">' + sub + '</span>' : '') + '</span><span style="width:2.6rem;height:1.5rem;border-radius:999px;background:' + (on ? 'var(--accent)' : 'rgba(128,128,128,.35)') + ';position:relative;flex-shrink:0"><span style="position:absolute;top:.15rem;left:' + (on ? '1.25rem' : '.15rem') + ';width:1.2rem;height:1.2rem;border-radius:999px;background:#fff;transition:left .15s"></span></span></button>';
+  const lbl = t => '<p style="font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:.9rem .2rem .1rem">' + t + '</p>';
+  const note = t => '<p style="font-size:.72rem;color:var(--text-muted);line-height:1.5">' + t + '</p>';
+
+  function alarmBlock() {
+    const r = R();
+    return lbl('Suara alarm (5 pilihan)') + ALARMS.map(a => {
+      const sel = r.alarm === a.id, pl = prev === a.id;
+      return '<div class="ios-glass" style="display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:1.1rem;margin-top:.45rem;' + (sel ? 'border:1.5px solid var(--accent)' : '') + '">' +
+        '<span style="font-size:1.5rem">' + a.icon + '</span>' +
+        '<button onclick="NGStudy.setAlarm(\'' + a.id + '\')" style="flex:1;min-width:0;text-align:left"><b style="font-size:.82rem;display:block">' + a.name + (sel ? ' ✓' : '') + '</b><span style="font-size:.66rem;color:var(--text-muted)">' + a.desc + '</span></button>' +
+        '<button onclick="NGStudy.preview(\'' + a.id + '\')" class="ios-glass" style="padding:.4rem .7rem;border-radius:999px;font-size:.72rem;font-weight:800">' + (pl ? '■ Stop' : '▶ Coba') + '</button></div>';
+    }).join('') +
+      '<div class="ios-glass" style="padding:.8rem .9rem;border-radius:1.2rem;margin-top:.6rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:800"><span>Lama alarm berbunyi</span><span id="ng-sec">' + r.sec + ' detik</span></div><input type="range" min="5" max="10" step="1" value="' + r.sec + '" oninput="NGStudy.setSec(this.value)" style="width:100%;margin-top:.5rem;accent-color:var(--accent)"></div>';
+  }
+  function drawReminder() {
+    const body = $('ng-body'); if (!body) return;
+    const r = R(), p = permState();
+    const pt = { granted: 'Diizinkan ✓', denied: 'Ditolak — ubah lewat pengaturan situs di browser', default: 'Belum diminta', unsupported: 'Tidak didukung browser ini' }[p];
+    body.innerHTML = '<div style="display:flex;flex-direction:column;gap:.55rem">' +
+      note('Pengingat muncul bila kamu tidak membuka aplikasi selama 1 hari, atau saat ada pesan baru dari teman. Aplikasi akan meminta izin notifikasi lebih dulu.') +
+      sw(!!state.reminderOn, 'NGStudy.toggleRem()', 'Pengingat Belajar', state.reminderOn ? 'Aktif' : 'Mati') +
+      (state.reminderOn ? sw(r.away, "NGStudy.flag('away')", 'Belum login 1 hari', 'Ingatkan bila 24 jam tidak membuka aplikasi') + sw(r.msg, "NGStudy.flag('msg')", 'Ada pesan baru', 'Notifikasi langsung muncul saat teman mengirim pesan') : '') +
+      '<div class="ios-glass" style="padding:.8rem .9rem;border-radius:1.2rem"><div style="font-size:.78rem"><b>Izin notifikasi:</b> ' + pt + '</div><div style="display:flex;gap:.5rem;margin-top:.55rem">' +
+      (p === 'default' ? '<button onclick="NGStudy.askPerm()" class="bg-accent text-white" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.75rem;font-weight:800">Izinkan Notifikasi</button>' : '') +
+      '<button onclick="NGStudy.test()" class="ios-glass" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.75rem;font-weight:800">Tes Notifikasi</button></div></div>' +
+      note('Catatan: pengingat bekerja selama aplikasi terbuka (termasuk di tab latar belakang). Saat aplikasi benar-benar ditutup, pengingat muncul begitu kamu membukanya lagi.') +
+      alarmBlock() + '</div>';
+  }
+  const GROUPS = [['Singkat', [5, 10, 15]], ['Sedang', [20, 25, 30, 45]], ['Panjang', [60, 90, 120]]];
+  function drawTarget() {
+    const body = $('ng-body'); if (!body) return;
+    const r = R(), tgt = state.dailyTarget || 10, t = state.studyTimer, a = curAlarm();
+    const seg = (id, txt) => '<button onclick="NGStudy.mode(\'' + id + '\')" class="' + (r.mode === id ? 'bg-accent text-white' : 'ios-glass') + '" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.78rem;font-weight:800">' + txt + '</button>';
+    const preset = GROUPS.map(g => '<p style="font-size:.62rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin:.6rem .2rem .3rem">' + g[0] + '</p><div style="display:flex;gap:.45rem;flex-wrap:wrap">' + g[1].map(n => '<button onclick="NGStudy.setTarget(' + n + ')" class="ios-glass" style="padding:.65rem 1rem;border-radius:.9rem;font-size:.8rem;font-weight:800;' + (tgt === n ? 'border:2px solid var(--accent)' : '') + '">' + n + ' menit</button>').join('') + '</div>').join('');
+    const custom = '<div style="display:flex;gap:.5rem;align-items:center"><input id="ng-min" type="number" inputmode="numeric" min="1" max="600" value="' + tgt + '" class="ios-glass" style="flex:1;padding:.7rem .9rem;border-radius:.9rem;font-size:1rem;font-weight:800;min-width:0"><span style="font-size:.8rem;font-weight:700">menit</span><button onclick="NGStudy.saveCustom()" class="bg-accent text-white" style="padding:.7rem 1.1rem;border-radius:.9rem;font-size:.8rem;font-weight:800">Simpan</button></div>' + note('Atur bebas dari 1 sampai 600 menit.');
+    body.innerHTML = '<div style="display:flex;flex-direction:column;gap:.55rem">' +
+      note('Pilih berapa menit kamu mau belajar. Saat waktunya habis, alarm berbunyi dan kamu bisa memilih Selesai, Tunda 10 menit, atau Kembali belajar.') +
+      '<div style="display:flex;gap:.45rem">' + seg('custom', 'Atur Sendiri') + seg('preset', 'Pilihan Cepat') + '</div>' +
+      (r.mode === 'custom' ? custom : preset) +
+      '<div class="ios-glass" style="padding:.9rem;border-radius:1.2rem;margin-top:.7rem;text-align:center">' +
+      (t ? '<p style="font-size:.7rem;color:var(--text-muted)">Timer berjalan · sisa</p><p id="ng-remain" style="font-size:2rem;font-weight:900;margin:.1rem 0 .6rem">' + fmt(t.endAt - Date.now()) + '</p><button onclick="NGStudy.cancel()" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-weight:800;font-size:.85rem">Batalkan timer</button>'
+        : '<p style="font-size:.7rem;color:var(--text-muted);margin-bottom:.5rem">Target saat ini</p><p style="font-size:1.6rem;font-weight:900;margin-bottom:.6rem">' + tgt + ' menit</p><button onclick="NGStudy.start()" class="bg-accent text-white" style="width:100%;padding:.8rem;border-radius:1rem;font-weight:800;font-size:.9rem">▶ Mulai Timer Belajar</button>') +
+      '<p style="font-size:.66rem;color:var(--text-muted);margin-top:.6rem">Alarm: ' + a.icon + ' ' + esc(a.name) + ' · ' + r.sec + ' detik (ubah di Pengingat)</p></div></div>';
+  }
+  function open(type) {
+    mt = type; prev = null;
+    shell(type === 'reminder' ? 'Pengingat Belajar' : 'Target Belajar');
+    type === 'reminder' ? drawReminder() : drawTarget();
+  }
+  const redraw = () => { mt === 'reminder' ? drawReminder() : mt === 'target' ? drawTarget() : 0; };
+
+  window.NGStudy = {
+    open,
+    close() { Snd.stop(); prev = null; try { closeSettingsDetail(); } catch (e) { const m = $('settings-detail-modal'); if (m) m.remove(); } },
+    async toggleRem() {
+      if (!state.reminderOn) {
+        const p = await askPerm();
+        state.reminderOn = true; save();
+        if (p === 'denied') banner('🔕', 'Izin notifikasi ditolak', 'Pengingat tetap muncul di dalam aplikasi. Izinkan lewat pengaturan browser untuk notifikasi sistem.');
+        else if (p === 'unsupported') banner('ℹ️', 'Notifikasi sistem tidak didukung', 'Pengingat tetap muncul di dalam aplikasi.');
+      } else { state.reminderOn = false; save(); }
+      redraw(); try { refreshSettingsSummary(); } catch (e) {}
+    },
+    flag(k) { const r = R(); r[k] = !r[k]; save(); redraw(); },
+    async askPerm() { await askPerm(); redraw(); },
+    async test() {
+      const p = await askPerm(), a = curAlarm(); redraw();
+      banner(a.icon, 'Tes pengingat NihonGo', 'Pengingat di dalam aplikasi berfungsi.');
+      if (p === 'granted') { if (!sys(a.icon + ' Tes notifikasi NihonGo', 'Notifikasi berfungsi!', 'ng-test')) banner('⚠️', 'Notifikasi sistem tidak bisa ditampilkan', 'Browser ini hanya mengizinkannya dari aplikasi yang dipasang (PWA).'); }
+      else if (p === 'denied') banner('🔕', 'Izin notifikasi ditolak', 'Izinkan lewat pengaturan situs di browser.');
+    },
+    setAlarm(id) { R().alarm = id; save(); redraw(); },
+    preview(id) {
+      if (prev === id) { Snd.stop(); prev = null; redraw(); return; }
+      prev = id; redraw();
+      Snd.play(id, R().sec, () => { prev = null; if (mt === 'reminder') redraw(); });
+    },
+    setSec(v) { const n = Math.max(5, Math.min(10, parseInt(v, 10) || 8)); R().sec = n; save(); const e = $('ng-sec'); if (e) e.textContent = n + ' detik'; },
+    mode(m) { R().mode = m; save(); redraw(); },
+    setTarget(n) { state.dailyTarget = n; save(); redraw(); try { refreshSettingsSummary(); } catch (e) {} },
+    saveCustom() {
+      const n = parseInt(($('ng-min') || {}).value, 10);
+      if (!(n >= 1 && n <= 600)) { banner('⚠️', 'Menit tidak valid', 'Isi angka antara 1 dan 600.'); return; }
+      state.dailyTarget = n; save(); redraw(); try { refreshSettingsSummary(); } catch (e) {}
+      banner('✅', 'Target disimpan', n + ' menit');
+    },
+    start() {
+      try { Snd.unlock(); } catch (e) {}
+      const n = state.dailyTarget || 10;
+      state.studyTimer = { endAt: Date.now() + n * 60000, minutes: n, snooze: 0 }; save();
+      redraw(); tick();
+    },
+    cancel() { state.studyTimer = null; save(); redraw(); tick(); },
+    done() { endRing(); state.studyTimer = null; save(); tick(); banner('🎉', 'Sesi belajar selesai', 'Kerja bagus! Sampai jumpa di sesi berikutnya.'); },
+    snooze() {
+      endRing(); const t = state.studyTimer;
+      if (t) { t.snooze = (t.snooze || 0) + 1; t.endAt = Date.now() + 10 * 60000; save(); }
+      tick(); banner('⏰', 'Ditunda 10 menit', 'Alarm berbunyi lagi 10 menit dari sekarang.');
+    },
+    back() {
+      endRing(); state.studyTimer = null; save(); tick();
+      const m = $('settings-detail-modal'); if (m) m.remove();
+      try { switchTab('home'); } catch (e) {}
+    },
+    onMessage,
+    _snd: Snd
+  };
+
+  /* menu pengaturan lama: arahkan 'reminder' & 'target' ke tampilan baru */
+  if (typeof window.openSettingsDetail === 'function') {
+    const orig = window.openSettingsDetail;
+    window.openSettingsDetail = function (type) {
+      if (type === 'reminder' || type === 'target') return open(type);
+      return orig.apply(this, arguments);
+    };
+  }
+
+  setInterval(tick, 1000);
+  setInterval(() => { try { checkAway(state.lastActive); } catch (e) {} }, 60000);
+  document.addEventListener('visibilitychange', () => { tick(); if (!document.hidden) { try { checkAway(state.lastActive); } catch (e) {} } });
+  window.addEventListener('load', () => setTimeout(() => {
+    try {
+      const prevActive = state.lastActive;
+      checkAway(prevActive);
+      if (!state.isFirstLogin) { state.lastActive = Date.now(); save(); }
+      tick();
+    } catch (e) {}
+  }, 900));
 })();
 </script>
 </body>
