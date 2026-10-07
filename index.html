@@ -6209,7 +6209,7 @@ const Social = (function () {
     try {
       const s = S(); if (!(state.user && state.user.name) || state.isFirstLogin || navigator.onLine === false) return;
       const db = dbURL();
-      if (s.visible === false) {
+      if (state.devMode && s.visible === false) {
         if (db) { const r = await fetch(db + '/users/' + s.code + '.json', { method: 'DELETE' }); if (r && r.ok) { s.dirPosted = false; delete s.dirSig; saveState(); } return; }
         if (s.dirPosted) { const r = await fetch(dirURL(), { method: 'POST', body: JSON.stringify({ t: 'd', c: s.code }) }); if (r && r.ok) { s.dirPosted = false; delete s.dirSig; saveState(); } }
         return;
@@ -6281,10 +6281,11 @@ const Social = (function () {
   function open(view) { V.view = view || 'friends'; V.chat = null; render(); dirSync(); dirFetch(); }
   function head(title) { return `<div style="display:flex;align-items:center;gap:.5rem"><button onclick="Social.close()" style="font-size:1.8rem;line-height:1;color:var(--text-muted)">‹</button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Komunitas</p><h2 class="text-xl font-bold">${title}</h2></div></div>`; }
   function me() { return `<div class="ios-glass" style="padding:.9rem;border-radius:1.5rem;display:flex;align-items:center;gap:.8rem">${avatarEl(state.user.avatar || '🌸', 3)}<div style="flex:1;min-width:0"><b style="font-size:.9rem">${esc(state.user.name || 'Kamu')}</b><p style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(bioText()) || 'Belum ada deskripsi'}</p><button onclick="Social.openSettings()" style="font-size:.65rem;font-weight:800;color:var(--accent);margin-top:.15rem">Atur profil & level ›</button></div><div style="align-self:flex-start;text-align:right">${S().showLevel ? chip(myLevel(), true) : ''}${S().levelMode === 'auto' ? '<p style="font-size:.55rem;color:var(--text-muted);margin-top:.2rem">level otomatis</p>' : ''}</div></div>`; }
+  const BETA = '<span style="font-size:.52rem;font-weight:800;color:#F59E0B;background:rgba(245,158,11,.16);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">BETA</span>';
   function row(u, mode) {
     const isF = S().friends.includes(u.id), last = api.history(u.id).slice(-1)[0];
     const action = unreadBadge(u.id) + (u.pending ? btn('⏳ Kirim ulang', `Social.resend('${u.id}')`) : u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true)));
-    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${esc(u.name)}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
+    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${esc(u.name)}${u.ai ? ' ' + BETA : ''}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
   }
   function render() {
     if (V.view === 'chat') return renderChat();
@@ -6296,10 +6297,8 @@ const Social = (function () {
   function friendsList() {
     const fr = S().friends.map(api.get).filter(x => x && !x.ai).sort((a, b) => ((api.history(b.id).slice(-1)[0] || {}).t || 0) - ((api.history(a.id).slice(-1)[0] || {}).t || 0));
     const pinned = row(RAMA, 'friend');
-    const others = dirUsers().filter(u => !S().friends.includes(u.id));
-    const more = others.length ? `<p style="font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:.5rem .2rem 0">Pengguna NihonGo (${others.length}) · tekan Tambah</p>` + others.slice(0, 60).map(u => row(u, 'find')).join('') : '';
-    if (!fr.length) return pinned + more + `<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;text-align:center;font-size:.78rem;color:var(--text-muted)">Belum punya teman manusia. Tambah dari daftar pengguna di atas, atau cari lewat tab <b>Cari teman</b>.<div style="margin-top:.8rem">${btn('Cari teman', "Social.open('find')", true)}</div></div>`;
-    return pinned + fr.map(u => row(u, 'friend')).join('') + more;
+    if (!fr.length) return pinned + `<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;text-align:center;font-size:.78rem;color:var(--text-muted)">Belum punya teman manusia. Temukan pengguna NihonGo lain lewat tab <b>Cari teman</b>.<div style="margin-top:.8rem">${btn('Cari teman', "Social.open('find')", true)}</div></div>`;
+    return pinned + fr.map(u => row(u, 'friend')).join('');
   }
   function myCodeCard() {
     return `<div class="ios-glass" style="padding:.8rem .9rem;border-radius:1.4rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem"><div style="min-width:0"><p style="font-size:.58rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)">Kode temanmu</p><p style="font-size:1.15rem;font-weight:900;letter-spacing:.1em">${esc(S().code)}</p></div><div style="display:flex;gap:.4rem">${btn('Salin', 'Social.copyCode()')}${btn('Bagikan', 'Social.share()', true)}</div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:.55rem;gap:.5rem">${netChip()}${btn('＋ Tambah teman', "Social.open('find')", true)}</div></div>`;
@@ -6414,7 +6413,7 @@ const Social = (function () {
   function renderChat() {
     const f = api.get(V.chat);
     vp().innerHTML = `<div class="animate-fade-in" style="display:flex;flex-direction:column;gap:.7rem">
-      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--accent)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}</b>${chip(f.level)}</div><p id="soc-sub" style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subline(f))}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
+      <div style="display:flex;align-items:center;gap:.6rem"><button onclick="Social.open('friends')" style="font-size:1.8rem;line-height:1;color:var(--accent)">‹</button>${avatarEl(f.avatar, 2.6)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;justify-content:space-between"><b style="font-size:.95rem">${esc(f.name)}${f.ai ? ' ' + BETA : ''}</b>${chip(f.level)}</div><p id="soc-sub" style="font-size:.62rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subline(f))}</p></div>${f.ai ? '' : btn('Hapus', `Social.unfriend('${f.id}')`)}</div>
       <div onclick="Social.warning()" style="cursor:pointer;font-size:.6rem;font-weight:700;text-align:center;padding:.35rem .6rem;border-radius:.8rem;background:rgba(245,158,11,.14);color:#F59E0B">🔒 Jangan bagikan data pribadi atau kata sandi di chat · ketuk untuk membaca aturan</div>
       ${f.ai && !getKey() ? '<div class="soc-aicard"><div><b>⚡ AI gratis aktif</b><span>Tanpa kunci memakai layanan publik gratis (kadang lambat atau penuh). Untuk jawaban cepat & stabil, pasang kunci gratis Gemini/Groq (±1 menit).</span></div><button onclick="Social.openSettings()">Pasang kunci</button></div>' : ''}
       <div id="soc-msgs" style="display:flex;flex-direction:column;min-height:45vh;padding-bottom:7.5rem">${bubbles(V.chat)}</div>
@@ -6460,7 +6459,7 @@ const Social = (function () {
       <p style="font-size:.7rem;font-weight:800;margin:.9rem 0 .4rem">Level</p>
       <div style="display:flex;flex-wrap:wrap;gap:.4rem">${btn('Otomatis', "Social.levelMode('auto')", s.levelMode === 'auto')}${LEVELS.map(L => btn(L, `Social.levelMode('${L}')`, s.levelMode === L)).join('')}</div>
       <p style="font-size:.62rem;color:var(--text-muted);margin-top:.35rem;line-height:1.5">Level otomatis dihitung dari progres kana, kosakata, dan pola N5 kamu (skor ${auto.p}%) → saat ini <b>${auto.label}</b>. Pilih level tertentu untuk menetapkannya sendiri.</p>
-      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${toggle('visible', 'Muncul di pencarian teman', 'Nama, avatar, level & deskripsimu tampil di daftar publik')}</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${state.devMode ? toggle('visible', 'Muncul di pencarian teman (developer)', 'Hanya developer yang bisa menyembunyikan diri dari daftar publik') : ''}</div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.7rem .9rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between"><span><b style="font-size:.78rem">Kode teman</b><span style="display:block;font-size:.62rem;color:var(--text-muted)">Bagikan agar bisa ditambahkan</span></span><button onclick="Social.copyCode()" style="font-weight:900;letter-spacing:.08em;color:var(--accent)">${esc(s.code)} ⧉</button></div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem"><b style="font-size:.78rem">🔗 Relay teman</b><p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;margin:.25rem 0 .5rem">Pesan antar-teman lewat relay publik gratis <b>ntfy.sh</b>. Bila jaringanmu memblokirnya, isi alamat server ntfy lain (harus sama dengan milik temanmu). Kosongkan untuk bawaan.</p><input id="soc-relay" type="text" value="${esc(s.relay || '')}" placeholder="https://ntfy.sh/" onchange="Social.setRelay(this.value)" class="ios-glass" style="width:100%;padding:.55rem .8rem;border-radius:.8rem;font-size:.75rem;font-weight:700;outline:none"><div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.reconnect()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Tes & sambung ulang</button></div></div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem">
@@ -6524,6 +6523,83 @@ const Social = (function () {
   })();
 
   return { reconnect, share, pasteCode, pasteKey, onType, retry, retryAi, resend, setRelay, addCode, aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
+})();
+
+/* =====================================================================
+   LOGIN HARIAN BERUNTUN (streak) — hadiah koin, hari ke-7 hadiah besar
+   ===================================================================== */
+(function () {
+  const REWARDS = [20, 30, 40, 50, 60, 80, 200];            /* hari 1..7, lalu mengulang dari hari 1 */
+  const key = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const coinIcon = () => { try { return getCoinIcon(); } catch (e) { return '🪙'; } };
+  const S = () => (state.streak = state.streak && typeof state.streak === 'object' ? state.streak : { count: 0, last: '', best: 0 });
+  function info(now) {
+    now = now || new Date(); const s = S(), today = key(now), y = new Date(now); y.setDate(y.getDate() - 1);
+    const claimed = s.last === today;
+    const next = claimed ? s.count : (s.last === key(y) ? s.count + 1 : 1);
+    const pos = ((next - 1) % 7) + 1;
+    const alive = claimed || s.last === key(y);               /* streak masih hidup */
+    return { claimed, next, pos, today, shown: alive ? s.count : 0 };
+  }
+  function claim(now) {
+    const i = info(now); if (i.claimed) return null;
+    const s = S(); s.count = i.next; s.last = i.today; s.best = Math.max(s.best || 0, s.count);
+    const gain = REWARDS[i.pos - 1]; state.coins = (state.coins || 0) + gain;
+    try { saveState(); } catch (e) {} try { updateCoinUI(); } catch (e) {} try { playChime(true); } catch (e) {}
+    return gain;
+  }
+  const $ = id => document.getElementById(id);
+  function chip() {
+    let b = $('streak-chip');
+    if (!b) {
+      const c = $('header-coins'); if (!c || !c.parentNode) return;
+      b = document.createElement('button'); b.id = 'streak-chip'; b.type = 'button';
+      b.setAttribute('aria-label', 'Login harian'); b.onclick = open;
+      b.style.cssText = 'margin-left:.5rem;font-size:.62rem;font-weight:900;color:#F97316;background:rgba(249,115,22,.14);border-radius:999px;padding:.08rem .45rem';
+      c.parentNode.appendChild(b);
+    }
+    const i = info(); b.textContent = '🔥 ' + i.shown + (i.claimed ? '' : ' ●');
+  }
+  function html() {
+    const i = info(), ic = coinIcon();
+    const cells = REWARDS.map((r, k) => {
+      const d = k + 1, done = i.claimed ? d <= i.pos : d < i.pos, cur = !i.claimed && d === i.pos, big = d === 7;
+      const bg = done ? 'rgba(16,185,129,.16)' : cur ? 'var(--accent)' : 'var(--glass-bg)';
+      const fg = cur ? '#fff' : 'var(--text-main)';
+      return `<div style="${big ? 'grid-column:span 2;' : ''}background:${bg};color:${fg};border:1px solid ${cur ? 'var(--accent)' : 'var(--glass-border)'};border-radius:1rem;padding:.55rem .3rem;text-align:center">
+        <p style="font-size:.55rem;font-weight:800;opacity:.75">Hari ${d}</p>
+        <p style="font-size:${big ? '1.6rem' : '1.15rem'};line-height:1.3">${done ? '✅' : big ? '🎁' : ic}</p>
+        <p style="font-size:.7rem;font-weight:900">+${r}</p></div>`;
+    }).join('');
+    const msg = i.claimed ? 'Sudah diklaim hari ini. Kembali besok untuk lanjut ke hari ke-' + (i.pos % 7 + 1) + '!' : (i.pos === 7 ? 'Hari ke-7! Hadiah terbesar menantimu.' : 'Login tiap hari tanpa putus, hari ke-7 hadiahnya paling besar.');
+    return `<div style="background:var(--bg-app);color:var(--text-main);border:1px solid var(--glass-border);border-radius:1.8rem;padding:1.2rem;width:min(92vw,22rem);box-shadow:0 20px 60px -20px #000">
+      <p style="font-size:.6rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)">Login Harian</p>
+      <h3 style="font-size:1.25rem;font-weight:800;margin:.1rem 0">🔥 ${i.shown} hari berturut-turut</h3>
+      <p style="font-size:.68rem;color:var(--text-muted);margin-bottom:.8rem">${msg} Rekor terbaikmu: ${S().best || 0} hari.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem">${cells}</div>
+      <div style="display:flex;gap:.5rem;margin-top:.9rem">
+        <button id="streak-claim" onclick="DailyStreak.claim()" ${i.claimed ? 'disabled' : ''} style="flex:1;padding:.7rem;border-radius:999px;font-weight:900;font-size:.8rem;background:${i.claimed ? 'var(--glass-bg)' : 'var(--accent)'};color:${i.claimed ? 'var(--text-muted)' : '#fff'}">${i.claimed ? 'Sudah diklaim ✓' : 'Klaim +' + REWARDS[i.pos - 1] + ' ' + ic}</button>
+        <button onclick="DailyStreak.close()" style="padding:.7rem 1rem;border-radius:999px;font-weight:800;font-size:.8rem;background:var(--glass-bg);color:var(--text-muted)">Tutup</button></div></div>`;
+  }
+  function open() {
+    let o = $('streak-modal');
+    if (!o) { o = document.createElement('div'); o.id = 'streak-modal'; o.style.cssText = 'position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center'; o.onclick = e => { if (e.target === o) close(); }; document.body.appendChild(o); }
+    o.innerHTML = html(); o.style.display = 'flex';
+  }
+  function close() { const o = $('streak-modal'); if (o) o.style.display = 'none'; chip(); }
+  function doClaim() {
+    const btn = $('streak-claim'), g = claim();
+    if (g == null) return;
+    try { if (btn && typeof showFloatingCoin === 'function') showFloatingCoin(btn, g); } catch (e) {}
+    open(); chip();
+  }
+  const ready = () => !!(state && state.user && state.user.name && !state.isFirstLogin);
+  function boot() { try { if (!ready()) return; chip(); if (!info().claimed) setTimeout(open, 700); } catch (e) {} }
+  window.addEventListener('DOMContentLoaded', () => setTimeout(boot, 900));
+  const fo = window.finishOnboarding;
+  if (typeof fo === 'function') window.finishOnboarding = function () { const r = fo.apply(this, arguments); setTimeout(boot, 900); return r; };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { chip(); } catch (e) {} } });
+  window.DailyStreak = { open, close, claim: doClaim, _info: info, _claim: claim, REWARDS };
 })();
 </script>
 </body>
