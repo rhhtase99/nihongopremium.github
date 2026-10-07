@@ -791,7 +791,7 @@
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Bahasa</p><div class="settings-section"><button onclick="openSettingsDetail('app-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Aplikasi</span><span class="setting-value">Bahasa Indonesia</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('learning-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Pembelajaran</span><span class="setting-value">Jepang</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Pembelajaran</p><div class="settings-section"><button onclick="openSettingsDetail('favorites')" class="settings-row"><i data-lucide="book-open-check" class="w-5 h-5"></i><span class="font-bold text-sm">Materi Favorit</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('reminder')" class="settings-row"><i data-lucide="bell" class="w-5 h-5"></i><span class="font-bold text-sm">Pengingat Belajar</span><span class="setting-value" id="reminder-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('target')" class="settings-row"><i data-lucide="graduation-cap" class="w-5 h-5"></i><span class="font-bold text-sm">Target Harian</span><span class="setting-value" id="target-label">10 menit</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Lainnya</p><div class="settings-section"><button onclick="openSettingsDetail('rating')" class="settings-row"><i data-lucide="star" class="w-5 h-5"></i><span class="font-bold text-sm">Beri Rating</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('share')" class="settings-row"><i data-lucide="share-2" class="w-5 h-5"></i><span class="font-bold text-sm">Bagikan Aplikasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('about')" class="settings-row"><i data-lucide="info" class="w-5 h-5"></i><span class="font-bold text-sm">Tentang Kami</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('privacy')" class="settings-row"><i data-lucide="shield-check" class="w-5 h-5"></i><span class="font-bold text-sm">Kebijakan Privasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('terms')" class="settings-row"><i data-lucide="scroll-text" class="w-5 h-5"></i><span class="font-bold text-sm">Syarat & Ketentuan</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Data Akun</p><div class="settings-section"><button onclick="resetData('progress')" class="settings-row text-orange-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Reset Kemajuan Belajar</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('all')" class="settings-row text-red-600"><i data-lucide="log-out" class="w-5 h-5"></i><span class="font-bold text-sm">Hapus Semua & Logout</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Data Akun</p><div class="settings-section"><button onclick="exportData()" class="settings-row text-accent"><i data-lucide="download" class="w-5 h-5"></i><span class="font-bold text-sm">Pindah Data: Ekspor ke File</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="importData()" class="settings-row text-accent"><i data-lucide="upload" class="w-5 h-5"></i><span class="font-bold text-sm">Pindah Data: Impor dari File</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('progress')" class="settings-row text-orange-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Reset Kemajuan Belajar</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('all')" class="settings-row text-red-600"><i data-lucide="log-out" class="w-5 h-5"></i><span class="font-bold text-sm">Hapus Semua & Logout</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
             </div>
             <div class="mb-6">
                 <label class="text-xs font-semibold uppercase tracking-wider block mb-3" style="color: var(--text-muted)">Mode Layar</label>
@@ -823,6 +823,8 @@
             </div>
 
             <div class="space-y-3">
+                <button onclick="exportData()" class="w-full ios-glass border-accent/30 text-accent py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Pindah Data: Ekspor ke File</button>
+                <button onclick="importData()" class="w-full ios-glass border-accent/30 text-accent py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="upload" class="w-4 h-4"></i> Pindah Data: Impor dari File</button>
                 <button onclick="resetData('progress')" class="w-full ios-glass border-orange-500/30 text-orange-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Reset Kemajuan Belajar</button>
                 <button onclick="resetData('all')" class="w-full ios-glass border-red-500/30 text-red-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Semua & Logout</button>
             </div>
@@ -2329,6 +2331,8 @@ const KANJI_N5_DB = (() => {
 
         /* Token developer: buka semua tema & latihan, koin 5000 (untuk uji coba) */
         const DEV_TOKEN = 'NPJ2026';
+        const DEV_TOKEN_GOLD = 'NPJ20267';   /* developer emas: tampil paling atas & berwarna emas di daftar teman */
+        const isDevToken = v => v === DEV_TOKEN || v === DEV_TOKEN_GOLD;
         function applyDevMode(fresh) {
             if (!state.devMode) return;
             state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), ...SHOP_ITEMS.map(i => i.id)])];
@@ -2337,22 +2341,25 @@ const KANJI_N5_DB = (() => {
         }
         function refreshTokenCapsule() {
             const t = document.getElementById('token-capsule-text'); if (!t) return;
-            t.textContent = state.devMode ? 'Token Aktif' : 'Masukkan Token';
+            t.textContent = state.devGold ? 'Developer ★' : state.devMode ? 'Token Aktif' : 'Masukkan Token';
             document.getElementById('token-box')?.classList.add('hidden');
         }
         function toggleTokenBox() {
-            if (state.devMode) { alert('Token developer sudah aktif: semua tema dan latihan terbuka.'); return; }
+            if (state.devGold) { alert('Token developer emas sudah aktif.'); return; }
             const box = document.getElementById('token-box'); box.classList.toggle('hidden');
             if (!box.classList.contains('hidden')) document.getElementById('profile-token').focus();
         }
         function activateToken() {
             const v = (document.getElementById('profile-token').value || '').trim().toUpperCase();
             if (!v) { alert('Masukkan token dulu ya.'); return; }
-            if (v !== DEV_TOKEN) { alert('Token tidak valid.'); return; }
-            state.devMode = true; applyDevMode(true); saveState();
+            if (!isDevToken(v)) { alert('Token tidak valid.'); return; }
+            const hadDev = !!state.devMode;
+            state.devMode = true; if (v === DEV_TOKEN_GOLD) state.devGold = true;
+            applyDevMode(!hadDev); saveState();
+            try { Social.refreshHeader(); } catch (e) {}
             document.getElementById('profile-token').value = '';
             refreshTokenCapsule(); updateHeaderUI();
-            alert('Token diterima! Semua tema dan latihan terbuka, koin 5000.');
+            alert(state.devGold ? 'Token developer emas diterima! Namamu tampil emas di paling atas daftar teman.' : 'Token diterima! Semua tema dan latihan terbuka, koin 5000.');
         }
 
         function initApp() {
@@ -2393,7 +2400,43 @@ const KANJI_N5_DB = (() => {
             }
         }
 
-        function saveState() { localStorage.setItem('nihongo_premium_v8', JSON.stringify(state)); }
+        function saveState() { if (window.__importing) return; localStorage.setItem('nihongo_premium_v8', JSON.stringify(state)); }
+
+        /* ================= PINDAH DATA (ganti HP): ekspor & impor ================= */
+        function exportData() {
+            try {
+                saveState();
+                const st = JSON.parse(JSON.stringify(state)); st.customMusicName = '';
+                const pkg = { app: 'NihonGo', v: 1, exported: new Date().toISOString(), state: st };
+                const d = new Date(), pad = n => String(n).padStart(2, '0');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([JSON.stringify(pkg)], { type: 'application/json' }));
+                a.download = 'nihongo-data-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '.json';
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+                alert('File data tersimpan (kemajuan, chat, streak, koin, tema, kode teman). Kirim file itu ke HP baru, lalu pilih Impor Data. Kunci AI pribadi tidak ikut diekspor demi keamanan.');
+            } catch (e) { alert('Gagal membuat file data: ' + (e && e.message || e)); }
+        }
+        function importData() {
+            const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+            inp.onchange = () => {
+                const f = inp.files && inp.files[0]; if (!f) return;
+                const r = new FileReader();
+                r.onload = () => {
+                    let st;
+                    try { const pkg = JSON.parse(r.result); st = pkg && pkg.app === 'NihonGo' && pkg.state; if (!st || typeof st !== 'object' || !st.user || !st.stats) throw new Error('bad'); }
+                    catch (e) { alert('File tidak valid. Pilih file nihongo-data-….json hasil ekspor.'); return; }
+                    if (!confirm('Impor data ini? Data di HP ini akan DIGANTI dengan isi file (kemajuan, chat, streak, koin, tema).')) return;
+                    window.__importing = true;
+                    try { localStorage.setItem('nihongo_premium_v8', JSON.stringify(st)); }
+                    catch (e) { window.__importing = false; alert('Gagal menyimpan data: ' + (e && e.message || e)); return; }
+                    alert('Data berhasil dipulihkan. Aplikasi akan dimuat ulang.');
+                    location.reload();
+                };
+                r.readAsText(f);
+            };
+            inp.click();
+        }
 
         /* ================= ONBOARDING ================= */
         function renderOnboardingAvatars() {
@@ -2410,8 +2453,8 @@ const KANJI_N5_DB = (() => {
             const nameInput = document.getElementById('setup-name').value.trim();
             if (!nameInput) { alert("Tolong isi nama kamu dulu ya!"); return; }
             const tokenInput = (document.getElementById('setup-token')?.value || '').trim().toUpperCase();
-            if (tokenInput && tokenInput !== DEV_TOKEN) { alert("Token tidak valid. Kosongkan kolom token jika tidak punya."); return; }
-            if (tokenInput === DEV_TOKEN) { state.devMode = true; applyDevMode(true); }
+            if (tokenInput && !isDevToken(tokenInput)) { alert("Token tidak valid. Kosongkan kolom token jika tidak punya."); return; }
+            if (isDevToken(tokenInput)) { state.devMode = true; if (tokenInput === DEV_TOKEN_GOLD) state.devGold = true; applyDevMode(true); }
             state.user.name = nameInput; state.isFirstLogin = false; saveState();
             
             document.getElementById('onboarding-screen').style.opacity = '0';
@@ -6199,11 +6242,11 @@ const Social = (function () {
   const DIR = 'nhgo1-directory', DIR_EVERY = 30 * 60 * 1000;
   const dirURL = () => net.base() + DIR;
   const lim = (v, n) => String(v == null ? '' : v).slice(0, n);
-  const dirProfile = () => ({ n: lim(state.user && state.user.name, 24), a: lim(state.user && state.user.avatar, 8), l: lim(myLevel(), 8), b: lim(bioText(), 80) });
+  const dirProfile = () => ({ n: lim(state.user && state.user.name, 24), a: lim(state.user && state.user.avatar, 8), l: lim(myLevel(), 8), b: lim(bioText(), 80), d: state.devGold ? 1 : 0 });
   function dirUsers() {
     const s = S(), d = s.dir || {};
-    return Object.keys(d).filter(c => c !== s.code).sort((a, b) => (d[b].ts || 0) - (d[a].ts || 0))
-      .map(c => ({ id: c, code: c, remote: true, real: true, chips: [], name: d[c].name, avatar: d[c].avatar || '👤', level: d[c].level || 'Pemula', bio: d[c].bio || '' }));
+    return Object.keys(d).filter(c => c !== s.code).sort((a, b) => (d[b].dev ? 1 : 0) - (d[a].dev ? 1 : 0) || (d[b].ts || 0) - (d[a].ts || 0))   /* developer emas selalu paling atas */
+      .map(c => ({ id: c, code: c, remote: true, real: true, dev: !!d[c].dev, chips: [], name: d[c].name, avatar: d[c].avatar || '👤', level: d[c].level || 'Pemula', bio: d[c].bio || '' }));
   }
   async function dirSync(force) {
     try {
@@ -6217,7 +6260,7 @@ const Social = (function () {
       const p = dirProfile(), sig = JSON.stringify(p);
       if (!force && s.dirSig === sig && Date.now() - (s.dirAt || 0) < DIR_EVERY) return;
       const r = db
-        ? await fetch(db + '/users/' + s.code + '.json', { method: 'PUT', body: JSON.stringify({ name: p.n, avatar: p.a, level: p.l, bio: p.b, ts: Date.now() }) })
+        ? await fetch(db + '/users/' + s.code + '.json', { method: 'PUT', body: JSON.stringify({ name: p.n, avatar: p.a, level: p.l, bio: p.b, dev: p.d ? 1 : 0, ts: Date.now() }) })
         : await fetch(dirURL(), { method: 'POST', body: JSON.stringify(Object.assign({ t: 'p', c: s.code }, p)) });
       if (r && r.ok) { s.dirSig = sig; s.dirAt = Date.now(); s.dirPosted = true; saveState(); }
     } catch (e) {}
@@ -6235,7 +6278,7 @@ const Social = (function () {
       if (db) {
         const r = await fetch(db + '/users.json'); if (!r || !r.ok) return;
         const o = (await r.json()) || {}, d = {};
-        Object.keys(o).forEach(k => { const c = net.canon(k), u = o[k]; if (!c || !u || typeof u !== 'object') return; const n = lim(u.name, 24).trim(); if (!n) return; d[c] = { name: n, avatar: lim(u.avatar, 8), level: LEVELS.includes(u.level) ? u.level : 'Pemula', bio: lim(u.bio, 80), ts: +u.ts || 0 }; });
+        Object.keys(o).forEach(k => { const c = net.canon(k), u = o[k]; if (!c || !u || typeof u !== 'object') return; const n = lim(u.name, 24).trim(); if (!n) return; d[c] = { name: n, avatar: lim(u.avatar, 8), level: LEVELS.includes(u.level) ? u.level : 'Pemula', bio: lim(u.bio, 80), dev: u.dev ? 1 : 0, ts: +u.ts || 0 }; });
         dirApply(d);
         return;
       }
@@ -6251,7 +6294,7 @@ const Social = (function () {
         if (p.t === 'd') { delete d[c]; return; }
         if (p.t !== 'p') return;
         const n = lim(p.n, 24).trim(); if (!n) return;
-        d[c] = { name: n, avatar: lim(p.a, 8), level: LEVELS.includes(p.l) ? p.l : 'Pemula', bio: lim(p.b, 80), ts: (m.time || 0) * 1000 };
+        d[c] = { name: n, avatar: lim(p.a, 8), level: LEVELS.includes(p.l) ? p.l : 'Pemula', bio: lim(p.b, 80), dev: p.d ? 1 : 0, ts: (m.time || 0) * 1000 };
       });
       dirApply(d);
     } catch (e) {} finally { dirBusy = false; }
@@ -6285,7 +6328,7 @@ const Social = (function () {
   function row(u, mode) {
     const isF = S().friends.includes(u.id), last = api.history(u.id).slice(-1)[0];
     const action = unreadBadge(u.id) + (u.pending ? btn('⏳ Kirim ulang', `Social.resend('${u.id}')`) : u.ai ? btn('Tanya', `Social.chatWith('${u.id}')`, true) : mode === 'friend' ? btn('Chat', `Social.chatWith('${u.id}')`, true) : (isF ? btn('✓ Teman', `Social.chatWith('${u.id}')`) : btn('＋ Tambah', `Social.add('${u.id}')`, true)));
-    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${esc(u.name)}${u.ai ? ' ' + BETA : ''}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
+    return `<div class="ios-glass" style="padding:.75rem;border-radius:1.3rem;display:flex;align-items:center;gap:.7rem${u.dev ? ';background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(245,158,11,.07));border:1px solid rgba(255,215,0,.5)' : ''}">${avatarEl(u.avatar)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem"><b style="font-size:.85rem">${u.dev ? '<span style="color:#FFD700;background:#2a1f00;border:1px solid rgba(255,215,0,.55);border-radius:.6rem;padding:.1rem .5rem;font-weight:900;text-shadow:0 0 8px rgba(255,215,0,.45)">★ ' + esc(u.name) + '</span>' : esc(u.name)}${u.ai ? ' ' + BETA : ''}${u.real ? ' <span style="font-size:.52rem;font-weight:800;color:#10B981;background:rgba(16,185,129,.14);border-radius:999px;padding:.1rem .4rem;vertical-align:middle">PENGGUNA ASLI</span> <span style="font-size:.62rem;font-weight:700;color:var(--text-muted)">#' + esc(u.code.slice(-4)) + '</span>' : ''}</b>${S().showLevel || true ? chip(u.level) : ''}</div><p style="font-size:.65rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${mode === 'friend' && last ? esc((last.f === 'me' ? 'Kamu: ' : '') + last.x) : esc(u.bio)}</p></div>${action}</div>`;
   }
   function render() {
     if (V.view === 'chat') return renderChat();
