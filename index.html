@@ -789,7 +789,7 @@
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tema</p><div class="settings-section"><button onclick="openSettingsDetail('themes')" class="settings-row"><i data-lucide="palette" class="w-5 h-5"></i><span class="font-bold text-sm">Pilih Tema</span><span class="setting-value" id="current-theme-label">Tema</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="toggleDarkMode()" class="settings-row"><i data-lucide="moon" class="w-5 h-5"></i><span class="font-bold text-sm">Mode Gelap</span><span class="setting-value" id="dark-mode-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="setTheme('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="smartphone" class="w-5 h-5"></i><span class="font-bold text-sm">Ikuti pengaturan perangkat</span><span class="setting-value" id="auto-theme-label">Auto</span></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tata Letak</p><div class="settings-section"><button onclick="setOrientationMode('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="rotate-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Auto</span><span class="setting-value" id="orientation-mode-label">Aktif</span></button><button onclick="setOrientationMode('manual'); toggleOrientationView(); refreshSettingsSummary()" class="settings-row"><i data-lucide="panel-top" class="w-5 h-5"></i><span class="font-bold text-sm">Manual</span><span class="setting-value">Ubah orientasi</span></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Bahasa</p><div class="settings-section"><button onclick="openSettingsDetail('app-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Aplikasi</span><span class="setting-value">Bahasa Indonesia</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('learning-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Pembelajaran</span><span class="setting-value">Jepang</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
-                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Pembelajaran</p><div class="settings-section"><button onclick="openSettingsDetail('favorites')" class="settings-row"><i data-lucide="book-open-check" class="w-5 h-5"></i><span class="font-bold text-sm">Materi Favorit</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('reminder')" class="settings-row"><i data-lucide="bell" class="w-5 h-5"></i><span class="font-bold text-sm">Pengingat Belajar</span><span class="setting-value" id="reminder-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('target')" class="settings-row"><i data-lucide="graduation-cap" class="w-5 h-5"></i><span class="font-bold text-sm">Target Harian</span><span class="setting-value" id="target-label">10 menit</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
+                <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Pembelajaran</p><div class="settings-section"><button onclick="openSettingsDetail('favorites')" class="settings-row"><i data-lucide="book-open-check" class="w-5 h-5"></i><span class="font-bold text-sm">Materi Favorit</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('reminder')" class="settings-row"><i data-lucide="bell" class="w-5 h-5"></i><span class="font-bold text-sm">Pengingat Belajar</span><span class="setting-value" id="reminder-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('target')" class="settings-row"><i data-lucide="graduation-cap" class="w-5 h-5"></i><span class="font-bold text-sm">Target Harian</span><span class="setting-value" id="target-label">10 menit</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="NGBook.open()" class="settings-row"><i data-lucide="book-open" class="w-5 h-5"></i><span class="font-bold text-sm">Buku Kesalahan</span><span class="setting-value" id="book-label">Kosong</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Lainnya</p><div class="settings-section"><button onclick="openSettingsDetail('rating')" class="settings-row"><i data-lucide="star" class="w-5 h-5"></i><span class="font-bold text-sm">Beri Rating</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('share')" class="settings-row"><i data-lucide="share-2" class="w-5 h-5"></i><span class="font-bold text-sm">Bagikan Aplikasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('about')" class="settings-row"><i data-lucide="info" class="w-5 h-5"></i><span class="font-bold text-sm">Tentang Kami</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('privacy')" class="settings-row"><i data-lucide="shield-check" class="w-5 h-5"></i><span class="font-bold text-sm">Kebijakan Privasi</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="openSettingsDetail('terms')" class="settings-row"><i data-lucide="scroll-text" class="w-5 h-5"></i><span class="font-bold text-sm">Syarat & Ketentuan</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Data Akun</p><div class="settings-section"><button onclick="exportData()" class="settings-row text-accent"><i data-lucide="download" class="w-5 h-5"></i><span class="font-bold text-sm">Pindah Data: Ekspor ke File</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="importData()" class="settings-row text-accent"><i data-lucide="upload" class="w-5 h-5"></i><span class="font-bold text-sm">Pindah Data: Impor dari File</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('progress')" class="settings-row text-orange-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Reset Kemajuan Belajar</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button><button onclick="resetData('all')" class="settings-row text-red-600"><i data-lucide="log-out" class="w-5 h-5"></i><span class="font-bold text-sm">Hapus Semua & Logout</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i></button></div></div>
             </div>
@@ -7008,6 +7008,602 @@ const Social = (function () {
       tick();
     } catch (e) {}
   }, 900));
+})();
+</script>
+<script>
+/* ===== BUKU KESALAHAN, TULIS KANJI & PENJELASAN (NihonGo) ===== */
+(function () {
+  'use strict';
+  /* Kode pola bunpou */
+  const CODES = {
+    A: 'N は N です', B: 'N に V (waktu / tujuan)', C: 'N を V (objek)', D: 'N が あります / います', E: 'Kata sifat + です',
+    F: 'N で V (tempat / alat)', G: 'V ます / V ません', H: 'N へ V (arah)', I: 'N の N', J: 'Penghitung (hitungan)',
+    K: 'Kata tanya', L: 'V て ください', M: 'N から N まで', N: 'N と / N も', O: 'Bentuk lampau', P: 'N は N が Adj (ciri)',
+    Q: 'Kebiasaan (毎～)', R: 'V ています', S: 'Bentuk biasa'
+  };
+  /* kata|bacaan @@ kalimat ~~ arti ~~ kode ## kalimat ~~ arti ~~ kode */
+  const EX_DATA = `
+朝|あさ@@朝 六時に おきます。~~Saya bangun pukul enam pagi.~~B##朝は さむいです。~~Pagi hari dingin.~~E
+毎朝|まいあさ@@毎朝 コーヒーを のみます。~~Setiap pagi saya minum kopi.~~Q##毎朝 かいしゃへ いきます。~~Setiap pagi saya pergi ke kantor.~~H
+今朝|けさ@@今朝 しんぶんを よみました。~~Pagi ini saya membaca koran.~~O##今朝は あめでした。~~Pagi ini hujan.~~O
+朝ごはん|あさごはん@@朝ごはんを たべます。~~Saya makan pagi.~~C##朝ごはんは パンです。~~Sarapan saya roti.~~A
+昼|ひる@@昼は うちで たべます。~~Siang hari saya makan di rumah.~~F##昼に ともだちに あいます。~~Siang hari saya bertemu teman.~~B
+昼休み|ひるやすみ@@昼休みは 十二時からです。~~Istirahat siang mulai pukul 12.~~M##昼休みに ほんを よみます。~~Saat istirahat siang saya membaca buku.~~B
+昼ごはん|ひるごはん@@昼ごはんを たべましたか。~~Apakah kamu sudah makan siang?~~O##昼ごはんは カレーです。~~Makan siang saya kari.~~A
+晩|ばん@@晩に テレビを みます。~~Malam hari saya menonton TV.~~B##きのうの 晩は さむかったです。~~Tadi malam dingin.~~O
+毎晩|まいばん@@毎晩 七時に ごはんを たべます。~~Setiap malam saya makan pukul tujuh.~~Q##毎晩 にほんごを べんきょうします。~~Setiap malam saya belajar bahasa Jepang.~~Q
+今晩|こんばん@@今晩 ともだちに あいます。~~Malam ini saya bertemu teman.~~B##今晩は ひまです。~~Malam ini saya senggang.~~E
+晩ごはん|ばんごはん@@晩ごはんを つくります。~~Saya membuat makan malam.~~C##晩ごはんは なんですか。~~Makan malamnya apa?~~K
+夜|よる@@夜は しずかです。~~Malam hari tenang.~~E##夜 おそく ねます。~~Saya tidur larut malam.~~G
+休みます|やすみます@@あした かいしゃを 休みます。~~Besok saya tidak masuk kantor.~~C##ここで 休みます。~~Saya beristirahat di sini.~~F
+休み|やすみ@@あしたは 休みです。~~Besok libur.~~A##休みの ひに うみへ いきます。~~Pada hari libur saya pergi ke pantai.~~I
+午前|ごぜん@@午前 九時に はじまります。~~Mulai pukul 9 pagi.~~B##午前は しごとが あります。~~Di pagi hari ada pekerjaan.~~D
+午後|ごご@@午後は ひまです。~~Siang/sore saya senggang.~~E##午後 二時に かいぎが あります。~~Pukul 2 siang ada rapat.~~D
+前|まえ@@えきの 前に ぎんこうが あります。~~Di depan stasiun ada bank.~~D##ごはんの 前に てを あらいます。~~Sebelum makan saya cuci tangan.~~Q
+四年前|よねんまえ@@四年前に 日本へ きました。~~Empat tahun lalu saya datang ke Jepang.~~O##四年前は がくせいでした。~~Empat tahun lalu saya pelajar.~~O
+後ろ|うしろ@@いすの 後ろに ねこが います。~~Di belakang kursi ada kucing.~~D##わたしの 後ろは だれですか。~~Siapa yang ada di belakang saya?~~K
+後で|あとで@@後で でんわします。~~Nanti saya telepon.~~G##後で メールを おくります。~~Nanti saya kirim email.~~C
+中|なか@@かばんの 中に ほんが あります。~~Di dalam tas ada buku.~~D##へやの 中は あかるいです。~~Di dalam ruangan terang.~~E
+一日中|いちにちじゅう@@きのうは 一日中 あめでした。~~Kemarin hujan sepanjang hari.~~O##一日中 うちに いました。~~Saya di rumah sepanjang hari.~~O
+午前中|ごぜんちゅう@@午前中は べんきょうします。~~Sepanjang pagi saya belajar.~~G##午前中に しごとが おわります。~~Pekerjaan selesai sebelum siang.~~B
+上|うえ@@つくえの 上に ほんが あります。~~Di atas meja ada buku.~~D##たなの 上は なんですか。~~Apa yang ada di atas rak?~~K
+上がります|あがります@@エレベーターで 上がります。~~Naik dengan lift.~~F##ここから 二かいへ 上がります。~~Dari sini naik ke lantai dua.~~H
+下|した@@いすの 下に ねこが います。~~Di bawah kursi ada kucing.~~D##つくえの 下に かばんが あります。~~Di bawah meja ada tas.~~D
+下がります|さがります@@ねだんが 下がります。~~Harga turun.~~G##もっと 下がって ください。~~Tolong mundur sedikit lagi.~~L
+外|そと@@外は あついです。~~Di luar panas.~~E##外で あそびます。~~Bermain di luar.~~F
+国|くに@@あなたの 国は どこですか。~~Negaramu di mana?~~K##わたしの 国は インドネシアです。~~Negara saya Indonesia.~~A
+外国|がいこく@@外国へ いきたいです。~~Saya ingin pergi ke luar negeri.~~H##外国の ともだちが います。~~Saya punya teman dari luar negeri.~~D
+中国|ちゅうごく@@中国の おちゃは おいしいです。~~Teh China enak.~~E##中国へ いきました。~~Saya pergi ke China.~~H
+右|みぎ@@右に まがります。~~Belok ke kanan.~~B##ぎんこうは 右に あります。~~Bank ada di sebelah kanan.~~D
+右手|みぎて@@右手で かきます。~~Saya menulis dengan tangan kanan.~~F##右手に かばんを もちます。~~Saya membawa tas di tangan kanan.~~B
+左|ひだり@@左に まがって ください。~~Tolong belok kiri.~~L##えきは 左です。~~Stasiun ada di sebelah kiri.~~A
+左手|ひだりて@@左手で ボールを なげます。~~Saya melempar bola dengan tangan kiri.~~F##左手が いたいです。~~Tangan kiri saya sakit.~~E
+手紙|てがみ@@手紙を かきます。~~Saya menulis surat.~~C##ともだちから 手紙が きました。~~Surat datang dari teman.~~O
+上手|じょうず@@ミラーさんは にほんごが 上手です。~~Miller pandai bahasa Jepang.~~E##りょうりが 上手ですね。~~Pandai memasak, ya.~~E
+下手|へた@@わたしは うたが 下手です。~~Saya tidak pandai bernyanyi.~~E##えが 下手ですが、すきです。~~Saya tidak pandai menggambar, tapi suka.~~E
+紙|かみ@@紙に なまえを かきます。~~Saya menulis nama di atas kertas.~~B##この 紙を ください。~~Tolong berikan kertas ini.~~C
+学生|がくせい@@わたしは 学生です。~~Saya pelajar.~~A##あの 学生は だれですか。~~Siapa pelajar itu?~~K
+学校|がっこう@@毎日 学校へ いきます。~~Setiap hari saya pergi ke sekolah.~~H##学校は 八時からです。~~Sekolah mulai pukul 8.~~M
+大学|だいがく@@大学で にほんごを べんきょうします。~~Saya belajar bahasa Jepang di universitas.~~F##大学は えきから ちかいです。~~Universitas dekat dari stasiun.~~E
+大きい|おおきい@@大きい いえですね。~~Rumah yang besar, ya.~~E##この かばんは 大きいです。~~Tas ini besar.~~E
+小さい|ちいさい@@小さい くるまが すきです。~~Saya suka mobil kecil.~~E##この へやは 小さいです。~~Ruangan ini kecil.~~E
+友だち|ともだち@@友だちと えいがを みます。~~Saya menonton film dengan teman.~~N##友だちに でんわします。~~Saya menelepon teman.~~B
+子ども|こども@@子どもが 二人 います。~~Saya punya dua anak.~~D##子どもは こうえんで あそびます。~~Anak-anak bermain di taman.~~F
+父|ちち@@父は かいしゃいんです。~~Ayah saya pegawai perusahaan.~~A##父は 六時に かえります。~~Ayah saya pulang pukul enam.~~B
+お父さん|おとうさん@@お父さんは おげんきですか。~~Apa kabar ayah Anda?~~K##ミラーさんの お父さんは せんせいです。~~Ayah Miller seorang guru.~~I
+母|はは@@母は りょうりが 上手です。~~Ibu saya pandai memasak.~~E##母は スーパーへ いきます。~~Ibu saya pergi ke supermarket.~~H
+お母さん|おかあさん@@お母さんは どこですか。~~Ibu ada di mana?~~K##これは ともだちの お母さんです。~~Ini ibu teman saya.~~I
+男|おとこ@@あの 男の ひとは だれですか。~~Siapa pria itu?~~K##男と 女が はなして います。~~Seorang pria dan wanita sedang berbicara.~~R
+男の子|おとこのこ@@男の子が はしって います。~~Seorang anak laki-laki sedang berlari.~~R##あそこに 男の子が います。~~Di sana ada anak laki-laki.~~D
+女|おんな@@女の ひとが ケーキを つくります。~~Seorang wanita membuat kue.~~C##あの 女の ひとは せんせいです。~~Wanita itu seorang guru.~~A
+女の子|おんなのこ@@女の子は ねこが すきです。~~Anak perempuan itu suka kucing.~~P##あそこに 女の子が います。~~Di sana ada anak perempuan.~~D
+電車|でんしゃ@@電車で かいしゃへ いきます。~~Saya pergi ke kantor naik kereta.~~F##つぎの 電車は 九時です。~~Kereta berikutnya pukul 9.~~A
+電話|でんわ@@友だちに 電話します。~~Saya menelepon teman.~~B##電話は どこですか。~~Telepon ada di mana?~~K
+電気|でんき@@電気を つけます。~~Saya menyalakan lampu.~~C##電気を けして ください。~~Tolong matikan lampu.~~L
+天気|てんき@@きょうは いい 天気ですね。~~Cuaca hari ini bagus, ya.~~E##あしたの 天気は どうですか。~~Bagaimana cuaca besok?~~K
+車|くるま@@車で いきます。~~Saya pergi naik mobil.~~F##あの 車は わたしのです。~~Mobil itu milik saya.~~I
+話|はなし@@おもしろい 話ですね。~~Ceritanya menarik, ya.~~E##先生の 話を ききます。~~Saya mendengarkan cerita guru.~~C
+話します|はなします@@にほんごで 話します。~~Saya berbicara dalam bahasa Jepang.~~F##友だちと 話します。~~Saya berbicara dengan teman.~~N
+会います|あいます@@友だちに 会います。~~Saya bertemu teman.~~B##あした 先生に 会います。~~Besok saya bertemu guru.~~B
+会話|かいわ@@日本語の 会話を れんしゅうします。~~Saya berlatih percakapan bahasa Jepang.~~C##この 会話は むずかしいです。~~Percakapan ini sulit.~~E
+会社|かいしゃ@@会社へ いきます。~~Saya pergi ke kantor.~~H##わたしの 会社は えきの ちかくです。~~Perusahaan saya dekat stasiun.~~I
+社長|しゃちょう@@社長は いま いません。~~Direktur sedang tidak ada.~~D##あの かたは 会社の 社長です。~~Beliau adalah direktur perusahaan.~~A
+駅|えき@@駅は どこですか。~~Stasiun di mana?~~K##駅まで あるきます。~~Saya berjalan sampai stasiun.~~M
+道|みち@@この 道を まっすぐ いきます。~~Saya lurus menyusuri jalan ini.~~C##道が わかりません。~~Saya tidak tahu jalannya.~~G
+店|みせ@@この 店は やすいです。~~Toko ini murah.~~E##店で パンを かいます。~~Saya membeli roti di toko.~~F
+空|そら@@空が あおいです。~~Langit biru.~~E##きょうの 空は あかるいです。~~Langit hari ini cerah.~~E
+空|から@@この はこは 空です。~~Kotak ini kosong.~~A##コップが 空に なりました。~~Gelasnya jadi kosong.~~O
+空気|くうき@@ここの 空気は きれいです。~~Udara di sini bersih.~~E##山の 空気は おいしいです。~~Udara pegunungan segar.~~E
+山|やま@@山に のぼります。~~Saya mendaki gunung.~~B##あの 山は たかいです。~~Gunung itu tinggi.~~E
+富士山|ふじさん@@富士山は 日本で いちばん たかい 山です。~~Gunung Fuji adalah gunung tertinggi di Jepang.~~A##富士山を 見ました。~~Saya melihat Gunung Fuji.~~O
+川|かわ@@川で およぎます。~~Saya berenang di sungai.~~F##この 川は きれいです。~~Sungai ini bersih.~~E
+雨|あめ@@きょうは 雨です。~~Hari ini hujan.~~A##雨の ひは うちに います。~~Pada hari hujan saya di rumah.~~I
+花|はな@@花を かいます。~~Saya membeli bunga.~~C##この 花は きれいですね。~~Bunga ini cantik, ya.~~E
+魚|さかな@@魚を たべます。~~Saya makan ikan.~~C##魚が すきです。~~Saya suka ikan.~~E
+目|め@@目が いたいです。~~Mata saya sakit.~~E##目を とじて ください。~~Tolong tutup mata.~~L
+耳|みみ@@耳が いたいです。~~Telinga saya sakit.~~E##ねこの 耳は ちいさいです。~~Telinga kucing itu kecil.~~E
+口|くち@@口を あけて ください。~~Tolong buka mulut.~~L##口が おおきいですね。~~Mulutnya besar, ya.~~E
+入口|いりぐち@@入口は どこですか。~~Pintu masuknya di mana?~~K##入口で まって います。~~Saya menunggu di pintu masuk.~~R
+出口|でぐち@@出口は あちらです。~~Pintu keluar ada di sana.~~A##出口で あいます。~~Kita bertemu di pintu keluar.~~F
+人口|じんこう@@日本の 人口は おおいです。~~Penduduk Jepang banyak.~~E##この まちの 人口は すくないです。~~Penduduk kota ini sedikit.~~E
+銀|ぎん@@銀の とけいを かいました。~~Saya membeli jam perak.~~O##これは 銀です。~~Ini perak.~~A
+銀行|ぎんこう@@銀行で おかねを おろします。~~Saya menarik uang di bank.~~F##銀行は えきの となりです。~~Bank ada di sebelah stasiun.~~A
+行きます|いきます@@がっこうへ 行きます。~~Saya pergi ke sekolah.~~H##あした 東京へ 行きます。~~Besok saya pergi ke Tokyo.~~H
+東京|とうきょう@@東京へ 行きます。~~Saya pergi ke Tokyo.~~H##東京は にぎやかです。~~Tokyo ramai.~~E
+東|ひがし@@えきの 東に こうえんが あります。~~Di sebelah timur stasiun ada taman.~~D##東へ いきます。~~Pergi ke timur.~~H
+西|にし@@西に まがります。~~Belok ke arah barat.~~B##えきの 西に スーパーが あります。~~Di sebelah barat stasiun ada supermarket.~~D
+南|みなみ@@南へ いきます。~~Pergi ke selatan.~~H##南は あたたかいです。~~Selatan hangat.~~E
+北|きた@@北は さむいです。~~Utara dingin.~~E##北へ いきます。~~Pergi ke utara.~~H
+新しい|あたらしい@@新しい くつを かいました。~~Saya membeli sepatu baru.~~O##この 本は 新しいです。~~Buku ini baru.~~E
+新聞|しんぶん@@毎朝 新聞を よみます。~~Setiap pagi saya membaca koran.~~Q##新聞は つくえの 上に あります。~~Koran ada di atas meja.~~D
+聞きます|ききます@@おんがくを 聞きます。~~Saya mendengarkan musik.~~C##先生に 聞きます。~~Saya bertanya kepada guru.~~B
+聞こえます|きこえます@@おとが 聞こえます。~~Terdengar suara.~~G##よく 聞こえません。~~Tidak terdengar jelas.~~G
+古い|ふるい@@古い いえに すんで います。~~Saya tinggal di rumah tua.~~R##この くるまは 古いです。~~Mobil ini tua.~~E
+何|なに@@これは 何ですか。~~Ini apa?~~K##何を たべますか。~~Mau makan apa?~~K
+何人|なんにん@@かぞくは 何人ですか。~~Keluargamu berapa orang?~~K##クラスに 何人 いますか。~~Di kelas ada berapa orang?~~K
+何人|なにじん@@あなたは 何人ですか。~~Anda orang mana (kebangsaan)?~~K##あの かたは 何人ですか。~~Beliau berkebangsaan apa?~~K
+何語|なにご@@これは 何語ですか。~~Ini bahasa apa?~~K##あなたの 国では 何語を はなしますか。~~Bahasa apa yang dipakai di negaramu?~~K
+何時|なんじ@@いま 何時ですか。~~Sekarang jam berapa?~~K##何時に おきますか。~~Jam berapa bangun?~~K
+インドネシア語|インドネシアご@@インドネシア語で 話します。~~Saya berbicara dalam bahasa Indonesia.~~F##わたしは インドネシア語が わかります。~~Saya mengerti bahasa Indonesia.~~E
+日本語|にほんご@@日本語を べんきょうします。~~Saya belajar bahasa Jepang.~~C##日本語は おもしろいです。~~Bahasa Jepang menarik.~~E
+外国語|がいこくご@@外国語を はなします。~~Saya berbicara bahasa asing.~~C##外国語の 本を よみます。~~Saya membaca buku bahasa asing.~~I
+高い|たかい@@この 山は 高いです。~~Gunung ini tinggi.~~E##この かばんは 高いです。~~Tas ini mahal.~~E
+安い|やすい@@この 店は 安いです。~~Toko ini murah.~~E##安い パンを かいます。~~Saya membeli roti murah.~~C
+安全|あんぜん@@ここは 安全です。~~Di sini aman.~~E##安全な みちを あるきます。~~Saya berjalan di jalan yang aman.~~E
+長い|ながい@@長い かわですね。~~Sungai yang panjang, ya.~~E##マリアさんは かみが 長いです。~~Rambut Maria panjang.~~P
+はん長|はんちょう@@はん長は たなかさんです。~~Kepala regu adalah Pak Tanaka.~~A##はん長に 聞きます。~~Saya bertanya kepada kepala regu.~~B
+短い|みじかい@@この えんぴつは 短いです。~~Pensil ini pendek.~~E##短い はなしです。~~Ceritanya pendek.~~E
+遠い|とおい@@えきは 遠いです。~~Stasiun jauh.~~E##がっこうは うちから 遠いです。~~Sekolah jauh dari rumah.~~M
+近い|ちかい@@えきは 近いです。~~Stasiun dekat.~~E##会社は うちから 近いです。~~Kantor dekat dari rumah.~~M
+多い|おおい@@この まちは 人が 多いです。~~Kota ini banyak orangnya.~~P##しゅくだいが 多いです。~~PR-nya banyak.~~E
+少ない|すくない@@この クラスは 学生が 少ないです。~~Kelas ini siswanya sedikit.~~P##おかねが 少ないです。~~Uangnya sedikit.~~E
+少し|すこし@@少し まって ください。~~Tolong tunggu sebentar.~~L##日本語が 少し わかります。~~Saya sedikit mengerti bahasa Jepang.~~E
+明るい|あかるい@@この へやは 明るいです。~~Ruangan ini terang.~~E##明るい いろが すきです。~~Saya suka warna cerah.~~E
+暗い|くらい@@夜は 暗いです。~~Malam hari gelap.~~E##へやが 暗いですね。~~Ruangannya gelap, ya.~~E
+名前|なまえ@@お名前は なんですか。~~Siapa nama Anda?~~K##ここに 名前を かいて ください。~~Tolong tulis nama di sini.~~L
+有名|ゆうめい@@富士山は 有名です。~~Gunung Fuji terkenal.~~E##この みせは 有名な レストランです。~~Toko ini restoran terkenal.~~E
+有ります|あります@@つくえの 上に 本が 有ります。~~Di atas meja ada buku.~~D##ここに みせが 有ります。~~Di sini ada toko.~~D
+白|しろ@@この かばんは 白です。~~Tas ini putih.~~A##白の シャツを きます。~~Saya memakai kemeja putih.~~C
+黒|くろ@@黒の ペンを ください。~~Tolong berikan pena hitam.~~C##ねこは 黒です。~~Kucingnya hitam.~~A
+赤|あか@@赤の くるまです。~~Mobilnya merah.~~A##赤の ペンを かいます。~~Saya membeli pena merah.~~C
+青|あお@@空は 青です。~~Langit biru.~~A##青の ノートを ください。~~Tolong berikan buku catatan biru.~~C
+見ます|みます@@テレビを 見ます。~~Saya menonton TV.~~C##えいがを 見ました。~~Saya menonton film.~~O
+見えます|みえます@@ここから 山が 見えます。~~Dari sini terlihat gunung.~~G##よく 見えません。~~Tidak terlihat jelas.~~G
+見せます|みせます@@パスポートを 見せます。~~Saya menunjukkan paspor.~~C##友だちに しゃしんを 見せます。~~Saya menunjukkan foto kepada teman.~~B
+食べます|たべます@@ごはんを 食べます。~~Saya makan nasi.~~C##毎朝 パンを 食べます。~~Setiap pagi saya makan roti.~~Q
+食べもの|たべもの@@すきな 食べものは なんですか。~~Makanan kesukaanmu apa?~~K##日本の 食べものは おいしいです。~~Makanan Jepang enak.~~E
+食どう|しょくどう@@食どうで ひるごはんを たべます。~~Saya makan siang di kantin.~~F##食どうは 一かいに あります。~~Kantin ada di lantai satu.~~D
+飲みます|のみます@@みずを 飲みます。~~Saya minum air.~~C##おちゃを 飲みます。~~Saya minum teh.~~C
+飲みもの|のみもの@@飲みものは なにが いいですか。~~Minuman apa yang kamu mau?~~K##つめたい 飲みものを ください。~~Tolong berikan minuman dingin.~~C
+買います|かいます@@パンを 買います。~~Saya membeli roti.~~C##スーパーで やさいを 買います。~~Saya membeli sayuran di supermarket.~~F
+買いもの|かいもの@@日曜日に 買いものを します。~~Hari Minggu saya berbelanja.~~B##買いものは たのしいです。~~Berbelanja menyenangkan.~~E
+入れます|いれます@@コーヒーに さとうを 入れます。~~Saya memasukkan gula ke dalam kopi.~~B##かばんに ほんを 入れます。~~Saya memasukkan buku ke dalam tas.~~B
+入ります|はいります@@へやに 入ります。~~Saya masuk ke dalam ruangan.~~B##おふろに 入ります。~~Saya mandi berendam.~~B
+出します|だします@@手紙を 出します。~~Saya mengirim surat.~~C##しゅくだいを 出します。~~Saya mengumpulkan PR.~~C
+出ます|でます@@うちを 出ます。~~Saya keluar dari rumah.~~C##電車が 出ます。~~Kereta berangkat.~~G
+出かけます|でかけます@@日曜日に 出かけます。~~Hari Minggu saya pergi keluar.~~B##友だちと 出かけます。~~Saya pergi keluar dengan teman.~~N
+書きます|かきます@@手紙を 書きます。~~Saya menulis surat.~~C##ここに 名前を 書いて ください。~~Tolong tulis nama di sini.~~L
+読みます|よみます@@新聞を 読みます。~~Saya membaca koran.~~C##毎晩 本を 読みます。~~Setiap malam saya membaca buku.~~Q
+読書|どくしょ@@読書が すきです。~~Saya suka membaca buku.~~E##日曜日は 読書を します。~~Hari Minggu saya membaca buku.~~C
+じ書|じしょ@@じ書を ひきます。~~Saya membuka kamus.~~C##じ書で ことばを しらべます。~~Saya mencari kata dengan kamus.~~F
+研修生|けんしゅうせい@@わたしは 研修生です。~~Saya peserta magang.~~A##研修生は 三人 います。~~Ada tiga peserta magang.~~D
+実習生|じっしゅうせい@@実習生は 日本で はたらきます。~~Peserta praktik bekerja di Jepang.~~F##あの ひとは 実習生です。~~Orang itu peserta praktik.~~A
+鳥|とり@@あそこに 鳥が います。~~Di sana ada burung (unggas).~~D##この 鳥は ちいさいです。~~Burung (unggas) ini kecil.~~E
+鶏肉|とりにく@@鶏肉を 食べます。~~Saya makan daging ayam.~~C##鶏肉は やすいです。~~Daging ayam murah.~~E
+牛|うし@@牛が います。~~Ada sapi.~~D##牛は 大きいです。~~Sapi itu besar.~~E
+牛肉|ぎゅうにく@@牛肉を 買います。~~Saya membeli daging sapi.~~C##牛肉は たかいです。~~Daging sapi mahal.~~E
+豚|ぶた@@豚が います。~~Ada babi.~~D##豚は 大きいです。~~Babi itu besar.~~E
+豚肉|ぶたにく@@豚肉を 買いました。~~Saya membeli daging babi.~~O##豚肉は たべません。~~Saya tidak makan daging babi.~~G
+生年月日|せいねんがっぴ@@生年月日を かいて ください。~~Tolong tulis tanggal lahir.~~L##生年月日は 二千年 三月 五日です。~~Tanggal lahir saya 5 Maret 2000.~~A
+酒|さけ@@酒を 飲みます。~~Saya minum sake.~~C##わたしは 酒を 飲みません。~~Saya tidak minum sake.~~G
+氏名|しめい@@ここに 氏名を かいて ください。~~Tolong tulis nama lengkap di sini.~~L##氏名と 住所を かきます。~~Saya menulis nama lengkap dan alamat.~~N
+年齢|ねんれい@@年齢を おしえて ください。~~Tolong beritahu usia Anda.~~L##年齢は 二十五さいです。~~Usia saya 25 tahun.~~A
+番号|ばんごう@@電話の 番号は なんばんですか。~~Berapa nomor telepon Anda?~~K##番号を かいて ください。~~Tolong tulis nomornya.~~L
+英語|えいご@@英語が わかります。~~Saya mengerti bahasa Inggris.~~E##英語で 話します。~~Saya berbicara dalam bahasa Inggris.~~F
+給料|きゅうりょう@@給料は 月に 一回です。~~Gaji sekali sebulan.~~A##今月の 給料を もらいました。~~Saya menerima gaji bulan ini.~~O
+会計|かいけい@@会計は あちらです。~~Kasir ada di sana.~~A##会計を おねがいします。~~Tolong hitungkan (saya mau bayar).~~C
+交番|こうばん@@交番は えきの まえに あります。~~Pos polisi ada di depan stasiun.~~D##交番で みちを 聞きます。~~Saya bertanya jalan di pos polisi.~~F
+性別|せいべつ@@性別は 男です。~~Jenis kelamin laki-laki.~~A##ここに 性別を かいて ください。~~Tolong tulis jenis kelamin di sini.~~L
+国籍|こくせき@@国籍は インドネシアです。~~Kewarganegaraan saya Indonesia.~~A##国籍を おしえて ください。~~Tolong beritahu kewarganegaraan Anda.~~L
+登録証|とうろくしょう@@登録証を 見せます。~~Saya menunjukkan kartu pendaftaran.~~C##登録証を なくしました。~~Saya kehilangan kartu pendaftaran.~~O
+非常口|ひじょうぐち@@非常口は どこですか。~~Pintu darurat di mana?~~K##非常口の まえに ものを おきません。~~Barang tidak ditaruh di depan pintu darurat.~~G
+残業|ざんぎょう@@今日は 残業です。~~Hari ini lembur.~~A##毎日 残業は しません。~~Saya tidak lembur setiap hari.~~G
+切符|きっぷ@@切符を 買います。~~Saya membeli tiket.~~C##切符は いくらですか。~~Berapa harga tiketnya?~~K
+住所|じゅうしょ@@住所を かいて ください。~~Tolong tulis alamat.~~L##あなたの 住所は どこですか。~~Di mana alamatmu?~~K
+署名|しょめい@@ここに 署名を おねがいします。~~Tolong tanda tangan di sini.~~C##署名は ボールペンで かきます。~~Tanda tangan ditulis dengan bolpoin.~~F
+給与|きゅうよ@@給与は 月末に もらいます。~~Gaji diterima akhir bulan.~~B##給与は ぎんこうに 入ります。~~Gaji masuk ke bank.~~B
+売り場|うりば@@くつの 売り場は 二かいです。~~Bagian sepatu ada di lantai dua.~~A##売り場は どこですか。~~Bagian penjualannya di mana?~~K
+日本人|にほんじん@@わたしは 日本人では ありません。~~Saya bukan orang Jepang.~~A##あの かたは 日本人です。~~Beliau orang Jepang.~~A
+日|ひ@@日が のぼります。~~Matahari terbit.~~G##休みの 日は うちに います。~~Pada hari libur saya di rumah.~~I
+日曜日|にちようび@@日曜日は 休みです。~~Hari Minggu libur.~~A##日曜日に 友だちに 会います。~~Hari Minggu saya bertemu teman.~~B
+月|つき@@月が きれいですね。~~Bulannya indah, ya.~~E##今日は 月が 見えます。~~Hari ini bulan terlihat.~~G
+月曜日|げつようび@@月曜日から しごとです。~~Dari hari Senin kerja.~~M##月曜日に テストが あります。~~Hari Senin ada ujian.~~D
+火|ひ@@火が あぶないです。~~Apinya berbahaya.~~E##火を けして ください。~~Tolong padamkan api.~~L
+火曜日|かようび@@火曜日は がっこうが あります。~~Hari Selasa ada sekolah.~~D##火曜日に かいものを します。~~Hari Selasa saya berbelanja.~~B
+水|みず@@水を ください。~~Tolong berikan air.~~C##水が つめたいです。~~Airnya dingin.~~E
+水曜日|すいようび@@水曜日は いそがしいです。~~Hari Rabu sibuk.~~E##水曜日に 日本語の クラスが あります。~~Hari Rabu ada kelas bahasa Jepang.~~D
+こう水|こうずい@@あめで こう水が ありました。~~Akibat hujan terjadi banjir.~~O##こう水で がっこうを 休みました。~~Karena banjir saya tidak masuk sekolah.~~O
+木|き@@木の 下に ねこが います。~~Di bawah pohon ada kucing.~~D##あの 木は 高いです。~~Pohon itu tinggi.~~E
+木曜日|もくようび@@木曜日に テストが あります。~~Hari Kamis ada ujian.~~D##木曜日は 休みです。~~Hari Kamis libur.~~A
+金|きん@@これは 金です。~~Ini emas.~~A##金の ゆびわを 見ます。~~Saya melihat cincin emas.~~C
+金曜日|きんようび@@金曜日の 夜に 友だちと あそびます。~~Jumat malam saya bermain dengan teman.~~I##金曜日は 六時に おわります。~~Hari Jumat selesai pukul enam.~~B
+お金|おかね@@お金が ありません。~~Saya tidak punya uang.~~D##お金を ぎんこうに 入れます。~~Saya memasukkan uang ke bank.~~B
+土|つち@@土の 上を あるきます。~~Saya berjalan di atas tanah.~~C##花は 土の 中に あります。~~Bunga ada di dalam tanah.~~D
+土曜日|どようび@@土曜日は 休みです。~~Hari Sabtu libur.~~A##土曜日に かいものを します。~~Hari Sabtu saya berbelanja.~~B
+本|ほん@@本を 読みます。~~Saya membaca buku.~~C##つくえの 上に 本が あります。~~Di atas meja ada buku.~~D
+日本|にほん@@日本へ いきたいです。~~Saya ingin pergi ke Jepang.~~H##日本の 食べものは おいしいです。~~Makanan Jepang enak.~~E
+人|ひと@@あの 人は だれですか。~~Siapa orang itu?~~K##やさしい 人ですね。~~Orangnya baik, ya.~~E
+一人|ひとり@@教室に 一人 います。~~Ada satu orang di kelas.~~D##一人で ごはんを 食べます。~~Saya makan sendirian.~~F
+今|いま@@今 何時ですか。~~Sekarang jam berapa?~~K##今 うちに います。~~Sekarang saya di rumah.~~D
+今日|きょう@@今日は 日曜日です。~~Hari ini hari Minggu.~~A##今日は あめです。~~Hari ini hujan.~~A
+今週|こんしゅう@@今週は いそがしいです。~~Minggu ini sibuk.~~E##今週の 土曜日に 会います。~~Sabtu minggu ini kita bertemu.~~B
+今月|こんげつ@@今月は 十月です。~~Bulan ini Oktober.~~A##今月 日本へ いきます。~~Bulan ini saya pergi ke Jepang.~~H
+今年|ことし@@今年 日本へ いきます。~~Tahun ini saya pergi ke Jepang.~~H##今年は あつかったです。~~Tahun ini panas.~~O
+毎日|まいにち@@毎日 日本語を べんきょうします。~~Setiap hari saya belajar bahasa Jepang.~~Q##毎日 六時に おきます。~~Setiap hari saya bangun pukul enam.~~Q
+毎週|まいしゅう@@毎週 日曜日に かいものを します。~~Setiap minggu pada hari Minggu saya berbelanja.~~Q##毎週 友だちに 会います。~~Setiap minggu saya bertemu teman.~~Q
+毎月|まいつき@@毎月 給料を もらいます。~~Setiap bulan saya menerima gaji.~~Q##毎月 二かい 東京へ 行きます。~~Setiap bulan saya pergi ke Tokyo dua kali.~~Q
+毎年|まいとし@@毎年 国へ かえります。~~Setiap tahun saya pulang ke negara asal.~~Q##毎年 山に のぼります。~~Setiap tahun saya mendaki gunung.~~Q
+昨日|きのう@@昨日は あめでした。~~Kemarin hujan.~~O##昨日 友だちに 会いました。~~Kemarin saya bertemu teman.~~O
+先週|せんしゅう@@先週 日本へ きました。~~Minggu lalu saya datang ke Jepang.~~O##先週は いそがしかったです。~~Minggu lalu sibuk.~~O
+先月|せんげつ@@先月 たんじょうびでした。~~Bulan lalu saya ulang tahun.~~O##先月 この 本を 買いました。~~Bulan lalu saya membeli buku ini.~~O
+去年|きょねん@@去年 日本へ きました。~~Tahun lalu saya datang ke Jepang.~~O##去年は さむかったです。~~Tahun lalu dingin.~~O
+明日|あした・あす@@明日は 休みです。~~Besok libur.~~A##明日 会社へ 行きます。~~Besok saya pergi ke kantor.~~H
+来週|らいしゅう@@来週 テストが あります。~~Minggu depan ada ujian.~~D##来週の 金曜日に 会います。~~Jumat minggu depan kita bertemu.~~B
+来月|らいげつ@@来月 国へ かえります。~~Bulan depan saya pulang ke negara asal.~~H##来月は 十二月です。~~Bulan depan Desember.~~A
+来年|らいねん@@来年 日本へ いきます。~~Tahun depan saya pergi ke Jepang.~~H##来年も 日本語を べんきょうします。~~Tahun depan juga saya belajar bahasa Jepang.~~N
+一週間|いっしゅうかん@@一週間に 三かい べんきょうします。~~Seminggu saya belajar tiga kali.~~B##一週間 休みます。~~Saya libur seminggu.~~G
+八週間|はっしゅうかん@@八週間 かかります。~~Butuh delapan minggu.~~G##八週間 日本語を べんきょうしました。~~Saya belajar bahasa Jepang selama delapan minggu.~~O
+十週間|じゅっしゅうかん@@十週間 かかります。~~Butuh sepuluh minggu.~~G##十週間 まって ください。~~Tolong tunggu sepuluh minggu.~~L
+2020年|にせんにじゅうねん@@2020年に 日本へ きました。~~Saya datang ke Jepang pada tahun 2020.~~O##2020年に うまれました。~~Saya lahir pada tahun 2020.~~O
+先生|せんせい@@先生は 日本人です。~~Guru saya orang Jepang.~~A##先生に 聞きます。~~Saya bertanya kepada guru.~~B
+生まれます|うまれます@@二千年に 生まれました。~~Saya lahir pada tahun 2000.~~O##ここで 生まれました。~~Saya lahir di sini.~~O
+誕生日|たんじょうび@@誕生日は 三月 五日です。~~Ulang tahun saya tanggal 5 Maret.~~A##誕生日に ケーキを 食べます。~~Saat ulang tahun saya makan kue.~~B
+来ます|きます@@友だちが 来ます。~~Teman akan datang.~~G##あした 先生が 来ます。~~Besok guru akan datang.~~G
+来る|くる@@あした 友だちが 来る。~~Besok teman datang (bentuk biasa).~~S##バスが 来る。~~Bus datang (bentuk biasa).~~S
+来ない|こない@@あした 友だちは 来ない。~~Besok teman tidak datang (bentuk biasa).~~S##バスが 来ない。~~Bus tidak datang (bentuk biasa).~~S
+時間|じかん@@時間が ありません。~~Saya tidak punya waktu.~~D##べんきょうの 時間は 一時間です。~~Waktu belajar satu jam.~~A
+時計|とけい@@時計を 見ます。~~Saya melihat jam.~~C##この 時計は 高いです。~~Jam ini mahal.~~E
+時|とき@@ひまな 時に 本を 読みます。~~Saat senggang saya membaca buku.~~B##おなかが すいた 時に たべます。~~Saat lapar saya makan.~~B
+間|あいだ@@えきと ぎんこうの 間に 店が あります。~~Di antara stasiun dan bank ada toko.~~D##わたしと 友だちの 間に ねこが います。~~Di antara saya dan teman ada kucing.~~D
+半分|はんぶん@@パンを 半分 食べます。~~Saya makan setengah roti.~~C##半分に きって ください。~~Tolong potong menjadi dua.~~L
+分かります|わかります@@日本語が 分かります。~~Saya mengerti bahasa Jepang.~~E##道が 分かりません。~~Saya tidak tahu jalannya.~~G
+万|まん@@一万円で 本を 買います。~~Saya membeli buku dengan 10.000 yen.~~F##万は 千の 十ばいです。~~Man (万) adalah sepuluh kali sen (千).~~A
+円い|まるい@@円い テーブルです。~~Mejanya bulat.~~E##月は 円いです。~~Bulan itu bulat.~~E
+万年ひつ|まんねんひつ@@万年ひつで 手紙を 書きます。~~Saya menulis surat dengan pena tinta.~~F##この 万年ひつは 高いです。~~Pena tinta ini mahal.~~E
+百万円|ひゃくまんえん@@この くるまは 百万円です。~~Mobil ini 1.000.000 yen.~~A##百万円 あります。~~Saya punya 1.000.000 yen.~~D
+一人|ひとり@@教室に 一人 います。~~Ada satu orang di kelas.~~D##一人で ごはんを 食べます。~~Saya makan sendirian.~~F
+  `;
+
+  /* ================= UTIL ================= */
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const save = () => { try { saveState(); } catch (e) {} };
+  const R = () => (state.rem = state.rem || {});
+  const tc = s => { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); };
+  const toHira = s => String(s || '').replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
+  /* ================= CONTOH KALIMAT ================= */
+  const EX = {};
+  EX_DATA.split('\n').forEach(l => {
+    l = l.trim(); if (!l) return;
+    const p = l.split('@@'); if (p.length < 2) return;
+    EX[p[0].trim()] = p[1].split('##').map(x => { const f = x.split('~~'); return [f[0].trim(), (f[1] || '').trim(), (f[2] || '').trim()]; });
+  });
+
+  /* contoh berpola untuk angka, bulan, tanggal, jam, menit, dan penghitung */
+  function frames(it) {
+    const K = it.kanji, a = String(it.arti || '').toUpperCase(), g = it.group; let m;
+    if (g === 'Angka Dasar') {
+      const nums = ['SATU', 'DUA', 'TIGA', 'EMPAT', 'LIMA', 'ENAM', 'TUJUH', 'DELAPAN', 'SEMBILAN', 'SEPULUH'], i = nums.indexOf(a);
+      if (i >= 0) {
+        const nx = i < 9 ? ['二', '三', '四', '五', '六', '七', '八', '九', '十'][i] : '十一', nxa = i < 9 ? tc(nums[i + 1]) : 'Sebelas';
+        return [[K + 'の つぎは ' + nx + 'です。', 'Setelah ' + tc(a) + ' adalah ' + nxa + '.', 'A'], [K + '時に おきます。', 'Saya bangun pukul ' + (i + 1) + '.', 'B']];
+      }
+      if ((m = a.match(/^(\d+) BUAH$/))) return [['みかんを ' + K + ' ください。', 'Tolong ' + m[1] + ' jeruk.', 'L'], ['りんごが ' + K + ' あります。', 'Ada ' + m[1] + ' apel.', 'D']];
+    }
+    if (/^[一二三四五六七八九十]+月$/.test(K) && g === 'Bulan & Tanggal')
+      return [[K + 'に 日本へ いきます。', 'Saya pergi ke Jepang pada bulan ' + tc(a) + '.', 'B'], ['たんじょうびは ' + K + 'です。', 'Ulang tahun saya di bulan ' + tc(a) + '.', 'A']];
+    if ((m = a.match(/^TANGGAL (\d+)$/))) return [[K + 'に テストが あります。', 'Pada tanggal ' + m[1] + ' ada ujian.', 'D'], ['あしたは ' + K + 'です。', 'Besok tanggal ' + m[1] + '.', 'A']];
+    if ((m = a.match(/^(\d+) HARI$/))) return [[K + ' かかります。', 'Butuh ' + m[1] + ' hari.', 'G'], [K + ' 休みます。', 'Saya libur ' + m[1] + ' hari.', 'G']];
+    if ((m = a.match(/^(\d+) BULAN$/))) return [[K + ' かかります。', 'Butuh ' + m[1] + ' bulan.', 'G'], [K + ' べんきょうしました。', 'Saya belajar selama ' + m[1] + ' bulan.', 'O']];
+    if ((m = a.match(/^(\d+) BATANG$/))) return [['えんぴつを ' + K + ' ください。', 'Tolong ' + m[1] + ' pensil.', 'J'], ['ペンが ' + K + ' あります。', 'Ada ' + m[1] + ' pena.', 'D']];
+    if ((m = a.match(/^(\d+) ORANG$/))) {
+      const w = { 1: 'sendirian', 2: 'berdua', 3: 'bertiga', 4: 'berempat' }[m[1]] || '';
+      return [['ここに ' + K + ' います。', 'Di sini ada ' + m[1] + ' orang.', 'D'], [K + 'で ごはんを 食べます。', 'Kami makan ' + w + '.', 'F']];
+    }
+    if ((m = a.match(/^(\d+) MINGGU$/))) return [[K + ' かかります。', 'Butuh ' + m[1] + ' minggu.', 'G'], [K + ' べんきょうしました。', 'Saya belajar selama ' + m[1] + ' minggu.', 'O']];
+    if ((m = a.match(/^JAM (\d+)$/)) && /時$/.test(K)) return [['いま ' + K + 'です。', 'Sekarang pukul ' + m[1] + '.', 'A'], [K + 'に おきます。', 'Saya bangun pukul ' + m[1] + '.', 'B']];
+    if ((m = a.match(/^(\d+) JAM SETENGAH$/))) return [[K + ' かかります。', 'Butuh ' + m[1] + ',5 jam.', 'G'], [K + ' はたらきました。', 'Saya bekerja ' + m[1] + ',5 jam.', 'O']];
+    if ((m = a.match(/^(\d+) JAM$/))) return [['毎日 ' + K + ' べんきょうします。', 'Setiap hari saya belajar ' + m[1] + ' jam.', 'Q'], [K + ' ねました。', 'Saya tidur ' + m[1] + ' jam.', 'O']];
+    if ((m = a.match(/^(\d+) MENIT$/))) return [[K + ' まって ください。', 'Tolong tunggu ' + m[1] + ' menit.', 'L'], ['えきまで ' + K + ' かかります。', 'Ke stasiun butuh ' + m[1] + ' menit.', 'M']];
+    if ((m = a.match(/^(\d+):(\d+)$/))) { const t = (+m[1]) + ':' + m[2]; return [['いま ' + K + 'です。', 'Sekarang pukul ' + t + '.', 'A'], [K + 'に ねます。', 'Saya tidur pukul ' + t + '.', 'B']]; }
+    if (/^[\d.]+$/.test(a)) return [['この ペンは ' + K + '円です。', 'Pena ini ' + a + ' yen.', 'A'], [K + '円 あります。', 'Saya punya ' + a + ' yen.', 'D']];
+    return null;
+  }
+
+  /* contoh asli dari materi Bunpou di aplikasi ini */
+  let BI = null;
+  function bunpouIndex() {
+    if (BI) return BI; BI = [];
+    try {
+      const titles = {};
+      Object.values(BUNPOU_DB).forEach(arr => arr.forEach(b => {
+        titles[b.id] = b.title;
+        (b.examples || []).forEach(e => { if (e.j && e.i) BI.push({ j: e.j, i: e.i, t: b.title }); });
+      }));
+      if (typeof BUNPOU_GUIDE_16_20 !== 'undefined') Object.keys(BUNPOU_GUIDE_16_20).forEach(id => {
+        const a = BUNPOU_GUIDE_16_20[id], t = titles[id] || 'Bunpou';
+        if (a[1] && a[2]) BI.push({ j: a[1], i: a[2], t }); if (a[4] && a[3]) BI.push({ j: a[4], i: a[3], t });
+      });
+      if (typeof BUNPOU_EXTRA_16_20 !== 'undefined') Object.keys(BUNPOU_EXTRA_16_20).forEach(id => {
+        const a = BUNPOU_EXTRA_16_20[id], t = titles[id] || 'Bunpou';
+        if (a[0] && a[1]) BI.push({ j: a[0], i: a[1], t }); if (a[3] && a[2]) BI.push({ j: a[3], i: a[2], t });
+      });
+    } catch (e) {}
+    return BI;
+  }
+  const PART = /^(は|が|を|に|へ|で|と|も|の|や|から|まで|より|です|でした|ですか|ですね|ね|よ|か|ました|ます)$/;
+  function bunpouExamples(kana, max) {
+    const out = [];
+    const alts = String(kana || '').split(/[・/／]/).map(s => s.replace(/[～~\s]/g, '').trim()).filter(s => s.length >= 2);
+    if (!alts.length || max <= 0) return out;
+    for (const e of bunpouIndex()) {
+      const toks = e.j.replace(/[、。,.!?？！]/g, ' ').split(/\s+/);
+      if (alts.some(a => toks.some(t => t === a || (t.startsWith(a) && PART.test(t.slice(a.length)))))) {
+        out.push({ jp: e.j, id: e.i, tag: e.t === 'Bunpou' ? 'Bunpou' : 'Bunpou: ' + e.t }); if (out.length >= max) break;
+      }
+    }
+    return out;
+  }
+  /* it: { kanji, kana, arti, group? } -> maksimal 3 contoh */
+  function examplesFor(it) {
+    const key = (it.kanji || '') + '|' + (it.kana || '');
+    const base = (EX[key] || (it.group ? frames(it) : null) || []).slice(0, 2).map(x => ({ jp: x[0], id: x[1], tag: CODES[x[2]] || '' }));
+    const have = new Set(base.map(x => x.jp.replace(/\s+/g, '')));
+    const extra = bunpouExamples(it.kana, 3 - base.length).filter(x => !have.has(x.jp.replace(/\s+/g, '')));
+    return base.concat(extra).slice(0, 3);
+  }
+  const lab = t => '<p style="font-size:.6rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)">' + t + '</p>';
+  function infoHTML(it) {
+    const ex = examplesFor(it);
+    const exH = ex.length ? ex.map(e => '<div style="padding:.55rem .7rem;border-radius:1rem;background:rgba(128,128,128,.1)"><p style="font-weight:800;font-size:.9rem;line-height:1.5">' + esc(e.jp) + '</p><p style="font-size:.74rem;color:var(--text-muted);margin-top:.1rem">' + esc(e.id) + '</p>' + (e.tag ? '<span style="display:inline-block;margin-top:.3rem;font-size:.58rem;font-weight:800;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:.05rem .45rem">' + esc(e.tag) + '</span>' : '') + '</div>').join('')
+      : '<p style="font-size:.74rem;color:var(--text-muted)">Belum ada contoh kalimat untuk kata ini.</p>';
+    return '<div class="ios-glass" style="padding:1rem;border-radius:1.5rem;display:flex;flex-direction:column;gap:.65rem;text-align:left">' +
+      '<div style="display:flex;gap:1.4rem;flex-wrap:wrap"><div>' + lab('Arti') + '<p style="font-size:1.05rem;font-weight:900;margin-top:.1rem">' + esc(tc(it.arti)) + '</p></div>' +
+      '<div>' + lab('Cara baca (hiragana)') + '<p style="font-size:1.05rem;font-weight:900;margin-top:.1rem">' + esc(toHira(it.kana)) + '</p>' + (it.romaji ? '<p style="font-size:.7rem;color:var(--text-muted)">' + esc(it.romaji) + '</p>' : '') + '</div></div>' +
+      lab('Contoh penggunaan dalam bunpou') + exH + '</div>';
+  }
+
+  /* ================= BUKU KESALAHAN ================= */
+  const B = () => (state.book = Array.isArray(state.book) ? state.book : []);
+  let filt = 'all', view = [], sess = [];
+
+  function entryFrom(item) {
+    if (typeof isKanjiQuizItem === 'function' && isKanjiQuizItem(item)) return { ty: 'kanji', sym: item.kanji, kana: item.kana, arti: item.arti, id: 'kanji|' + item.no };
+    if (item.arti && item.kana !== undefined) {
+      if (/[<>]/.test(item.kanji || '')) return null;
+      return { ty: 'kotoba', sym: (item.kanji && item.kanji !== item.kana) ? item.kanji : item.kana, kana: item.kana, arti: item.arti, r: item.romaji || '', id: 'kotoba|' + item.kana + '|' + item.arti };
+    }
+    if (item.j) return { ty: 'kana', sym: item.j, kana: item.j, arti: '', r: item.r || '', id: 'kana|' + item.j + '|' + (item.r || '') };
+    return null;
+  }
+  function recordWrong(chosen, correct) {
+    const q = state.quiz, item = q && q.questions && q.questions[q.currentQuestion]; if (!item) return;
+    const bad = chosen === null || normalizeQuizAnswer(chosen) !== normalizeQuizAnswer(correct);
+    if (!bad) return;
+    const e = entryFrom(item); if (!e) return;
+    const wrong = chosen === null ? '(waktu habis)' : String(chosen).slice(0, 80), right = String(correct == null ? '' : correct).slice(0, 80), now = Date.now();
+    const list = B(), old = list.find(x => x.id === e.id);
+    if (old) { old.n = (old.n || 1) + 1; old.wrong = wrong; old.right = right; old.t = now; }
+    else {
+      list.push(Object.assign(e, { wrong, right, n: 1, t: now }));
+      if (list.length > 400) { list.sort((a, b) => b.t - a.t); list.length = 400; }
+    }
+    if (!sess.includes(e.id)) sess.push(e.id);
+    save(); updLabel();
+  }
+  function itemOf(e) {
+    try {
+      if (e.ty === 'kanji') return KANJI_N5_DB.find(x => 'kanji|' + x.no === e.id);
+      if (e.ty === 'kotoba') return Object.values(KOTOBA_DB).flat().find(x => 'kotoba|' + x.kana + '|' + x.arti === e.id);
+      const all = [].concat(Object.values(HIRAGANA_DB), Object.values(KATAKANA_DB)).filter(Array.isArray).flat();
+      return all.find(x => x && x.j && 'kana|' + x.j + '|' + (x.r || '') === e.id);
+    } catch (err) { return null; }
+  }
+  const ago = t => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'baru saja' : m < 60 ? m + ' mnt lalu' : m < 1440 ? Math.floor(m / 60) + ' jam lalu' : Math.floor(m / 1440) + ' hari lalu'; };
+  function updLabel() { const el = $('book-label'); if (el) el.textContent = B().length ? B().length + ' catatan' : 'Kosong'; }
+
+  function open(f) {
+    if (f) filt = f;
+    const old = $('ng-book'); if (old) old.remove();
+    const m = document.createElement('div'); m.id = 'ng-book';
+    m.style.cssText = 'position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:.75rem';
+    m.innerHTML = '<div id="ng-book-box" class="bg-appbg" style="width:100%;max-width:28rem;max-height:90vh;overflow-y:auto;border-radius:2rem;padding:1.2rem;box-shadow:0 20px 60px rgba(0,0,0,.45)"></div>';
+    document.body.appendChild(m); draw();
+  }
+  function close() { const m = $('ng-book'); if (m) m.remove(); }
+  function draw() {
+    const box = $('ng-book-box'); if (!box) return;
+    const all = B(), cnt = t => all.filter(e => t === 'all' || e.ty === t).length;
+    view = all.filter(e => filt === 'all' || e.ty === filt).sort((a, b) => b.t - a.t);
+    const chip = (id, txt) => '<button onclick="NGBook.filter(\'' + id + '\')" class="' + (filt === id ? 'bg-accent text-white' : 'ios-glass') + '" style="padding:.4rem .8rem;border-radius:999px;font-size:.72rem;font-weight:800">' + txt + ' (' + cnt(id) + ')</button>';
+    const card = (e, i) => {
+      const big = Array.from(e.sym).length > 3 ? '1.05rem' : '1.7rem';
+      return '<div class="ios-glass" style="padding:.8rem;border-radius:1.3rem;margin-top:.55rem"><div style="display:flex;gap:.7rem;align-items:flex-start">' +
+        '<div style="font-size:' + big + ';font-weight:900;min-width:2.6rem;max-width:5.5rem;text-align:center;line-height:1.2;word-break:break-all">' + esc(e.sym) + '</div>' +
+        '<div style="flex:1;min-width:0"><p style="font-weight:800;font-size:.85rem">' + esc(e.kana) + (e.arti ? ' · ' + esc(tc(e.arti)) : '') + '</p>' +
+        '<p style="font-size:.74rem;margin-top:.15rem"><span style="color:#ef4444;font-weight:700">✗ ' + esc(e.wrong) + '</span> &nbsp;<span style="color:#10b981;font-weight:700">✓ ' + esc(e.right) + '</span></p>' +
+        '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.15rem">Salah ' + (e.n || 1) + '× · ' + ago(e.t) + '</p></div>' +
+        '<div style="display:flex;flex-direction:column;gap:.35rem">' +
+        (e.ty !== 'kana' ? '<button id="bk-a-' + i + '" onclick="NGBook.tog(' + i + ')" class="ios-glass" style="width:2rem;height:2rem;border-radius:.7rem;font-size:.8rem" aria-label="Penjelasan">▼</button>' : '') +
+        (e.ty === 'kanji' ? '<button onclick="NGBook.write(' + i + ')" class="ios-glass" style="width:2rem;height:2rem;border-radius:.7rem;font-size:.85rem" aria-label="Latihan tulis">✍️</button>' : '') +
+        '<button onclick="NGBook.del(' + i + ')" class="ios-glass" style="width:2rem;height:2rem;border-radius:.7rem;font-size:.85rem" aria-label="Hapus">🗑</button></div></div>' +
+        '<div id="bk-x-' + i + '" style="display:none;margin-top:.6rem"></div></div>';
+    };
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><div><h3 style="font-size:1.25rem;font-weight:900">📕 Buku Kesalahan</h3><p style="font-size:.7rem;color:var(--text-muted)">Setiap jawaban salah dicatat di sini. Hapus sendiri kalau sudah hafal.</p></div><button onclick="NGBook.close()" style="font-size:1.2rem;padding:.2rem .5rem">✕</button></div>' +
+      '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem">' + chip('all', 'Semua') + chip('kanji', 'Kanji') + chip('kotoba', 'Kotoba') + chip('kana', 'Kana') + '</div>' +
+      (view.length ? '<div style="display:flex;gap:.5rem;margin-top:.8rem"><button onclick="NGBook.practice()" class="bg-accent text-white" style="flex:1;padding:.7rem;border-radius:1rem;font-size:.8rem;font-weight:800">▶ Latihan Ulang (' + Math.min(view.length, 20) + ')</button><button onclick="NGBook.clear()" class="ios-glass" style="padding:.7rem 1rem;border-radius:1rem;font-size:.8rem;font-weight:800">Hapus semua</button></div>' : '') +
+      (view.length ? view.map(card).join('') : '<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;margin-top:.9rem;text-align:center;font-size:.8rem;color:var(--text-muted)">Belum ada kesalahan' + (filt === 'all' ? '' : ' di kategori ini') + '. Kerjakan latihan, dan jawaban yang salah akan muncul di sini.</div>');
+  }
+
+  /* ================= TULIS KANJI: GORESAN / MANUAL ================= */
+  const HW_URL = 'https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js';
+  const HW_DATA = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data-jp@0/';
+  let hwP = null, offline = false, token = 0, cur = null, fcOpen = false;
+  function loadHW() {
+    if (window.HanziWriter) return Promise.resolve();
+    if (hwP) return hwP;
+    hwP = new Promise((res, rej) => { const s = document.createElement('script'); s.src = HW_URL; s.onload = res; s.onerror = () => { hwP = null; rej(new Error('hw')); }; document.head.appendChild(s); });
+    return hwP;
+  }
+  const accent = () => { const c = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); return /^#[0-9a-f]{3,8}$/i.test(c) ? c : '#007AFF'; };
+  const isKanjiCh = c => /[\u4e00-\u9fff々]/.test(c);
+
+  function modeBar(goresan, note) {
+    const b = (id, on, txt) => '<button onclick="NGKaku.mode(\'' + id + '\')" class="' + (on ? 'bg-accent text-white' : 'ios-glass') + '" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.78rem;font-weight:800">' + txt + '</button>';
+    return '<div id="ngk-mode"><div style="display:flex;gap:.45rem">' + b('goresan', goresan, '✍️ Dengan Goresan') + b('manual', !goresan, '🖊️ Manual') + '</div>' +
+      (note ? '<p style="font-size:.68rem;color:#f59e0b;font-weight:700;margin-top:.4rem">' + esc(note) + '</p>' : '') + '</div>';
+  }
+  function enhanceWriting() {
+    if (typeof writingSession === 'undefined' || writingSession.type !== 'kanji') return;
+    const item = writingSession.items[writingSession.index]; if (!item) return;
+    const v = $('app-viewport'), canvas = $('writing-canvas'); if (!v || !canvas) return;
+    const card = canvas.closest('.ios-glass'), root = v.firstElementChild, grid = root && root.querySelector('.grid.grid-cols-2');
+    if (!card || !root) return;
+    const chars = Array.from(String(item.kanji || '')).filter(isKanjiCh);
+    const want = R().kakuMode !== 'manual';
+    let note = '';
+    if (want && offline) note = 'Data goresan tidak bisa dimuat (butuh internet). Memakai mode Manual.';
+    else if (want && !chars.length) note = 'Kata ini tidak punya huruf kanji untuk dipandu. Memakai mode Manual.';
+    const guided = want && !offline && chars.length > 0;
+    card.insertAdjacentHTML('beforebegin', modeBar(guided, note));
+    if (guided) startGuided(item, chars, card, grid);
+  }
+
+  function startGuided(item, chars, card, grid) {
+    const tok = ++token; let ci = 0, mist = 0, okAny = false, writer = null; const done = [];
+    cur = { tok, replay: () => load(ci), skip: () => finish(true) };
+    card.innerHTML = '<div id="ngk-chips" style="display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:.4rem"></div>' +
+      '<p id="ngk-status" style="text-align:center;font-size:.8rem;font-weight:800;color:var(--accent);margin-bottom:.5rem;min-height:1.2rem">Memuat data goresan…</p>' +
+      '<div id="ngk-stage" style="margin:0 auto;border:1px dashed var(--accent);border-radius:1rem;touch-action:none"></div>' +
+      '<div style="display:flex;gap:.5rem;margin-top:.7rem"><button onclick="NGKaku.replay()" class="ios-glass" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.75rem;font-weight:800">↺ Ulangi animasi</button><button onclick="NGKaku.skip()" class="ios-glass" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.75rem;font-weight:800">Lewati ›</button></div>' +
+      '<p style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:.5rem">Lihat animasi urutan goresan, lalu tulis sendiri di kotak. Goresan yang salah akan diberi petunjuk.</p>';
+    if (grid && grid.firstElementChild && grid.lastElementChild) { grid.firstElementChild.style.display = 'none'; grid.lastElementChild.style.gridColumn = 'span 2'; }
+    const alive = () => cur && cur.tok === tok && $('ngk-stage');
+    const status = t => { const e = $('ngk-status'); if (e) e.textContent = t; };
+    const chips = () => { const e = $('ngk-chips'); if (e) e.innerHTML = chars.map((c, i) => '<span style="min-width:2rem;text-align:center;padding:.25rem .55rem;border-radius:.7rem;font-weight:900;font-size:1rem;' + (done[i] ? 'background:rgba(16,185,129,.2);color:#10b981' : i === ci ? 'background:var(--accent);color:#fff' : 'background:rgba(128,128,128,.15)') + '">' + esc(c) + '</span>').join(''); };
+    function fail() { offline = true; renderWritingPractice(); }
+    function finish(skipped) {
+      if (!alive()) return; writingSession.hasInk = true;
+      status(skipped ? 'Dilewati' : (mist ? 'Selesai ✓ (' + mist + ' kesalahan goresan)' : 'Selesai ✓ Tanpa kesalahan!'));
+      setTimeout(() => { if (alive() && !writingSession._shown) completeWritingPractice(); }, skipped ? 100 : 1000);
+    }
+    function load(i) {
+      if (!alive()) return; ci = i; chips();
+      const stage = $('ngk-stage'); stage.innerHTML = '';
+      const size = Math.max(180, Math.min(300, Math.floor(card.clientWidth - 40) || 260)); stage.style.width = stage.style.height = size + 'px';
+      let loaded = false;
+      const err = () => { if (!alive() || loaded) return; if (!okAny && i === 0) return fail(); done[i] = true; if (i + 1 < chars.length) load(i + 1); else finish(); };
+      writer = window.HanziWriter.create(stage, chars[i], {
+        width: size, height: size, padding: 14, showOutline: true, showCharacter: false, strokeAnimationSpeed: 1, delayBetweenStrokes: 350,
+        strokeColor: accent(), outlineColor: '#9aa0a6', highlightColor: '#f59e0b', drawingColor: accent(),
+        charDataLoader: (c, ok, bad) => { fetch(HW_DATA + encodeURIComponent(c) + '.json').then(r => { if (!r.ok) throw new Error('404'); return r.json(); }).then(ok).catch(bad); },
+        onLoadCharDataSuccess: () => { loaded = true; okAny = true; },
+        onLoadCharDataError: err
+      });
+      status('Perhatikan urutan goresannya…');
+      writer.animateCharacter({ onComplete: () => { if (!alive()) return; status('Giliranmu: tulis mengikuti urutan'); setTimeout(() => quiz(i), 500); } });
+    }
+    function quiz(i) {
+      if (!alive() || ci !== i || !writer) return;
+      writer.quiz({
+        showHintAfterMisses: 2, highlightOnComplete: true,
+        onMistake: () => { mist++; },
+        onComplete: () => {
+          if (!alive()) return; done[i] = true; chips();
+          if (i + 1 < chars.length) { status('Bagus! Lanjut ke kanji berikutnya…'); setTimeout(() => load(i + 1), 900); } else finish(false);
+        }
+      });
+    }
+    loadHW().then(() => { if (alive()) load(0); }).catch(() => { if (cur && cur.tok === tok) fail(); });
+  }
+
+  function showResult() {
+    const v = $('app-viewport'), root = v && v.firstElementChild; if (!root) return;
+    const item = writingSession.items[writingSession.index]; if (!item) return;
+    const d = document.createElement('div'); d.id = 'ngk-info'; d.style.marginTop = '1rem';
+    d.innerHTML = '<p style="font-size:.8rem;font-weight:900;margin:0 .2rem .5rem">✅ Selesai! Ini penjelasannya:</p>' + infoHTML(item);
+    root.appendChild(d);
+    const btn = Array.from(root.querySelectorAll('button')).find(b => (b.getAttribute('onclick') || '').includes('completeWritingPractice'));
+    if (btn) btn.textContent = 'Lanjut →';
+    try { d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+  }
+
+  /* ================= FLASHCARD KANJI: PANAH PENJELASAN ================= */
+  function fcEnhance() {
+    const card = document.querySelector('.kanji-flashcard'); if (!card) return;
+    const w = document.createElement('div'); w.id = 'ngfc';
+    w.innerHTML = '<button onclick="NGKaku.fcToggle()" class="ios-glass" style="width:100%;padding:.7rem;border-radius:1.1rem;font-size:.78rem;font-weight:800;display:flex;justify-content:center;align-items:center;gap:.45rem"><span id="ngfc-a" style="display:inline-block;transition:transform .2s">▼</span> Penjelasan & contoh</button><div id="ngfc-x" style="display:none;margin-top:.6rem"></div>';
+    card.insertAdjacentElement('afterend', w);
+    if (fcOpen) fcToggle(true);
+  }
+  function fcToggle(force) {
+    const x = $('ngfc-x'), a = $('ngfc-a'); if (!x) return;
+    const open = force === true ? true : x.style.display === 'none'; fcOpen = open;
+    if (open) { const it = KANJI_N5_DB.filter(k => k.group === kanjiFlashcardGroup)[kanjiFlashcardIndex]; x.innerHTML = it ? infoHTML(it) : ''; }
+    x.style.display = open ? 'block' : 'none'; if (a) a.style.transform = open ? 'rotate(180deg)' : '';
+  }
+
+  /* ================= PASANG KE FUNGSI YANG ADA ================= */
+  const wrap = (name, fn) => { const o = window[name]; if (typeof o !== 'function') return; window[name] = function () { return fn(o, this, arguments); }; };
+
+  wrap('submitQuizAnswer', (o, t, a) => { try { recordWrong(a[0], a[1]); } catch (e) {} return o.apply(t, a); });
+  wrap('setupQuizFlow', (o, t, a) => { sess = []; return o.apply(t, a); });
+  wrap('renderQuizQuestion', (o, t, a) => { try { if (state.quiz && state.quiz.currentQuestion === 0) sess = []; } catch (e) {} return o.apply(t, a); });
+  wrap('renderQuizResults', (o, t, a) => {
+    const r = o.apply(t, a);
+    try {
+      const items = sess.map(id => B().find(x => x.id === id)).filter(Boolean), v = $('app-viewport'), root = v && v.firstElementChild;
+      if (items.length && root) {
+        const box = document.createElement('div'); box.className = 'ios-glass';
+        box.style.cssText = 'padding:1rem;border-radius:1.5rem;margin-top:.8rem;text-align:left';
+        box.innerHTML = '<p style="font-size:.72rem;font-weight:900;color:var(--accent);margin-bottom:.4rem">📕 Masuk Buku Kesalahan (' + items.length + ')</p>' +
+          items.slice(0, 8).map(e => '<div style="display:flex;gap:.6rem;align-items:baseline;padding:.3rem 0;border-top:1px solid rgba(128,128,128,.15)"><b style="font-size:1.05rem;min-width:2.2rem">' + esc(e.sym) + '</b><span style="font-size:.72rem;flex:1"><span style="color:#ef4444">✗ ' + esc(e.wrong) + '</span> <span style="color:#10b981">✓ ' + esc(e.right) + '</span></span></div>').join('') +
+          '<button onclick="NGBook.open()" class="bg-accent text-white" style="width:100%;margin-top:.7rem;padding:.7rem;border-radius:1rem;font-weight:800;font-size:.82rem">Buka Buku Kesalahan</button>';
+        root.appendChild(box);
+      }
+    } catch (e) {}
+    return r;
+  });
+  wrap('refreshSettingsSummary', (o, t, a) => { const r = o.apply(t, a); updLabel(); return r; });
+  wrap('renderWritingPractice', (o, t, a) => { if (typeof writingSession !== 'undefined') writingSession._shown = false; const r = o.apply(t, a); try { enhanceWriting(); } catch (e) {} return r; });
+  wrap('renderKanjiFlashcards', (o, t, a) => { const r = o.apply(t, a); try { fcEnhance(); } catch (e) {} return r; });
+  wrap('completeWritingPractice', (o, t, a) => {
+    if (typeof writingSession === 'undefined' || writingSession.type !== 'kanji') return o.apply(t, a);
+    if (writingSession._shown) { writingSession.index++; writingSession.hasInk = false; writingSession._shown = false; renderWritingPractice(); return; }
+    if (!writingSession.hasInk) { alert('Tulis kanjinya terlebih dahulu, lalu tekan tombol Sudah Menulis.'); return; }
+    state.coins += 10; state.stats.kanjiProgress = Math.min(100, (state.stats.kanjiProgress || 0) + 1); save();
+    try { updateCoinUI(); } catch (e) {}
+    writingSession._shown = true; showResult();
+  });
+
+  window.NGBook = {
+    open, close,
+    filter(f) { filt = f; draw(); },
+    tog(i) {
+      const e = view[i], x = $('bk-x-' + i), a = $('bk-a-' + i); if (!e || !x) return;
+      const open = x.style.display === 'none';
+      if (open) { const it = itemOf(e) || { kanji: e.sym, kana: e.kana, arti: e.arti, romaji: e.r }; x.innerHTML = infoHTML(it); }
+      x.style.display = open ? 'block' : 'none'; if (a) a.style.transform = open ? 'rotate(180deg)' : '';
+    },
+    del(i) { const e = view[i]; if (!e) return; state.book = B().filter(x => x.id !== e.id); save(); updLabel(); draw(); },
+    clear() {
+      const n = view.length; if (!n) return;
+      if (!confirm('Hapus ' + n + ' catatan' + (filt === 'all' ? '' : ' di kategori ini') + '?')) return;
+      const ids = new Set(view.map(e => e.id)); state.book = B().filter(x => !ids.has(x.id)); save(); updLabel(); draw();
+    },
+    practice() {
+      const items = view.slice(0, 20).map(itemOf).filter(Boolean);
+      if (!items.length) { alert('Tidak ada soal yang bisa dibuat dari catatan ini.'); return; }
+      close();
+      try { setupQuizFlow(items, 'Buku Kesalahan', false, 'choice'); } catch (e) { alert('Tidak bisa memulai latihan: ' + (e && e.message || e)); }
+    },
+    write(i) {
+      const e = view[i], it = e && itemOf(e); if (!it) return;
+      close();
+      writingSession = { type: 'kanji', label: 'Buku Kesalahan', items: [it], index: 0, hasInk: false, returnView: () => open() };
+      renderWritingPractice();
+    }
+  };
+  window.NGKaku = {
+    mode(m) { R().kakuMode = m; offline = false; save(); if (typeof writingSession !== 'undefined') writingSession.hasInk = false; renderWritingPractice(); },
+    replay() { if (cur && cur.replay) cur.replay(); },
+    skip() { if (cur && cur.skip) cur.skip(); },
+    fcToggle,
+    info: infoHTML, examples: examplesFor
+  };
+  updLabel();
+
 })();
 </script>
 </body>
