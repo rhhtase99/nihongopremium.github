@@ -702,6 +702,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="openMusicModal()" id="music-btn" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press transition-colors" style="color: var(--text-muted)" aria-label="Pengaturan musik"><i data-lucide="music-4" class="w-5 h-5"></i></button>
+                <button onclick="NGNotif.open()" id="notif-btn" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press transition-colors relative" style="color: var(--text-muted)" aria-label="Pemberitahuan"><i data-lucide="bell" class="w-5 h-5"></i><span id="notif-dot" style="display:none;position:absolute;top:.3rem;right:.35rem;width:.65rem;height:.65rem;border-radius:999px;background:#ef4444;box-shadow:0 0 0 2px rgba(255,255,255,.85),0 0 8px rgba(239,68,68,.8)"></span></button>
                 <button onclick="openShopModal()" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press text-yellow-500 hover:bg-yellow-500/10 transition-colors"><i data-lucide="shopping-bag" class="w-5 h-5"></i></button>
                 <button onclick="openThemeModal()" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center ios-btn-press" style="color: var(--text-muted)"><i data-lucide="settings" class="w-5 h-5"></i></button>
             </div>
@@ -7606,6 +7607,201 @@ const Social = (function () {
   };
   updLabel();
 
+})();
+</script>
+<script>
+/* ===== MENU PEMBERITAHUAN v2.1.1: pesan developer & riwayat update ===== */
+(function () {
+  'use strict';
+  const APP_VER = '2.1.1';
+  /* Opsional: alamat JSON pesan developer supaya bisa dikirim tanpa memperbarui file ini.
+     Contoh (Firebase): 'https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app/notices.json'
+     Format: { "pesan1": { "title": "Judul", "body": "Isi", "date": "20 Okt", "url": "https://...", "t": 1760000000 } }  */
+  const NOTICE_URL = '';
+
+  /* Pesan developer bawaan (terbaru di atas). Tambah objek baru di sini untuk memunculkan bundaran merah. */
+  const DEV_NOTES = [
+    { id: 'v211-menu', date: 'v2.1.1', title: 'Menu Pemberitahuan hadir 🔔',
+      body: 'Mulai versi 2.1.1, kabar dari developer muncul di sini. Kalau ada pesan baru, lonceng di pojok atas diberi bundaran merah.\nSemua riwayat pembaruan juga bisa dilihat di tab Riwayat Update. Ketuk satu versi untuk membuka pop up-nya.\n\n— RamaTeam' }
+  ];
+
+  /* Riwayat pembaruan (terbaru di atas) */
+  const HISTORY = [
+    { v: '2.1.1', ic: '🔔', t: 'Menu Pemberitahuan', d: ['Lonceng di header dengan bundaran merah saat ada pesan baru dari developer.', 'Riwayat semua pembaruan, lengkap dengan pop up tiap versi.'], ill: 'bell' },
+    { v: '2.1.0', ic: '✍️', t: 'Animasi Goresan Kanji & Buku Kesalahan', d: ['Latihan menulis kanji punya mode Dengan Goresan: lihat animasi urutan goresan, lalu tulis sendiri dan dapat petunjuk bila salah. Mode Manual tetap tersedia.', 'Buku Kesalahan: setiap jawaban yang salah dicatat otomatis, bisa dihapus sendiri, dan bisa dilatih ulang.', 'Ketuk ▼ untuk arti, cara baca hiragana, dan 2–3 contoh kalimat. Di flashcard kanji juga ada panah ▼ penjelasan.'], ill: 'v210' },
+    { v: '2.0.9', ic: '👥', t: 'Menu Teman dan AI Terpisah', d: ['Daftar teman dan asisten AI kini dipisah supaya tidak tercampur.'] },
+    { v: '2.0.8', ic: '🔥', t: 'Streak Login Harian', d: ['Login tiap hari untuk menjaga streak dan mendapat hadiah koin. Hari ke-7 hadiahnya paling besar.'] },
+    { v: '2.0.7', ic: '⏰', t: 'Pengingat & Alarm Bersuara', d: ['Pengingat belajar dan alarm kini punya lagunya sendiri.'] },
+    { v: '2.0.5', ic: '🎮', t: 'Game Baru: Sambung Kata & Listening Kalimat', d: ['Dua game baru di menu Games: Sambung Kata dan Listening Kalimat.'] },
+    { v: '2.0.4', ic: '🏅', t: 'Menu JLPT', d: ['Menu latihan JLPT hadir di aplikasi.'] },
+    { v: '2.0.3', ic: '💬', t: 'Animasi Chat & Teman Semua Pengguna', d: ['Animasi pop up saat mengirim dan mengetik pesan.', 'Kamu bisa melihat semua orang yang memakai aplikasi dan langsung menambahnya sebagai teman tanpa kode. Kode hanya dipakai untuk membedakan nama yang sama.'] },
+    { v: '2.0.0', ic: '🤖', t: 'AI Dioptimalkan & Teman Asli', d: ['AI bisa memakai kunci Gemini atau Grok.', 'Teman asli bisa ditemukan lewat kode acak.'] },
+    { v: '1.1.9', ic: '💬', t: 'Fitur AI Chat dan Teman', d: ['Ngobrol dengan asisten AI dan mulai menambahkan teman.'] },
+    { v: '1.1.8', ic: '🎯', t: 'Menu Games Berurutan', d: ['Latihan hiragana, katakana, dan kanji bisa diatur sendiri jumlah soal dan babnya.', 'Semua harus diselesaikan dan berurutan: hiragana dulu, katakana dan kanji terkunci sampai giliran mereka.'] },
+    { v: '1.1.7', ic: '⛩️', t: 'Tema Kyoto Zen & Inari Shrine', d: ['Dua tema baru: Kyoto Zen dan Inari Shrine.'] },
+    { v: '1.1.5', ic: '⭐', t: 'Favorit & Hapus Data Lebih Aman', d: ['Tekan lama bab Bunpou atau Kotoba untuk menjadikannya favorit.', 'Hapus data kini punya satu peringatan lagi: "Apakah yakin dihapus?".'] },
+    { v: '1.1.3', ic: '⚙️', t: 'Menu Pengaturan Dioptimalkan', d: ['Menu pengaturan dirapikan dan dioptimalkan.'] },
+    { v: '1.1.1', ic: '🫧', t: 'Liquid Glass Bar Dioptimalkan', d: ['Bar liquid glass dioptimalkan dan bisa disembunyikan saat layar digeser ke bawah.'] },
+    { v: '1.1.0', ic: '✍️', t: 'Latihan Isian, Kanji di Huruf Baru & Flashcard', d: ['Latihan soal bisa dipilih: isian atau pilihan ganda.', 'Ada kanji di bagian huruf baru, latihan menulis, dan flashcard.'] },
+    { v: '1.0.9', ic: '📘', t: 'Kotoba & Bunpou Lengkap 25 Bab', d: ['Materi Kotoba dan Bunpou kini lengkap sampai bab 25.'] },
+    { v: '1.0.8', ic: '🎵', t: 'Revamp Backsound Musik', d: ['Lagu semua tema dibuat lebih panjang dan lebih bagus.', 'Volume musik dan suara sistem bisa diatur sendiri.', 'Kamu bisa memilih lagu dari perangkat sendiri.'] },
+    { v: '1.0.7', ic: '📗', t: 'Bab Lengkap Sampai 20', d: ['Materi tersedia lengkap sampai bab 20.'] },
+    { v: '1.0.6', ic: '🪟', t: 'Tema iOS 6 & Windows XP (Frutiger Aero)', d: ['Dua tema nostalgia baru: iOS 6 dan Windows XP bergaya Frutiger Aero.'] },
+    { v: '1.0.5', ic: '⏱️', t: 'Mode Ujian Lebih Bagus', d: ['Mode ujian punya backsound sendiri dan timer.'] },
+    { v: '1.0.4', ic: '📚', t: 'Kotoba & Bunpou Sampai Bab 15', d: ['Materi Kotoba dan Bunpou kini sampai bab 15.'] },
+    { v: '1.0.3', ic: '🚀', t: 'Tema Luar Angkasa & Spesial Natal', d: ['Tema baru bertema luar angkasa dan tema spesial Natal.'] },
+    { v: '1.0.2', ic: '🪙', t: 'Sistem Toko & Koin', d: ['Kumpulkan koin dari belajar dan belanjakan di toko.'] },
+    { v: '1.0.1', ic: '🌴', t: 'Tema Baru: Hutan Tropis', d: ['Tema baru Hutan Tropis hadir.'] }
+  ];
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const save = () => { try { saveState(); } catch (e) {} };
+  const N = () => { const n = (state.notif = state.notif || {}); if (!n.read) n.read = {}; if (!Array.isArray(n.remote)) n.remote = []; return n; };
+
+  /* ---------- ilustrasi SVG ---------- */
+  const CSS = '@keyframes wn1{0%,2%{stroke-dashoffset:100}12%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:100}}' +
+    '@keyframes wn2{0%,16%{stroke-dashoffset:100}32%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:100}}' +
+    '@keyframes wn3{0%,36%{stroke-dashoffset:100}48%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:100}}' +
+    '@keyframes wn4{0%,52%{stroke-dashoffset:100}64%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:100}}' +
+    '@keyframes wnn1{0%,2%{opacity:0}4%,92%{opacity:1}100%{opacity:0}}@keyframes wnn2{0%,16%{opacity:0}18%,92%{opacity:1}100%{opacity:0}}' +
+    '@keyframes wnn3{0%,36%{opacity:0}38%,92%{opacity:1}100%{opacity:0}}@keyframes wnn4{0%,52%{opacity:0}54%,92%{opacity:1}100%{opacity:0}}' +
+    '@keyframes ngup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}' +
+    '@keyframes ngpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}' +
+    '.wn-s{fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100;stroke-dashoffset:100;animation-duration:7s;animation-iteration-count:infinite;animation-timing-function:ease-in-out}' +
+    '.wn-n{animation-duration:7s;animation-iteration-count:infinite;opacity:0}' +
+    '#notif-dot{animation:ngpulse 1.6s ease-in-out infinite}' +
+    '@media (max-width:389px){#main-app>header>div:last-child{gap:.35rem}#main-app>header>div:last-child>button{width:2.25rem;height:2.25rem}}' +
+    '@media (prefers-reduced-motion:reduce){.wn-s{animation:none;stroke-dashoffset:0}.wn-n{animation:none;opacity:1}#notif-dot{animation:none}}';
+
+  const BOOK_SVG =
+    '<svg viewBox="0 0 320 156" width="100%" role="img" aria-label="Contoh kartu Buku Kesalahan" style="display:block;margin-top:.5rem">' +
+    '<rect x="2" y="2" width="316" height="152" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<text x="46" y="62" text-anchor="middle" font-size="40" font-weight="900" fill="currentColor">六</text>' +
+    '<text x="92" y="42" font-size="14" font-weight="800" fill="currentColor">ろく · Enam</text>' +
+    '<text x="92" y="64" font-size="13" font-weight="700" fill="#ef4444">✗ ろっ</text><text x="156" y="64" font-size="13" font-weight="700" fill="#10b981">✓ ろく</text>' +
+    '<text x="92" y="82" font-size="10" fill="currentColor" opacity=".6">Salah 2× · baru saja</text>' +
+    '<rect x="236" y="26" width="30" height="30" rx="9" fill="rgba(128,128,128,.2)"/><text x="251" y="46" text-anchor="middle" font-size="13" fill="currentColor">▼</text>' +
+    '<rect x="274" y="26" width="30" height="30" rx="9" fill="rgba(128,128,128,.2)"/><text x="289" y="47" text-anchor="middle" font-size="14">🗑</text>' +
+    '<rect x="14" y="98" width="292" height="46" rx="12" fill="rgba(128,128,128,.14)"/>' +
+    '<text x="24" y="116" font-size="10" font-weight="900" fill="var(--accent)">CONTOH PENGGUNAAN</text>' +
+    '<text x="24" y="134" font-size="13" font-weight="800" fill="currentColor">ペンが 六本 あります。</text><text x="190" y="134" font-size="10" fill="currentColor" opacity=".65">Ada enam pena.</text></svg>';
+  const KANJI_SVG =
+    '<svg viewBox="0 0 320 150" width="100%" role="img" aria-label="Animasi urutan goresan kanji 日" style="display:block;margin-top:.7rem">' +
+    '<rect x="2" y="2" width="316" height="146" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<g transform="translate(18,13) scale(1.17)"><rect x="0" y="0" width="109" height="109" rx="10" fill="none" stroke="rgba(128,128,128,.4)" stroke-dasharray="4 4"/>' +
+    '<g stroke="rgba(128,128,128,.25)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M34,24 L34,86"/><path d="M34,24 L75,24 L75,86"/><path d="M34,55 L75,55"/><path d="M34,86 L75,86"/></g>' +
+    '<path class="wn-s" pathLength="100" style="animation-name:wn1" d="M34,24 L34,86"/><path class="wn-s" pathLength="100" style="animation-name:wn2" d="M34,24 L75,24 L75,86"/>' +
+    '<path class="wn-s" pathLength="100" style="animation-name:wn3" d="M34,55 L75,55"/><path class="wn-s" pathLength="100" style="animation-name:wn4" d="M34,86 L75,86"/>' +
+    '<g font-size="11" font-weight="900" fill="#f59e0b" text-anchor="middle"><text class="wn-n" style="animation-name:wnn1" x="24" y="34">1</text><text class="wn-n" style="animation-name:wnn2" x="55" y="17">2</text>' +
+    '<text class="wn-n" style="animation-name:wnn3" x="24" y="59">3</text><text class="wn-n" style="animation-name:wnn4" x="24" y="94">4</text></g></g>' +
+    '<text x="170" y="48" font-size="15" font-weight="900" fill="currentColor">日 · hi / nichi</text>' +
+    '<text x="170" y="72" font-size="12" font-weight="700" fill="var(--accent)">① Lihat animasi urutan</text><text x="170" y="92" font-size="12" font-weight="700" fill="var(--accent)">② Tulis sendiri di kotak</text>' +
+    '<text x="170" y="112" font-size="12" font-weight="700" fill="var(--accent)">③ Dapat petunjuk bila salah</text><text x="170" y="134" font-size="10" fill="currentColor" opacity=".6">Mode: Dengan Goresan | Manual</text></svg>';
+  const BELL_SVG =
+    '<svg viewBox="0 0 320 120" width="100%" role="img" aria-label="Lonceng dengan bundaran merah dan pesan developer" style="display:block;margin-top:.5rem">' +
+    '<rect x="2" y="2" width="316" height="116" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<circle cx="62" cy="60" r="32" fill="rgba(128,128,128,.2)"/><text x="62" y="72" text-anchor="middle" font-size="34">🔔</text><circle cx="82" cy="38" r="8" fill="#ef4444"/>' +
+    '<rect x="116" y="26" width="186" height="68" rx="12" fill="rgba(128,128,128,.16)"/>' +
+    '<text x="128" y="48" font-size="12" font-weight="900" fill="currentColor">Pesan dari developer</text>' +
+    '<text x="128" y="66" font-size="10" fill="currentColor" opacity=".7">Kabar terbaru dan pengumuman</text><text x="128" y="82" font-size="10" fill="var(--accent)" font-weight="800">— RamaTeam</text></svg>';
+  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG };
+
+  /* ---------- data pesan ---------- */
+  const notes = () => {
+    const rem = N().remote.slice().sort((a, b) => (b.t || 0) - (a.t || 0)).map(x => Object.assign({}, x, { id: 'r:' + x.id }));
+    return rem.concat(DEV_NOTES);
+  };
+  const unread = () => notes().filter(n => !N().read[n.id]);
+  function dot() {
+    const d = $('notif-dot'), b = $('notif-btn'), n = unread().length;
+    if (d) d.style.display = n ? 'block' : 'none';
+    if (b) b.setAttribute('aria-label', n ? 'Pemberitahuan, ' + n + ' baru' : 'Pemberitahuan');
+  }
+  async function fetchRemote() {
+    if (!NOTICE_URL) return;
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch(NOTICE_URL, { signal: ctl.signal, cache: 'no-store' }); clearTimeout(to);
+      if (!r.ok) return; const j = await r.json(); if (!j) return;
+      const arr = (Array.isArray(j) ? j.map((x, i) => Object.assign({ id: String(i) }, x)) : Object.keys(j).map(k => Object.assign({ id: k }, j[k]))).filter(x => x && x.title);
+      N().remote = arr.slice(0, 50).map(x => ({
+        id: String(x.id).slice(0, 60), title: String(x.title).slice(0, 80), body: String(x.body || '').slice(0, 800), date: String(x.date || '').slice(0, 20),
+        url: /^https?:\/\//.test(x.url || '') ? String(x.url).slice(0, 300) : '', t: +x.t || 0
+      }));
+      save();
+      if ($('ng-notif')) { unread().forEach(n => { fresh.add(n.id); N().read[n.id] = 1; }); save(); if (view === 'pesan') draw(); }
+      dot();
+    } catch (e) {}
+  }
+
+  /* ---------- tampilan ---------- */
+  let view = 'pesan', fresh = new Set();
+  const chipTxt = 'font-size:.58rem;font-weight:900;border-radius:999px;padding:.1rem .45rem';
+  function noteHTML(n) {
+    return '<div class="ios-glass" style="padding:.85rem .9rem;border-radius:1.3rem;margin-top:.55rem;' + (fresh.has(n.id) ? 'border:1.5px solid #ef4444' : '') + '">' +
+      '<div style="display:flex;align-items:center;gap:.5rem"><b style="font-size:.88rem;flex:1;min-width:0">' + esc(n.title) + '</b>' +
+      (fresh.has(n.id) ? '<span style="' + chipTxt + ';background:#ef4444;color:#fff">BARU</span>' : '') + '</div>' +
+      (n.date ? '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.1rem">' + esc(n.date) + '</p>' : '') +
+      '<p style="font-size:.78rem;line-height:1.6;margin-top:.45rem;white-space:normal">' + esc(n.body).replace(/\n/g, '<br>') + '</p>' +
+      (n.url ? '<button onclick="NGNotif.link(\'' + encodeURI(n.url).replace(/'/g, '%27') + '\')" class="bg-accent text-white" style="margin-top:.6rem;padding:.5rem .9rem;border-radius:.9rem;font-size:.74rem;font-weight:800">Buka tautan</button>' : '') + '</div>';
+  }
+  function histHTML(h, i) {
+    return '<button onclick="NGNotif.detail(\'' + h.v + '\')" class="ios-glass" style="width:100%;display:flex;align-items:center;gap:.7rem;padding:.7rem .8rem;border-radius:1.2rem;margin-top:.5rem;text-align:left">' +
+      '<span style="font-size:1.5rem;width:2rem;text-align:center">' + h.ic + '</span>' +
+      '<span style="flex:1;min-width:0"><b style="font-size:.82rem;display:block">' + esc(h.t) + '</b><span style="font-size:.68rem;color:var(--text-muted)">Versi ' + h.v + '</span></span>' +
+      (i === 0 ? '<span style="' + chipTxt + ';background:var(--accent);color:#fff">TERBARU</span>' : '') + '<span style="opacity:.45;font-size:1.1rem">›</span></button>';
+  }
+  function draw() {
+    const box = $('ng-notif-box'); if (!box) return;
+    const list = notes(), tab = (id, txt, extra) => '<button onclick="NGNotif.tab(\'' + id + '\')" class="' + (view === id ? 'bg-accent text-white' : 'ios-glass') + '" style="flex:1;padding:.6rem;border-radius:.9rem;font-size:.78rem;font-weight:800">' + txt + (extra || '') + '</button>';
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><div><h3 style="font-size:1.25rem;font-weight:900">🔔 Pemberitahuan</h3><p style="font-size:.68rem;color:var(--text-muted)">NihonGo versi ' + APP_VER + '</p></div>' +
+      '<button onclick="NGNotif.close()" aria-label="Tutup" style="font-size:1.2rem;line-height:1;padding:.25rem .55rem;border-radius:999px;background:rgba(128,128,128,.18)">✕</button></div>' +
+      '<div style="display:flex;gap:.45rem;margin-top:.8rem">' + tab('pesan', 'Pesan Developer', fresh.size ? ' (' + fresh.size + ' baru)' : '') + tab('riwayat', 'Riwayat Update') + '</div>' +
+      (view === 'pesan'
+        ? (list.length ? list.map(noteHTML).join('') : '<div class="ios-glass" style="padding:1.6rem;border-radius:1.5rem;margin-top:.8rem;text-align:center;font-size:.8rem;color:var(--text-muted)">Belum ada pesan dari developer.</div>')
+        : '<p style="font-size:.7rem;color:var(--text-muted);margin:.7rem .2rem 0">Ketuk satu versi untuk membuka pop up-nya.</p>' + HISTORY.map(histHTML).join(''));
+  }
+  function open(tabId) {
+    close();
+    view = tabId === 'riwayat' ? 'riwayat' : 'pesan';
+    fresh = new Set(unread().map(n => n.id));
+    const m = document.createElement('div'); m.id = 'ng-notif'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Pemberitahuan');
+    m.style.cssText = 'position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:.75rem';
+    m.innerHTML = '<div id="ng-notif-box" class="bg-appbg" style="width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;border-radius:2rem 2rem 1.6rem 1.6rem;padding:1.2rem;box-shadow:0 -10px 50px rgba(0,0,0,.4);animation:ngup .3s ease-out"></div>';
+    m.addEventListener('click', ev => { if (ev.target === m) close(); });
+    document.body.appendChild(m); draw();
+    /* pesan yang sudah ditampilkan dianggap terbaca: bundaran merah hilang */
+    unread().forEach(n => { N().read[n.id] = 1; }); save(); dot();
+    fetchRemote();
+  }
+  function close() { closeDetail(); const m = $('ng-notif'); if (m) m.remove(); }
+  function closeDetail() { const d = $('ng-notif-detail'); if (d) d.remove(); }
+  function detail(v) {
+    const h = HISTORY.find(x => x.v === v); if (!h) return; closeDetail();
+    const d = document.createElement('div'); d.id = 'ng-notif-detail'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Versi ' + h.v);
+    d.style.cssText = 'position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.62);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;padding:.6rem';
+    d.innerHTML = '<div class="bg-appbg" style="width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;border-radius:2rem 2rem 1.6rem 1.6rem;padding:1.2rem 1.2rem 1.4rem;box-shadow:0 -10px 50px rgba(0,0,0,.45);animation:ngup .3s ease-out">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem"><div><p style="font-size:.62rem;font-weight:900;letter-spacing:.14em;color:var(--accent)">VERSI ' + h.v + '</p><h2 style="font-size:1.35rem;font-weight:900;line-height:1.25;margin-top:.15rem">' + h.ic + ' ' + esc(h.t) + '</h2></div>' +
+      '<button onclick="NGNotif.closeDetail()" aria-label="Tutup" style="font-size:1.3rem;line-height:1;padding:.25rem .55rem;border-radius:999px;background:rgba(128,128,128,.18)">✕</button></div>' +
+      (ILL[h.ill] ? ILL[h.ill] : '<div style="font-size:3.6rem;text-align:center;margin:.8rem 0 .2rem">' + h.ic + '</div>') +
+      '<ul style="margin-top:.8rem;padding-left:1.1rem;list-style:disc">' + h.d.map(x => '<li style="font-size:.82rem;line-height:1.6;margin-top:.3rem">' + esc(x) + '</li>').join('') + '</ul>' +
+      '<button onclick="NGNotif.closeDetail()" class="bg-accent text-white" style="width:100%;padding:.75rem;border-radius:1rem;font-weight:800;font-size:.85rem;margin-top:1rem">Tutup</button>' +
+      '<p style="text-align:center;font-size:.72rem;font-weight:800;color:var(--text-muted);margin-top:.8rem">— RamaTeam</p></div>';
+    d.addEventListener('click', ev => { if (ev.target === d) closeDetail(); });
+    document.body.appendChild(d);
+  }
+
+  window.NGNotif = {
+    open, close, closeDetail, detail, version: APP_VER,
+    tab(t) { view = t; draw(); },
+    link(u) { try { window.open(decodeURI(u), '_blank', 'noopener'); } catch (e) {} }
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('ng-notif-detail')) closeDetail(); else if ($('ng-notif')) close(); } });
+
+  const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+  function init() { dot(); fetchRemote(); }
+  if (document.readyState === 'complete') setTimeout(init, 300); else window.addEventListener('load', () => setTimeout(init, 600));
 })();
 </script>
 </body>
