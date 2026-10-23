@@ -4046,7 +4046,7 @@ const KANJI_N5_DB = (() => {
             const themeCards = [{id:'default',name:'Umum',icon:'⚙️'},{id:'haru',name:'Haru',icon:'🌸'},{id:'natsu',name:'Natsu',icon:'🌻'},{id:'aki',name:'Aki',icon:'🍁'},{id:'fuyu',name:'Fuyu',icon:'❄️'}];
             const premium = SHOP_ITEMS;
             const docs = {
-                about: ['Tentang Kami', '<b>NihonGo! Premium</b><br>Versi 1.0.0<br><br>Selamat datang di NihonGo!, aplikasi belajar bahasa Jepang dengan tampilan modern, sederhana, dan nyaman digunakan setiap hari.<br><br>Pelajari Hiragana, Katakana, Kanji N5, Kosakata, Bunpou, latihan interaktif, ujian, dan progres belajar.<br><br>Developer<br><b>Rama! Team</b><br><br>© 2026 NihonGo! All Rights Reserved.'],
+                about: ['Tentang Kami', '<b>NihonGo! Premium</b><br>Versi ' + ((window.NGNotif && NGNotif.version) || '2.1.2') + '<br><br>Selamat datang di NihonGo!, aplikasi belajar bahasa Jepang dengan tampilan modern, sederhana, dan nyaman digunakan setiap hari.<br><br>Pelajari Hiragana, Katakana, Kanji N5, Kosakata, Bunpou, latihan interaktif, ujian, dan progres belajar.<br><br>Developer<br><b>Rama! Team</b><br><br>© 2026 NihonGo! All Rights Reserved.'],
                 privacy: ['Kebijakan Privasi', '<b>Terakhir diperbarui: 28 Juli 2026</b><br><br>Kami menghargai privasi pengguna. Data yang dapat disimpan meliputi nama, email bila login, foto profil, progres belajar, pengaturan, tema yang dimiliki, dan statistik belajar.<br><br>Data digunakan untuk menyimpan progres, sinkronisasi antar perangkat, statistik, fitur sosial, dan peningkatan layanan. Kami tidak menjual data pribadi kepada pihak ketiga.<br><br>Anda dapat mengubah profil, keluar dari akun, menghapus akun bila tersedia, atau menghubungi pengembang terkait data.'],
                 terms: ['Syarat & Ketentuan', '<b>Terakhir diperbarui: 28 Juli 2026</b><br><br>Aplikasi digunakan untuk pembelajaran. Pengguna bertanggung jawab atas keamanan akun dan kata sandi.<br><br>Fitur premium dapat memerlukan lisensi, Key Premium valid, atau berlangganan. Seluruh desain, materi, ikon, musik, ilustrasi, dan kode adalah hak cipta pengembang.<br><br>Dilarang membobol sistem, menyebarkan Key Premium ilegal, menjual ulang aplikasi, atau melakukan aktivitas melanggar hukum. Ketentuan dapat diperbarui sewaktu-waktu.']
             };
@@ -7649,7 +7649,7 @@ const Social = (function () {
 
   /* Riwayat pembaruan (terbaru di atas) */
   const HISTORY = [
-    { v: '2.1.2', ic: '✨', t: 'Header Lebih Rapi', d: ['Lonceng pindah ke dekat foto profil, bundaran merah tetap muncul saat ada pesan baru.', 'Level tampil di bawah foto profil dan api streak 🔥 di samping nama.', 'Koin dipindah ke bawah nama dan tombol di kanan dikurangi menjadi Teman, Musik, Toko, dan Pengaturan.'], ill: 'hdr' },
+    { v: '2.1.2', ic: '✨', t: 'Header Lebih Rapi', d: ['Level bahasa Jepang (misalnya N5) tampil di bawah foto profil.', 'Api streak 🔥 ada di samping nama.', 'Lonceng pindah ke baris koin, tepat di depan angka koin. Bundaran merah tetap muncul saat ada pesan baru.', 'Tombol di kanan tinggal Teman, Musik, Toko, dan Pengaturan.'], ill: 'hdr3' },
     { v: '2.1.1', ic: '🔔', t: 'Menu Pemberitahuan', d: ['Lonceng di header dengan bundaran merah saat ada pesan baru dari developer.', 'Riwayat semua pembaruan, lengkap dengan pop up tiap versi.'], ill: 'bell' },
     { v: '2.1.0', ic: '✍️', t: 'Animasi Goresan Kanji & Buku Kesalahan', d: ['Latihan menulis kanji punya mode Dengan Goresan: lihat animasi urutan goresan, lalu tulis sendiri dan dapat petunjuk bila salah. Mode Manual tetap tersedia.', 'Buku Kesalahan: setiap jawaban yang salah dicatat otomatis, bisa dihapus sendiri, dan bisa dilatih ulang.', 'Ketuk ▼ untuk arti, cara baca hiragana, dan 2–3 contoh kalimat. Di flashcard kanji juga ada panah ▼ penjelasan.'], ill: 'v210' },
     { v: '2.0.9', ic: '👥', t: 'Menu Teman dan AI Terpisah', d: ['Daftar teman dan asisten AI kini dipisah supaya tidak tercampur.'] },
@@ -7740,7 +7740,22 @@ const Social = (function () {
     '<g transform="translate(228,24)"><circle cx="14" cy="14" r="14" fill="rgba(128,128,128,.22)"/><circle cx="46" cy="14" r="14" fill="rgba(128,128,128,.22)"/><circle cx="78" cy="14" r="14" fill="rgba(128,128,128,.22)"/>' +
     '<text x="14" y="19" text-anchor="middle" font-size="13">👥</text><text x="46" y="19" text-anchor="middle" font-size="13">🎵</text><text x="78" y="19" text-anchor="middle" font-size="13">🛍</text></g>' +
     '<text x="160" y="118" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6">Lonceng ↖ dekat foto · level ↓ di bawah foto · 🔥 di samping nama</text></svg>';
-  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG };
+  const HDR3_SVG =
+    '<svg viewBox="0 0 320 138" width="100%" role="img" aria-label="Contoh header baru: level di bawah foto, api di samping nama, lonceng di depan koin" style="display:block;margin-top:.5rem">' +
+    '<rect x="2" y="2" width="316" height="134" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<circle cx="40" cy="42" r="21" fill="rgba(128,128,128,.2)" stroke="var(--accent)" stroke-width="2.5"/><text x="40" y="50" text-anchor="middle" font-size="22">🌸</text>' +
+    '<rect x="23" y="58" width="34" height="15" rx="7.5" fill="#3b82f6" stroke="#fff" stroke-width="2"/><text x="40" y="69" text-anchor="middle" font-size="9" font-weight="900" fill="#fff">N5</text>' +
+    '<text x="74" y="36" font-size="14" font-weight="900" fill="currentColor">Rama</text>' +
+    '<rect x="122" y="23" width="42" height="17" rx="8.5" fill="rgba(249,115,22,.18)"/><text x="143" y="35.5" text-anchor="middle" font-size="10.5" font-weight="900" fill="#F97316">🔥 15</text>' +
+    '<circle cx="86" cy="58" r="11" fill="rgba(128,128,128,.28)" stroke="var(--accent)" stroke-width="1.5"/><text x="86" y="62.5" text-anchor="middle" font-size="12">🔔</text><circle cx="94" cy="50" r="3.6" fill="#ef4444"/>' +
+    '<text x="104" y="62" font-size="12" font-weight="900" fill="currentColor" opacity=".65">🪙 11190</text>' +
+    '<g><circle cx="226" cy="32" r="10" fill="rgba(128,128,128,.22)"/><circle cx="251" cy="32" r="10" fill="rgba(128,128,128,.22)"/><circle cx="276" cy="32" r="10" fill="rgba(128,128,128,.22)"/><circle cx="301" cy="32" r="10" fill="rgba(128,128,128,.22)"/>' +
+    '<text x="226" y="36" text-anchor="middle" font-size="10">👥</text><text x="251" y="36" text-anchor="middle" font-size="10">🎵</text><text x="276" y="36" text-anchor="middle" font-size="10">🛍</text><text x="301" y="36" text-anchor="middle" font-size="10">⚙️</text></g>' +
+    '<g font-size="8" font-weight="900" fill="#fff" text-anchor="middle"><circle cx="64" cy="66" r="6.5" fill="var(--accent)"/><text x="64" y="69">1</text><circle cx="166" cy="22" r="6.5" fill="var(--accent)"/><text x="166" y="25">2</text><circle cx="78" cy="46" r="6.5" fill="var(--accent)"/><text x="78" y="49">3</text></g>' +
+    '<g font-size="10" fill="currentColor"><circle cx="20" cy="95" r="6.5" fill="var(--accent)"/><text x="20" y="98" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">1</text><text x="34" y="98.5">Level bahasa Jepang di bawah foto profil</text>' +
+    '<circle cx="20" cy="110" r="6.5" fill="var(--accent)"/><text x="20" y="113" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">2</text><text x="34" y="113.5">Api streak 🔥 di samping nama</text>' +
+    '<circle cx="20" cy="125" r="6.5" fill="var(--accent)"/><text x="20" y="128" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">3</text><text x="34" y="128.5">Lonceng pindah ke depan koin</text></g></svg>';
+  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG, hdr3: HDR3_SVG };
 
   /* ---------- data pesan ---------- */
   const notes = () => {
@@ -7835,7 +7850,25 @@ const Social = (function () {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('ng-notif-detail')) closeDetail(); else if ($('ng-notif')) close(); } });
 
   const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
-  function init() { dot(); fetchRemote(); }
+  /* Pop up otomatis sekali saat pertama kali membuka versi baru (menunggu sampai layar utama tampil) */
+  function autoShowNew() {
+    let tries = 0;
+    (function wait() {
+      if (N().seenVer === APP_VER) return;
+      const mainApp = $('main-app');
+      const ready = mainApp && !mainApp.classList.contains('hidden') && mainApp.offsetParent !== null;
+      if (ready && !$('ng-notif') && !$('ng-notif-detail')) {
+        setTimeout(() => {
+          if (N().seenVer === APP_VER) return;
+          N().seenVer = APP_VER; save();
+          detail(APP_VER);
+        }, 900);
+        return;
+      }
+      if (++tries < 60) setTimeout(wait, 1000);
+    })();
+  }
+  function init() { dot(); fetchRemote(); autoShowNew(); }
   if (document.readyState === 'complete') setTimeout(init, 300); else window.addEventListener('load', () => setTimeout(init, 600));
 })();
 </script>
