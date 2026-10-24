@@ -7637,7 +7637,7 @@ const Social = (function () {
 /* ===== MENU PEMBERITAHUAN v2.1.1: pesan developer & riwayat update ===== */
 (function () {
   'use strict';
-  const APP_VER = '2.1.2';
+  const APP_VER = '2.1.3';
   /* Opsional: alamat JSON pesan developer supaya bisa dikirim tanpa memperbarui file ini.
      Contoh (Firebase): 'https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app/notices.json'
      Format: { "pesan1": { "title": "Judul", "body": "Isi", "date": "20 Okt", "url": "https://...", "t": 1760000000 } }  */
@@ -7645,6 +7645,8 @@ const Social = (function () {
 
   /* Pesan developer bawaan (terbaru di atas). Tambah objek baru di sini untuk memunculkan bundaran merah. */
   const DEV_NOTES = [
+    { id: 'v213-duel', date: 'v2.1.3', title: 'Multiplayer & Duel resmi hadir ⚔️',
+      body: 'Mulai versi 2.1.3 kamu bisa menantang temanmu!\nBuka Games → tombol 👥 Multiplayer di pojok kanan atas → Duel. Pilih teman, jenis soal (Kotoba atau Bunpou), bab, dan jumlah soal.\n⚡ Langsung: main bersamaan, skor lawan tampil di pojok layar.\n⏰ Kapan saja: temanmu boleh main nanti, skornya muncul otomatis saat ia selesai.\n\n— RamaTeam' },
     { id: 'v212-header', date: 'v2.1.2', title: 'Header lebih rapi ✨',
       body: 'Mulai versi 2.1.2 tampilan atas dirapikan: lonceng pindah ke dekat foto profil, level tampil di bawah foto, api streak 🔥 di samping nama, dan koin di bawah nama. Tombol di kanan tinggal Teman, Musik, Toko, dan Pengaturan.\n\n— RamaTeam' },
     { id: 'v211-menu', date: 'v2.1.1', title: 'Menu Pemberitahuan hadir 🔔',
@@ -7653,6 +7655,7 @@ const Social = (function () {
 
   /* Riwayat pembaruan (terbaru di atas) */
   const HISTORY = [
+    { v: '2.1.3', ic: '⚔️', t: 'Multiplayer: Duel dengan Teman', d: ['Menu Games punya tombol 👥 Multiplayer di pojok kanan atas. Ketuk, lalu pilih Duel.', 'Tantang temanmu dari daftar Tantang Teman. Atur jenis soal: Kotoba (pilih arti) atau Bunpou (susun kalimat), bab yang diinginkan, dan jumlah soal.', 'Mode ⚡ Langsung: main bersamaan dan skor lawan terlihat di pojok layar. Mode ⏰ Kapan saja: temanmu boleh membalas nanti (sekitar 12 jam) dan skor tampil otomatis saat ia selesai.', 'Skor akhir 0–100; kalau sama, yang lebih cepat menang. Riwayat duel tersimpan dan bisa dihapus.'], ill: 'v213' },
     { v: '2.1.2', ic: '✨', t: 'Header Lebih Rapi', d: ['Level bahasa Jepang (misalnya N5) tampil di bawah foto profil.', 'Api streak 🔥 ada di samping nama.', 'Lonceng pindah ke baris koin, tepat di depan angka koin. Bundaran merah tetap muncul saat ada pesan baru.', 'Tombol di kanan tinggal Teman, Musik, Toko, dan Pengaturan.'], ill: 'hdr3' },
     { v: '2.1.1', ic: '🔔', t: 'Menu Pemberitahuan', d: ['Lonceng di header dengan bundaran merah saat ada pesan baru dari developer.', 'Riwayat semua pembaruan, lengkap dengan pop up tiap versi.'], ill: 'bell' },
     { v: '2.1.0', ic: '✍️', t: 'Animasi Goresan Kanji & Buku Kesalahan', d: ['Latihan menulis kanji punya mode Dengan Goresan: lihat animasi urutan goresan, lalu tulis sendiri dan dapat petunjuk bila salah. Mode Manual tetap tersedia.', 'Buku Kesalahan: setiap jawaban yang salah dicatat otomatis, bisa dihapus sendiri, dan bisa dilatih ulang.', 'Ketuk ▼ untuk arti, cara baca hiragana, dan 2–3 contoh kalimat. Di flashcard kanji juga ada panah ▼ penjelasan.'], ill: 'v210' },
@@ -7759,7 +7762,41 @@ const Social = (function () {
     '<g font-size="10" fill="currentColor"><circle cx="20" cy="95" r="6.5" fill="var(--accent)"/><text x="20" y="98" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">1</text><text x="34" y="98.5">Level bahasa Jepang di bawah foto profil</text>' +
     '<circle cx="20" cy="110" r="6.5" fill="var(--accent)"/><text x="20" y="113" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">2</text><text x="34" y="113.5">Api streak 🔥 di samping nama</text>' +
     '<circle cx="20" cy="125" r="6.5" fill="var(--accent)"/><text x="20" y="128" font-size="8" font-weight="900" fill="#fff" text-anchor="middle">3</text><text x="34" y="128.5">Lonceng pindah ke depan koin</text></g></svg>';
-  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG, hdr3: HDR3_SVG };
+  const DUEL_SVG =
+    '<svg viewBox="0 0 320 540" width="100%" role="img" aria-label="Letak Multiplayer, tantang teman, dan pengaturan duel" style="display:block;margin-top:.5rem">' +
+    '<g font-family="-apple-system,system-ui,sans-serif">' +
+    '<rect x="2" y="2" width="316" height="136" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<text x="18" y="26" font-size="11" font-weight="900" fill="var(--accent)">① CARI DI MENU GAMES</text>' +
+    '<text x="18" y="70" font-size="20" font-weight="900" fill="currentColor">Games</text>' +
+    '<text x="18" y="88" font-size="9" fill="currentColor" opacity=".6">Latihan dan game seru</text>' +
+    '<rect x="176" y="50" width="130" height="30" rx="15" fill="rgba(128,128,128,.15)" stroke="var(--accent)" stroke-width="1.8"/>' +
+    '<text x="241" y="70" text-anchor="middle" font-size="12" font-weight="800" fill="var(--accent)">👥 Multiplayer</text>' +
+    '<rect x="172" y="46" width="138" height="38" rx="19" fill="none" stroke="var(--accent)" stroke-width="2"><animate attributeName="opacity" values="1;.15;1" dur="1.6s" repeatCount="indefinite"/></rect>' +
+    '<text x="306" y="106" text-anchor="end" font-size="10" font-weight="800" fill="#f59e0b">↑ Ketuk di sini (pojok kanan atas)</text>' +
+    '<text x="18" y="126" font-size="10" fill="currentColor" opacity=".7">Lalu pilih kartu Duel.</text>' +
+    '<rect x="2" y="148" width="316" height="136" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<text x="18" y="172" font-size="11" font-weight="900" fill="var(--accent)">② TANTANG TEMAN</text>' +
+    '<rect x="14" y="184" width="292" height="40" rx="14" fill="rgba(128,128,128,.16)"/><text x="30" y="209" font-size="18">🦊</text><text x="58" y="209" font-size="12" font-weight="800" fill="currentColor">Rina</text>' +
+    '<rect x="228" y="192" width="68" height="24" rx="12" fill="var(--accent)"/><text x="262" y="208" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">Tantang ⚔️</text>' +
+    '<rect x="14" y="232" width="292" height="40" rx="14" fill="rgba(128,128,128,.16)"/><text x="30" y="257" font-size="18">🐼</text><text x="58" y="257" font-size="12" font-weight="800" fill="currentColor">Budi</text>' +
+    '<rect x="228" y="240" width="68" height="24" rx="12" fill="rgba(128,128,128,.3)"/><text x="262" y="256" text-anchor="middle" font-size="10" font-weight="900" fill="currentColor">Tantang ⚔️</text>' +
+    '<rect x="2" y="294" width="316" height="242" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+    '<text x="18" y="318" font-size="11" font-weight="900" fill="var(--accent)">③ ATUR TANTANGANMU</text>' +
+    '<text x="18" y="338" font-size="9" font-weight="900" fill="currentColor" opacity=".6">JENIS SOAL</text>' +
+    '<rect x="18" y="344" width="132" height="26" rx="13" fill="var(--accent)"/><text x="84" y="361" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">📖 Kotoba</text>' +
+    '<rect x="158" y="344" width="132" height="26" rx="13" fill="rgba(128,128,128,.25)"/><text x="224" y="361" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor">🧩 Bunpou</text>' +
+    '<text x="18" y="388" font-size="9" font-weight="900" fill="currentColor" opacity=".6">BAB</text>' +
+    '<rect x="18" y="394" width="104" height="22" rx="11" fill="var(--accent)"/><text x="70" y="409" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">🎲 Acak semua</text>' +
+    '<rect x="128" y="394" width="46" height="22" rx="11" fill="rgba(128,128,128,.25)"/><text x="151" y="409" text-anchor="middle" font-size="10" font-weight="800" fill="currentColor">Bab 1</text>' +
+    '<rect x="180" y="394" width="46" height="22" rx="11" fill="rgba(128,128,128,.25)"/><text x="203" y="409" text-anchor="middle" font-size="10" font-weight="800" fill="currentColor">Bab 2</text>' +
+    '<text x="18" y="434" font-size="9" font-weight="900" fill="currentColor" opacity=".6">JUMLAH SOAL</text><text x="18" y="492" font-size="9" font-weight="900" fill="currentColor" opacity=".6">MODE</text>' +
+    '<rect x="18" y="440" width="26" height="26" rx="9" fill="rgba(128,128,128,.25)"/><text x="31" y="458" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">−</text>' +
+    '<text x="72" y="459" text-anchor="middle" font-size="16" font-weight="900" fill="currentColor">15</text>' +
+    '<rect x="100" y="440" width="26" height="26" rx="9" fill="rgba(128,128,128,.25)"/><text x="113" y="458" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">+</text>' +
+    '<rect x="18" y="498" width="132" height="28" rx="14" fill="var(--accent)"/><text x="84" y="516" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">⚡ Langsung</text>' +
+    '<rect x="158" y="498" width="132" height="28" rx="14" fill="rgba(128,128,128,.25)"/><text x="224" y="516" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor">⏰ Kapan saja</text>' +
+    '</g></svg>';
+  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG, hdr3: HDR3_SVG, v213: DUEL_SVG };
 
   /* ---------- data pesan ---------- */
   const notes = () => {
@@ -7909,7 +7946,7 @@ const Social = (function () {
 })();
 </script>
 <script>
-/* ===== DUEL v2 (uji coba, khusus token developer) =====
+/* ===== DUEL v2 (rilis publik 2.1.3) =====
    Jenis soal: Kosakata / Susun Kalimat · Jumlah: 10 / 15 / 20
    Mode: ⚡ Langsung (main bersamaan, skor lawan tampil di pojok) · ⏰ Kapan saja (lawan main nanti)
    Pesan (lewat NGNet.duel): ch=tantangan, ac=gabung, dc=batal/tolak, pg=progres, rs=hasil akhir, sy=minta hasil terbaru */
@@ -7918,8 +7955,7 @@ const Social = (function () {
   const $ = id => document.getElementById(id), vp = () => $('app-viewport');
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const save = () => { try { saveState(); } catch (e) {} };
-  const dev = () => !!state.devMode;
-  const D = () => { const d = (state.duel = state.duel || {}); if (!d.list) d.list = {}; if (!d.cfg) d.cfg = { ty: 'k', n: 10, md: 'a' }; return d; };
+  const D = () => { const d = (state.duel = state.duel || {}); if (!d.list) d.list = {}; if (!d.cfg) d.cfg = { ty: 'k', nk: 15, ns: 10, md: 'a' }; if (!d.cfg.bk) d.cfg.bk = []; if (!d.cfg.bs) d.cfg.bs = []; if (!d.cfg.nk) { d.cfg.nk = Math.min(50, Math.max(5, d.cfg.n || 15)); d.cfg.ns = Math.min(10, d.cfg.n || 10); } if (!d.gone) d.gone = {}; if (!d.orph) d.orph = {}; return d; };
   const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
   const DLY = { ok: 700, bad: 1500 }, LIVE_MS = 180000, SYNC_MS = 45000, KEEP_MS = 12 * 3600e3;
   let run = null, view = { n: 'home' }, tm = 0;
@@ -7932,6 +7968,10 @@ const Social = (function () {
       '[data-ng-duel] .dl-chip{flex:1 1 0;min-width:6.2rem;padding:.75rem .6rem;border-radius:1rem;font-size:.8rem;font-weight:800;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--text-main);text-align:center}' +
       '[data-ng-duel] .dl-chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}' +
       '[data-ng-duel] .dl-chip:disabled{opacity:.38}' +
+      '[data-ng-duel] .dl-step{display:flex;align-items:center;justify-content:center;gap:1.2rem;padding:.4rem 0}' +
+      '[data-ng-duel] .dl-sb{width:3rem;height:3rem;border-radius:50%;font-size:1.6rem;font-weight:900;line-height:1;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--accent)}[data-ng-duel] .dl-sb:disabled{opacity:.3}' +
+      '[data-ng-duel] .dl-sv{min-width:5rem;text-align:center;display:flex;flex-direction:column;line-height:1.05}[data-ng-duel] .dl-sv b{font-size:2.2rem;font-weight:900}[data-ng-duel] .dl-sv small{font-size:.7rem;color:var(--text-muted);font-weight:800}' +
+      '[data-ng-duel] .dl-tm{font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums}' +
       '[data-ng-duel] .dl-top{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.75rem;font-weight:800}' +
       '[data-ng-duel] .dl-corner{display:flex;flex-direction:column;gap:.18rem;font-size:.66rem;font-weight:800;padding:.4rem .65rem;border-radius:.9rem;border:1px solid var(--glass-border);background:var(--glass-bg);min-width:9.5rem;max-width:68%}' +
       '[data-ng-duel] .dl-cr{display:flex;justify-content:space-between;align-items:center;gap:.5rem;white-space:nowrap}' +
@@ -7953,6 +7993,8 @@ const Social = (function () {
       '[data-ng-duel] .dl-fr{width:100%;padding:.75rem;border-radius:1rem;display:flex;align-items:center;gap:.7rem;text-align:left;font-size:.85rem;font-weight:800;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-main)}' +
       '[data-ng-duel] .dl-hist{width:100%;padding:.7rem .8rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;text-align:left;font-size:.75rem;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-main)}' +
       '[data-ng-duel] .dl-hist small{color:var(--text-muted)}' +
+      '[data-ng-duel] .dl-hrow{display:flex;gap:.4rem;align-items:stretch}[data-ng-duel] .dl-hrow .dl-hist{flex:1}' +
+      '[data-ng-duel] .dl-del{width:2.5rem;flex:none;border-radius:1rem;border:1px solid var(--glass-border);background:var(--glass-bg);font-size:.95rem}' +
       '[data-ng-duel] .dl-board{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}' +
       '[data-ng-duel] .dl-sc{display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:1rem .5rem;border-radius:1.25rem;border:1.5px solid var(--glass-border);background:var(--glass-bg)}' +
       '[data-ng-duel] .dl-sc.hi{border-color:#16a34a;background:rgba(22,163,74,.14)}' +
@@ -7962,6 +8004,11 @@ const Social = (function () {
       '[data-ng-duel] .dl-st{font-size:.68rem;color:var(--text-muted)}' +
       '[data-ng-duel] .dl-btn{width:100%;background:var(--accent);color:#fff;border-radius:1rem;padding:.85rem;font-weight:800;font-size:.85rem}' +
       '[data-ng-duel] .dl-btn.alt{background:var(--glass-bg);color:var(--text-main);border:1.5px solid var(--glass-border)}' +
+      '[data-ng-duel] .dl-mpcard{width:100%;display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:1.5rem;text-align:left;color:var(--text-main)}' +
+      '[data-ng-duel] .dl-mpi{width:3rem;height:3rem;flex:none;border-radius:1rem;background:color-mix(in srgb,var(--accent) 15%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.5rem}' +
+      '[data-ng-duel] .dl-beta{font-size:.55rem;font-weight:900;color:#f59e0b;border:1px solid #f59e0b;border-radius:999px;padding:.05rem .4rem;vertical-align:middle}' +
+      '[data-ng-duel] .dl-bdg{min-width:1.4rem;height:1.4rem;padding:0 .35rem;border-radius:999px;background:#ef4444;color:#fff;font-size:.7rem;font-weight:800;display:grid;place-items:center}' +
+      '[data-ng-duel] .dl-babs{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}[data-ng-duel] .dl-babs .dl-chip{min-width:0;padding:.55rem .2rem;font-size:.72rem}' +
       '[data-ng-duel] .dl-note{font-size:.68rem;color:var(--text-muted);text-align:center;line-height:1.5}' +
       '[data-ng-duel] .dl-center{padding:1.6rem 1rem;border-radius:1.5rem;text-align:center;display:flex;flex-direction:column;gap:.5rem;align-items:center}';
     document.head.appendChild(st);
@@ -7971,19 +8018,27 @@ const Social = (function () {
     const o = $('ng-duel-toast'); if (o) o.remove();
     const e = document.createElement('div'); e.id = 'ng-duel-toast'; e.className = 'ios-glass';
     e.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + .7rem);z-index:360;padding:.65rem 1rem;border-radius:999px;font-size:.78rem;font-weight:800;max-width:90%;text-align:center;border:1.5px solid var(--accent)' + (openOnTap ? ';cursor:pointer' : '');
-    e.textContent = t; if (openOnTap && dev()) e.onclick = () => { e.remove(); open(); };
+    e.textContent = t; if (openOnTap) e.onclick = () => { e.remove(); open(); };
     document.body.appendChild(e); setTimeout(() => e.remove(), 3200);
   }
 
   /* ---- soal ---- */
-  const kPool = () => Object.keys(KOTOBA_DB).map(Number).sort((a, b) => a - b).flatMap(b => KOTOBA_DB[b]).filter(it => it && it.arti && (it.kana || it.kanji));
-  const sPool = () => Object.values(BUNPOU_DB).flat().flatMap(it => (it && it.quizzes) || []).filter(q => q && q.prompt && Array.isArray(q.words) && q.words.length >= 3);
-  const poolOf = ty => ty === 's' ? sPool() : kPool();
+  const kEntries = () => Object.keys(KOTOBA_DB).map(Number).sort((a, b) => a - b).flatMap(b => (KOTOBA_DB[b] || []).filter(it => it && it.arti && (it.kana || it.kanji)).map(it => ({ it, bab: b })));
+  const sEntries = () => Object.keys(BUNPOU_DB).map(Number).sort((a, b) => a - b).flatMap(b => (BUNPOU_DB[b] || []).flatMap(x => (x && x.quizzes) || []).filter(q => q && q.prompt && Array.isArray(q.words) && q.words.length >= 3).map(it => ({ it, bab: b })));
+  const entriesOf = ty => ty === 's' ? sEntries() : kEntries();
+  const poolOf = ty => entriesOf(ty).map(e => e.it);
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const TY = d => d.ty === 's' ? 's' : 'k', N = d => d.n || (d.q && d.q.length) || 10;
+  const selOf = c => (c.ty === 's' ? c.bs : c.bk) || [];
+  const availN = (ty, sel) => entriesOf(ty).filter(e => !sel.length || sel.includes(e.bab)).length;
+  const babsOf = ty => Array.from(new Set(entriesOf(ty).map(e => e.bab)));
+  const lim = (ty, sel) => ({ min: ty === 's' ? 3 : 5, max: Math.min(ty === 's' ? 10 : 50, availN(ty, sel || [])) });
+  const curN = c => { const l = lim(c.ty, selOf(c)), v = c.ty === 's' ? c.ns : c.nk; return Math.max(Math.min(l.min, l.max), Math.min(l.max, v)); };
+  const fmtT = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   const pts = (s, n) => Math.round(100 * (+s || 0) / (n || 1)); /* benar semua = 100, disesuaikan jumlah soal */
   const dots = r => String(r || '').split('').map(x => '<i class="dl-d' + (x === '1' ? '' : ' x') + '"></i>').join('');
-  const tyLabel = d => TY(d) === 's' ? '🧩 Susun Kalimat' : '📖 Kosakata';
+  const tyLabel = d => TY(d) === 's' ? '🧩 Bunpou' : '📖 Kotoba';
+  const babTxt = d => (d.bb && d.bb.length) ? 'Bab ' + d.bb.join(', ') : 'Acak semua bab';
   /* checksum soal terpilih: kalau isi soal beda antar perangkat, duel ditolak (bukan menampilkan soal yang salah) */
   const hsh = (ty, P, q) => { let h = 5381; const s = q.map(i => { const it = P[i]; if (!it) return '?'; return ty === 's' ? it.prompt + '|' + it.words.join('/') : (it.kana || '') + '|' + (it.kanji || '') + '|' + it.arti; }).join('\n'); for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
   function build(d) {
@@ -8002,14 +8057,14 @@ const Social = (function () {
   /* ---- teman & jaringan ---- */
   const friends = () => { const s = state.social || {}; return (s.friends || []).filter(c => /^NJ-/.test(c)).map(c => Object.assign({ id: c, name: 'Teman ' + c.slice(-4), avatar: '👤' }, (s.remote || {})[c] || {})); };
   const nameOf = c => { const f = friends().find(x => x.id === c); return f ? f.name : 'Teman'; };
-  const send = (c, o) => { try { return window.NGNet.duel(c, o).then(ok => !!ok, () => false); } catch (e) { return Promise.resolve(false); } };
+  const send = (c, o) => { try { return window.NGNet.duel(c, Object.assign({ v: 2 }, o)).then(ok => !!ok, () => false); } catch (e) { return Promise.resolve(false); } };
   const cmp = (a, b) => a.s !== b.s ? (a.s > b.s ? 1 : -1) : (a.t !== b.t ? (a.t < b.t ? 1 : -1) : 0); /* >0: a menang (skor lebih tinggi, seri skor → lebih cepat) */
   const live = d => d.md === 'l' && !d.mine && d.from === 'them' && Date.now() - d.ts < LIVE_MS;
   const shown = () => !!(vp() && vp().querySelector('[data-ng-duel]'));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, +v || 0));
 
-  function sendCh(d) { return send(d.opp, { k: 'ch', id: d.id, ty: TY(d), n: N(d), md: d.md, h: d.h, ts: d.ts, q: d.q.join(',') }).then(ok => { d.sent = ok; save(); return ok; }); }
-  function pushResult(d) { return send(d.opp, { k: 'rs', id: d.id, sc: d.mine.s, tm: d.mine.t }).then(ok => { d.rsOk = ok; save(); return ok; }); }
+  function sendCh(d) { return send(d.opp, { k: 'ch', id: d.id, ty: TY(d), n: N(d), md: d.md, h: d.h, ts: d.ts, bb: (d.bb || []).join(','), q: d.q.join(',') }).then(ok => { d.sent = ok; save(); return ok; }); }
+  function pushResult(d) { d.sending = true; return send(d.opp, { k: 'rs', id: d.id, sc: d.mine.s, tm: d.mine.t }).then(ok => { d.sending = false; d.rsOk = ok; save(); const e = $('dl-diag'); if (e && shown() && view.n === 'result' && view.id === d.id) e.textContent = diag(d); return ok; }); }
   function askSync(d, force) { const n = Date.now(); if (!force && n - (d.syT || 0) < SYNC_MS) return; d.syT = n; send(d.opp, { k: 'sy', id: d.id }); }
   function tick(force) {
     if (!state || !state.social) return; const now = Date.now();
@@ -8026,18 +8081,22 @@ const Social = (function () {
   const orig = window.renderLatihanTabs;
   window.renderLatihanTabs = function () {
     orig.apply(this, arguments);
-    const box = document.querySelector('#app-viewport .space-y-3'), sec = box && box.firstElementChild; if (!sec) return;
-    const b = document.createElement('button');
-    b.className = 'w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-4 hover:border-accent active:scale-[.98] transition-all';
-    b.setAttribute('onclick', 'NGDuel.open()');
-    b.innerHTML = '<span class="w-12 h-12 rounded-2xl bg-accent/15 flex items-center justify-center text-2xl shrink-0">⚔️</span><span class="min-w-0 flex-1"><b class="text-sm block">Duel <span style="font-size:.55rem;font-weight:900;color:#f59e0b;border:1px solid #f59e0b;border-radius:999px;padding:.05rem .4rem;vertical-align:middle">UJI COBA</span></b><span class="text-xs" style="color:var(--text-muted)">Kosakata atau susun kalimat · langsung atau main kapan saja</span></span>';
-    sec.appendChild(b); icons();
+    const h2 = Array.prototype.find.call(document.querySelectorAll('#app-viewport h2'), h => h.textContent.trim() === 'Games'), head = h2 && h2.parentElement;
+    if (head && !head.querySelector('[data-mp]')) {
+      const w = document.createElement('div'); while (head.firstChild) w.appendChild(head.firstChild); head.appendChild(w);
+      head.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem';
+      const inbox = Object.values(D().list).filter(d => d.from === 'them' && !d.mine).length;
+      const b = document.createElement('button'); b.setAttribute('data-mp', ''); b.setAttribute('onclick', 'NGDuel.hub()'); b.className = 'ios-glass';
+      b.style.cssText = 'flex:none;position:relative;display:flex;align-items:center;gap:.35rem;padding:.45rem .85rem;border-radius:999px;font-size:.72rem;font-weight:800;color:var(--accent);border:1.5px solid var(--accent)';
+      b.innerHTML = '👥 Multiplayer' + (inbox ? '<span style="position:absolute;top:-.35rem;right:-.2rem;min-width:1.1rem;height:1.1rem;padding:0 .25rem;border-radius:999px;background:#ef4444;color:#fff;font-size:.62rem;display:grid;place-items:center">' + inbox + '</span>' : '');
+      head.appendChild(b);
+    }
   };
 
   /* ---- layar ---- */
-  function shell(inner) {
+  function shell(inner, title) {
     clearInterval(tm);
-    vp().innerHTML = '<div data-ng-duel class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="NGDuel.back()" aria-label="Kembali" style="color:var(--text-muted);font-size:1.3rem;padding:.2rem .5rem">‹</button><h2 class="text-xl font-black">⚔️ Duel</h2></div>' + inner + '</div>';
+    vp().innerHTML = '<div data-ng-duel class="animate-fade-in space-y-4 pb-24"><div class="flex items-center gap-2"><button onclick="NGDuel.back()" aria-label="Kembali" style="color:var(--text-muted);font-size:1.3rem;padding:.2rem .5rem">‹</button><h2 class="text-xl font-black">' + (title || '⚔️ Duel') + '</h2></div>' + inner + '</div>';
   }
   const statusOf = d => {
     if (d.mine && d.theirs) { const c = cmp(d.mine, d.theirs); return c > 0 ? '🏆 Menang' : c < 0 ? '😅 Kalah' : '🤝 Seri'; }
@@ -8047,35 +8106,56 @@ const Social = (function () {
   function home() {
     view = { n: 'home' }; tick(true);
     const L = Object.values(D().list).sort((a, b) => b.ts - a.ts), inbox = L.filter(d => d.from === 'them' && !d.mine), fr = friends();
-    const inHtml = inbox.map(d => '<button class="dl-in" onclick="NGDuel.play(\'' + d.id + '\')"><span><b>' + esc(nameOf(d.opp)) + '</b> menantangmu<br><span style="color:var(--text-muted)">' + tyLabel(d) + ' · ' + N(d) + ' soal · ' + (live(d) ? '⚡ Langsung — ia sedang menunggu' : '⏰ Main kapan saja') + '</span></span><span class="dl-go">' + (live(d) ? 'Gabung' : 'Main') + '</span></button>').join('');
-    const row = d => '<button class="dl-hist" onclick="NGDuel.open_(\'' + d.id + '\')"><span><b>' + esc(nameOf(d.opp)) + '</b><br><small>' + tyLabel(d) + ' · ' + N(d) + ' soal' + (d.mine ? ' · Kamu ' + pts(d.mine.s, N(d)) : '') + (d.theirs ? ' · Lawan ' + pts(d.theirs.s, N(d)) : '') + '</small></span><b style="white-space:nowrap">' + statusOf(d) + '</b></button>';
+    const delBtn = id => '<button class="dl-del" aria-label="Hapus" onclick="NGDuel.del(\'' + id + '\')">🗑</button>';
+    const inHtml = inbox.map(d => '<div class="dl-hrow"><button class="dl-in" style="flex:1" onclick="NGDuel.play(\'' + d.id + '\')"><span><b>' + esc(nameOf(d.opp)) + '</b> menantangmu<br><span style="color:var(--text-muted)">' + tyLabel(d) + ' · ' + N(d) + ' soal · ' + babTxt(d) + ' · ' + (live(d) ? '⚡ Langsung — ia sedang menunggu' : '⏰ Main kapan saja') + '</span></span><span class="dl-go">' + (live(d) ? 'Gabung' : 'Main') + '</span></button>' + delBtn(d.id) + '</div>').join('');
+    const row = d => '<div class="dl-hrow"><button class="dl-hist" onclick="NGDuel.open_(\'' + d.id + '\')"><span><b>' + esc(nameOf(d.opp)) + '</b><br><small>' + tyLabel(d) + ' · ' + N(d) + ' soal' + (d.mine ? ' · Kamu ' + pts(d.mine.s, N(d)) : '') + (d.theirs ? ' · Lawan ' + pts(d.theirs.s, N(d)) : '') + '</small></span><b style="white-space:nowrap">' + statusOf(d) + '</b></button>' + delBtn(d.id) + '</div>';
     shell((inbox.length ? '<div class="space-y-2"><p class="dl-t">TANTANGAN MASUK</p>' + inHtml + '</div>' : '') +
       '<div class="space-y-2"><p class="dl-t">TANTANG TEMAN</p>' + (fr.length ? fr.map(f => '<button class="dl-fr" onclick="NGDuel.setup(\'' + f.id + '\')"><span style="font-size:1.5rem">' + esc(f.avatar) + '</span><span style="flex:1">' + esc(f.name) + '</span><span style="font-size:.72rem;color:var(--accent)">Tantang ›</span></button>').join('') : '<p class="ios-glass dl-note" style="padding:1rem;border-radius:1rem">Belum ada teman asli. Tambahkan dulu lewat menu Teman → Cari teman.</p>') + '</div>' +
-      (L.length ? '<div class="space-y-2"><p class="dl-t">RIWAYAT</p>' + L.slice(0, 12).map(row).join('') + '</div>' : '') +
-      '<p class="dl-note">Fitur uji coba · skor lawan dikirim lewat koneksi teman. Kalau belum muncul, buka Riwayat lalu ketuk duelnya untuk meminta hasil terbaru.</p>');
+      (L.length ? '<div class="space-y-2"><div style="display:flex;justify-content:space-between;align-items:center"><p class="dl-t">RIWAYAT</p><button onclick="NGDuel.clearAll()" style="font-size:.68rem;font-weight:800;color:#dc2626;padding:.2rem .5rem">🗑 Hapus semua</button></div>' + L.slice(0, 20).map(row).join('') + '</div>' : '') +
+      '<p class="dl-note">Skor lawan dikirim lewat koneksi teman. Kalau belum muncul, buka Riwayat lalu ketuk duelnya untuk meminta hasil terbaru.</p>');
+  }
+  function del(id) {
+    const d = D().list[id]; if (!d) return;
+    if (!confirm('Hapus duel dengan ' + nameOf(d.opp) + ' dari riwayat?')) return;
+    if (!d.mine) send(d.opp, { k: 'dc', id });
+    forget(id); save(); home();
+  }
+  function forget(id) { const G = D().gone; G[id] = Date.now(); delete D().list[id]; delete D().orph[id]; const now = Date.now(); Object.keys(G).forEach(k => { if (now - G[k] > 3 * 86400000) delete G[k]; }); }
+  function clearAll() {
+    const ids = Object.keys(D().list); if (!ids.length) return;
+    if (!confirm('Hapus SEMUA riwayat duel (' + ids.length + ')? Tantangan yang belum dimainkan juga dibatalkan.')) return;
+    ids.forEach(id => { const d = D().list[id]; if (d && !d.mine) send(d.opp, { k: 'dc', id }); forget(id); }); save(); home();
   }
   function open_(id) { const d = D().list[id]; if (!d) return home(); if (d.mine) result(id); else play(id); }
 
   function setup(code) {
-    view = { n: 'setup', code }; const c = D().cfg, kN = kPool().length, sN = sPool().length, max = c.ty === 's' ? sN : kN;
+    view = { n: 'setup', code }; const c = D().cfg, sel = selOf(c), lm = lim(c.ty, sel), n = curN(c), av = availN(c.ty, sel), enough = av >= lm.min;
     const chip = (on, act, label, dis) => '<button class="dl-chip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' onclick="' + act + '">' + label + '</button>';
+    const sm = t => '<small style="display:block;font-weight:600;font-size:.62rem;opacity:.7">' + t + '</small>';
+    const presets = c.ty === 's' ? [5, 8, 10] : [10, 15, 20, 30, 50], unit = c.ty === 's' ? 'kalimat' : 'kata';
     shell('<div class="ios-glass" style="padding:.8rem 1rem;border-radius:1rem;font-size:.85rem">Lawan: <b>' + esc(nameOf(code)) + '</b></div>' +
-      '<div class="space-y-2"><p class="dl-t">JENIS SOAL</p><div class="dl-row">' + chip(c.ty === 'k', "NGDuel.cfg('ty','k')", '📖 Kosakata', kN < 5) + chip(c.ty === 's', "NGDuel.cfg('ty','s')", '🧩 Susun Kalimat', sN < 5) + '</div></div>' +
-      '<div class="space-y-2"><p class="dl-t">JUMLAH SOAL</p><div class="dl-row">' + [10, 15, 20].map(n => chip(c.n === n, "NGDuel.cfg('n'," + n + ')', n + ' soal', max < n)).join('') + '</div></div>' +
+      '<div class="space-y-2"><p class="dl-t">JENIS SOAL</p><div class="dl-row">' + chip(c.ty === 'k', "NGDuel.cfg('ty','k')", '📖 Kotoba' + sm('pilih arti'), availN('k', []) < 5) + chip(c.ty === 's', "NGDuel.cfg('ty','s')", '🧩 Bunpou' + sm('susun kalimat'), availN('s', []) < 3) + '</div></div>' +
+      '<div class="space-y-2"><p class="dl-t">BAB</p><div class="dl-row">' + chip(!sel.length, 'NGDuel.allBab()', '🎲 Acak semua bab') + '</div><div class="dl-babs">' + babsOf(c.ty).map(b => chip(sel.includes(b), 'NGDuel.toggleBab(' + b + ')', 'Bab ' + b)).join('') + '</div>' +
+      '<p class="dl-note" style="text-align:left">' + (sel.length ? 'Soal hanya dari Bab ' + sel.join(', ') : 'Soal diacak dari semua bab') + ' · tersedia ' + av + ' ' + unit + (enough ? '' : ' — kurang, minimal ' + lm.min + '. Tambah bab lagi.') + '</p></div>' +
+      '<div class="space-y-2"><p class="dl-t">JUMLAH SOAL</p><div class="dl-step"><button class="dl-sb" onclick="NGDuel.stepN(-1)"' + (!enough || n <= lm.min ? ' disabled' : '') + '>−</button><div class="dl-sv"><b>' + (enough ? n : '–') + '</b><small>soal</small></div><button class="dl-sb" onclick="NGDuel.stepN(1)"' + (!enough || n >= lm.max ? ' disabled' : '') + '>+</button></div>' +
+      '<div class="dl-row">' + presets.map(v => chip(enough && n === v, 'NGDuel.setN(' + v + ')', v, !enough || v > lm.max || v < lm.min)).join('') + '</div>' +
+      '<p class="dl-note" style="text-align:left">' + (c.ty === 's' ? 'Bunpou: atur ' + lm.min + '–' + lm.max + ' soal (maksimal 10).' : 'Kotoba: atur bebas ' + lm.min + '–' + lm.max + ' soal.') + ' Skor akhir dihitung 0–100, benar semua = 100.</p></div>' +
       '<div class="space-y-2"><p class="dl-t">MODE</p><div class="dl-row">' + chip(c.md === 'l', "NGDuel.cfg('md','l')", '⚡ Langsung') + chip(c.md === 'a', "NGDuel.cfg('md','a')", '⏰ Kapan saja') + '</div>' +
-      '<p class="dl-note" style="text-align:left">' + (c.md === 'l' ? 'Kamu menunggu temanmu bergabung, lalu kalian main bersamaan. Skor lawan terlihat di pojok layar selama bermain.' : 'Kamu main sekarang, temanmu bisa main kapan saja (1–2 jam lagi pun boleh). Skor kalian tampil otomatis saat ia selesai.') + '</p></div>' +
-      '<button class="dl-btn" onclick="NGDuel.challenge(\'' + code + '\')">Kirim tantangan ⚔️</button>');
+      '<p class="dl-note" style="text-align:left">' + (c.md === 'l' ? 'Kamu menunggu temanmu bergabung, lalu kalian main bersamaan. Skor lawan terlihat di pojok layar selama bermain.' : 'Kamu main sekarang, temanmu bisa main kapan saja (1–2 jam lagi pun boleh). Skor kalian tampil otomatis saat ia selesai.') + ' Timer berjalan saat bermain: skor sama → yang lebih cepat menang.</p></div>' +
+      '<button class="dl-btn"' + (enough ? '' : ' disabled style="opacity:.4"') + ' onclick="NGDuel.challenge(\'' + code + '\')">Kirim tantangan ⚔️</button>');
   }
-  function cfg(k, v) {
-    const c = D().cfg; c[k] = v;
-    const max = (c.ty === 's' ? sPool() : kPool()).length; if (c.n > max) c.n = [20, 15, 10].find(n => n <= max) || 10;
-    save(); setup(view.code);
-  }
+  function cfg(k, v) { const c = D().cfg; c[k] = v; save(); setup(view.code); }
+  function toggleBab(b) { const c = D().cfg, k = c.ty === 's' ? 'bs' : 'bk', a = c[k] || []; c[k] = a.includes(b) ? a.filter(x => x !== b) : a.concat(b).sort((x, y) => x - y); save(); setup(view.code); }
+  function allBab() { const c = D().cfg; c[c.ty === 's' ? 'bs' : 'bk'] = []; save(); setup(view.code); }
+  function setN(v) { const c = D().cfg, l = lim(c.ty, selOf(c)); v = Math.max(l.min, Math.min(l.max, +v || l.min)); if (c.ty === 's') c.ns = v; else c.nk = v; save(); setup(view.code); }
+  function stepN(dl) { setN(curN(D().cfg) + dl); }
 
   function challenge(code) {
-    const c = D().cfg, P = poolOf(c.ty), n = Math.min(c.n, P.length); if (P.length < 5) return toast('Soal belum cukup');
-    const q = shuf(P.map((_, i) => i)).slice(0, n), id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-    const d = D().list[id] = { id, opp: code, ty: c.ty, n, md: c.md, q, h: hsh(c.ty, P, q), mine: null, theirs: null, prog: null, from: 'me', ts: Date.now(), sent: null };
+    const c = D().cfg, E = entriesOf(c.ty), P = E.map(e => e.it), sel = selOf(c).slice(), lm = lim(c.ty, sel);
+    const cand = E.map((e, i) => i).filter(i => !sel.length || sel.includes(E[i].bab));
+    if (cand.length < lm.min) return toast('Soal di bab terpilih belum cukup — pilih lebih banyak bab');
+    const n = Math.min(curN(c), cand.length), q = shuf(cand).slice(0, n), id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    const d = D().list[id] = { id, opp: code, ty: c.ty, n, md: c.md, q, h: hsh(c.ty, P, q), bb: sel, mine: null, theirs: null, prog: null, from: 'me', ts: Date.now(), sent: null };
     save();
     sendCh(d).then(ok => { if (shown() && view.n === 'lobby') lobby(id); toast(ok ? 'Tantangan terkirim ⚔️' : 'Tantangan belum terkirim — periksa koneksi'); });
     c.md === 'l' ? lobby(id) : play(id);
@@ -8094,15 +8174,17 @@ const Social = (function () {
     const d = D().list[id]; if (!d) return home(); if (d.mine) return result(id);
     const Q = build(d); if (Q.length < 3) { toast('Soal tidak cocok dengan versi aplikasi ini'); return home(); }
     if (d.from === 'them' && !d.acked) { d.acked = true; save(); send(d.opp, { k: 'ac', id }); }
-    run = { id, d, Q, i: 0, c: 0, done: 0, log: '', t0: Date.now(), lock: false, last: 0, pt: 0, sel: [] };
+    run = { id, d, Q, i: 0, c: 0, done: 0, log: '', t0: Date.now(), lock: false, last: 0, pt: 0, sel: [], tt: 0 };
+    const rr = run; rr.tt = setInterval(() => { if (run !== rr) return clearInterval(rr.tt); tickTimer(); }, 250);
     sendProg(true); ask();
   }
+  function tickTimer() { const e = $('dl-timer'); if (e && run) e.textContent = fmtT(Math.floor((Date.now() - run.t0) / 1000)); }
   function ask() {
     const q = run.Q[run.i], n = run.Q.length; run.sel = []; run.lock = false; view = { n: 'play', id: run.id };
-    const top = '<div class="dl-top"><span>Soal ' + (run.i + 1) + '/' + n + '</span><div id="dl-corner" class="dl-corner"></div></div>';
+    const top = '<div class="dl-top"><span>Soal ' + (run.i + 1) + '/' + n + '<br>⏱ <span id="dl-timer" class="dl-tm" style="font-size:1.1rem">0:00</span></span><div id="dl-corner" class="dl-corner"></div></div>';
     if (q.ty === 'k') shell(top + '<div class="ios-glass dl-q"><div class="dl-big">' + esc(q.show) + '</div><div class="dl-sub">' + (q.show !== q.sub ? esc(q.sub) : 'Apa artinya?') + '</div></div><div class="dl-grid">' + q.opts.map((o, i) => '<button class="dl-opt" data-dl-i="' + i + '" onclick="NGDuel.pick(' + i + ')">' + esc(o) + '</button>').join('') + '</div>');
     else { shell(top + '<div class="ios-glass dl-q"><div class="dl-sub">Susun kalimat Jepang:</div><div class="dl-pr">' + esc(q.prompt) + '</div></div><div id="dl-ans" class="dl-ans"></div><div id="dl-chips" class="dl-row"></div><div id="dl-fb"></div><button class="dl-reset" onclick="NGDuel.resetAns()">↺ Ulangi susunan</button>'); drawChips(); }
-    updateCorner();
+    updateCorner(); tickTimer();
   }
   function drawChips() {
     const q = run.Q[run.i], used = new Set(run.sel), w = k => q.chips.find(c => c.k === k).w;
@@ -8140,7 +8222,7 @@ const Social = (function () {
     el.innerHTML = me + op;
   }
   function finish() {
-    const r = run, d = r.d, t = Math.round((Date.now() - r.t0) / 1000); clearTimeout(r.pt);
+    const r = run, d = r.d, t = Math.round((Date.now() - r.t0) / 1000); clearTimeout(r.pt); clearInterval(r.tt);
     d.mine = { s: r.c, t }; d.rsOk = false; run = null; save();
     pushResult(d).then(ok => { if (!ok && shown()) toast('Hasil belum terkirim — dicoba lagi otomatis'); });
     result(d.id);
@@ -8152,10 +8234,21 @@ const Social = (function () {
     const card = (title, s, sub, hi) => '<div class="dl-sc' + (hi ? ' hi' : '') + '"><span class="dl-sn">' + title + '</span><b class="dl-ss">' + (s === null ? '–' : pts(s, n)) + '<small> poin</small></b><span class="dl-st">' + sub + '</span></div>';
     const p = d.prog;
     const opp = o ? card(nm, o.s, o.s + '/' + n + ' benar · ' + o.t + ' dtk', c < 0) : card(nm, null, p ? (p.i ? 'sedang mengerjakan ' + p.i + '/' + n + ' · ✅ ' + p.c : 'sudah membuka, belum menjawab') : 'belum ada kabar (belum dibuka / belum terhubung)', false);
-    shell('<div class="ios-glass dl-center"><div style="font-size:1.6rem;font-weight:900">' + head + '</div><div class="dl-note">' + tyLabel(d) + ' · ' + n + ' soal · ' + (d.md === 'l' ? '⚡ Langsung' : '⏰ Kapan saja') + '</div></div>' +
+    shell('<div class="ios-glass dl-center"><div style="font-size:1.6rem;font-weight:900">' + head + '</div><div class="dl-note">' + tyLabel(d) + ' · ' + n + ' soal · ' + babTxt(d) + ' · ' + (d.md === 'l' ? '⚡ Langsung' : '⏰ Kapan saja') + '</div>' + (o && m.s === o.s && m.t !== o.t ? '<div class="dl-note">Skor sama — pemenang ditentukan dari waktu tercepat ⏱</div>' : '') + '</div>' +
       '<div class="dl-board">' + card('Kamu', m.s, m.s + '/' + n + ' benar · ' + m.t + ' dtk', c > 0) + opp + '</div>' +
       (o ? '' : '<p class="dl-note">Skor ' + nm + ' muncul otomatis di sini saat ia selesai. Boleh ditinggal — cek lagi nanti lewat Riwayat.</p><button class="dl-btn alt" onclick="NGDuel.sync(\'' + id + '\')">🔄 Cek hasil terbaru</button>') +
+      '<button class="dl-btn alt" onclick="NGDuel.resend(\'' + id + '\')">📤 Kirim ulang skorku</button>' +
+      '<p class="dl-note" id="dl-diag">' + diag(d) + '</p>' +
       '<button class="dl-btn" onclick="NGDuel.setup(\'' + d.opp + '\')">Tantang lagi ⚔️</button><button class="dl-btn alt" onclick="NGDuel.open()">Kembali ke Duel</button>');
+  }
+  function ago(ts) { if (!ts) return 'belum pernah'; const s = Math.round((Date.now() - ts) / 1000); return s < 60 ? s + ' dtk lalu' : s < 3600 ? Math.round(s / 60) + ' mnt lalu' : Math.round(s / 3600) + ' jam lalu'; }
+  function diag(d) {
+    let mode = '?'; try { mode = window.NGNet.mode(); } catch (e) {}
+    return 'Skormu: ' + (d.rsOk ? 'terkirim ✓' : d.sending ? 'mengirim…' : 'belum terkirim ✗') + ' · Kabar terakhir dari lawan: ' + ago(d.rx) + (d.oldv ? ' · ⚠️ lawan memakai versi aplikasi lama' : '') + ' · Koneksi: ' + esc(mode);
+  }
+  function resend(id) {
+    const d = D().list[id]; if (!d || !d.mine) return;
+    pushResult(d).then(ok => { toast(ok ? 'Skormu terkirim ✓' : 'Gagal mengirim — periksa koneksi internet'); const e = $('dl-diag'); if (e && shown()) e.textContent = diag(d); });
   }
   function sync(id) {
     const d = D().list[id]; if (!d) return;
@@ -8163,37 +8256,51 @@ const Social = (function () {
     setTimeout(() => { if (shown() && view.n === 'result' && view.id === id) result(id); }, 2500);
   }
   function back() {
-    if (run) { if (!confirm('Keluar dari duel? Skormu belum terkirim ke lawan.')) return; clearTimeout(run.pt); run = null; return home(); }
-    if (view.n === 'home') return window.renderLatihanTabs();
+    if (run) { if (!confirm('Keluar dari duel? Skormu belum terkirim ke lawan.')) return; clearTimeout(run.pt); clearInterval(run.tt); run = null; return home(); }
+    if (view.n === 'mp') return window.renderLatihanTabs();
+    if (view.n === 'home') return hub();
     home();
   }
-  function open() { if (!dev()) return toast('Fitur Duel belum tersedia'); home(); }
+  function hub() {
+    view = { n: 'mp' }; const inbox = Object.values(D().list).filter(d => d.from === 'them' && !d.mine).length;
+    shell('<p class="dl-note" style="text-align:left">Main bareng teman. Pilih permainan:</p>' +
+      '<button class="ios-glass dl-mpcard" onclick="NGDuel.open()"><span class="dl-mpi">⚔️</span><span style="flex:1;min-width:0"><b style="font-size:.9rem">Duel</b><br><span style="font-size:.72rem;color:var(--text-muted)">Tantang temanmu: kotoba atau bunpou · langsung atau main kapan saja</span></span>' + (inbox ? '<span class="dl-bdg">' + inbox + '</span>' : '') + '</button>', '👥 Multiplayer');
+  }
+  function open() { home(); }
 
   /* ---- pesan masuk ---- */
   function refresh() {
     if (!shown()) return;
     if (run) return updateCorner();
-    if (view.n === 'home') home(); else if (view.n === 'result') result(view.id);
+    if (view.n === 'mp') hub(); else if (view.n === 'home') home(); else if (view.n === 'result') result(view.id);
   }
   function onMsg(from, p) {
     if (!p || typeof p.id !== 'string' || !/^[A-Za-z0-9]{1,24}$/.test(p.id)) return;
     const L = D().list, d = L[p.id];
+    if (D().gone[p.id]) return;
+    if (d && d.opp === from) { d.rx = Date.now(); if (p.v !== 2) d.oldv = true; else if (d.oldv) d.oldv = false; }
     if (p.k === 'ch') {
       if (d) return;
+      if (p.v !== 2) { send(from, { k: 'dc', id: p.id, why: 'v' }); if (shown()) toast('⚔️ ' + nameOf(from) + ' memakai versi aplikasi lama — minta ia memuat ulang / memperbarui aplikasi'); return; }
       const ty = p.ty === 's' ? 's' : 'k', P = poolOf(ty);
-      const q = String(p.q || '').split(',').map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < P.length).slice(0, 20);
-      if (q.length < 5 || String(p.q || '').split(',').length !== q.length || hsh(ty, P, q) !== p.h) { send(from, { k: 'dc', id: p.id, why: 'v' }); if (shown()) toast('⚔️ Tantangan ' + nameOf(from) + ' tidak cocok dengan versi aplikasimu'); return; }
+      const q = String(p.q || '').split(',').map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < P.length).slice(0, 50);
+      if (q.length < 3 || (ty === 's' && q.length > 10) || String(p.q || '').split(',').length !== q.length || hsh(ty, P, q) !== p.h) { send(from, { k: 'dc', id: p.id, why: 'v' }); if (shown()) toast('⚔️ Tantangan ' + nameOf(from) + ' tidak cocok dengan versi aplikasimu'); return; }
       const ts = Math.abs(Date.now() - (+p.ts || 0)) < 2 * 86400000 ? +p.ts : Date.now();
-      const nd = L[p.id] = { id: p.id, opp: from, ty, n: q.length, md: p.md === 'l' ? 'l' : 'a', q, h: p.h, mine: null, theirs: null, prog: null, from: 'them', ts };
+      const nd = L[p.id] = { id: p.id, opp: from, ty, n: q.length, md: p.md === 'l' ? 'l' : 'a', q, h: p.h, mine: null, theirs: null, prog: null, from: 'them', ts, rx: Date.now(), bb: String(p.bb || '').split(',').map(Number).filter(x => Number.isInteger(x) && x > 0 && x < 100).slice(0, 40) };
+      const o = D().orph[p.id]; if (o && o.from === from) { if (o.prog) nd.prog = o.prog; if (o.theirs) nd.theirs = o.theirs; delete D().orph[p.id]; }
       save(); toast('⚔️ ' + nameOf(from) + (live(nd) ? ' mengajakmu duel langsung! Ketuk untuk gabung' : ' menantangmu duel!'), true);
-    } else if (!d || d.opp !== from) { return; }
+    } else if (!d) {
+      /* pesan datang sebelum tantangannya (urutan terbalik): simpan dulu, dipasang saat tantangan tiba */
+      if ((p.k === 'rs' || p.k === 'pg') && p.v === 2) { const o = D().orph[p.id] = D().orph[p.id] || { from }; if (o.from === from) { if (p.k === 'rs') o.theirs = { s: clamp(p.sc, 0, 50), t: clamp(p.tm, 0, 99999) }; else o.prog = { i: clamp(p.dn, 0, 50), c: clamp(p.ok, 0, 50), r: String(p.r || '').replace(/[^01]/g, '').slice(0, 50), ts: Date.now() }; } }
+      return;
+    } else if (d.opp !== from) { return; }
     else if (p.k === 'ac') {
       d.joined = true;
       if (view.n === 'lobby' && view.id === d.id && !d.mine && !run && shown()) { toast('⚡ ' + nameOf(from) + ' bergabung — mulai!'); return play(d.id); }
     } else if (p.k === 'dc') {
       if (d.from === 'me' && !d.mine) { d.declined = p.why || 1; save(); if (view.n === 'lobby' && view.id === d.id && shown()) { toast(p.why === 'v' ? 'Versi aplikasi temanmu berbeda — duel tidak bisa dimulai' : nameOf(from) + ' menolak tantangan'); delete L[d.id]; save(); return home(); } }
     } else if (p.k === 'pg') {
-      d.prog = { i: clamp(p.dn, 0, N(d)), c: clamp(p.ok, 0, N(d)), r: String(p.r || '').replace(/[^01]/g, '').slice(0, 20), ts: Date.now() };
+      d.prog = { i: clamp(p.dn, 0, N(d)), c: clamp(p.ok, 0, N(d)), r: String(p.r || '').replace(/[^01]/g, '').slice(0, 50), ts: Date.now() };
     } else if (p.k === 'rs') {
       if (d.theirs) return;
       d.theirs = { s: clamp(p.sc, 0, N(d)), t: clamp(p.tm, 0, 99999) }; save();
@@ -8204,7 +8311,7 @@ const Social = (function () {
     } else return;
     refresh();
   }
-  window.NGDuel = { open, open_, setup, cfg, challenge, playNow, cancel, play, pick, tapChip, tapAns, resetAns, sync, back, result, onMsg };
+  window.NGDuel = { hub, toggleBab, allBab, open, open_, del, clearAll, resend, setup, cfg, setN, stepN, challenge, playNow, cancel, play, pick, tapChip, tapAns, resetAns, sync, back, result, onMsg };
   if (window.__NG_TEST__) window.NGDuel._t = { fast() { DLY.ok = DLY.bad = 15; }, tick, list: () => D().list, run: () => run, view: () => view, ans() { const q = run && run.Q[run.i]; if (!q) return null; if (q.ty === 'k') return q.opts.indexOf(q.ans); const u = []; return q.words.map(w => { const c = q.chips.find(c => c.w === w && !u.includes(c.k)); u.push(c.k); return c.k; }); } };
 })();
 </script>
