@@ -727,6 +727,16 @@
         .hdr-coin-row { display: flex; align-items: center; margin-top: .3rem !important; }
         #main-app header.hdr-v212 #header-bio { margin-left: .1rem; }
     </style>
+<style id="ng-theme-fx">
+#season-overlay { z-index: 0; }
+/* transisi gelap <-> terang */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+html.ng-vt, html.ng-vt *, html.ng-vt *::before, html.ng-vt *::after { transition: none !important; }
+html.ng-fade, html.ng-fade body, html.ng-fade body * { transition: background-color .6s ease, color .6s ease, border-color .6s ease, fill .6s ease, stroke .6s ease, box-shadow .6s ease, opacity .3s ease !important; }
+@media (prefers-reduced-motion: reduce) { html.ng-fade, html.ng-fade * { transition: none !important; } }
+</style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative flex flex-col">
     <svg width="0" height="0" style="position:fixed" aria-hidden="true"><filter id="lg-edge" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="5" result="n"/><feGaussianBlur in="n" stdDeviation=".8" result="b"/><feDisplacementMap in="SourceGraphic" in2="b" scale="22" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
@@ -7686,7 +7696,7 @@ const Social = (function () {
 /* ===== MENU PEMBERITAHUAN v2.1.1: pesan developer & riwayat update ===== */
 (function () {
   'use strict';
-  const APP_VER = '2.1.3';
+  const APP_VER = '2.1.4';
   /* Opsional: alamat JSON pesan developer supaya bisa dikirim tanpa memperbarui file ini.
      Contoh (Firebase): 'https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app/notices.json'
      Format: { "pesan1": { "title": "Judul", "body": "Isi", "date": "20 Okt", "url": "https://...", "t": 1760000000 } }  */
@@ -7694,6 +7704,8 @@ const Social = (function () {
 
   /* Pesan developer bawaan (terbaru di atas). Tambah objek baru di sini untuk memunculkan bundaran merah. */
   const DEV_NOTES = [
+    { id: 'v214-natal', date: 'v2.1.4', title: 'Special Natal hadir 🎄',
+      body: 'Mulai versi 2.1.4 tema Spesial Natal tampil baru: hutan pinus bersalju, bingkai emas dengan holly, dan bar bawah pita merah-emas-hijau. Versi terang dan versi gelapnya sama-sama punya suasana sendiri.\nGanti mode gelap/terang juga kini punya transisi halus.\nBuka Riwayat Update → v2.1.4 untuk melihat perbandingan sebelum dan sesudah.\n\n— RamaTeam' },
     { id: 'v213-duel', date: 'v2.1.3', title: 'Multiplayer & Duel resmi hadir ⚔️',
       body: 'Mulai versi 2.1.3 kamu bisa menantang temanmu!\nBuka Games → tombol 👥 Multiplayer di pojok kanan atas → Duel. Pilih teman, jenis soal (Kotoba atau Bunpou), bab, dan jumlah soal.\n⚡ Langsung: main bersamaan, skor lawan tampil di pojok layar.\n⏰ Kapan saja: temanmu boleh main nanti, skornya muncul otomatis saat ia selesai.\n\n— RamaTeam' },
     { id: 'v212-header', date: 'v2.1.2', title: 'Header lebih rapi ✨',
@@ -7704,6 +7716,7 @@ const Social = (function () {
 
   /* Riwayat pembaruan (terbaru di atas) */
   const HISTORY = [
+    { v: '2.1.4', ic: '🎄', t: 'Special Natal Update', d: ['Tema Spesial Natal dirombak: hutan pinus bersalju, bingkai emas dengan ranting holly, dan bar bawah pita merah-emas-hijau.', 'Tersedia dalam dua versi: terang (pagi bersalju hangat) dan gelap (malam biru bersalju).', 'Ganti mode gelap dan terang kini memakai transisi halus yang melebar dari titik yang kamu ketuk.', 'Gambar di atas membandingkan Natal lama (terang & gelap) dengan Natal baru (terang & gelap).'], ill: 'v214' },
     { v: '2.1.3', ic: '⚔️', t: 'Multiplayer: Duel dengan Teman', d: ['Menu Games punya tombol 👥 Multiplayer di pojok kanan atas. Ketuk, lalu pilih Duel.', 'Tantang temanmu dari daftar Tantang Teman. Atur jenis soal: Kotoba (pilih arti) atau Bunpou (susun kalimat), bab yang diinginkan, dan jumlah soal.', 'Mode ⚡ Langsung: main bersamaan dan skor lawan terlihat di pojok layar. Mode ⏰ Kapan saja: temanmu boleh membalas nanti (sekitar 12 jam) dan skor tampil otomatis saat ia selesai.', 'Skor akhir 0–100; kalau sama, yang lebih cepat menang. Riwayat duel tersimpan dan bisa dihapus.'], ill: 'v213' },
     { v: '2.1.2', ic: '✨', t: 'Header Lebih Rapi', d: ['Level bahasa Jepang (misalnya N5) tampil di bawah foto profil.', 'Api streak 🔥 ada di samping nama.', 'Lonceng pindah ke baris koin, tepat di depan angka koin. Bundaran merah tetap muncul saat ada pesan baru.', 'Tombol di kanan tinggal Teman, Musik, Toko, dan Pengaturan.'], ill: 'hdr3' },
     { v: '2.1.1', ic: '🔔', t: 'Menu Pemberitahuan', d: ['Lonceng di header dengan bundaran merah saat ada pesan baru dari developer.', 'Riwayat semua pembaruan, lengkap dengan pop up tiap versi.'], ill: 'bell' },
@@ -7845,7 +7858,57 @@ const Social = (function () {
     '<rect x="18" y="498" width="132" height="28" rx="14" fill="var(--accent)"/><text x="84" y="516" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">⚡ Langsung</text>' +
     '<rect x="158" y="498" width="132" height="28" rx="14" fill="rgba(128,128,128,.25)"/><text x="224" y="516" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor">⏰ Kapan saja</text>' +
     '</g></svg>';
-  const ILL = { v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG, hdr3: HDR3_SVG, v213: DUEL_SVG };
+  const NATAL214_SVG = (function () {
+    const W = 142, H = 86;
+    const defs =
+      '<defs>' +
+      '<linearGradient id="n214ol" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fffafa"/><stop offset=".55" stop-color="#ffe8e8"/><stop offset="1" stop-color="#f9fff0"/></linearGradient>' +
+      '<linearGradient id="n214od" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a0f12"/><stop offset=".56" stop-color="#160b0b"/><stop offset="1" stop-color="#102016"/></linearGradient>' +
+      '<linearGradient id="n214nl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff4ee"/><stop offset=".55" stop-color="#fde4e1"/><stop offset="1" stop-color="#eaf3ee"/></linearGradient>' +
+      '<linearGradient id="n214nd" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#060f1c"/><stop offset=".6" stop-color="#0b2036"/><stop offset="1" stop-color="#17314f"/></linearGradient>' +
+      '<linearGradient id="n214rg" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#c8102e"/><stop offset=".3" stop-color="#e9b949"/><stop offset=".5" stop-color="#1f7a4a"/><stop offset=".7" stop-color="#e9b949"/><stop offset="1" stop-color="#c8102e"/></linearGradient>' +
+      '<linearGradient id="n214rb" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6f9cc8"/><stop offset=".25" stop-color="#e6f1fb"/><stop offset=".5" stop-color="#9cc0e4"/><stop offset=".75" stop-color="#e6f1fb"/><stop offset="1" stop-color="#6f9cc8"/></linearGradient>' +
+      '<pattern id="n214cl" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#d71920"/><rect x="4" width="4" height="8" fill="#fff"/></pattern>' +
+      '<pattern id="n214cd" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#ff6b6b"/><rect x="4" width="4" height="8" fill="#ffe1b0"/></pattern>' +
+      '</defs>';
+    const pines = (x, y, fill) => {
+      let o = '';
+      [[10, 62, 16], [34, 56, 20], [96, 58, 18], [120, 63, 15]].forEach(t => {
+        const cx = x + t[0] + 8, top = y + t[1] - t[2], base = y + t[1] + 8;
+        o += '<path d="M' + cx + ' ' + top + ' L' + (cx - t[2] * .5) + ' ' + base + ' L' + (cx + t[2] * .5) + ' ' + base + ' Z" fill="' + fill + '"/>';
+      });
+      return o;
+    };
+    const snowDots = (x, y) => '<g fill="#fff" opacity=".9"><circle cx="' + (x + 22) + '" cy="' + (y + 12) + '" r="1.4"/><circle cx="' + (x + 62) + '" cy="' + (y + 8) + '" r="1.2"/><circle cx="' + (x + 100) + '" cy="' + (y + 16) + '" r="1.6"/><circle cx="' + (x + 128) + '" cy="' + (y + 10) + '" r="1.2"/><circle cx="' + (x + 80) + '" cy="' + (y + 28) + '" r="1"/></g>';
+    const snowBar = (x, y) => '<path d="M' + (x + 12) + ' ' + (y + 66) + ' q5 -5 10 0 q5 -6 10 0 q5 -5 10 0 q5 -6 10 0 q5 -5 10 0 q5 -6 10 0 q5 -5 10 0 q5 -6 10 0 q5 -5 10 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>';
+    const K = {
+      ol: { bg: 'url(#n214ol)', edge: 'rgba(128,128,128,.35)', card: '#fff', cs: 'url(#n214cl)', csw: 2, bar: '#fff', bs: 'url(#n214cl)', bsw: 2.4, ink: 'rgba(60,30,30,.4)', cap: 'rgba(60,30,30,.6)', e: ['🎅', '🎁'], t: 'Terang' },
+      od: { bg: 'url(#n214od)', edge: 'rgba(255,225,176,.35)', card: '#3f1616', cs: 'url(#n214cd)', csw: 2, bar: '#3f1616', bs: 'url(#n214cd)', bsw: 2.4, ink: 'rgba(255,225,176,.5)', cap: 'rgba(255,225,176,.8)', e: ['🎅', '🎁'], t: 'Gelap' },
+      nl: { bg: 'url(#n214nl)', edge: 'rgba(190,40,50,.35)', card: '#fffaf8', cs: '#d9a93f', csw: 1.4, bar: '#fff6f3', bs: 'url(#n214rg)', bsw: 2.4, ink: 'rgba(60,30,30,.4)', cap: 'rgba(60,30,30,.6)', e: ['🎄', '⛄'], t: 'Terang', pine: '#7fae8c', snow: 1 },
+      nd: { bg: 'url(#n214nd)', edge: 'rgba(160,200,240,.5)', card: '#12223a', cs: '#7fa8d6', csw: 1.4, bar: '#0e2036', bs: 'url(#n214rb)', bsw: 2.4, ink: 'rgba(200,225,255,.5)', cap: 'rgba(200,225,255,.85)', e: ['🎄', '⛄'], t: 'Gelap', pine: '#0f3a34', snow: 1 }
+    };
+    const panel = (x, y, k) => {
+      const c = K[k];
+      let o = '<g><rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + H + '" rx="11" fill="' + c.bg + '" stroke="' + c.edge + '"/>';
+      if (c.pine) o += pines(x, y, c.pine) + snowDots(x, y);
+      o += '<circle cx="' + (x + 19) + '" cy="' + (y + 16) + '" r="8" fill="' + c.ink + '" opacity=".6"/><rect x="' + (x + 32) + '" y="' + (y + 12) + '" width="38" height="7" rx="3.5" fill="' + c.ink + '"/>';
+      o += '<text x="' + (x + W - 9) + '" y="' + (y + 19) + '" text-anchor="end" font-size="8" font-weight="900" fill="' + c.cap + '">' + c.t + '</text>';
+      o += '<rect x="' + (x + 10) + '" y="' + (y + 28) + '" width="56" height="30" rx="8" fill="' + c.card + '" stroke="' + c.cs + '" stroke-width="' + c.csw + '"/>';
+      o += '<rect x="' + (x + 76) + '" y="' + (y + 28) + '" width="56" height="30" rx="8" fill="' + c.card + '" stroke="' + c.cs + '" stroke-width="' + c.csw + '"/>';
+      o += '<text x="' + (x + 38) + '" y="' + (y + 48) + '" text-anchor="middle" font-size="13">' + c.e[0] + '</text><text x="' + (x + 104) + '" y="' + (y + 48) + '" text-anchor="middle" font-size="13">' + c.e[1] + '</text>';
+      o += '<rect x="' + (x + 10) + '" y="' + (y + 64) + '" width="122" height="16" rx="8" fill="' + c.bar + '" stroke="' + c.bs + '" stroke-width="' + c.bsw + '"/>';
+      if (c.snow) o += snowBar(x, y + 0);
+      return o + '</g>';
+    };
+    const lbl = (y, txt, accent) => '<text x="160" y="' + y + '" text-anchor="middle" font-size="10" font-weight="900" fill="' + (accent ? 'var(--accent)' : 'currentColor') + '"' + (accent ? '' : ' opacity=".7"') + '>' + txt + '</text>';
+    return '<svg viewBox="0 0 320 262" width="100%" role="img" aria-label="Perbandingan Natal lama dan Natal baru, masing-masing versi terang dan gelap" style="display:block;margin-top:.5rem">' + defs +
+      '<rect x="2" y="2" width="316" height="258" rx="18" fill="rgba(128,128,128,.12)" stroke="var(--accent)" stroke-width="1.5"/>' +
+      lbl(21, 'SEBELUM · NATAL LAMA', false) + panel(10, 28, 'ol') + panel(168, 28, 'od') +
+      '<text x="160" y="130" text-anchor="middle" font-size="14" font-weight="900" fill="var(--accent)">↓</text>' +
+      lbl(145, 'SESUDAH · NATAL BARU', true) + panel(10, 152, 'nl') + panel(168, 152, 'nd') +
+      '<text x="160" y="252" text-anchor="middle" font-size="9" fill="currentColor" opacity=".65">Tepi permen merah-putih → hutan pinus bersalju &amp; pita emas</text></svg>';
+  })();
+  const ILL = { v214: NATAL214_SVG, v210: BOOK_SVG + KANJI_SVG, bell: BELL_SVG, hdr: HDR_SVG, hdr3: HDR3_SVG, v213: DUEL_SVG };
 
   /* ---------- data pesan ---------- */
   const notes = () => {
@@ -8362,6 +8425,44 @@ const Social = (function () {
   }
   window.NGDuel = { hub, toggleBab, allBab, open, open_, del, clearAll, resend, setup, cfg, setN, stepN, challenge, playNow, cancel, play, pick, tapChip, tapAns, resetAns, sync, back, result, onMsg };
   if (window.__NG_TEST__) window.NGDuel._t = { fast() { DLY.ok = DLY.bad = 15; }, tick, list: () => D().list, run: () => run, view: () => view, ans() { const q = run && run.Q[run.i]; if (!q) return null; if (q.ty === 'k') return q.opts.indexOf(q.ans); const u = []; return q.words.map(w => { const c = q.chips.find(c => c.w === w && !u.includes(c.k)); u.push(c.k); return c.k; }); } };
+})();
+</script>
+
+<script id="ng-theme-fx-js">
+/* Transisi mode gelap/terang: lingkaran melebar dari titik ketuk (fallback: pudar halus) */
+(function () {
+  'use strict';
+  if (typeof window.applyTheme !== 'function') return;
+  const orig = window.applyTheme, root = document.documentElement;
+  const reduced = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let px = window.innerWidth - 40, py = 40;
+  document.addEventListener('pointerdown', e => { px = e.clientX; py = e.clientY; }, true);
+  const wantDark = () => { try { return state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return root.classList.contains('dark'); } };
+  let busy = false;
+  window.applyTheme = function () {
+    const main = document.getElementById('main-app');
+    const ready = main && !main.classList.contains('hidden');
+    if (!ready || busy || reduced() || wantDark() === root.classList.contains('dark')) return orig.apply(this, arguments);
+    const self = this, args = arguments;
+    if (typeof document.startViewTransition === 'function') {
+      busy = true; root.classList.add('ng-vt');
+      const r = Math.hypot(Math.max(px, innerWidth - px), Math.max(py, innerHeight - py));
+      let t;
+      try { t = document.startViewTransition(() => { orig.apply(self, args); }); }
+      catch (e) { root.classList.remove('ng-vt'); busy = false; return orig.apply(self, args); }
+      const done = () => { root.classList.remove('ng-vt'); busy = false; };
+      t.ready.then(() => {
+        root.animate({ clipPath: ['circle(0px at ' + px + 'px ' + py + 'px)', 'circle(' + r + 'px at ' + px + 'px ' + py + 'px)'] },
+          { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', pseudoElement: '::view-transition-new(root)' });
+      }).catch(() => {});
+      t.finished.then(done, done);
+      return;
+    }
+    root.classList.add('ng-fade');
+    const res = orig.apply(this, arguments);
+    setTimeout(() => root.classList.remove('ng-fade'), 700);
+    return res;
+  };
 })();
 </script>
 </body>
