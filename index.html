@@ -4240,27 +4240,42 @@ const KANJI_N5_DB = (() => {
         }
 
         // Shop System
+        /* Tata letak toko: "Event Spesial" (Natal, Ramadhan, Halloween) lalu "Tema Lainnya" (urut tanggal rilis) */
+        const SHOP_EVENT_IDS = ['natal', 'ramadan', 'halloween'];
+        const SHOP_OTHER_ORDER = ['tropis', 'space', 'ios6', 'xpaero', 'kyoto', 'inari'];   /* urutan tanggal rilis; tema baru otomatis di paling akhir */
         function openShopModal() {
             updateCoinUI();
             const container = document.getElementById('shop-items-container');
             const coinIcon = getCoinIcon();
-            
-            container.innerHTML = SHOP_ITEMS.map(item => {
+            const card = (item, isEvent) => {
                 const isUnlocked = state.unlockedThemes.includes(item.id);
                 const btnHTML = isUnlocked 
                     ? `<button onclick="setSeason('${item.id}'); closeShopModal()" class="px-4 py-2 bg-glassborder rounded-full text-xs font-bold w-full text-main hover:bg-accent hover:text-white transition-all">Gunakan</button>`
                     : `<button onclick="buyTheme('${item.id}', ${item.price})" class="px-4 py-2 bg-yellow-500 text-white rounded-full text-xs font-bold w-full shadow hover:bg-yellow-600 transition-colors">Beli (${item.price} ${coinIcon})</button>`;
-                
                 return `
-                <div class="ios-glass p-4 rounded-[1.5rem] flex items-center gap-4">
+                <div class="ios-glass p-4 rounded-[1.5rem] flex items-center gap-4 ${isEvent ? 'ring-1 ring-yellow-500/40' : ''}">
                     <div class="w-14 h-14 rounded-2xl bg-glassborder flex items-center justify-center text-3xl shrink-0">${item.icon}</div>
                     <div class="flex-1">
-                        <h4 class="font-bold text-sm text-main">${item.name}</h4>
+                        <h4 class="font-bold text-sm text-main">${item.name}${isEvent ? ' <span class="text-[9px] font-black text-yellow-500 align-middle">EVENT</span>' : ''}</h4>
                         <p class="text-[10px] mb-2 leading-tight" style="color: var(--text-muted)">${item.desc}</p>
                         ${btnHTML}
                     </div>
                 </div>`;
-            }).join('');
+            };
+            const section = (icon, title, sub, items, isEvent) => !items.length ? '' : `
+                <section class="space-y-3">
+                    <div class="flex items-center gap-2 px-1">
+                        <span class="text-xl">${icon}</span>
+                        <div><h3 class="font-black text-sm text-main">${title}</h3><p class="text-[10px]" style="color: var(--text-muted)">${sub}</p></div>
+                    </div>
+                    ${items.map(i => card(i, isEvent)).join('')}
+                </section>`;
+            const events = SHOP_EVENT_IDS.map(id => SHOP_ITEMS.find(i => i.id === id)).filter(Boolean);
+            const rank = id => { const k = SHOP_OTHER_ORDER.indexOf(id); return k < 0 ? 999 : k; };
+            const others = SHOP_ITEMS.filter(i => !SHOP_EVENT_IDS.includes(i.id)).sort((a, b) => rank(a.id) - rank(b.id));
+            container.innerHTML =
+                section('🎉', 'Event Spesial', events.map(i => i.name.replace(/^Spesial /, '').replace(/ Kareem$/, '')).join(' · '), events, true) +
+                section('🎨', 'Tema Lainnya', 'Urut sesuai tanggal rilis', others, false);
             
             document.getElementById('shop-modal').classList.remove('hidden'); 
             setTimeout(()=>document.getElementById('shop-modal').querySelector('div').classList.remove('translate-y-full'), 50); 
