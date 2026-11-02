@@ -9095,7 +9095,7 @@ const Social = (function () {
   const LANGS = { id: 'Indonesia', ja: 'Jepang', en: 'Inggris' }, SRL = { id: 'id-ID', ja: 'ja-JP', en: 'en-US' };
   let root, app, stage, tabbar, toastEl, isOpen = false, tab = 'home', stack = [], hist = 0, histOK = true, skipPop = false, skipT = 0, closeT = 0, hideT = 0, closing = false, hwP = null;
   const caches = { w: new Map(), ex: new Map(), kj: new Map(), kw: new Map(), grade: new Map() };
-  const T = { from: 'id', to: 'ja' };
+  const T = { from: 'id', to: 'ja', mode: 'tr', fk: 'kata', ft: '', fseed: 0, furi: true };
 
   /* ---------- util UI ---------- */
   function toast(m) { if (!toastEl) return; toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => toastEl.classList.remove('on'), 2200); }
@@ -9369,10 +9369,10 @@ const Social = (function () {
   }
 
   /* ---------- TERJEMAH ---------- */
-  function transHTML() {
+  function transHTMLBase() {
     const th = DT().trHist.slice(0, 6), opt = (cur, other) => Object.keys(LANGS).map(l => '<option value="' + l + '"' + (l === cur ? ' selected' : '') + '>' + LANGS[l] + '</option>').join('');
     return '<div class="ngd-hero" style="--h2:#14b8a6"><div class="ngd-kan">訳</div>' + heroBar('Terjemah', '訳') + '<h1>Terjemahkan ke<br>bahasa Jepang</h1><p>Lengkap dengan romaji dan suara. Bisa juga Jepang → Indonesia.</p></div>' +
-      '<div class="ngd-langbar"><label><small>Dari</small><select id="ngd-from" data-act="lang">' + opt(T.from) + '</select></label><button class="ngd-swap ngd-press" data-act="swap" aria-label="Tukar bahasa">' + ico('sw', 20) + '</button><label><small>Ke</small><select id="ngd-to" data-act="lang">' + opt(T.to) + '</select></label></div>' +
+      trSeg() + '<div class="ngd-langbar" style="margin-top:12px"><label><small>Dari</small><select id="ngd-from" data-act="lang">' + opt(T.from) + '</select></label><button class="ngd-swap ngd-press" data-act="swap" aria-label="Tukar bahasa">' + ico('sw', 20) + '</button><label><small>Ke</small><select id="ngd-to" data-act="lang">' + opt(T.to) + '</select></label></div>' +
       '<div class="ngd-inbox"><textarea id="ngd-tin" rows="4" maxlength="480" placeholder="' + esc(tph()) + '"></textarea><div class="ngd-inrow"><span id="ngd-cnt">0/480</span><span class="ngd-tools"><button class="ngd-circ sm" data-act="paste" aria-label="Tempel">' + ico('paste', 16) + '</button>' + (SR ? '<button class="ngd-circ sm" data-act="tmic" aria-label="Bicara">' + ico('mic', 16) + '</button>' : '') + '<button class="ngd-circ sm" data-act="tclear" aria-label="Hapus">' + ico('x', 16) + '</button></span></div></div>' +
       '<button class="ngd-big-btn ngd-press" data-act="trgo">' + ico('lang', 20) + ' Terjemahkan</button><div id="ngd-tout"></div>' +
       '<div class="ngd-sec"><div class="ngd-sech"><h4>Frasa perjalanan</h4></div><div class="ngd-phr">' + PHRASES.map((p, i) => '<div class="ngd-ph ngd-press" data-act="phrase" data-i="' + i + '" style="--d:' + i * 30 + 'ms"><b>' + esc(p[0]) + '</b><span>' + esc(p[1]) + '</span><small>' + esc(p[2]) + '</small></div>').join('') + '</div></div>' +
@@ -9438,6 +9438,139 @@ const Social = (function () {
   }
   function answer(el, ok) { const c = el._deck[el._i]; if (ok) el._ok++; else el._bad.push(c); el._i++; vib(); renderCard(el); }
 
+  /* ---------- MODE SERU: huruf kita → Katakana / Kanji (ateji, sesuai bunyi) ---------- */
+  const FUN_SYL = {
+    '': ['ア', 'イ', 'ウ', 'エ', 'オ'],
+    k: ['カ', 'キ', 'ク', 'ケ', 'コ'], g: ['ガ', 'ギ', 'グ', 'ゲ', 'ゴ'], s: ['サ', 'シ', 'ス', 'セ', 'ソ'], z: ['ザ', 'ジ', 'ズ', 'ゼ', 'ゾ'],
+    t: ['タ', 'ティ', 'トゥ', 'テ', 'ト'], d: ['ダ', 'ディ', 'ドゥ', 'デ', 'ド'], n: ['ナ', 'ニ', 'ヌ', 'ネ', 'ノ'], h: ['ハ', 'ヒ', 'フ', 'ヘ', 'ホ'],
+    b: ['バ', 'ビ', 'ブ', 'ベ', 'ボ'], p: ['パ', 'ピ', 'プ', 'ペ', 'ポ'], m: ['マ', 'ミ', 'ム', 'メ', 'モ'], r: ['ラ', 'リ', 'ル', 'レ', 'ロ'],
+    y: ['ヤ', 'イ', 'ユ', 'イェ', 'ヨ'], w: ['ワ', 'ウィ', 'ウ', 'ウェ', 'ウォ'], f: ['ファ', 'フィ', 'フ', 'フェ', 'フォ'], v: ['ヴァ', 'ヴィ', 'ヴ', 'ヴェ', 'ヴォ'],
+    j: ['ジャ', 'ジ', 'ジュ', 'ジェ', 'ジョ'], ch: ['チャ', 'チ', 'チュ', 'チェ', 'チョ'], sh: ['シャ', 'シ', 'シュ', 'シェ', 'ショ'], ts: ['ツァ', 'ツィ', 'ツ', 'ツェ', 'ツォ'],
+    ny: ['ニャ', 'ニ', 'ニュ', 'ニェ', 'ニョ'], ky: ['キャ', 'キ', 'キュ', 'キェ', 'キョ'], gy: ['ギャ', 'ギ', 'ギュ', 'ギェ', 'ギョ'], hy: ['ヒャ', 'ヒ', 'ヒュ', 'ヒェ', 'ヒョ'],
+    my: ['ミャ', 'ミ', 'ミュ', 'ミェ', 'ミョ'], ry: ['リャ', 'リ', 'リュ', 'リェ', 'リョ'], by: ['ビャ', 'ビ', 'ビュ', 'ビェ', 'ビョ'], py: ['ピャ', 'ピ', 'ピュ', 'ピェ', 'ピョ']
+  };
+  const FUN_EP = { k: 'ク', g: 'グ', s: 'ス', z: 'ズ', t: 'ト', d: 'ド', b: 'ブ', p: 'プ', f: 'フ', v: 'ヴ', h: 'フ', m: 'ム', r: 'ル', ch: 'チ', sh: 'シュ', j: 'ジ', w: 'ウ', y: 'イ', ts: 'ツ', ny: 'ニ', ky: 'キ', gy: 'ギ', hy: 'ヒ', my: 'ミ', ry: 'リ', by: 'ビ', py: 'ピ', n: 'ン' };
+  const FUN_UNITS = ['ch', 'sh', 'ts', 'ny', 'ng', 'ky', 'gy', 'hy', 'my', 'ry', 'by', 'py'];
+  const FUN_PUNCT = { ',': '、', '.': '。', '?': '？', '!': '！', ':': '：', ';': '；', '(': '（', ')': '）', '-': '・', '"': '”' };
+  const FUN_VOWEL = {}; Object.keys(FUN_SYL).forEach(c => FUN_SYL[c].forEach((s, i) => { FUN_VOWEL[s.slice(-1)] = i; }));
+  const FUN_VKJ = ['ア', 'イ', 'ウ', 'エ', 'オ'];
+  const FUN_ATEJI = {
+    'ア': ['亜', '阿'], 'イ': ['伊', '位', '依'], 'ウ': ['宇', '羽', '雨'], 'エ': ['恵', '絵', '江'], 'オ': ['於', '尾', '緒'],
+    'カ': ['加', '夏', '香'], 'キ': ['紀', '希', '輝'], 'ク': ['久', '苦', '区'], 'ケ': ['毛', '気', '家'], 'コ': ['子', '古', '湖'],
+    'サ': ['砂', '沙', '佐'], 'シ': ['志', '詩', '紫'], 'ス': ['寿', '須', '巣'], 'セ': ['瀬', '世', '勢'], 'ソ': ['曽', '祖', '素'],
+    'タ': ['多', '太', '汰'], 'チ': ['千', '知', '地'], 'ツ': ['津', '都'], 'テ': ['手', '天', '帝'], 'ト': ['戸', '斗', '都'],
+    'ナ': ['奈', '那', '菜'], 'ニ': ['仁', '二', '似'], 'ヌ': ['奴', '縫'], 'ネ': ['音', '根', '祢'], 'ノ': ['乃', '野', '之'],
+    'ハ': ['葉', '波', '羽'], 'ヒ': ['日', '妃', '比'], 'フ': ['布', '不', '富'], 'ヘ': ['辺'], 'ホ': ['保', '穂', '帆'],
+    'マ': ['真', '麻', '万'], 'ミ': ['美', '実', '未'], 'ム': ['夢', '武', '無'], 'メ': ['芽', '女', '目'], 'モ': ['茂', '桃', '藻'],
+    'ヤ': ['夜', '也', '屋'], 'ユ': ['由', '遊', '湯'], 'ヨ': ['与', '世', '代'],
+    'ラ': ['羅', '良', '楽'], 'リ': ['理', '利', '里'], 'ル': ['流', '留', '琉'], 'レ': ['礼', '玲', '麗'], 'ロ': ['路', '呂', '露'],
+    'ワ': ['和', '輪', '倭'], 'ヲ': ['乎'], 'ン': ['運', '恩', '円'], 'ッ': ['津', '都'],
+    'ガ': ['我', '牙', '雅'], 'ギ': ['義', '技', '祇'], 'グ': ['愚', '具'], 'ゲ': ['下', '外', '芸'], 'ゴ': ['吾', '後', '護'],
+    'ザ': ['座', '坐', '挫'], 'ジ': ['慈', '時', '治'], 'ズ': ['頭', '図', '豆'], 'ゼ': ['是', '絶'], 'ゾ': ['蔵', '像'],
+    'ダ': ['駄', '打', '陀'], 'デ': ['出', '弟'], 'ド': ['怒', '度', '土'],
+    'バ': ['婆', '馬', '場'], 'ビ': ['備', '尾', '琵'], 'ブ': ['舞', '部', '奉'], 'ベ': ['弁', '別'], 'ボ': ['母', '墓', '暮'],
+    'パ': ['覇', '破', '派'], 'ピ': ['妃', '皮'], 'プ': ['譜', '普'], 'ペ': ['偏', '平'], 'ポ': ['歩', '補'], 'ヴ': ['舞', '部'],
+    'キャ': ['客', '脚'], 'キュ': ['九', '球', '旧'], 'キョ': ['京', '狂', '巨'], 'ギョ': ['魚', '漁'], 'ギャ': ['虐'],
+    'シャ': ['者', '社', '車', '射'], 'シュ': ['主', '酒', '朱'], 'ショ': ['初', '書', '所'],
+    'チャ': ['茶', '着'], 'チュ': ['中', '忠', '注'], 'チョ': ['蝶', '帳', '兆'],
+    'ニャ': ['若'], 'ニュ': ['入', '乳'], 'ニョ': ['女'], 'ヒャ': ['百'], 'ヒョ': ['氷', '表'], 'ミャ': ['脈'], 'ミョ': ['妙'],
+    'リャ': ['略'], 'リュ': ['竜', '留', '隆'], 'リョ': ['良', '料', '旅'], 'ビョ': ['病', '秒'],
+    'ジャ': ['蛇', '邪'], 'ジュ': ['十', '樹', '授'], 'ジョ': ['助', '序', '嬢']
+  };
+  const FUN_SMALL = { 'ァ': ['亜'], 'ィ': ['伊'], 'ゥ': ['宇'], 'ェ': ['恵'], 'ォ': ['於'], 'ャ': ['也'], 'ュ': ['由'], 'ョ': ['与'] };
+  const FUN_EX = ['Budi', 'Selamat pagi', 'Terima kasih', 'Aku cinta kamu', 'Indonesia', 'NihonGo'];
+
+  function funNorm(w) {
+    return w.toLowerCase().replace(/ck/g, 'k').replace(/ph/g, 'f').replace(/th/g, 't').replace(/kh/g, 'h').replace(/dj/g, 'j').replace(/tj/g, 'ch')
+      .replace(/sy/g, 'sh').replace(/qu/g, 'ku').replace(/q/g, 'k').replace(/x/g, 'ks').replace(/l/g, 'r').replace(/c(?!h)/g, 'ch');
+  }
+  function funWord(raw) {
+    const w = funNorm(raw), V = 'aiueo', out = [];
+    let i = 0, lastV = -1;
+    const unitAt = j => { const two = w.substr(j, 2); return FUN_UNITS.indexOf(two) >= 0 ? two : w[j]; };
+    while (i < w.length) {
+      const c = w[i], vi = V.indexOf(c);
+      if (vi >= 0) {
+        if (vi === lastV) out.push('ー'); else { out.push(FUN_SYL[''][vi]); lastV = vi; }
+        i++; continue;
+      }
+      const u = unitAt(i), len = u.length, nx = w[i + len], nv = nx ? V.indexOf(nx) : -1;
+      if (u === 'ng') {
+        out.push('ン');
+        if (nv >= 0) { out.push(FUN_SYL.g[nv]); lastV = nv; i += len + 1; } else { lastV = -1; i += len; }
+        continue;
+      }
+      if (nv >= 0 && FUN_SYL[u]) { out.push(FUN_SYL[u][nv]); lastV = nv; i += len + 1; continue; }
+      /* konsonan tanpa vokal sesudahnya */
+      if (u === 'n') { out.push('ン'); lastV = -1; }
+      else if (u === 'm') { out.push(nx === 'b' || nx === 'p' || nx === 'm' ? 'ン' : 'ム'); lastV = -1; }
+      else if (u === 'h' && lastV >= 0) { /* h lembut di akhir suku kata dibuang: kasih → カシ */ }
+      else if (nx && unitAt(i + len) === u && u !== 'h' && u !== 'w' && u !== 'y') { out.push('ッ'); lastV = -1; }
+      else { out.push(FUN_EP[u] || 'ク'); lastV = -1; }
+      i += len;
+    }
+    return out;
+  }
+  function funKana(text) {
+    const toks = [];
+    String(text).split(/([A-Za-z]+)/).forEach(p => {
+      if (!p) return;
+      if (/^[A-Za-z]+$/.test(p)) funWord(p).forEach(k => toks.push({ k }));
+      else p.split('').forEach(ch => toks.push({ s: ch === ' ' ? '　' : (FUN_PUNCT[ch] || ch) }));
+    });
+    return toks;
+  }
+  function funPick(list, seed, n) {
+    if (!seed || list.length < 2) return list[0];
+    let h = (Math.imul(seed | 0, 2654435761) + Math.imul(n + 1, 40503)) >>> 0; h ^= h >>> 13; h = Math.imul(h, 1274126177) >>> 0; h = (h ^ (h >>> 16)) >>> 0;
+    return list[h % list.length];
+  }
+  function funKanji(toks, seed) {
+    let n = 0, last = ''; const out = [];
+    toks.forEach(t => {
+      if (t.s != null) { out.push({ s: t.s }); last = ''; return; }
+      const k = t.k; let kj;
+      if (k === 'ー') { const v = FUN_VOWEL[last.slice(-1)]; kj = v == null ? 'ー' : funPick(FUN_ATEJI[FUN_VKJ[v]], seed, n); }
+      else if (FUN_ATEJI[k]) kj = funPick(FUN_ATEJI[k], seed, n);
+      else kj = Array.from(k).map((ch, ci) => { const l = FUN_ATEJI[ch] || FUN_SMALL[ch]; return l ? funPick(l, seed, n + ci) : ch; }).join('');
+      out.push({ k, kj }); n++; if (k !== 'ー') last = k;
+    });
+    return out;
+  }
+
+  /* ---------- MODE SERU: tampilan ---------- */
+  function trSeg() {
+    const fun = T.mode === 'fun';
+    return '<div class="ngd-segw"><div class="ngd-seg2" style="--i:' + (fun ? 1 : 0) + '"><button class="' + (fun ? '' : 'on') + '" data-act="tmode" data-m="tr">Terjemah</button><button class="' + (fun ? 'on' : '') + '" data-act="tmode" data-m="fun">Mode Seru 🎉</button></div></div>';
+  }
+  function funOutHTML(text) {
+    const src = String(text || '').trim();
+    if (!src) return '<div class="ngd-fnote" style="margin:14px 0 0">Ketik sesuatu di atas — hasilnya langsung muncul ✨</div>';
+    const toks = funKana(src), kata = toks.map(t => t.k != null ? t.k : t.s).join('').replace(/\n/g, ' ');
+    const kanji = T.fk === 'kanji', kj = kanji ? funKanji(toks, T.fseed || 0) : null, furi = T.furi !== false;
+    const outTxt = kanji ? kj.map(t => t.kj != null ? t.kj : t.s).join('').replace(/\n/g, ' ') : kata;
+    const html = kanji ? kj.map(t => t.kj == null ? esc(t.s) : (furi ? '<ruby>' + esc(t.kj) + '<rt>' + esc(t.k) + '</rt></ruby>' : esc(t.kj))).join('') : esc(kata);
+    const fav = favIdx('p', src) >= 0;
+    return '<div class="ngd-out"><div class="ngd-lbl">' + (kanji ? 'Kanji sesuai bunyi (ateji)' : 'Katakana') + '</div><div class="ngd-fout-t">' + html + '</div>' +
+      (kanji ? '<div class="ngd-rom">Dibaca: ' + esc(kata) + '</div>' : '') +
+      '<div class="ngd-outbar"><span class="ngd-tools">' + (kanji ? '<button class="ngd-circ sm" data-act="fdice" aria-label="Acak kanji">🎲</button><button class="ngd-circ sm' + (furi ? ' on' : '') + '" data-act="ffuri" aria-label="Tampilkan bacaan">あ</button>' : '<small>Bunyi huruf, bukan arti</small>') + '</span>' +
+      '<span class="ngd-tools"><button class="ngd-circ sm" data-act="speak" data-t="' + esc(kata) + '" aria-label="Dengar">' + ico('spk', 16) + '</button><button class="ngd-circ sm" data-act="copy" data-t="' + esc(outTxt) + '" aria-label="Salin">' + ico('cp', 16) + '</button>' +
+      '<button class="ngd-circ sm' + (fav ? ' on' : '') + '" data-act="favp" data-s="' + esc(src) + '" data-o="' + esc(outTxt) + '" data-r="' + esc(kata) + '" aria-label="Simpan">' + ico('star', 16, fav) + '</button></span></div></div>';
+  }
+  function renderFun() { const o = $('ngd-fout'); if (o) o.innerHTML = funOutHTML(T.ft); }
+  function funHTML() {
+    const kata = T.fk !== 'kanji';
+    return '<div class="ngd-hero" style="--h2:#ec4899"><div class="ngd-kan">遊</div>' + heroBar('Mode Seru', '遊') + '<h1>Ubah hurufmu jadi<br>Katakana atau Kanji</h1><p>Seru-seruan: tulisanmu diubah sesuai bunyinya, bukan artinya.</p></div>' +
+      trSeg() +
+      '<div class="ngd-funkind"><button class="ngd-fk ngd-press' + (kata ? ' on' : '') + '" data-act="fkind" data-k="kata"><b>カタカナ</b><small>Katakana</small></button><button class="ngd-fk ngd-press' + (kata ? '' : ' on') + '" data-act="fkind" data-k="kanji"><b>漢字</b><small>Kanji sesuai bunyi</small></button></div>' +
+      '<div class="ngd-inbox"><textarea id="ngd-fin" rows="3" maxlength="200" placeholder="Ketik namamu atau kalimat apa saja…">' + esc(T.ft || '') + '</textarea><div class="ngd-inrow"><span id="ngd-fcnt">' + String(T.ft || '').length + '/200</span><span class="ngd-tools"><button class="ngd-circ sm" data-act="fclear" aria-label="Hapus">' + ico('x', 16) + '</button></span></div></div>' +
+      '<div id="ngd-tout" style="margin:0 16px"><div id="ngd-fout">' + funOutHTML(T.ft) + '</div></div>' +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Coba contoh</h4></div><div class="ngd-fex">' + FUN_EX.map((x, i) => '<button class="ngd-press" data-act="fex" data-i="' + i + '">' + esc(x) + '</button>').join('') + '</div></div>' +
+      '<div class="ngd-fnote">' + (kata ? 'Huruf Latin diubah jadi Katakana menurut bunyinya, seperti nama asing ditulis di Jepang.' : 'Setiap bunyi diberi kanji yang <b>bunyinya mirip</b> (ateji), tanpa memikirkan arti — jadi hasilnya murni seru-seruan. Ketuk 🎲 untuk mengacak pilihan kanji.') + '</div>';
+  }
+  function transHTML() { return T.mode === 'fun' ? funHTML() : transHTMLBase(); }
+  function rerenderTrans() { const p = tabEl(tab); if (p) p.innerHTML = renderTab(tab); }
+
   /* ---------- CATEGORY ---------- */
   function openCat(i) {
     const c = CATS[i];
@@ -9447,7 +9580,7 @@ const Social = (function () {
 
   /* ---------- event ---------- */
   function inputOf(id) { return $(id); }
-  function onInput(e) { if (e.target.id === 'ngd-tin') { const c = $('ngd-cnt'); if (c) c.textContent = e.target.value.length + '/480'; } }
+  function onInput(e) { if (e.target.id === 'ngd-fin') { T.ft = e.target.value; const fc = $('ngd-fcnt'); if (fc) fc.textContent = T.ft.length + '/200'; renderFun(); return; } if (e.target.id === 'ngd-tin') { const c = $('ngd-cnt'); if (c) c.textContent = e.target.value.length + '/480'; } }
   function pageOf(el) { return el.closest('.ngd-page'); }
   function onClick(e) {
     const el = e.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act;
@@ -9494,6 +9627,12 @@ const Social = (function () {
       case 'fok': { const pg = pageOf(el); pg._deckDone = 1; answer(pg, true); break; }
       case 'fbad': { const pg = pageOf(el); answer(pg, false); break; }
       case 'fagain': { const pg = pageOf(el); pg._deck = pg._bad.slice(); pg._i = 0; pg._ok = 0; pg._bad = []; renderCard(pg); break; }
+      case 'tmode': T.mode = el.dataset.m === 'fun' ? 'fun' : 'tr'; rerenderTrans(); break;
+      case 'fkind': T.fk = el.dataset.k === 'kanji' ? 'kanji' : 'kata'; rerenderTrans(); break;
+      case 'fex': T.ft = FUN_EX[+el.dataset.i] || ''; rerenderTrans(); break;
+      case 'fclear': T.ft = ''; { const fi = $('ngd-fin'); if (fi) { fi.value = ''; fi.focus(); } const fc = $('ngd-fcnt'); if (fc) fc.textContent = '0/200'; } renderFun(); break;
+      case 'fdice': T.fseed = (Math.floor(Math.random() * 1e9) + 1); vib(); renderFun(); break;
+      case 'ffuri': T.furi = !(T.furi !== false); renderFun(); break;
       default: break;
     }
   }
@@ -9693,6 +9832,18 @@ html.ngd-lock{overflow:hidden}
 .ngd-ph b{display:block;font-size:.76rem;color:var(--text-muted);font-weight:700}.ngd-ph span{display:block;font-size:1.02rem;font-weight:800;margin-top:3px;font-family:'Noto Sans JP',sans-serif;line-height:1.4}.ngd-ph small{display:block;font-size:.66rem;color:var(--accent);font-style:italic;margin-top:2px}
 .ngd-hitem{position:relative;padding:11px 14px;border-radius:1.1rem;background:var(--glass-bg);border:1px solid var(--glass-border);margin-bottom:7px;cursor:pointer;font-size:.82rem}.ngd-hitem b{display:block;font-weight:700}.ngd-hitem span{display:block;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;margin-top:2px}
 .ngd-hitem .ngd-circ{position:absolute;right:10px;top:10px}
+.ngd-seg2{position:relative;display:grid;grid-template-columns:repeat(2,1fr);padding:4px;border-radius:1.2rem;background:var(--bg-app);border:1px solid var(--glass-border);box-shadow:0 16px 34px -18px rgba(0,0,0,.55)}
+.ngd-seg2::before{content:'';position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/2);border-radius:.95rem;background:linear-gradient(140deg,var(--accent),var(--a1));transform:translateX(calc(var(--i,0)*100%));transition:transform .32s cubic-bezier(.3,1.3,.5,1)}
+.ngd-seg2 button{position:relative;padding:11px 0;font-weight:800;font-size:.8rem;color:var(--text-muted)!important}.ngd-seg2 button.on{color:#fff!important}
+.ngd-funkind{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 16px 0}
+.ngd-fk{padding:12px 10px;border-radius:1.2rem;background:var(--glass-bg);border:1.5px solid var(--glass-border);text-align:center;cursor:pointer;color:var(--text-main)!important}
+.ngd-fk b{display:block;font-size:1.25rem;font-family:'Noto Sans JP',sans-serif;font-weight:900}.ngd-fk small{display:block;font-size:.66rem;color:var(--text-muted);font-weight:700;margin-top:2px}
+.ngd-fk.on{border-color:var(--accent);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 18%,var(--bg-app)),var(--glass-bg));box-shadow:0 10px 22px -14px var(--accent)}.ngd-fk.on b{color:var(--accent)}
+.ngd-fout-t{font-size:1.7rem;font-weight:800;line-height:2.15;margin-top:4px;font-family:'Noto Sans JP',sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+.ngd-fout-t ruby{ruby-position:over}.ngd-fout-t rt{font-size:.5rem;font-weight:700;color:var(--accent)}
+.ngd-fex{display:flex;flex-wrap:wrap;gap:8px}.ngd-fex button{padding:8px 13px;border-radius:999px;background:var(--glass-bg);border:1px solid var(--glass-border);font-weight:700;font-size:.8rem;color:var(--text-main)!important}
+.ngd-fnote{margin:14px 16px 0;padding:12px 14px;border-radius:1.2rem;background:color-mix(in srgb,var(--accent) 8%,transparent);font-size:.74rem;line-height:1.5;color:var(--text-muted)}
+
 
 /* ---- simpanan & kartu ---- */
 .ngd-segw{margin:-26px 16px 0;position:relative;z-index:2}
