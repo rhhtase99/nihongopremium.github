@@ -9093,7 +9093,7 @@ const Social = (function () {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const TABS = [['home', 'Kamus', 'book'], ['kanji', 'Kanji', 'kj'], ['trans', 'Terjemah', 'lang'], ['saved', 'Simpanan', 'mark']];
   const LANGS = { id: 'Indonesia', ja: 'Jepang', en: 'Inggris' }, SRL = { id: 'id-ID', ja: 'ja-JP', en: 'en-US' };
-  let root, app, stage, tabbar, toastEl, isOpen = false, tab = 'home', stack = [], pushedHist = false, closing = false, hwP = null;
+  let root, app, stage, tabbar, toastEl, isOpen = false, tab = 'home', stack = [], hist = 0, histOK = true, skipPop = false, skipT = 0, closeT = 0, hideT = 0, closing = false, hwP = null;
   const caches = { w: new Map(), ex: new Map(), kj: new Map(), kw: new Map(), grade: new Map() };
   const T = { from: 'id', to: 'ja' };
 
@@ -9134,31 +9134,65 @@ const Social = (function () {
     root.addEventListener('keydown', e => { if (e.key !== 'Enter') return; if (e.target.matches('.ngd-sin')) { e.preventDefault(); const q = e.target.value.trim(); if (q) openResults(q); } if (e.target.id === 'ngd-kq') { e.preventDefault(); kanjiSearch(); } });
     root.addEventListener('input', onInput);
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) goBack(); });
-    window.addEventListener('popstate', () => { if (!isOpen) return; if (closing) { finishClose(); return; } if (stack.length) { pop(); history.pushState({ ngd: 1 }, ''); } else finishClose(); });
+    window.addEventListener('popstate', () => {
+      if (skipPop) { skipPop = false; clearTimeout(skipT); return; }
+      if (!isOpen) return;
+      clearTimeout(closeT); if (hist > 0) hist--;
+      if (closing || !stack.length) { finishClose(); return; }
+      popEl();
+    });
+    window.addEventListener('pageshow', () => { if (!isOpen && root) { root.classList.remove('on'); root.style.display = ''; document.documentElement.classList.remove('ngd-lock'); } });
     root.addEventListener('pointerdown', e => { const b = e.target.closest('.ngd-press'); if (b) b.classList.add('down'); });
     ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => root.addEventListener(ev, () => root.querySelectorAll('.ngd-press.down').forEach(b => b.classList.remove('down')), true));
   }
+  function hpush() { if (!histOK) return; try { history.pushState({ ngd: hist + 1 }, ''); hist++; } catch (e) { histOK = false; } }
   function open(which) {
     if (!ST().devMode) { alert('Fitur ini khusus pengguna dengan token developer.\nMasukkan token di Edit Profil (ketuk avatar di pojok kiri atas).'); return; }
     try { if (!document.getElementById('theme-modal').classList.contains('hidden')) closeThemeModal(); } catch (e) { /* abaikan */ }
-    build(); const first = !isOpen; isOpen = true; closing = false;
-    if (first) { try { history.pushState({ ngd: 1 }, ''); pushedHist = true; } catch (e) { pushedHist = false; } }
-    document.documentElement.style.overflow = 'hidden';
+    build(); const first = !isOpen || closing; clearTimeout(hideT); clearTimeout(closeT);
+    if (closing) { skipPop = true; clearTimeout(skipT); skipT = setTimeout(() => { skipPop = false; }, 900); }
+    if (first) { isOpen = true; closing = false; hist = 0; histOK = true; hpush(); }
+    root.style.display = 'block'; document.documentElement.classList.add('ngd-lock');
     switchTab(which === 'trans' ? 'trans' : which === 'kanji' ? 'kanji' : which === 'saved' ? 'saved' : 'home', true);
-    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('on')));
+    void root.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => { if (isOpen) root.classList.add('on'); }));
   }
-  function close() { if (!isOpen) return; while (stack.length) pop(true); if (pushedHist && !closing) { closing = true; try { history.back(); return; } catch (e) { /* lanjut */ } } finishClose(); }
-  function finishClose() { isOpen = false; closing = false; pushedHist = false; root.classList.remove('on'); document.documentElement.style.overflow = ''; try { speechSynthesis.cancel(); } catch (e) { /* abaikan */ } }
-  function goBack() { if (stack.length) pop(); else if (tab !== 'home') switchTab('home'); else close(); }
+  /* X / tombol keluar: tutup semuanya, lalu kembalikan riwayat browser ke posisi sebelum Kamus dibuka */
+  function close() {
+    if (!isOpen || closing) return;
+    while (stack.length) popEl(true);
+    if (histOK && hist > 0) {
+      closing = true;
+      try { history.go(-hist); closeT = setTimeout(() => { if (isOpen && closing) finishClose(); }, 700); return; } catch (e) { /* lanjut */ }
+    }
+    finishClose();
+  }
+  function finishClose() {
+    clearTimeout(closeT); isOpen = false; closing = false; hist = 0;
+    document.documentElement.classList.remove('ngd-lock'); document.documentElement.style.overflow = '';
+    if (!root) return; root.classList.remove('on'); app.classList.remove('deep');
+    clearTimeout(hideT); hideT = setTimeout(() => { if (!isOpen) root.style.display = ''; }, 320);
+    try { speechSynthesis.cancel(); } catch (e) { /* abaikan */ }
+  }
+  /* tombol kembali di dalam Kamus: lewat riwayat browser supaya sinkron dengan geser/back bawaan HP */
+  function goBack() {
+    if (stack.length) { if (histOK && hist > 1) { try { history.back(); return; } catch (e) { /* lanjut */ } } popEl(); }
+    else if (tab !== 'home') switchTab('home');
+    else close();
+  }
   function push(html, kind) {
-    const el = document.createElement('div'); el.className = 'ngd-page ngd-push'; el.dataset.kind = kind || ''; el.innerHTML = html; stage.appendChild(el); stack.push(el); app.classList.add('deep');
+    const el = document.createElement('div'); el.className = 'ngd-page ngd-push'; el.dataset.kind = kind || ''; el.innerHTML = html; stage.appendChild(el); stack.push(el); app.classList.add('deep'); hpush();
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on'))); el.scrollTop = 0; return el;
   }
-  function pop(instant) { const el = stack.pop(); if (!el) return; el.classList.remove('on'); setTimeout(() => el.remove(), instant ? 0 : 340); if (!stack.length) app.classList.remove('deep'); }
+  function popEl(instant) { const el = stack.pop(); if (!el) return; el.classList.remove('on'); setTimeout(() => el.remove(), instant ? 0 : 340); if (!stack.length) app.classList.remove('deep'); }
+  /* tutup semua halaman bertumpuk sekaligus (pindah tab / buka ulang) beserta entri riwayatnya */
+  function dropStack() {
+    const k = stack.length; if (!k) return; while (stack.length) popEl(true);
+    if (histOK && hist > 1) { const n = Math.min(k, hist - 1); hist -= n; skipPop = true; clearTimeout(skipT); skipT = setTimeout(() => { skipPop = false; }, 700); try { history.go(-n); } catch (e) { skipPop = false; } }
+  }
   const tabEl = n => $('ngt-' + n);
   function switchTab(n, force) {
     if (!force && n === tab && !stack.length) { const p = tabEl(n); if (p) p.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    while (stack.length) pop(true);
+    dropStack();
     tab = n; tabbar.style.setProperty('--i', TABS.findIndex(t => t[0] === n));
     tabbar.querySelectorAll('.ngd-tb').forEach(b => b.classList.toggle('on', b.dataset.tab === n));
     let p = tabEl(n); if (!p) { p = document.createElement('div'); p.id = 'ngt-' + n; p.className = 'ngd-page ngd-tabpage'; stage.appendChild(p); }
@@ -9470,8 +9504,11 @@ const Social = (function () {
 
   /* ---------- gaya ---------- */
   const css = document.createElement('style'); css.id = 'ng-dev-css';
-  css.textContent = `#ngdev{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s;font-family:Inter,system-ui,sans-serif}
+  css.textContent = `#ngdev{display:none;position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s;font-family:Inter,system-ui,sans-serif}
 #ngdev.on{opacity:1;pointer-events:auto}
+#ngdev:not(.on),#ngdev:not(.on) *{pointer-events:none!important}
+html.ngd-lock{overflow:hidden}
+.ngd-page{overscroll-behavior:contain}
 #ngdev *{box-sizing:border-box}
 :where(#ngdev) button{font-family:inherit;font-size:inherit;font-weight:inherit;line-height:inherit;border:0;background:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
 :where(#ngdev) select,:where(#ngdev) textarea,:where(#ngdev) input{font-family:inherit}
