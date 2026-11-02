@@ -1245,6 +1245,7 @@ html.ng-fade, html.ng-fade body, html.ng-fade body * { transition: background-co
                 <button onclick="closeThemeModal()" style="color: var(--text-muted)"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <div class="space-y-4 pb-4">
+                <div id="dev-tools-section" class="hidden"><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Developer</p><div class="settings-section"><button onclick="NGDev.open('kamus')" class="settings-row"><i data-lucide="search" class="w-5 h-5"></i><span class="font-bold text-sm">Kamus Jepang</span><span class="setting-value">Aplikasi kamus</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="NGDev.open('trans')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Terjemah ke Jepang</span><span class="setting-value">ID &#8660; JP</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tema</p><div class="settings-section"><button onclick="openSettingsDetail('themes')" class="settings-row"><i data-lucide="palette" class="w-5 h-5"></i><span class="font-bold text-sm">Pilih Tema</span><span class="setting-value" id="current-theme-label">Tema</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="toggleDarkMode()" class="settings-row"><i data-lucide="moon" class="w-5 h-5"></i><span class="font-bold text-sm">Mode Gelap</span><span class="setting-value" id="dark-mode-label">Mati</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="setTheme('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="smartphone" class="w-5 h-5"></i><span class="font-bold text-sm">Ikuti pengaturan perangkat</span><span class="setting-value" id="auto-theme-label">Auto</span></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Tata Letak</p><div class="settings-section"><button onclick="setOrientationMode('auto'); refreshSettingsSummary()" class="settings-row"><i data-lucide="rotate-cw" class="w-5 h-5"></i><span class="font-bold text-sm">Auto</span><span class="setting-value" id="orientation-mode-label">Aktif</span></button><button onclick="setOrientationMode('manual'); toggleOrientationView(); refreshSettingsSummary()" class="settings-row"><i data-lucide="panel-top" class="w-5 h-5"></i><span class="font-bold text-sm">Manual</span><span class="setting-value">Ubah orientasi</span></button></div></div>
                 <div><p class="text-[11px] font-black uppercase tracking-wider text-accent mb-2 ml-2">Bahasa</p><div class="settings-section"><button onclick="openSettingsDetail('app-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Aplikasi</span><span class="setting-value">Bahasa Indonesia</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button onclick="openSettingsDetail('learning-language')" class="settings-row"><i data-lucide="languages" class="w-5 h-5"></i><span class="font-bold text-sm">Bahasa Pembelajaran</span><span class="setting-value">Jepang</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div></div>
@@ -8937,6 +8938,772 @@ const Social = (function () {
   Array.from(document.body.children).forEach(tag);
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(tag))).observe(document.body, { childList: true });
 })();
+</script>
+
+<script id="ng-dev-js">
+/* ===== NGDev v2 — "Kamus NihonGo!" : aplikasi kamus & terjemah satu halaman (khusus token developer) ===== */
+(function () {
+  'use strict';
+  const ST = () => (typeof state !== 'undefined' ? state : {});
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const $ = id => document.getElementById(id);
+  const JP = /[\u3040-\u30ff\u3400-\u9fff]/, HAS_KJ = /[\u3400-\u9fff]/, KJG = /[\u3400-\u9fff]/g;
+  const uniq = a => a.filter((x, i) => a.indexOf(x) === i);
+  const DT = () => { const s = ST(); s.devTools = s.devTools || {}; const d = s.devTools; d.hist = d.hist || []; d.trHist = d.trHist || []; d.fav = d.fav || []; return d; };
+  const persist = () => { try { saveState(); } catch (e) { /* abaikan */ } };
+
+  /* ---------- ikon ---------- */
+  const IC = {
+    back: '<path d="m15 18-6-6 6-6"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>', search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', spk: '<path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+    slow: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/>', cp: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+    star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>', book: '<path d="M4 5a2 2 0 0 1 2-2h12v17H6a2 2 0 0 0-2 2zM8 7h6"/>',
+    lang: '<path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/>', mark: '<path d="M6 3h12v18l-6-4-6 4z"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    play: '<path d="M7 4v16l13-8z"/>', pen: '<path d="M16 3l5 5L8 21H3v-5zM13 6l5 5"/>', rf: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',
+    ok: '<path d="m5 12 5 5L20 7"/>', sw: '<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>', cr: '<path d="m9 6 6 6-6 6"/>', paste: '<rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5a3 3 0 0 1 6 0M9 12h6M9 16h4"/>',
+    cards: '<rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h13a1 1 0 0 1 1 1v13"/>', kj: '<path d="M4 6h16M12 3v18M7 11h10M6 21l6-7 6 7"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>',
+    home: '<path d="M4 11 12 4l8 7v9H4z"/>'
+  };
+  const ico = (k, s, fill) => '<svg viewBox="0 0 24 24" width="' + (s || 18) + '" height="' + (s || 18) + '" fill="' + (fill ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' + IC[k] + '</svg>';
+
+  /* ---------- data kurasi (tersimpan di file, kecil) ---------- */
+  const CATS = [
+    { n: 'Salam', e: '👋', c: '#ff7a45', w: [['ありがとう', 'ありがとう', 'terima kasih'], ['こんにちは', 'こんにちは', 'halo / selamat siang'], ['おはよう', 'おはよう', 'selamat pagi'], ['こんばんは', 'こんばんは', 'selamat malam'], ['さようなら', 'さようなら', 'selamat tinggal'], ['すみません', 'すみません', 'permisi / maaf'], ['お願いします', 'おねがいします', 'tolong / mohon'], ['いただきます', 'いただきます', 'selamat makan']] },
+    { n: 'Angka', e: '🔢', c: '#3b82f6', w: [['一', 'いち', 'satu'], ['二', 'に', 'dua'], ['三', 'さん', 'tiga'], ['四', 'よん', 'empat'], ['五', 'ご', 'lima'], ['十', 'じゅう', 'sepuluh'], ['百', 'ひゃく', 'seratus'], ['千', 'せん', 'seribu']] },
+    { n: 'Makanan', e: '🍣', c: '#ef4444', w: [['水', 'みず', 'air'], ['ご飯', 'ごはん', 'nasi / makanan'], ['肉', 'にく', 'daging'], ['魚', 'さかな', 'ikan'], ['野菜', 'やさい', 'sayuran'], ['果物', 'くだもの', 'buah'], ['お茶', 'おちゃ', 'teh'], ['卵', 'たまご', 'telur']] },
+    { n: 'Keluarga', e: '👨‍👩‍👧', c: '#ec4899', w: [['家族', 'かぞく', 'keluarga'], ['父', 'ちち', 'ayah (saya)'], ['母', 'はは', 'ibu (saya)'], ['兄', 'あに', 'kakak laki-laki'], ['姉', 'あね', 'kakak perempuan'], ['弟', 'おとうと', 'adik laki-laki'], ['妹', 'いもうと', 'adik perempuan'], ['友達', 'ともだち', 'teman']] },
+    { n: 'Waktu', e: '⏰', c: '#8b5cf6', w: [['今日', 'きょう', 'hari ini'], ['明日', 'あした', 'besok'], ['昨日', 'きのう', 'kemarin'], ['今', 'いま', 'sekarang'], ['毎日', 'まいにち', 'setiap hari'], ['朝', 'あさ', 'pagi'], ['夜', 'よる', 'malam'], ['時間', 'じかん', 'waktu']] },
+    { n: 'Tempat', e: '🏯', c: '#14b8a6', w: [['学校', 'がっこう', 'sekolah'], ['駅', 'えき', 'stasiun'], ['病院', 'びょういん', 'rumah sakit'], ['空港', 'くうこう', 'bandara'], ['店', 'みせ', 'toko'], ['公園', 'こうえん', 'taman'], ['銀行', 'ぎんこう', 'bank'], ['家', 'いえ', 'rumah']] },
+    { n: 'Kata kerja', e: '🏃', c: '#0ea5e9', w: [['食べる', 'たべる', 'makan'], ['飲む', 'のむ', 'minum'], ['行く', 'いく', 'pergi'], ['来る', 'くる', 'datang'], ['見る', 'みる', 'melihat'], ['話す', 'はなす', 'berbicara'], ['読む', 'よむ', 'membaca'], ['勉強する', 'べんきょうする', 'belajar']] },
+    { n: 'Sifat', e: '🎨', c: '#f59e0b', w: [['大きい', 'おおきい', 'besar'], ['小さい', 'ちいさい', 'kecil'], ['新しい', 'あたらしい', 'baru'], ['高い', 'たかい', 'tinggi / mahal'], ['安い', 'やすい', 'murah'], ['美味しい', 'おいしい', 'enak'], ['楽しい', 'たのしい', 'menyenangkan'], ['難しい', 'むずかしい', 'sulit']] },
+    { n: 'Alam', e: '🌸', c: '#22c55e', w: [['桜', 'さくら', 'bunga sakura'], ['山', 'やま', 'gunung'], ['川', 'かわ', 'sungai'], ['海', 'うみ', 'laut'], ['空', 'そら', 'langit'], ['花', 'はな', 'bunga'], ['雨', 'あめ', 'hujan'], ['雪', 'ゆき', 'salju']] }
+  ];
+  const ALLW = [].concat(...CATS.map((c, ci) => c.w.map(w => ({ w: w[0], r: w[1], m: w[2], c: c.c, e: c.e, cat: c.n }))));
+  const PHRASES = [
+    ['Terima kasih banyak', 'どうもありがとうございます', 'Dōmo arigatō gozaimasu'], ['Permisi / maaf', 'すみません', 'Sumimasen'], ['Berapa harganya?', 'いくらですか？', 'Ikura desu ka?'],
+    ['Di mana toilet?', 'トイレはどこですか？', 'Toire wa doko desu ka?'], ['Saya tidak mengerti', 'わかりません', 'Wakarimasen'], ['Tolong bicara pelan-pelan', 'ゆっくり話してください', 'Yukkuri hanashite kudasai'],
+    ['Saya mau ini', 'これをください', 'Kore o kudasai'], ['Apakah bisa bahasa Inggris?', '英語が話せますか？', 'Eigo ga hanasemasu ka?'], ['Enak sekali!', 'とても美味しいです！', 'Totemo oishii desu!'],
+    ['Saya orang Indonesia', '私はインドネシア人です', 'Watashi wa Indoneshia-jin desu'], ['Senang berkenalan', 'はじめまして', 'Hajimemashite'], ['Tolong bantu saya', '助けてください', 'Tasukete kudasai']
+  ];
+  const KSTART = '日月火水木金土人大小山川口目手足'.split('');
+  const GRADES = [['1', 'Kelas 1', 80, '#22c55e'], ['2', 'Kelas 2', 160, '#14b8a6'], ['3', 'Kelas 3', 200, '#0ea5e9'], ['4', 'Kelas 4', 202, '#6366f1'], ['5', 'Kelas 5', 193, '#a855f7'], ['6', 'Kelas 6', 191, '#ec4899'], ['8', 'SMP', 1110, '#f97316']];
+
+  /* ---------- jaringan ---------- */
+  function ft(url, opt, ms) {
+    const c = new AbortController(), t = setTimeout(() => c.abort(), ms || 8000);
+    return fetch(url, Object.assign({}, opt || {}, { signal: c.signal })).finally(() => clearTimeout(t));
+  }
+  async function jt(path, body) {
+    const r = await ft('https://jotoba.de/api/search/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 10000);
+    if (!r.ok) throw new Error('Jotoba HTTP ' + r.status);
+    return r.json();
+  }
+  const jWords = q => jt('words', { query: q, language: 'English', no_english: false });
+  const jSent = q => jt('sentences', { query: q, language: 'English', no_english: false });
+  async function kapi(path) { const r = await ft('https://kanjiapi.dev/v1/' + path, {}, 9000); if (!r.ok) throw new Error('kanjiapi ' + r.status); return r.json(); }
+  const dec = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
+
+  async function eGoogle(text, sl, tl) {
+    const r = await ft('https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + sl + '&tl=' + tl + '&dt=t&dt=rm&q=' + encodeURIComponent(text), {}, 7000);
+    if (!r.ok) throw new Error('G' + r.status);
+    const j = await r.json(), seg = (j && j[0]) || [];
+    const txt = seg.filter(x => x && x[0] != null).map(x => x[0]).join('');
+    const rom = seg.filter(x => x && x[0] == null && x[2]).map(x => x[2]).join(' ');
+    if (!txt) throw new Error('kosong');
+    return { text: txt, romaji: rom, via: 'Google Translate' };
+  }
+  async function eMyMemory(text, sl, tl) {
+    const r = await ft('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.slice(0, 480)) + '&langpair=' + sl + '|' + tl, {}, 8000);
+    if (!r.ok) throw new Error('MM' + r.status);
+    const j = await r.json(), t = j && j.responseData && j.responseData.translatedText;
+    if (!t || /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID/i.test(t)) throw new Error('MM kosong');
+    return { text: dec(t), romaji: '', via: 'MyMemory' };
+  }
+  async function eAI(text, sl, tl) {
+    const N = { id: 'Indonesia', en: 'Inggris', ja: 'Jepang' };
+    const p = 'Terjemahkan teks berikut dari bahasa ' + N[sl] + ' ke bahasa ' + N[tl] + '. Balas HANYA dengan hasil terjemahan, tanpa penjelasan, tanda kutip, atau catatan.\n\n' + text;
+    let last;
+    for (const base of ['https://gen.pollinations.ai/text/', 'https://text.pollinations.ai/']) {
+      try { const r = await ft(base + encodeURIComponent(p), {}, 15000); if (!r.ok) throw new Error('AI' + r.status); const t = (await r.text()).trim(); if (t) return { text: t, romaji: '', via: 'AI (Pollinations)' }; } catch (e) { last = e; }
+    }
+    throw last || new Error('AI gagal');
+  }
+  async function translate(text, sl, tl) {
+    let err;
+    for (const e of [eGoogle, eMyMemory, eAI]) { try { const r = await e(text, sl, tl); if (r && r.text) return r; } catch (x) { err = x; } }
+    throw err || new Error('Semua layanan terjemahan gagal');
+  }
+  const trCache = new Map();
+  async function translateLines(lines, sl, tl) {
+    const key = l => sl + '>' + tl + ':' + l, need = lines.filter(l => l && !trCache.has(key(l)));
+    if (need.length) {
+      let out = null;
+      try {
+        const r = await eGoogle(need.join('\n'), sl, tl), o = r.text.split('\n').map(s => s.trim());
+        while (o.length > need.length && !o[o.length - 1]) o.pop();
+        if (o.length === need.length) out = o;
+      } catch (e) { /* satu-satu */ }
+      if (!out) out = await Promise.all(need.map(l => translate(l, sl, tl).then(r => r.text).catch(() => '')));
+      need.forEach((l, i) => { if (out[i]) trCache.set(key(l), out[i]); });
+    }
+    return lines.map(l => trCache.get(key(l)) || '');
+  }
+
+  /* ---------- romaji ---------- */
+  const KT = { 'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o', 'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko', 'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so', 'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to', 'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no', 'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho', 'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo', 'や': 'ya', 'ゆ': 'yu', 'よ': 'yo', 'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro', 'わ': 'wa', 'を': 'o', 'ん': 'n', 'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go', 'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo', 'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do', 'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo', 'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po', 'ぁ': 'a', 'ぃ': 'i', 'ぅ': 'u', 'ぇ': 'e', 'ぉ': 'o', 'ゔ': 'vu', 'ゃ': 'ya', 'ゅ': 'yu', 'ょ': 'yo' };
+  const DG = { 'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo', 'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho', 'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho', 'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo', 'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo', 'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo', 'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo', 'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo', 'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo', 'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo', 'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo', 'ふぁ': 'fa', 'ふぃ': 'fi', 'ふぇ': 'fe', 'ふぉ': 'fo', 'てぃ': 'ti', 'でぃ': 'di', 'うぃ': 'wi', 'うぇ': 'we', 'うぉ': 'wo', 'しぇ': 'she', 'じぇ': 'je', 'ちぇ': 'che' };
+  const k2h = s => s.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  function romaji(str) {
+    str = k2h(String(str || '')); let out = '', i = 0, dbl = false;
+    while (i < str.length) {
+      const c = str[i]; if (c === 'っ') { dbl = true; i++; continue; }
+      let r, n = 1; const two = str.substr(i, 2);
+      if (DG[two]) { r = DG[two]; n = 2; }
+      else if (c === 'ん') r = 'あいうえおやゆよ'.indexOf(str[i + 1] || '') >= 0 ? "n'" : 'n';
+      else if (c === 'ー') r = /[aiueo]$/.test(out) ? out.slice(-1) : '';
+      else if (KT[c]) r = KT[c]; else r = c;
+      if (dbl && /^[a-z]/.test(r)) r = (r[0] === 'c' && r[1] === 'h') ? 't' + r : r[0] + r;
+      dbl = false; out += r; i += n;
+    }
+    return out;
+  }
+  const romajiSafe = s => (HAS_KJ.test(String(s || '')) ? '' : romaji(s));
+
+  /* ---------- parsing & label ---------- */
+  const POSM = [[/Ichidan/i, 'Kata kerja', 'v'], [/Godan/i, 'Kata kerja', 'v'], [/Suru/i, 'Kata kerja', 'v'], [/Verb/i, 'Kata kerja', 'v'], [/Keiyoushi|"I"/, 'Kata sifat-i', 'a'], [/KeiyouDoushi|"Na"/i, 'Kata sifat-na', 'a'], [/Adjective/i, 'Kata sifat', 'a'], [/Adverb/i, 'Kata keterangan', 'o'], [/Particle/i, 'Partikel', 'p'], [/Conjunction/i, 'Kata sambung', 'o'], [/Pronoun/i, 'Kata ganti', 'o'], [/Interjection/i, 'Kata seru', 'e'], [/Counter/i, 'Penghitung', 'o'], [/Prefix/i, 'Awalan', 'o'], [/Suffix/i, 'Akhiran', 'o'], [/Expression/i, 'Ungkapan', 'e'], [/Noun/i, 'Kata benda', 'n']];
+  function posOf(p) { const s = typeof p === 'string' ? p : JSON.stringify(p || ''); for (const [re, t, k] of POSM) if (re.test(s)) return { t, k }; return null; }
+  function parseWord(w) {
+    const rd = w.reading || {}, kana = rd.kana || '', kanji = rd.kanji || '';
+    const senses = (w.senses || []).slice(0, 6).map(s => ({ gl: (s.glosses || []).slice(0, 4).map(g => String(g).replace(/[.。]+$/, '')), pos: uniq((s.pos || []).map(posOf).filter(Boolean).map(p => p.t + '|' + p.k)).map(x => { const a = x.split('|'); return { t: a[0], k: a[1] }; }) })).filter(s => s.gl.length);
+    const pos = []; senses.forEach(s => s.pos.forEach(p => { if (!pos.some(q => q.t === p.t)) pos.push(p); }));
+    return { key: String(w.sequence || '') + (kanji || kana), written: kanji || kana, kana, kanji, common: !!(w.common != null ? w.common : w.is_common), jlpt: w.jlpt_lvl || w.jlpt || null, senses, pos: pos.slice(0, 3) };
+  }
+  const gloss = s => s.gl.join('; ');
+  const wordRuby = w => (w.kanji && w.kana ? '<ruby>' + esc(w.kanji) + '<rt>' + esc(w.kana) + '</rt></ruby>' : esc(w.written));
+
+  window.__NGD = { ST, esc, $, JP, HAS_KJ, KJG, uniq, DT, persist, ico, CATS, ALLW, PHRASES, KSTART, GRADES, ft, jWords, jSent, kapi, translate, translateLines, trCache, romaji, romajiSafe, parseWord, posOf, gloss, wordRuby };
+})();
+
+/* ===== NGDev v2 — tampilan & navigasi ===== */
+(function () {
+  'use strict';
+  const N = window.__NGD;
+  const { ST, esc, $, JP, HAS_KJ, KJG, uniq, DT, persist, ico, CATS, ALLW, PHRASES, KSTART, GRADES, ft, jWords, jSent, kapi, translate, translateLines, romaji, romajiSafe, parseWord, gloss, wordRuby } = N;
+  const HW_URL = 'https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js', HW_DATA = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data-jp@0/';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const TABS = [['home', 'Kamus', 'book'], ['kanji', 'Kanji', 'kj'], ['trans', 'Terjemah', 'lang'], ['saved', 'Simpanan', 'mark']];
+  const LANGS = { id: 'Indonesia', ja: 'Jepang', en: 'Inggris' }, SRL = { id: 'id-ID', ja: 'ja-JP', en: 'en-US' };
+  let root, app, stage, tabbar, toastEl, isOpen = false, tab = 'home', stack = [], pushedHist = false, closing = false, hwP = null;
+  const caches = { w: new Map(), ex: new Map(), kj: new Map(), kw: new Map(), grade: new Map() };
+  const T = { from: 'id', to: 'ja' };
+
+  /* ---------- util UI ---------- */
+  function toast(m) { if (!toastEl) return; toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => toastEl.classList.remove('on'), 2200); }
+  const vib = () => { try { navigator.vibrate && navigator.vibrate(12); } catch (e) { /* abaikan */ } };
+  function speak(t, rate) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = rate || .9; const v = (speechSynthesis.getVoices() || []).find(v => /^ja/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { toast('Pemutar suara tidak tersedia'); } }
+  function copy(t, btn) {
+    const done = () => { toast('Disalin'); if (btn) { const o = btn.innerHTML; btn.innerHTML = ico('ok', 16); setTimeout(() => { btn.innerHTML = o; }, 1000); } };
+    const fb = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); done(); } catch (e) { /* abaikan */ } a.remove(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fb); else fb();
+  }
+  function listen(input, lang, btn) {
+    if (!SR) { toast('Mikrofon tidak didukung di browser ini'); return; }
+    const r = new SR(); r.lang = lang; r.interimResults = true;
+    r.onresult = e => { input.value = Array.prototype.map.call(e.results, x => x[0].transcript).join(''); input.dispatchEvent(new Event('input', { bubbles: true })); };
+    r.onend = () => btn.classList.remove('rec'); r.onerror = () => { btn.classList.remove('rec'); toast('Mikrofon tidak bisa dipakai'); };
+    btn.classList.add('rec'); try { r.start(); } catch (e) { btn.classList.remove('rec'); }
+  }
+  const favIdx = (t, k) => DT().fav.findIndex(f => f.t === t && f.k === k);
+  function toggleFav(item) {
+    const d = DT(), i = favIdx(item.t, item.k);
+    if (i >= 0) { d.fav.splice(i, 1); persist(); toast('Dihapus dari Simpanan'); return false; }
+    d.fav.unshift(item); persist(); vib(); toast('Disimpan ke Simpanan ★'); return true;
+  }
+  const skelRows = n => Array.from({ length: n || 3 }, () => '<div class="ngd-card"><div class="ngd-sk" style="width:42%;height:24px"></div><div class="ngd-sk" style="width:78%;margin-top:10px"></div></div>').join('');
+  const errBox = (m, act) => '<div class="ngd-err"><b>Tidak bisa mengambil data</b><p>' + esc(m) + '</p>' + (act ? '<button class="ngd-btn" data-act="' + act + '">Coba lagi</button>' : '') + '</div>';
+  const badges = w => (w.common ? '<span class="ngd-b ok">Umum</span>' : '') + (w.jlpt ? '<span class="ngd-b jl">JLPT N' + esc(w.jlpt) + '</span>' : '') + w.pos.map(p => '<span class="ngd-b pos-' + p.k + '">' + esc(p.t) + '</span>').join('');
+
+  /* ---------- kerangka & navigasi ---------- */
+  function build() {
+    if (root) return;
+    root = document.createElement('div'); root.id = 'ngdev';
+    root.innerHTML = '<div class="ngd-app"><div class="ngd-stage"></div><nav class="ngd-tabbar" style="--i:0">' + TABS.map(t => '<button class="ngd-tb' + (t[0] === 'home' ? ' on' : '') + '" data-act="tab" data-tab="' + t[0] + '">' + ico(t[2], 22) + '<span>' + t[1] + '</span></button>').join('') + '</nav><div class="ngd-toast"></div></div>';
+    document.body.appendChild(root);
+    app = root.firstChild; stage = app.querySelector('.ngd-stage'); tabbar = app.querySelector('.ngd-tabbar'); toastEl = app.querySelector('.ngd-toast');
+    root.addEventListener('click', onClick);
+    root.addEventListener('keydown', e => { if (e.key !== 'Enter') return; if (e.target.matches('.ngd-sin')) { e.preventDefault(); const q = e.target.value.trim(); if (q) openResults(q); } if (e.target.id === 'ngd-kq') { e.preventDefault(); kanjiSearch(); } });
+    root.addEventListener('input', onInput);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) goBack(); });
+    window.addEventListener('popstate', () => { if (!isOpen) return; if (closing) { finishClose(); return; } if (stack.length) { pop(); history.pushState({ ngd: 1 }, ''); } else finishClose(); });
+    root.addEventListener('pointerdown', e => { const b = e.target.closest('.ngd-press'); if (b) b.classList.add('down'); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => root.addEventListener(ev, () => root.querySelectorAll('.ngd-press.down').forEach(b => b.classList.remove('down')), true));
+  }
+  function open(which) {
+    if (!ST().devMode) { alert('Fitur ini khusus pengguna dengan token developer.\nMasukkan token di Edit Profil (ketuk avatar di pojok kiri atas).'); return; }
+    try { if (!document.getElementById('theme-modal').classList.contains('hidden')) closeThemeModal(); } catch (e) { /* abaikan */ }
+    build(); const first = !isOpen; isOpen = true; closing = false;
+    if (first) { try { history.pushState({ ngd: 1 }, ''); pushedHist = true; } catch (e) { pushedHist = false; } }
+    document.documentElement.style.overflow = 'hidden';
+    switchTab(which === 'trans' ? 'trans' : which === 'kanji' ? 'kanji' : which === 'saved' ? 'saved' : 'home', true);
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('on')));
+  }
+  function close() { if (!isOpen) return; while (stack.length) pop(true); if (pushedHist && !closing) { closing = true; try { history.back(); return; } catch (e) { /* lanjut */ } } finishClose(); }
+  function finishClose() { isOpen = false; closing = false; pushedHist = false; root.classList.remove('on'); document.documentElement.style.overflow = ''; try { speechSynthesis.cancel(); } catch (e) { /* abaikan */ } }
+  function goBack() { if (stack.length) pop(); else if (tab !== 'home') switchTab('home'); else close(); }
+  function push(html, kind) {
+    const el = document.createElement('div'); el.className = 'ngd-page ngd-push'; el.dataset.kind = kind || ''; el.innerHTML = html; stage.appendChild(el); stack.push(el); app.classList.add('deep');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on'))); el.scrollTop = 0; return el;
+  }
+  function pop(instant) { const el = stack.pop(); if (!el) return; el.classList.remove('on'); setTimeout(() => el.remove(), instant ? 0 : 340); if (!stack.length) app.classList.remove('deep'); }
+  const tabEl = n => $('ngt-' + n);
+  function switchTab(n, force) {
+    if (!force && n === tab && !stack.length) { const p = tabEl(n); if (p) p.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    while (stack.length) pop(true);
+    tab = n; tabbar.style.setProperty('--i', TABS.findIndex(t => t[0] === n));
+    tabbar.querySelectorAll('.ngd-tb').forEach(b => b.classList.toggle('on', b.dataset.tab === n));
+    let p = tabEl(n); if (!p) { p = document.createElement('div'); p.id = 'ngt-' + n; p.className = 'ngd-page ngd-tabpage'; stage.appendChild(p); }
+    p.innerHTML = renderTab(n); stage.querySelectorAll('.ngd-tabpage').forEach(x => x.classList.toggle('on', x === p));
+  }
+  const renderTab = n => n === 'home' ? homeHTML() : n === 'kanji' ? kanjiHomeHTML() : n === 'trans' ? transHTML() : savedHTML();
+
+  /* ---------- HOME ---------- */
+  const heroBar = (title, ico2) => '<div class="ngd-hbar"><div class="ngd-brand"><i>' + ico2 + '</i>' + title + '</div><button class="ngd-hb ngd-press" data-act="close" aria-label="Tutup">' + ico('x', 18) + '</button></div>';
+  function searchBox(ph, val, id, cls) { return '<div class="ngd-search ' + (cls || '') + '">' + ico('search', 20) + '<input class="ngd-sin" id="' + id + '" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(ph) + '" value="' + esc(val || '') + '" aria-label="Cari kata">' + (SR ? '<button class="ngd-mic" data-act="mic" data-for="' + id + '" aria-label="Cari dengan suara">' + ico('mic', 18) + '</button>' : '') + '<button class="ngd-go ngd-press" data-act="go" data-for="' + id + '">Cari</button></div>'; }
+  function homeHTML() {
+    const h = DT().hist.slice(0, 10), day = Math.floor(Date.now() / 864e5), w = ALLW[day % ALLW.length], fav = favIdx('w', w.w) >= 0;
+    return '<div class="ngd-hero" style="--h2:#7c5cff"><div class="ngd-kan">辞</div>' + heroBar('Kamus NihonGo!', '言') + '<h1>Cari kata,<br>pahami cara pakainya</h1><p>Jepang · romaji · Indonesia — lengkap dengan arti dan contoh kalimat.</p></div>' +
+      searchBox('Ketik: 食べる / taberu / makan', '', 'ngd-hq') +
+      (h.length ? '<div class="ngd-sec"><div class="ngd-sech"><h4>Riwayat</h4><button data-act="hclear">Hapus</button></div><div class="ngd-chips">' + h.map(q => '<button class="ngd-chip" data-act="hist" data-q="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div></div>' : '') +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Kata hari ini</h4></div><div class="ngd-wotd" style="--cc:' + w.c + '"><div class="ngd-wcat">' + w.e + ' ' + esc(w.cat) + '</div><div class="ngd-wbig2"><ruby>' + esc(w.w) + (w.w !== w.r ? '<rt>' + esc(w.r) + '</rt>' : '') + '</ruby></div><div class="ngd-wrom2">' + esc(romaji(w.r)) + '</div><div class="ngd-wmean">' + esc(w.m) + '</div>' +
+      '<div class="ngd-wrow"><button class="ngd-pill ngd-press" data-act="openw" data-q="' + esc(w.w) + '">Lihat detail ' + ico('cr', 15) + '</button><button class="ngd-circ" data-act="speak" data-t="' + esc(w.r) + '" aria-label="Dengar">' + ico('spk', 18) + '</button><button class="ngd-circ' + (fav ? ' on' : '') + '" data-act="favq" data-w="' + esc(w.w) + '" data-r="' + esc(w.r) + '" data-m="' + esc(w.m) + '" aria-label="Simpan">' + ico('star', 18, fav) + '</button></div></div></div>' +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Jelajahi kategori</h4></div><div class="ngd-cats">' + CATS.map((c, i) => '<button class="ngd-cat ngd-press" style="--cc:' + c.c + ';--d:' + i * 35 + 'ms" data-act="cat" data-i="' + i + '"><span>' + c.e + '</span><b>' + c.n + '</b><small>' + c.w.length + ' kata</small></button>').join('') + '</div></div>' +
+      '<div class="ngd-tip">💡 Tulis kata Indonesia (mis. <b>makan</b>) dan aplikasi akan mencari padanan Jepangnya. Ketuk bintang ★ untuk menyimpan, lalu latihan dengan kartu di tab Simpanan.</div>';
+  }
+
+  /* ---------- HASIL PENCARIAN ---------- */
+  async function lookup(q) {
+    if (caches.w.has(q)) return caches.w.get(q);
+    const out = { q, viaJa: '', words: [] };
+    if (JP.test(q)) { const d = await jWords(q); out.words = (d.words || []).map(parseWord); }
+    else {
+      const [tr, direct] = await Promise.all([translate(q, 'id', 'ja').catch(() => null), jWords(q).catch(() => null)]);
+      const seen = new Set(), list = [], add = arr => arr.forEach(w => { if (w.written && !seen.has(w.key)) { seen.add(w.key); list.push(w); } });
+      if (tr && JP.test(tr.text)) { out.viaJa = tr.text.replace(/[。.!！？?\s]+$/, ''); const d2 = await jWords(out.viaJa).catch(() => null); if (d2) { const ws = (d2.words || []).map(parseWord); ws.sort((a, b) => (b.written === out.viaJa) - (a.written === out.viaJa)); add(ws); } }
+      if (direct) add((direct.words || []).map(parseWord));
+      if (!list.length && !direct && !tr) throw new Error('Layanan kamus tidak terjangkau. Periksa koneksi internet atau coba lagi nanti.');
+      out.words = list;
+    }
+    out.words = out.words.slice(0, 10); caches.w.set(q, out); return out;
+  }
+  function openResults(q) {
+    q = (q || '').trim(); if (!q) return;
+    const d = DT(); d.hist = [q].concat(d.hist.filter(x => x !== q)).slice(0, 20); persist();
+    let el = stack.length && stack[stack.length - 1].dataset.kind === 'results' ? stack[stack.length - 1] : null;
+    const head = '<div class="ngd-top"><button class="ngd-hb2 ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button>' + searchBox('Cari kata…', q, 'ngd-rq', 'flat') + '</div><div class="ngd-rbody"></div>';
+    if (!el) el = push(head, 'results'); else { el.innerHTML = head; el.scrollTop = 0; }
+    el._tk = (el._tk || 0) + 1; const tk = el._tk, body = el.querySelector('.ngd-rbody'); body.innerHTML = '<div class="ngd-rinfo">Mencari “' + esc(q) + '”…</div>' + skelRows(3);
+    lookup(q).then(r => {
+      if (el._tk !== tk) return; el._res = r;
+      let h = '';
+      if (r.viaJa) h += '<div class="ngd-via">Padanan Jepang untuk “' + esc(q) + '”: <b>' + esc(r.viaJa) + '</b> <span>' + esc(romajiSafe(r.viaJa)) + '</span></div>'; else h += '<div class="ngd-rinfo">' + r.words.length + ' hasil untuk “' + esc(q) + '”</div>';
+      if (!r.words.length) h += '<div class="ngd-err"><b>Tidak ada hasil</b><p>Coba kata lain, ejaan romaji, atau bentuk dasarnya. Untuk kalimat panjang pakai tab Terjemah.</p></div>';
+      h += r.words.map((w, i) => '<div class="ngd-row ngd-press" style="--d:' + i * 45 + 'ms" data-act="openres" data-i="' + i + '"><div class="ngd-rw">' + wordRuby(w) + '</div><div class="ngd-rm"><div class="ngd-rmean" data-rm="' + i + '">' + esc(w.senses[0] ? gloss(w.senses[0]) : '') + '</div><div class="ngd-rtags">' + badges(w) + '</div></div>' + ico('cr', 18) + '</div>').join('');
+      body.innerHTML = h;
+      translateLines(r.words.map(w => w.senses[0] ? gloss(w.senses[0]) : ''), 'en', 'id').then(out => { if (el._tk !== tk) return; r.words.forEach((w, i) => { const n = el.querySelector('[data-rm="' + i + '"]'); if (n && out[i]) n.textContent = out[i]; }); }).catch(() => {});
+    }).catch(e => { if (el._tk !== tk) return; body.innerHTML = errBox((e && e.name === 'AbortError') ? 'Permintaan terlalu lama. Coba lagi.' : (e && e.message) || 'Gagal terhubung.', 'retryres'); });
+  }
+  function openWordByText(text) {
+    toast('Memuat “' + text + '”…');
+    lookup(text).then(r => { const f = r.words.find(x => x.written === text || x.kana === text || x.kanji === text) || r.words[0]; if (f) openWord(f); else openResults(text); }).catch(() => toast('Tidak bisa memuat. Periksa internet.'));
+  }
+
+  /* ---------- DETAIL KATA ---------- */
+  function openWord(w) {
+    const fav = favIdx('w', w.written) >= 0, rom = romaji(w.kana || w.written);
+    const sn = w.senses.map((s, i) => '<div class="ngd-sense" style="--d:' + i * 50 + 'ms"><span class="ngd-num">' + (i + 1) + '</span><div class="ngd-sbody"><div class="ngd-sid" data-sid="' + i + '">' + esc(gloss(s)) + '</div><small class="ngd-sen" data-sen="' + i + '"></small><div class="ngd-stags">' + s.pos.map(p => '<span class="ngd-b pos-' + p.k + '">' + esc(p.t) + '</span>').join('') + '</div></div></div>').join('') || '<div class="ngd-note">Belum ada arti.</div>';
+    const html = '<div class="ngd-whero"><div class="ngd-kan">' + esc((w.kanji || w.kana || '').charAt(0)) + '</div><div class="ngd-wbar"><button class="ngd-hb ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button><span></span>' +
+      '<button class="ngd-hb ngd-press' + (fav ? ' on' : '') + '" data-act="favw" aria-label="Simpan">' + ico('star', 19, fav) + '</button><button class="ngd-hb ngd-press" data-act="copy" data-t="' + esc(w.written) + '" aria-label="Salin">' + ico('cp', 18) + '</button></div>' +
+      '<div class="ngd-wbig">' + wordRuby(w) + '</div><div class="ngd-wrom">' + esc(rom) + '</div><div class="ngd-wbadges">' + badges(w) + '</div>' +
+      '<div class="ngd-wacts"><button class="ngd-act ngd-press" data-act="speak" data-t="' + esc(w.kana || w.written) + '">' + ico('spk', 18) + 'Dengar</button><button class="ngd-act ngd-press" data-act="speak" data-t="' + esc(w.kana || w.written) + '" data-r="0.55">' + ico('slow', 18) + 'Lambat</button></div></div>' +
+      '<div class="ngd-seg" style="--i:0"><button class="on" data-act="wtab" data-p="mean">Arti</button><button data-act="wtab" data-p="ex">Contoh</button><button data-act="wtab" data-p="kj">Kanji</button></div>' +
+      '<div class="ngd-wbody"><div data-pn="mean">' + sn + '</div><div data-pn="ex" style="display:none"></div><div data-pn="kj" style="display:none"></div></div>';
+    const el = push(html, 'word'); el._w = w;
+    translateLines(w.senses.map(gloss), 'en', 'id').then(out => { w._id = out; w.senses.forEach((s, i) => { const a = el.querySelector('[data-sid="' + i + '"]'), b = el.querySelector('[data-sen="' + i + '"]'); if (a && out[i]) { a.textContent = out[i]; b.textContent = gloss(s); } }); }).catch(() => {});
+  }
+  function wordTab(el, p, btn) {
+    const seg = el.querySelector('.ngd-seg'), idx = ['mean', 'ex', 'kj'].indexOf(p); seg.style.setProperty('--i', idx);
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+    el.querySelectorAll('[data-pn]').forEach(d => { d.style.display = d.dataset.pn === p ? '' : 'none'; });
+    const w = el._w; if (p === 'ex') loadExamples(el, w); if (p === 'kj') loadKanjiPanel(el, w);
+  }
+  async function loadExamples(el, w) {
+    const box = el.querySelector('[data-pn="ex"]'); if (box.dataset.ok) return; box.innerHTML = skelRows(2);
+    try {
+      let ss = caches.ex.get(w.key);
+      if (!ss) {
+        const d = await jSent(w.written);
+        ss = (d.sentences || d.results || []).slice(0, 6).map(s => ({ jp: s.content || s.japanese || s.sentence || '', en: s.translation || s.eng || s.english || '' })).filter(s => s.jp);
+        const id = await translateLines(ss.map(s => s.en), 'en', 'id').catch(() => []); ss.forEach((s, i) => { s.id = id[i] || ''; }); caches.ex.set(w.key, ss);
+      }
+      if (!ss.length) { box.innerHTML = '<div class="ngd-empty2"><div>🍃</div><b>Belum ada contoh kalimat</b><p>Coba lihat tab Arti atau cari kata yang lebih umum.</p></div>'; box.dataset.ok = '1'; return; }
+      const stem = w.kanji ? (w.kanji.replace(/[\u3041-\u3096]+$/, '') || w.kanji) : w.kana;
+      box.innerHTML = ss.map((s, i) => { let jp = esc(s.jp); if (stem) jp = jp.split(esc(stem)).join('<mark>' + esc(stem) + '</mark>'); const rm = romajiSafe(s.jp);
+        return '<div class="ngd-eg" style="--d:' + i * 55 + 'ms"><div class="ngd-egrow"><div class="ngd-egjp">' + jp + '</div><button class="ngd-circ sm" data-act="speak" data-t="' + esc(s.jp) + '" aria-label="Dengar">' + ico('spk', 16) + '</button></div>' + (rm ? '<div class="ngd-rom">' + esc(rm) + '</div>' : '') + '<div class="ngd-egid">' + esc(s.id || s.en) + '</div>' + (s.id && s.en ? '<small class="ngd-sen">' + esc(s.en) + '</small>' : '') + '</div>'; }).join('');
+      box.dataset.ok = '1';
+    } catch (e) { box.innerHTML = errBox('Contoh kalimat belum bisa dimuat.', ''); }
+  }
+  async function loadKanjiPanel(el, w) {
+    const box = el.querySelector('[data-pn="kj"]'); if (box.dataset.ok) return; box.dataset.ok = '1';
+    const ks = uniq((w.kanji.match(KJG) || [])).slice(0, 6);
+    if (!ks.length) { box.innerHTML = '<div class="ngd-empty2"><div>あ</div><b>Kata ini ditulis dengan kana</b><p>Tidak ada kanji untuk dipelajari di sini.</p></div>'; return; }
+    box.innerHTML = ks.map(c => '<div class="ngd-kc" data-c="' + c + '"><div class="ngd-kw"></div><div class="ngd-ki"><div class="ngd-sk" style="width:70%"></div><div class="ngd-sk" style="width:50%;margin-top:8px"></div></div></div>').join('');
+    ks.forEach(c => fillKcard(box.querySelector('.ngd-kc[data-c="' + c + '"]'), c));
+  }
+  async function kInfo(c) { if (caches.kj.has(c)) return caches.kj.get(c); const k = await kapi('kanji/' + encodeURIComponent(c)); caches.kj.set(c, k); return k; }
+  async function fillKcard(card, c) {
+    const host = card.querySelector('.ngd-kw'), info = card.querySelector('.ngd-ki');
+    mkWriter(host, c, 132).then(wr => { host._w = wr; try { wr.animateCharacter(); } catch (e) { /* abaikan */ } }).catch(() => { host.innerHTML = '<div class="ngd-bigk">' + esc(c) + '</div>'; });
+    try {
+      const k = await kInfo(c), mi = k.meanings && k.meanings.length ? (await translateLines([k.meanings.slice(0, 4).join('; ')], 'en', 'id'))[0] : '';
+      info.innerHTML = '<div class="ngd-kt"><b>' + esc(mi || (k.meanings || []).slice(0, 3).join(', ') || '—') + '</b></div>' + (mi ? '<small class="ngd-sen">' + esc(k.meanings.slice(0, 4).join('; ')) + '</small>' : '') +
+        '<div class="ngd-kr"><span>Kun</span>' + esc((k.kun_readings || []).slice(0, 3).join('、') || '—') + '</div><div class="ngd-kr"><span>On</span>' + esc((k.on_readings || []).slice(0, 3).join('、') || '—') + '</div>' +
+        '<div class="ngd-kr"><span>Goresan</span>' + esc(k.stroke_count || '—') + (k.jlpt ? ' · N' + esc(k.jlpt) : '') + '</div>' +
+        '<div class="ngd-kbtns"><button class="ngd-mini ngd-press" data-act="kanim">' + ico('rf', 14) + 'Putar</button><button class="ngd-mini ngd-press" data-act="kquiz">' + ico('pen', 14) + 'Tulis</button><button class="ngd-mini ngd-press" data-act="kopen" data-c="' + esc(c) + '">Detail ' + ico('cr', 13) + '</button></div>';
+    } catch (e) { info.innerHTML = '<div class="ngd-note">Info kanji belum bisa dimuat.</div>'; }
+  }
+
+  /* ---------- Hanzi Writer ---------- */
+  function loadHW() { if (window.HanziWriter) return Promise.resolve(); return hwP || (hwP = new Promise((ok, bad) => { const s = document.createElement('script'); s.src = HW_URL; s.onload = ok; s.onerror = () => { hwP = null; bad(new Error('hw')); }; document.head.appendChild(s); })); }
+  async function mkWriter(host, ch, size, extra) {
+    await loadHW(); host.innerHTML = '';
+    const acc = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '').trim() || '#2e9d5b';
+    return new Promise((ok, bad) => {
+      let failed = false;
+      const w = window.HanziWriter.create(host, ch, Object.assign({ width: size, height: size, padding: Math.round(size * .07), strokeAnimationSpeed: 1.3, delayBetweenStrokes: 220, strokeColor: acc, outlineColor: 'rgba(128,128,128,.32)', drawingColor: acc, highlightColor: acc, showOutline: true,
+        charDataLoader: (c, o, b) => { fetch(HW_DATA + encodeURIComponent(c) + '.json').then(r => { if (!r.ok) throw new Error('404'); return r.json(); }).then(o).catch(b); },
+        onLoadCharDataError: () => { failed = true; bad(new Error('data')); } }, extra || {}));
+      setTimeout(() => { if (!failed) ok(w); }, 60);
+    });
+  }
+
+  /* ---------- KANJI ---------- */
+  function kanjiHomeHTML() {
+    return '<div class="ngd-hero" style="--h2:#ff7a45"><div class="ngd-kan">字</div>' + heroBar('Kanji', '字') + '<h1>Pelajari kanji<br>goresan demi goresan</h1><p>Lihat urutan goresan, bacaan kun/on, dan kata yang memakainya.</p></div>' +
+      '<div class="ngd-search"><span class="ngd-kqi">字</span><input class="ngd-sin" id="ngd-kq" type="text" autocomplete="off" spellcheck="false" placeholder="Ketik satu kanji, mis. 水" aria-label="Cari kanji"><button class="ngd-go ngd-press" data-act="kqgo">Lihat</button></div>' +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Kanji dasar</h4></div><div class="ngd-ktiles">' + KSTART.map((c, i) => '<button class="ngd-kt2 ngd-press" style="--d:' + i * 25 + 'ms" data-act="kopen" data-c="' + c + '">' + c + '</button>').join('') + '</div></div>' +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Berdasarkan kelas</h4></div><div class="ngd-grades">' + GRADES.map((g, i) => '<button class="ngd-gr ngd-press" style="--cc:' + g[3] + ';--d:' + i * 35 + 'ms" data-act="grade" data-g="' + g[0] + '" data-l="' + g[1] + '"><b>' + g[1] + '</b><small>±' + g[2] + ' kanji</small></button>').join('') + '</div></div>' +
+      '<div class="ngd-tip">✍️ Di halaman kanji ada tombol <b>Tulis</b>: gambar goresannya sendiri di kotak, dan aplikasi akan memeriksa urutan dan arahnya.</div>';
+  }
+  function kanjiSearch() { const v = ($('ngd-kq') || {}).value || '', m = v.match(KJG); if (m) openKanji(m[0]); else if (v.trim()) { openResults(v.trim()); } else toast('Ketik satu kanji dulu'); }
+  async function openGrade(g, label) {
+    const col = (GRADES.find(x => x[0] === g) || [0, 0, 0, '#22c55e'])[3];
+    const el = push('<div class="ngd-top2" style="--cc:' + col + '"><button class="ngd-hb ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button><div><h2>' + esc(label) + '</h2><small id="ngd-gc">Memuat…</small></div></div><div class="ngd-gbody">' + skelRows(2) + '</div>', 'grade');
+    try {
+      let list = caches.grade.get(g); if (!list) { list = await kapi('kanji/grade-' + g); caches.grade.set(g, list); }
+      el.querySelector('#ngd-gc').textContent = list.length + ' kanji · ketuk untuk melihat goresan';
+      el.querySelector('.ngd-gbody').innerHTML = '<div class="ngd-ktiles big">' + list.map(c => '<button class="ngd-kt2 ngd-press" data-act="kopen" data-c="' + c + '">' + c + '</button>').join('') + '</div>';
+    } catch (e) { el.querySelector('.ngd-gbody').innerHTML = errBox('Daftar kanji belum bisa dimuat. Periksa internet.', ''); }
+  }
+  function openKanji(c) {
+    const fav = favIdx('k', c) >= 0;
+    const el = push('<div class="ngd-whero k"><div class="ngd-kan">' + esc(c) + '</div><div class="ngd-wbar"><button class="ngd-hb ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button><span></span><button class="ngd-hb ngd-press' + (fav ? ' on' : '') + '" data-act="favk" data-c="' + esc(c) + '" aria-label="Simpan">' + ico('star', 19, fav) + '</button></div>' +
+      '<div class="ngd-board"><div class="ngd-wstage" id="ngd-big"></div></div><div class="ngd-kmsg" id="ngd-kmsg">Ketuk “Putar” untuk melihat urutan goresan</div>' +
+      '<div class="ngd-wacts"><button class="ngd-act ngd-press" data-act="kanim2">' + ico('rf', 18) + 'Putar</button><button class="ngd-act ngd-press" data-act="kquiz2">' + ico('pen', 18) + 'Tulis</button><button class="ngd-act ngd-press" data-act="kreset">' + ico('x', 18) + 'Ulang</button></div></div><div class="ngd-kbody"><div class="ngd-card"><div class="ngd-sk" style="width:60%;height:22px"></div><div class="ngd-sk" style="width:80%;margin-top:10px"></div></div></div>', 'kanji');
+    el._c = c; const host = el.querySelector('#ngd-big'), size = Math.min(260, Math.round(app.clientWidth * .62));
+    host.style.width = host.style.height = size + 'px';
+    mkWriter(host, c, size).then(w => { el._w = w; try { w.animateCharacter(); } catch (e) { /* abaikan */ } }).catch(() => { host.innerHTML = '<div class="ngd-bigk" style="font-size:' + Math.round(size * .7) + 'px">' + esc(c) + '</div>'; $('ngd-kmsg').textContent = 'Data goresan tidak tersedia untuk kanji ini'; });
+    kInfo(c).then(async k => {
+      const mi = k.meanings && k.meanings.length ? (await translateLines([k.meanings.slice(0, 5).join('; ')], 'en', 'id'))[0] : '';
+      const rd = (arr, cls) => (arr && arr.length ? arr.slice(0, 6).map(r => '<button class="ngd-chip2 ' + cls + '" data-act="speak" data-t="' + esc(r.replace(/[.\-]/g, '')) + '">' + esc(r) + '</button>').join('') : '<span class="ngd-dim">—</span>');
+      const body = el.querySelector('.ngd-kbody');
+      body.innerHTML = '<div class="ngd-card"><div class="ngd-lbl">Arti</div><div class="ngd-big2">' + esc(mi || (k.meanings || []).slice(0, 4).join(', ') || '—') + '</div>' + (mi ? '<small class="ngd-sen">' + esc((k.meanings || []).slice(0, 5).join('; ')) + '</small>' : '') + '</div>' +
+        '<div class="ngd-card"><div class="ngd-lbl">Bacaan kun (Jepang asli)</div><div class="ngd-rd">' + rd(k.kun_readings, 'kun') + '</div><div class="ngd-lbl" style="margin-top:12px">Bacaan on (serapan Tiongkok)</div><div class="ngd-rd">' + rd(k.on_readings, 'on') + '</div></div>' +
+        '<div class="ngd-facts"><div><b>' + esc(k.stroke_count || '—') + '</b><small>goresan</small></div><div><b>' + (k.jlpt ? 'N' + esc(k.jlpt) : '—') + '</b><small>JLPT</small></div><div><b>' + (k.grade ? esc(k.grade) : '—') + '</b><small>kelas</small></div></div>' +
+        '<div class="ngd-sec" style="padding:0"><div class="ngd-sech"><h4>Kata yang memakai ' + esc(c) + '</h4></div><div id="ngd-kw">' + skelRows(2) + '</div></div>';
+      loadCompounds(el, c);
+    }).catch(() => { el.querySelector('.ngd-kbody').innerHTML = errBox('Info kanji belum bisa dimuat. Periksa internet.', ''); });
+  }
+  async function loadCompounds(el, c) {
+    const box = el.querySelector('#ngd-kw'); if (!box) return;
+    try {
+      let ws = caches.kw.get(c); if (!ws) { ws = (await kapi('words/' + encodeURIComponent(c))).slice(0, 12); caches.kw.set(c, ws); }
+      const items = ws.map(x => { const v = (x.variants && x.variants[0]) || {}; return { w: v.written || '', r: v.pronounced || '', m: ((x.meanings && x.meanings[0] && x.meanings[0].glosses) || []).slice(0, 2).join('; ') }; }).filter(x => x.w);
+      if (!items.length) { box.innerHTML = '<div class="ngd-note">Belum ada kata terkait.</div>'; return; }
+      const id = await translateLines(items.map(x => x.m), 'en', 'id').catch(() => []);
+      box.innerHTML = items.map((x, i) => '<div class="ngd-row ngd-press" style="--d:' + i * 40 + 'ms" data-act="openw" data-q="' + esc(x.w) + '"><div class="ngd-rw"><ruby>' + esc(x.w) + '<rt>' + esc(x.r) + '</rt></ruby></div><div class="ngd-rm"><div class="ngd-rmean">' + esc(id[i] || x.m) + '</div></div>' + ico('cr', 18) + '</div>').join('');
+    } catch (e) { box.innerHTML = '<div class="ngd-note">Kata terkait belum bisa dimuat.</div>'; }
+  }
+
+  /* ---------- TERJEMAH ---------- */
+  function transHTML() {
+    const th = DT().trHist.slice(0, 6), opt = (cur, other) => Object.keys(LANGS).map(l => '<option value="' + l + '"' + (l === cur ? ' selected' : '') + '>' + LANGS[l] + '</option>').join('');
+    return '<div class="ngd-hero" style="--h2:#14b8a6"><div class="ngd-kan">訳</div>' + heroBar('Terjemah', '訳') + '<h1>Terjemahkan ke<br>bahasa Jepang</h1><p>Lengkap dengan romaji dan suara. Bisa juga Jepang → Indonesia.</p></div>' +
+      '<div class="ngd-langbar"><label><small>Dari</small><select id="ngd-from" data-act="lang">' + opt(T.from) + '</select></label><button class="ngd-swap ngd-press" data-act="swap" aria-label="Tukar bahasa">' + ico('sw', 20) + '</button><label><small>Ke</small><select id="ngd-to" data-act="lang">' + opt(T.to) + '</select></label></div>' +
+      '<div class="ngd-inbox"><textarea id="ngd-tin" rows="4" maxlength="480" placeholder="' + esc(tph()) + '"></textarea><div class="ngd-inrow"><span id="ngd-cnt">0/480</span><span class="ngd-tools"><button class="ngd-circ sm" data-act="paste" aria-label="Tempel">' + ico('paste', 16) + '</button>' + (SR ? '<button class="ngd-circ sm" data-act="tmic" aria-label="Bicara">' + ico('mic', 16) + '</button>' : '') + '<button class="ngd-circ sm" data-act="tclear" aria-label="Hapus">' + ico('x', 16) + '</button></span></div></div>' +
+      '<button class="ngd-big-btn ngd-press" data-act="trgo">' + ico('lang', 20) + ' Terjemahkan</button><div id="ngd-tout"></div>' +
+      '<div class="ngd-sec"><div class="ngd-sech"><h4>Frasa perjalanan</h4></div><div class="ngd-phr">' + PHRASES.map((p, i) => '<div class="ngd-ph ngd-press" data-act="phrase" data-i="' + i + '" style="--d:' + i * 30 + 'ms"><b>' + esc(p[0]) + '</b><span>' + esc(p[1]) + '</span><small>' + esc(p[2]) + '</small></div>').join('') + '</div></div>' +
+      (th.length ? '<div class="ngd-sec"><div class="ngd-sech"><h4>Terakhir</h4><button data-act="thclear">Hapus</button></div>' + th.map((x, i) => '<div class="ngd-hitem ngd-press" data-act="thist" data-i="' + i + '"><b>' + esc(x.src) + '</b><span>' + esc(x.out) + '</span></div>').join('') + '</div>' : '');
+  }
+  const tph = () => T.from === 'ja' ? 'Tempel teks Jepang di sini…' : T.from === 'en' ? 'Type English here…' : 'Ketik kalimat bahasa Indonesia…';
+  async function doTranslate() {
+    const inp = $('ngd-tin'), src = (inp.value || '').trim(); if (!src) { inp.focus(); return; }
+    const out = $('ngd-tout'), tk = (doTranslate._t = (doTranslate._t || 0) + 1);
+    out.innerHTML = '<div class="ngd-card"><div class="ngd-sk" style="width:80%;height:26px"></div><div class="ngd-sk" style="width:55%;margin-top:10px"></div></div>';
+    try {
+      const r = await translate(src, T.from, T.to); if (tk !== doTranslate._t) return;
+      if (!r.romaji && T.to === 'ja') r.romaji = romajiSafe(r.text);
+      const d = DT(); d.trHist = [{ src, out: r.text, rom: r.romaji || '', via: r.via, from: T.from, to: T.to }].concat(d.trHist.filter(x => !(x.src === src && x.from === T.from && x.to === T.to))).slice(0, 12); persist();
+      showTr(src, r, T.to);
+    } catch (e) { if (tk === doTranslate._t) out.innerHTML = errBox('Semua layanan terjemahan tidak terjangkau saat ini. Periksa internet lalu coba lagi.', ''); }
+  }
+  function showTr(src, r, to) {
+    const ja = to === 'ja', short = (ja ? r.text : src).length <= 14, fav = favIdx('p', src) >= 0;
+    $('ngd-tout').innerHTML = '<div class="ngd-out"><div class="ngd-lbl">' + LANGS[to] + '</div><div class="' + (ja ? 'ngd-outjp' : 'ngd-outid') + '">' + esc(r.text) + '</div>' + (r.romaji ? '<div class="ngd-rom">' + esc(r.romaji) + '</div>' : '') +
+      '<div class="ngd-outbar"><small>via ' + esc(r.via || '') + '</small><span class="ngd-tools">' + (ja ? '<button class="ngd-circ sm" data-act="speak" data-t="' + esc(r.text) + '" aria-label="Dengar">' + ico('spk', 16) + '</button>' : '') + '<button class="ngd-circ sm" data-act="copy" data-t="' + esc(r.text) + '" aria-label="Salin">' + ico('cp', 16) + '</button>' +
+      '<button class="ngd-circ sm' + (fav ? ' on' : '') + '" data-act="favp" data-s="' + esc(src) + '" data-o="' + esc(r.text) + '" data-r="' + esc(r.romaji || '') + '" aria-label="Simpan">' + ico('star', 16, fav) + '</button></span></div>' +
+      (short ? '<button class="ngd-link" data-act="openw" data-q="' + esc(ja ? r.text.replace(/[。！？!?]+$/, '') : src) + '">Lihat di kamus ' + ico('cr', 14) + '</button>' : '') + '</div>';
+    $('ngd-tout').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ---------- SIMPANAN & KARTU ---------- */
+  let savedSeg = 'w';
+  function savedHTML() {
+    const f = DT().fav, list = f.filter(x => x.t === savedSeg), cnt = t => f.filter(x => x.t === t).length;
+    const rows = list.map((x, i) => {
+      const gi = f.indexOf(x);
+      if (x.t === 'w') return '<div class="ngd-row ngd-press" style="--d:' + i * 35 + 'ms" data-act="openw" data-q="' + esc(x.k) + '"><div class="ngd-rw"><ruby>' + esc(x.k) + (x.r && x.r !== x.k ? '<rt>' + esc(x.r) + '</rt>' : '') + '</ruby></div><div class="ngd-rm"><div class="ngd-rmean">' + esc(x.m || '') + '</div></div><button class="ngd-circ sm" data-act="rm" data-i="' + gi + '" aria-label="Hapus">' + ico('trash', 15) + '</button></div>';
+      if (x.t === 'p') return '<div class="ngd-hitem ngd-press" data-act="phr2" data-i="' + gi + '"><b>' + esc(x.k) + '</b><span>' + esc(x.o) + '</span><button class="ngd-circ sm" data-act="rm" data-i="' + gi + '" aria-label="Hapus">' + ico('trash', 15) + '</button></div>';
+      return '<div class="ngd-row ngd-press" data-act="kopen" data-c="' + esc(x.k) + '"><div class="ngd-rw big">' + esc(x.k) + '</div><div class="ngd-rm"><div class="ngd-rmean">' + esc(x.m || 'Kanji') + '</div></div><button class="ngd-circ sm" data-act="rm" data-i="' + gi + '" aria-label="Hapus">' + ico('trash', 15) + '</button></div>';
+    }).join('');
+    const nWords = cnt('w') + cnt('k');
+    return '<div class="ngd-hero" style="--h2:#ec4899"><div class="ngd-kan">宝</div>' + heroBar('Simpanan', '★') + '<h1>Koleksi belajarmu</h1><p>' + f.length + ' item tersimpan. Latih dengan kartu untuk menghafal lebih cepat.</p></div>' +
+      '<div class="ngd-segw"><div class="ngd-seg3" style="--i:' + ['w', 'p', 'k'].indexOf(savedSeg) + '"><button class="' + (savedSeg === 'w' ? 'on' : '') + '" data-act="sseg" data-s="w">Kata (' + cnt('w') + ')</button><button class="' + (savedSeg === 'p' ? 'on' : '') + '" data-act="sseg" data-s="p">Frasa (' + cnt('p') + ')</button><button class="' + (savedSeg === 'k' ? 'on' : '') + '" data-act="sseg" data-s="k">Kanji (' + cnt('k') + ')</button></div></div>' +
+      (nWords ? '<button class="ngd-big-btn alt ngd-press" data-act="flash">' + ico('cards', 20) + ' Latihan kartu (' + nWords + ')</button>' : '') +
+      (rows ? '<div class="ngd-list">' + rows + '</div>' : '<div class="ngd-empty2"><div>⭐</div><b>Belum ada yang disimpan</b><p>Ketuk bintang di halaman kata, kanji, atau terjemahan untuk menyimpannya di sini.</p></div>') +
+      (DT().hist.length ? '<div class="ngd-sec"><div class="ngd-sech"><h4>Riwayat pencarian</h4><button data-act="hclear2">Hapus</button></div><div class="ngd-chips">' + DT().hist.slice(0, 14).map(q => '<button class="ngd-chip" data-act="hist" data-q="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div></div>' : '');
+  }
+  function openFlash() {
+    const items = DT().fav.filter(x => x.t === 'w' || x.t === 'k').map(x => ({ f: x.k, r: x.t === 'w' ? (x.r || '') : '', m: x.m || '' }));
+    if (!items.length) { toast('Simpan beberapa kata atau kanji dulu'); return; }
+    for (let i = items.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [items[i], items[j]] = [items[j], items[i]]; }
+    const el = push('<div class="ngd-ftop"><button class="ngd-hb ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button><div class="ngd-fprog"><i></i></div><b id="ngd-fn"></b></div><div class="ngd-fstage"></div>', 'flash');
+    el._deck = items; el._i = 0; el._ok = 0; el._bad = []; renderCard(el);
+  }
+  function renderCard(el) {
+    const d = el._deck, i = el._i, st = el.querySelector('.ngd-fstage');
+    el.querySelector('.ngd-fprog i').style.width = (i / d.length * 100) + '%'; el.querySelector('#ngd-fn').textContent = Math.min(i + 1, d.length) + '/' + d.length;
+    if (i >= d.length) {
+      const p = Math.round(el._ok / d.length * 100);
+      st.innerHTML = '<div class="ngd-done"><div class="ngd-ring" style="--p:' + p + '"><b>' + p + '%</b></div><h3>Sesi selesai!</h3><p>' + el._ok + ' dari ' + d.length + ' sudah hafal.</p><div class="ngd-fbtns2">' + (el._bad.length ? '<button class="ngd-big-btn ngd-press" data-act="fagain">Ulangi yang belum (' + el._bad.length + ')</button>' : '') + '<button class="ngd-big-btn alt ngd-press" data-act="back">Selesai</button></div></div>'; return;
+    }
+    const c = d[i]; el._flipped = false;
+    st.innerHTML = '<div class="ngd-fc" data-act="flip"><div class="ngd-fci"><div class="ngd-ff front"><div class="ngd-ffw">' + esc(c.f) + '</div><small>ketuk untuk membalik</small></div><div class="ngd-ff back"><div class="ngd-ffr">' + esc(c.r || romaji(c.f)) + '</div><div class="ngd-ffm">' + esc(c.m || '—') + '</div><button class="ngd-circ" data-act="speak" data-t="' + esc(c.r || c.f) + '" aria-label="Dengar">' + ico('spk', 18) + '</button></div></div></div>' +
+      '<div class="ngd-fbtns"><button class="ngd-fb bad ngd-press" data-act="fbad">' + ico('x', 22) + '<span>Belum hafal</span></button><button class="ngd-fb good ngd-press" data-act="fok">' + ico('ok', 22) + '<span>Hafal</span></button></div>';
+    const card = st.querySelector('.ngd-fc'); let x0 = null;
+    card.addEventListener('pointerdown', e => { x0 = e.clientX; }); card.addEventListener('pointerup', e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 70) { card.classList.add(dx > 0 ? 'out-r' : 'out-l'); setTimeout(() => answer(el, dx > 0), 220); } });
+  }
+  function answer(el, ok) { const c = el._deck[el._i]; if (ok) el._ok++; else el._bad.push(c); el._i++; vib(); renderCard(el); }
+
+  /* ---------- CATEGORY ---------- */
+  function openCat(i) {
+    const c = CATS[i];
+    push('<div class="ngd-top2" style="--cc:' + c.c + '"><button class="ngd-hb ngd-press" data-act="back" aria-label="Kembali">' + ico('back', 20) + '</button><div><h2>' + c.e + ' ' + c.n + '</h2><small>' + c.w.length + ' kata · ketuk untuk detail & contoh</small></div></div><div class="ngd-gbody">' +
+      c.w.map((w, k) => { const fav = favIdx('w', w[0]) >= 0; return '<div class="ngd-row ngd-press" style="--d:' + k * 40 + 'ms" data-act="openw" data-q="' + esc(w[0]) + '"><div class="ngd-rw"><ruby>' + esc(w[0]) + (w[0] !== w[1] ? '<rt>' + esc(w[1]) + '</rt>' : '') + '</ruby></div><div class="ngd-rm"><div class="ngd-rmean">' + esc(w[2]) + '</div><div class="ngd-rom">' + esc(romaji(w[1])) + '</div></div><button class="ngd-circ sm" data-act="speak" data-t="' + esc(w[1]) + '" aria-label="Dengar">' + ico('spk', 16) + '</button><button class="ngd-circ sm' + (fav ? ' on' : '') + '" data-act="favq" data-w="' + esc(w[0]) + '" data-r="' + esc(w[1]) + '" data-m="' + esc(w[2]) + '" aria-label="Simpan">' + ico('star', 16, fav) + '</button></div>'; }).join('') + '</div>', 'cat');
+  }
+
+  /* ---------- event ---------- */
+  function inputOf(id) { return $(id); }
+  function onInput(e) { if (e.target.id === 'ngd-tin') { const c = $('ngd-cnt'); if (c) c.textContent = e.target.value.length + '/480'; } }
+  function pageOf(el) { return el.closest('.ngd-page'); }
+  function onClick(e) {
+    const el = e.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act;
+    switch (a) {
+      case 'close': close(); break;
+      case 'back': goBack(); break;
+      case 'tab': switchTab(el.dataset.tab); break;
+      case 'go': { const i = inputOf(el.dataset.for); if (i && i.value.trim()) openResults(i.value.trim()); else if (i) i.focus(); break; }
+      case 'mic': listen(inputOf(el.dataset.for), 'ja-JP', el); break;
+      case 'hist': openResults(el.dataset.q); break;
+      case 'hclear': case 'hclear2': DT().hist = []; persist(); { const p = tabEl(tab); if (p) p.innerHTML = renderTab(tab); } break;
+      case 'cat': openCat(+el.dataset.i); break;
+      case 'openw': openWordByText(el.dataset.q); break;
+      case 'openres': { const pg = pageOf(el), r = pg && pg._res; if (r && r.words[+el.dataset.i]) openWord(r.words[+el.dataset.i]); break; }
+      case 'retryres': { const pg = pageOf(el), q = pg && pg.querySelector('.ngd-sin') ? pg.querySelector('.ngd-sin').value : ''; caches.w.delete(q); openResults(q); break; }
+      case 'speak': speak(el.dataset.t, el.dataset.r ? +el.dataset.r : 0.9); break;
+      case 'copy': copy(el.dataset.t, el); break;
+      case 'favq': { const on = toggleFav({ t: 'w', k: el.dataset.w, r: el.dataset.r, m: el.dataset.m }); el.classList.toggle('on', on); el.innerHTML = ico('star', el.classList.contains('sm') ? 16 : 18, on); break; }
+      case 'favw': { const pg = pageOf(el), w = pg._w, m = (w._id && w._id[0]) || (w.senses[0] ? gloss(w.senses[0]) : ''); const on = toggleFav({ t: 'w', k: w.written, r: w.kana, m }); el.classList.toggle('on', on); el.innerHTML = ico('star', 19, on); break; }
+      case 'favk': { const on = toggleFav({ t: 'k', k: el.dataset.c, m: '' }); el.classList.toggle('on', on); el.innerHTML = ico('star', 19, on); break; }
+      case 'favp': { const on = toggleFav({ t: 'p', k: el.dataset.s, o: el.dataset.o, r: el.dataset.r }); el.classList.toggle('on', on); el.innerHTML = ico('star', 16, on); break; }
+      case 'wtab': wordTab(pageOf(el), el.dataset.p, el); break;
+      case 'kanim': { const h = el.closest('.ngd-kc').querySelector('.ngd-kw'); if (h._w) { try { h._w.cancelQuiz(); } catch (x) { /* */ } h._w.showCharacter(); h._w.animateCharacter(); } break; }
+      case 'kquiz': { const h = el.closest('.ngd-kc').querySelector('.ngd-kw'); if (h._w) { h._w.quiz({ showHintAfterMisses: 2, onComplete: s => toast('Bagus! Kesalahan: ' + s.totalMistakes) }); toast('Gambar goresan sesuai urutan'); } break; }
+      case 'kopen': openKanji(el.dataset.c); break;
+      case 'kanim2': { const pg = pageOf(el); if (pg._w) { try { pg._w.cancelQuiz(); } catch (x) { /* */ } pg._w.showCharacter(); pg._w.animateCharacter(); $('ngd-kmsg').textContent = 'Perhatikan urutan dan arah goresan'; } break; }
+      case 'kquiz2': { const pg = pageOf(el); if (pg._w) { pg._w.quiz({ showHintAfterMisses: 2, onMistake: () => { vib(); }, onComplete: s => { $('ngd-kmsg').textContent = s.totalMistakes ? 'Selesai! Kesalahan: ' + s.totalMistakes + ' — coba lagi 💪' : 'Sempurna! 🎉'; } }); $('ngd-kmsg').textContent = 'Giliranmu: gambar goresan pertama ✍️'; } break; }
+      case 'kreset': { const pg = pageOf(el); if (pg._w) { try { pg._w.cancelQuiz(); } catch (x) { /* */ } pg._w.showCharacter(); $('ngd-kmsg').textContent = 'Ketuk “Putar” untuk melihat urutan goresan'; } break; }
+      case 'kqgo': kanjiSearch(); break;
+      case 'grade': openGrade(el.dataset.g, el.dataset.l); break;
+      case 'swap': { const f = $('ngd-from').value, t = $('ngd-to').value; T.from = t; T.to = f; syncLang(); break; }
+      case 'trgo': doTranslate(); break;
+      case 'tclear': $('ngd-tin').value = ''; $('ngd-cnt').textContent = '0/480'; $('ngd-tout').innerHTML = ''; break;
+      case 'paste': if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(t => { $('ngd-tin').value = t.slice(0, 480); onInput({ target: $('ngd-tin') }); }, () => toast('Tidak bisa membaca clipboard')); else toast('Tempel manual dengan menekan lama kolom teks'); break;
+      case 'tmic': listen($('ngd-tin'), SRL_OF(T.from), el); break;
+      case 'phrase': { const p = PHRASES[+el.dataset.i]; T.from = 'id'; T.to = 'ja'; syncLang(); $('ngd-tin').value = p[0]; $('ngd-cnt').textContent = p[0].length + '/480'; showTr(p[0], { text: p[1], romaji: p[2], via: 'Frasa bawaan' }, 'ja'); speak(p[1]); break; }
+      case 'thist': { const x = DT().trHist[+el.dataset.i]; if (x) { T.from = x.from; T.to = x.to; syncLang(); $('ngd-tin').value = x.src; $('ngd-cnt').textContent = x.src.length + '/480'; showTr(x.src, { text: x.out, romaji: x.rom, via: x.via }, x.to); } break; }
+      case 'thclear': DT().trHist = []; persist(); { const p = tabEl('trans'); if (p) p.innerHTML = transHTML(); } break;
+      case 'sseg': savedSeg = el.dataset.s; tabEl('saved').innerHTML = savedHTML(); break;
+      case 'rm': { DT().fav.splice(+el.dataset.i, 1); persist(); tabEl('saved').innerHTML = savedHTML(); toast('Dihapus'); break; }
+      case 'phr2': { const x = DT().fav[+el.dataset.i]; if (x) { switchTab('trans'); T.from = 'id'; T.to = 'ja'; syncLang(); $('ngd-tin').value = x.k; showTr(x.k, { text: x.o, romaji: x.r, via: 'Tersimpan' }, 'ja'); } break; }
+      case 'flash': openFlash(); break;
+      case 'flip': { const c = el; c.classList.toggle('flip'); break; }
+      case 'fok': { const pg = pageOf(el); pg._deckDone = 1; answer(pg, true); break; }
+      case 'fbad': { const pg = pageOf(el); answer(pg, false); break; }
+      case 'fagain': { const pg = pageOf(el); pg._deck = pg._bad.slice(); pg._i = 0; pg._ok = 0; pg._bad = []; renderCard(pg); break; }
+      default: break;
+    }
+  }
+  const SRL_OF = l => SRL[l] || 'id-ID';
+  root_langHook();
+  function root_langHook() { document.addEventListener('change', e => { if (!root || !root.contains(e.target)) return; if (e.target.id === 'ngd-from' || e.target.id === 'ngd-to') { T.from = $('ngd-from').value; T.to = $('ngd-to').value; if (T.from === T.to) { T[e.target.id === 'ngd-from' ? 'to' : 'from'] = T.from === 'ja' ? 'id' : 'ja'; } syncLang(); } }); }
+  function syncLang() { const f = $('ngd-from'), t = $('ngd-to'); if (!f) return; f.value = T.from; t.value = T.to; $('ngd-tin').placeholder = tph(); }
+
+  /* ---------- gaya ---------- */
+  const css = document.createElement('style'); css.id = 'ng-dev-css';
+  css.textContent = `#ngdev{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s;font-family:Inter,system-ui,sans-serif}
+#ngdev.on{opacity:1;pointer-events:auto}
+#ngdev *{box-sizing:border-box}
+:where(#ngdev) button{font-family:inherit;font-size:inherit;font-weight:inherit;line-height:inherit;border:0;background:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
+:where(#ngdev) select,:where(#ngdev) textarea,:where(#ngdev) input{font-family:inherit}
+#ngdev .ngd-app,#ngdev .ngd-app.ram-pop{background-image:none!important;box-shadow:0 0 60px rgba(0,0,0,.5)!important}
+.ngd-app{--a1:color-mix(in srgb,var(--accent) 86%,#000);--r:1.5rem;position:relative;max-width:520px;height:100%;margin:0 auto;background:var(--bg-app);color:var(--text-main);overflow:hidden;transform:translateY(26px) scale(.985);transition:transform .38s cubic-bezier(.2,.8,.2,1)}
+#ngdev.on .ngd-app{transform:none}
+.ngd-stage{position:absolute;inset:0;overflow:hidden}
+.ngd-page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg-app);transform:translateX(104%);transition:transform .36s cubic-bezier(.2,.8,.2,1);will-change:transform;-webkit-overflow-scrolling:touch;padding-bottom:28px}
+.ngd-page.on{transform:none;box-shadow:-14px 0 30px -18px rgba(0,0,0,.5)}
+.ngd-page.ngd-tabpage{transform:none;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s;padding-bottom:112px;box-shadow:none}
+.ngd-page.ngd-tabpage.on{opacity:1;visibility:visible;pointer-events:auto}
+.ngd-push.ngd-page{padding-bottom:36px}
+
+/* ---- tab bar melayang ---- */
+.ngd-tabbar{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:6;display:grid;grid-template-columns:repeat(4,1fr);padding:5px;border-radius:1.7rem;background:var(--glass-bg);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid var(--glass-border);box-shadow:0 18px 40px -16px rgba(0,0,0,.55);transition:transform .36s cubic-bezier(.2,.8,.2,1)}
+.ngd-app.deep .ngd-tabbar{transform:translateY(200%);opacity:0;pointer-events:none}
+.ngd-tabbar::before{content:'';position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/4);border-radius:1.3rem;background:linear-gradient(140deg,var(--accent),var(--a1));transform:translateX(calc(var(--i,0)*100%));transition:transform .38s cubic-bezier(.3,1.35,.5,1);box-shadow:0 10px 20px -10px var(--accent)}
+.ngd-tb{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:.66rem;font-weight:800;color:var(--text-muted)!important;transition:color .2s}
+.ngd-tb.on{color:#fff!important}
+.ngd-toast{position:absolute;left:50%;bottom:calc(98px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:rgba(20,20,24,.92);color:#fff;font-size:.8rem;font-weight:700;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.28s;z-index:9;white-space:nowrap;max-width:88%;overflow:hidden;text-overflow:ellipsis}
+.ngd-toast.on{opacity:1;transform:translate(-50%,0)}
+.ngd-app.deep .ngd-toast{bottom:calc(26px + env(safe-area-inset-bottom,0px))}
+.ngd-press{transition:transform .15s,filter .15s}.ngd-press.down{transform:scale(.97);filter:brightness(.96)}
+
+/* ---- hero ---- */
+.ngd-hero{position:relative;overflow:hidden;color:#fff;padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 58px;background:radial-gradient(circle at 85% 0%,rgba(255,255,255,.25),transparent 45%),linear-gradient(140deg,var(--a1),color-mix(in srgb,var(--h2,#7c5cff) 72%,var(--accent)));border-radius:0 0 2.2rem 2.2rem}
+.ngd-hero::after{content:'';position:absolute;left:-40px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.1)}
+.ngd-kan{position:absolute;right:-8px;top:-24px;font-size:190px;line-height:1;font-weight:900;opacity:.13;font-family:'Noto Sans JP',serif;pointer-events:none;user-select:none}
+.ngd-hbar{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.ngd-brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:.95rem;letter-spacing:.01em}
+.ngd-brand i{font-style:normal;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:.95rem;font-family:'Noto Sans JP',sans-serif}
+.ngd-hb{width:38px;height:38px;border-radius:50%;display:grid!important;place-items:center;background:rgba(255,255,255,.2)!important;color:#fff!important;backdrop-filter:blur(6px)}
+.ngd-hb.on{background:#fff!important;color:#f5b301!important}
+.ngd-hero h1{position:relative;z-index:1;font-size:1.65rem;line-height:1.2;font-weight:900;margin:20px 0 8px;letter-spacing:-.01em}
+.ngd-hero p{position:relative;z-index:1;font-size:.8rem;opacity:.9;margin:0;line-height:1.5;max-width:30ch}
+
+/* ---- search ---- */
+.ngd-search{position:relative;z-index:2;margin:-28px 16px 0;display:flex;align-items:center;gap:8px;padding:7px 7px 7px 14px;background:var(--bg-app);border:1px solid var(--glass-border);border-radius:1.3rem;box-shadow:0 16px 34px -18px rgba(0,0,0,.55);color:var(--text-muted)}
+.ngd-search.flat{margin:0;flex:1;min-width:0;box-shadow:none;background:var(--glass-bg)}
+.ngd-search svg{flex:none}
+.ngd-sin{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text-main);font-size:.98rem;font-weight:700;font-family:'Noto Sans JP',Inter,system-ui,sans-serif;padding:8px 0}
+.ngd-sin::placeholder{color:var(--text-muted);font-weight:600}
+.ngd-search:focus-within{box-shadow:0 0 0 2px var(--accent),0 16px 34px -18px rgba(0,0,0,.55)}
+.ngd-go{background:linear-gradient(140deg,var(--accent),var(--a1))!important;color:#fff!important;font-weight:800;font-size:.84rem;padding:10px 16px!important;border-radius:1rem}
+.ngd-mic{width:36px;height:36px;border-radius:50%;display:grid!important;place-items:center;color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 14%,transparent)!important}
+.ngd-mic.rec{background:#ef4444!important;color:#fff!important;animation:ngdRec 1s infinite}
+@keyframes ngdRec{50%{box-shadow:0 0 0 8px rgba(239,68,68,.25)}}
+.ngd-kqi{font-family:'Noto Sans JP',serif;font-weight:900;font-size:1.2rem;color:var(--accent)}
+
+/* ---- section ---- */
+.ngd-sec{margin:20px 16px 0}
+.ngd-sech{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ngd-sech h4{margin:0;font-size:.74rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.ngd-sech button{font-size:.72rem;font-weight:700;color:var(--text-muted)!important}
+.ngd-chips{display:flex;flex-wrap:wrap;gap:7px}
+.ngd-chip{padding:7px 13px;border-radius:999px;background:var(--glass-bg)!important;border:1px solid var(--glass-border)!important;font-size:.82rem;font-weight:700;font-family:'Noto Sans JP',Inter,sans-serif}
+.ngd-tip{margin:22px 16px 0;padding:14px 16px;border-radius:1.2rem;background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);font-size:.78rem;line-height:1.55;color:var(--text-muted)}
+.ngd-tip b{color:var(--text-main)}
+
+/* ---- kata hari ini ---- */
+.ngd-wotd{--cc:#7c5cff;position:relative;overflow:hidden;border-radius:1.8rem;padding:18px 20px;color:#fff;background:radial-gradient(circle at 100% 0%,rgba(255,255,255,.28),transparent 50%),linear-gradient(140deg,color-mix(in srgb,var(--cc) 90%,#000),color-mix(in srgb,var(--cc) 62%,#fff));box-shadow:0 20px 36px -22px var(--cc)}
+.ngd-wcat{font-size:.7rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.ngd-wbig2{font-size:3rem;font-weight:900;line-height:1.35;margin-top:4px;font-family:'Noto Sans JP',serif}
+.ngd-wbig2 rt{font-size:.9rem;font-weight:700;opacity:.9}
+.ngd-wrom2{font-size:.85rem;opacity:.85;font-style:italic;margin-top:-2px}
+.ngd-wmean{font-size:1.15rem;font-weight:800;margin-top:6px}
+.ngd-wrow{display:flex;gap:10px;align-items:center;margin-top:14px}
+.ngd-pill{flex:1;background:#fff!important;color:#222!important;border-radius:999px;font-weight:800;font-size:.82rem;padding:11px 14px!important;display:inline-flex!important;justify-content:center;align-items:center;gap:6px}
+.ngd-circ{width:42px;height:42px;border-radius:50%;display:inline-grid!important;place-items:center;flex:none;background:rgba(255,255,255,.22)!important;color:#fff!important;transition:transform .15s}
+.ngd-circ:active{transform:scale(.9)}
+.ngd-circ.on{background:#fff!important;color:#f5b301!important;animation:ngdPop .4s}
+@keyframes ngdPop{40%{transform:scale(1.25)}}
+.ngd-circ.sm{width:34px;height:34px;background:rgba(128,128,128,.14)!important;color:var(--accent)!important}
+.ngd-circ.sm.on{background:#fff3c4!important;color:#f5a301!important}
+
+/* ---- kategori ---- */
+.ngd-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ngd-cat{--cc:#7c5cff;display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 6px 12px;border-radius:1.4rem;background:linear-gradient(160deg,color-mix(in srgb,var(--cc) 20%,var(--bg-app)),color-mix(in srgb,var(--cc) 7%,var(--bg-app)))!important;border:1px solid color-mix(in srgb,var(--cc) 32%,transparent)!important;animation:ngdIn .5s both;animation-delay:var(--d,0s)}
+.ngd-cat span{font-size:1.7rem;line-height:1.2}.ngd-cat b{font-size:.8rem;font-weight:800}.ngd-cat small{font-size:.64rem;color:var(--text-muted);font-weight:700}
+@keyframes ngdIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ---- hasil / baris ---- */
+.ngd-top{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 8px;position:sticky;top:0;z-index:3;background:var(--bg-app)}
+.ngd-hb2{width:40px;height:40px;border-radius:50%;display:grid!important;place-items:center;background:var(--glass-bg)!important;border:1px solid var(--glass-border)!important;flex:none}
+.ngd-rbody{padding:0 14px}
+.ngd-rinfo{margin:8px 4px 10px;font-size:.76rem;color:var(--text-muted);font-weight:700}
+.ngd-via{margin:8px 4px 12px;font-size:.8rem;color:var(--text-muted)}.ngd-via b{color:var(--text-main);font-family:'Noto Sans JP',sans-serif;font-size:1.05rem}.ngd-via span{font-style:italic;font-size:.74rem}
+.ngd-list{padding:0 14px}
+.ngd-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:9px;border-radius:1.3rem;background:var(--glass-bg);border:1px solid var(--glass-border);cursor:pointer;animation:ngdIn .45s both;animation-delay:var(--d,0s);color:var(--text-muted)}
+.ngd-rw{min-width:74px;max-width:44%;font-size:1.55rem;font-weight:900;line-height:1.5;color:var(--text-main);font-family:'Noto Sans JP',serif;word-break:break-all}
+.ngd-rw rt{font-size:.58rem;font-weight:700;color:var(--text-muted)}.ngd-rw.big{font-size:2rem}
+.ngd-rm{flex:1;min-width:0}.ngd-rmean{font-weight:800;font-size:.9rem;color:var(--text-main);line-height:1.35}
+.ngd-rtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.ngd-rom{font-size:.72rem;color:var(--text-muted);font-style:italic;margin-top:2px}
+.ngd-b{font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(128,128,128,.15);color:var(--text-muted)}
+.ngd-b.ok{background:rgba(34,197,94,.18);color:#16a34a}.ngd-b.jl{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
+.ngd-b[class*=pos-]{background:color-mix(in srgb,var(--pc) 16%,transparent);color:var(--pc)}
+.pos-v{--pc:#3b82f6}.pos-n{--pc:#16a34a}.pos-a{--pc:#f59e0b}.pos-p{--pc:#a855f7}.pos-e{--pc:#ec4899}.pos-o{--pc:#64748b}
+.ngd-err{margin:14px 14px 0;padding:18px;border-radius:1.3rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);text-align:center}.ngd-err b{display:block;margin-bottom:4px}.ngd-err p{font-size:.78rem;color:var(--text-muted);margin:0 0 10px;line-height:1.5}
+.ngd-btn{background:linear-gradient(140deg,var(--accent),var(--a1))!important;color:#fff!important;border-radius:.9rem;padding:10px 16px!important;font-weight:800;font-size:.84rem}
+.ngd-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:1.4rem;padding:14px 16px;margin:0 0 10px}
+.ngd-sk{height:14px;border-radius:8px;background:linear-gradient(90deg,rgba(128,128,128,.14),rgba(128,128,128,.28),rgba(128,128,128,.14));background-size:200% 100%;animation:ngdSk 1.2s linear infinite}
+@keyframes ngdSk{to{background-position:-200% 0}}
+.ngd-note{font-size:.76rem;color:var(--text-muted);margin:10px 4px;line-height:1.5}
+.ngd-empty2{text-align:center;padding:34px 24px;color:var(--text-muted);font-size:.8rem}.ngd-empty2>div{font-size:2.6rem;font-family:'Noto Sans JP',sans-serif}.ngd-empty2 b{display:block;color:var(--text-main);font-size:1rem;margin:6px 0 4px}.ngd-empty2 p{margin:0;line-height:1.5}
+
+/* ---- detail kata ---- */
+.ngd-whero{position:relative;overflow:hidden;color:#fff;padding:calc(env(safe-area-inset-top,0px) + 12px) 18px 26px;background:radial-gradient(circle at 90% 0%,rgba(255,255,255,.25),transparent 50%),linear-gradient(140deg,var(--a1),color-mix(in srgb,var(--h2,#7c5cff) 70%,var(--accent)));border-radius:0 0 2.2rem 2.2rem;text-align:center}
+.ngd-whero.k{background:radial-gradient(circle at 90% 0%,rgba(255,255,255,.25),transparent 50%),linear-gradient(140deg,var(--a1),color-mix(in srgb,#ff7a45 70%,var(--accent)))}
+.ngd-wbar{display:flex;gap:8px;align-items:center;position:relative;z-index:1}.ngd-wbar span{flex:1}
+.ngd-wbig{position:relative;z-index:1;font-size:3.4rem;font-weight:900;line-height:1.5;margin-top:10px;font-family:'Noto Sans JP',serif;word-break:break-all}
+.ngd-wbig rt{font-size:1rem;font-weight:700;opacity:.92}
+.ngd-wrom{position:relative;z-index:1;font-size:1rem;font-style:italic;opacity:.92;margin-top:-4px}
+.ngd-wbadges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;position:relative;z-index:1}
+.ngd-wbadges .ngd-b{background:rgba(255,255,255,.22)!important;color:#fff!important}
+.ngd-wacts{display:flex;gap:10px;justify-content:center;margin-top:16px;position:relative;z-index:1}
+.ngd-act{display:inline-flex!important;align-items:center;gap:7px;padding:11px 18px!important;border-radius:999px;background:#fff!important;color:#222!important;font-weight:800;font-size:.82rem}
+.ngd-seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:16px 16px 12px;padding:4px;border-radius:1.2rem;background:var(--glass-bg);border:1px solid var(--glass-border)}
+.ngd-seg::before{content:'';position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:.95rem;background:linear-gradient(140deg,var(--accent),var(--a1));transform:translateX(calc(var(--i,0)*100%));transition:transform .32s cubic-bezier(.3,1.3,.5,1)}
+.ngd-seg button{position:relative;padding:10px 0;font-weight:800;font-size:.82rem;color:var(--text-muted)!important;transition:color .2s}.ngd-seg button.on{color:#fff!important}
+.ngd-wbody{padding:0 16px}
+.ngd-sense{display:flex;gap:12px;padding:14px;margin-bottom:10px;border-radius:1.3rem;background:var(--glass-bg);border:1px solid var(--glass-border);animation:ngdIn .45s both;animation-delay:var(--d,0s)}
+.ngd-num{flex:none;width:28px;height:28px;border-radius:50%;background:linear-gradient(140deg,var(--accent),var(--a1));color:#fff;display:grid;place-items:center;font-weight:900;font-size:.8rem}
+.ngd-sid{font-size:1.02rem;font-weight:800;line-height:1.4}.ngd-sen{display:block;color:var(--text-muted);font-size:.72rem;font-weight:600;margin-top:2px}
+.ngd-stags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ngd-eg{padding:14px;margin-bottom:10px;border-radius:1.3rem;background:var(--glass-bg);border:1px solid var(--glass-border);animation:ngdIn .45s both;animation-delay:var(--d,0s)}
+.ngd-egrow{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.ngd-egjp{font-size:1.1rem;font-weight:700;line-height:1.65;font-family:'Noto Sans JP',sans-serif}
+.ngd-egjp mark{background:color-mix(in srgb,var(--accent) 28%,transparent);color:inherit;border-radius:.35rem;padding:0 3px}
+.ngd-egid{font-size:.9rem;font-weight:700;margin-top:4px}
+
+/* ---- kanji ---- */
+.ngd-kc{display:flex;gap:14px;padding:12px;margin-bottom:10px;border-radius:1.4rem;background:var(--glass-bg);border:1px solid var(--glass-border)}
+.ngd-kw{flex:none;width:132px;height:132px;border-radius:1.1rem;background:repeating-linear-gradient(0deg,transparent 0 65px,rgba(128,128,128,.18) 65px 66px),repeating-linear-gradient(90deg,transparent 0 65px,rgba(128,128,128,.18) 65px 66px),var(--bg-app);border:1px solid var(--glass-border);overflow:hidden}
+.ngd-kw svg{display:block}
+.ngd-bigk{width:100%;height:100%;display:grid;place-items:center;font-size:4rem;font-weight:900;font-family:'Noto Sans JP',serif}
+.ngd-ki{flex:1;min-width:0}.ngd-kt{font-size:1rem;font-weight:900}
+.ngd-kr{margin-top:4px;font-size:.82rem;font-family:'Noto Sans JP',sans-serif;line-height:1.4}.ngd-kr span{display:inline-block;min-width:54px;font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-family:Inter,sans-serif}
+.ngd-kbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.ngd-mini{display:inline-flex!important;align-items:center;gap:4px;padding:7px 11px!important;border-radius:999px;background:color-mix(in srgb,var(--accent) 15%,transparent)!important;color:var(--accent)!important;font-weight:800;font-size:.72rem}
+.ngd-ktiles{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.ngd-ktiles.big{grid-template-columns:repeat(5,1fr);gap:8px}
+.ngd-kt2{aspect-ratio:1;border-radius:1.2rem;font-size:1.8rem;font-weight:900;font-family:'Noto Sans JP',serif;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--bg-app)),color-mix(in srgb,var(--accent) 5%,var(--bg-app)))!important;border:1px solid color-mix(in srgb,var(--accent) 26%,transparent)!important;color:var(--text-main)!important;animation:ngdIn .5s both;animation-delay:var(--d,0s)}
+.ngd-ktiles.big .ngd-kt2{font-size:1.45rem;border-radius:1rem}
+.ngd-grades{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.ngd-gr{--cc:#22c55e;text-align:left;padding:14px 16px!important;border-radius:1.4rem;background:linear-gradient(140deg,color-mix(in srgb,var(--cc) 22%,var(--bg-app)),color-mix(in srgb,var(--cc) 6%,var(--bg-app)))!important;border:1px solid color-mix(in srgb,var(--cc) 34%,transparent)!important;animation:ngdIn .5s both;animation-delay:var(--d,0s)}
+.ngd-gr b{display:block;font-size:.95rem}.ngd-gr small{color:var(--text-muted);font-weight:700;font-size:.7rem}
+.ngd-top2{--cc:#22c55e;display:flex;align-items:center;gap:12px;color:#fff;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 22px;background:linear-gradient(140deg,color-mix(in srgb,var(--cc) 88%,#000),color-mix(in srgb,var(--cc) 60%,#fff));border-radius:0 0 1.8rem 1.8rem;margin-bottom:14px}
+.ngd-top2 h2{margin:0;font-size:1.25rem;font-weight:900}.ngd-top2 small{opacity:.9;font-size:.72rem;font-weight:600}
+.ngd-gbody{padding:0 14px}
+.ngd-board{display:flex;justify-content:center;margin-top:12px;position:relative;z-index:1}
+.ngd-wstage{border-radius:1.6rem;background:repeating-linear-gradient(0deg,transparent 0 calc(50% - .5px),rgba(128,128,128,.3) calc(50% - .5px) calc(50% + .5px),transparent calc(50% + .5px)),repeating-linear-gradient(90deg,transparent 0 calc(50% - .5px),rgba(128,128,128,.3) calc(50% - .5px) calc(50% + .5px),transparent calc(50% + .5px)),var(--bg-app);color:var(--text-main);box-shadow:0 22px 40px -22px rgba(0,0,0,.6);overflow:hidden}
+.ngd-wstage svg{display:block;touch-action:none}
+.ngd-kmsg{position:relative;z-index:1;font-size:.78rem;font-weight:700;margin-top:12px;min-height:1.2em;opacity:.95}
+.ngd-kbody{padding:16px 16px 0}
+.ngd-lbl{font-size:.64rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.ngd-big2{font-size:1.25rem;font-weight:900;margin-top:4px;line-height:1.4}
+.ngd-rd{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.ngd-chip2{padding:7px 13px;border-radius:999px;font-weight:800;font-size:.9rem;font-family:'Noto Sans JP',sans-serif}
+.ngd-chip2.kun{background:color-mix(in srgb,var(--accent) 16%,transparent)!important;color:var(--accent)!important}
+.ngd-chip2.on{background:color-mix(in srgb,#f97316 18%,transparent)!important;color:#f97316!important}
+.ngd-dim{color:var(--text-muted)}
+.ngd-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.ngd-facts div{text-align:center;padding:14px 6px;border-radius:1.3rem;background:var(--glass-bg);border:1px solid var(--glass-border)}.ngd-facts b{display:block;font-size:1.4rem;font-weight:900;color:var(--accent)}.ngd-facts small{font-size:.66rem;color:var(--text-muted);font-weight:700}
+
+/* ---- terjemah ---- */
+.ngd-langbar{position:relative;z-index:2;margin:-28px 16px 0;display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg-app);border:1px solid var(--glass-border);border-radius:1.4rem;box-shadow:0 16px 34px -18px rgba(0,0,0,.55)}
+.ngd-langbar label{flex:1;display:block}.ngd-langbar small{display:block;font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 2px 6px}
+.ngd-langbar select{width:100%;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:.9rem;padding:9px 10px;color:var(--text-main);font:inherit;font-weight:800;font-size:.9rem;outline:0}
+.ngd-swap{flex:none;width:42px;height:42px;margin-top:14px;border-radius:50%;display:grid!important;place-items:center;background:linear-gradient(140deg,var(--accent),var(--a1))!important;color:#fff!important;box-shadow:0 10px 20px -10px var(--accent)}
+.ngd-inbox{margin:14px 16px 0;padding:12px 14px 8px;border-radius:1.5rem;background:var(--glass-bg);border:1px solid var(--glass-border)}.ngd-inbox:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.ngd-inbox textarea{width:100%;background:transparent;border:0;outline:0;resize:none;color:var(--text-main);font-size:1.05rem;font-weight:600;font-family:'Noto Sans JP',Inter,sans-serif;line-height:1.55}
+.ngd-inrow{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--text-muted)}.ngd-tools{display:inline-flex;gap:6px;align-items:center}
+.ngd-big-btn{display:flex!important;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:12px 16px 0!important;padding:15px!important;border-radius:1.3rem;background:linear-gradient(140deg,var(--accent),var(--a1))!important;color:#fff!important;font-weight:900;font-size:.95rem;box-shadow:0 16px 26px -16px var(--accent)}
+.ngd-big-btn.alt{background:linear-gradient(140deg,#f59e0b,#ef4444)!important;box-shadow:0 16px 26px -16px #ef4444}
+#ngd-tout{margin:0 16px}
+.ngd-out{margin-top:12px;padding:16px;border-radius:1.5rem;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 14%,var(--bg-app)),var(--glass-bg));border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);animation:ngdIn .4s both}
+.ngd-outjp{font-size:1.6rem;font-weight:800;line-height:1.55;margin-top:4px;font-family:'Noto Sans JP',sans-serif}.ngd-outid{font-size:1.2rem;font-weight:800;line-height:1.5;margin-top:4px}
+.ngd-outbar{display:flex;justify-content:space-between;align-items:center;margin-top:10px}.ngd-outbar small{font-size:.66rem;color:var(--text-muted)}
+.ngd-link{margin-top:8px;display:inline-flex!important;align-items:center;gap:4px;font-weight:800;font-size:.78rem;color:var(--accent)!important}
+.ngd-phr{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ngd-ph{padding:12px 14px;border-radius:1.2rem;background:var(--glass-bg);border:1px solid var(--glass-border);cursor:pointer;animation:ngdIn .45s both;animation-delay:var(--d,0s)}
+.ngd-ph b{display:block;font-size:.76rem;color:var(--text-muted);font-weight:700}.ngd-ph span{display:block;font-size:1.02rem;font-weight:800;margin-top:3px;font-family:'Noto Sans JP',sans-serif;line-height:1.4}.ngd-ph small{display:block;font-size:.66rem;color:var(--accent);font-style:italic;margin-top:2px}
+.ngd-hitem{position:relative;padding:11px 14px;border-radius:1.1rem;background:var(--glass-bg);border:1px solid var(--glass-border);margin-bottom:7px;cursor:pointer;font-size:.82rem}.ngd-hitem b{display:block;font-weight:700}.ngd-hitem span{display:block;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;margin-top:2px}
+.ngd-hitem .ngd-circ{position:absolute;right:10px;top:10px}
+
+/* ---- simpanan & kartu ---- */
+.ngd-segw{margin:-26px 16px 0;position:relative;z-index:2}
+.ngd-seg3{position:relative;display:grid;grid-template-columns:repeat(3,1fr);padding:4px;border-radius:1.2rem;background:var(--bg-app);border:1px solid var(--glass-border);box-shadow:0 16px 34px -18px rgba(0,0,0,.55)}
+.ngd-seg3::before{content:'';position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:.95rem;background:linear-gradient(140deg,#ec4899,#a855f7);transform:translateX(calc(var(--i,0)*100%));transition:transform .32s cubic-bezier(.3,1.3,.5,1)}
+.ngd-seg3 button{position:relative;padding:11px 0;font-weight:800;font-size:.78rem;color:var(--text-muted)!important}.ngd-seg3 button.on{color:#fff!important}
+.ngd-list{margin-top:14px}
+.ngd-ftop{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 6px}
+.ngd-ftop .ngd-hb{background:var(--glass-bg)!important;color:var(--text-main)!important;border:1px solid var(--glass-border)}
+.ngd-fprog{flex:1;height:8px;border-radius:8px;background:rgba(128,128,128,.2);overflow:hidden}.ngd-fprog i{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--accent),#a855f7);transition:width .4s}
+.ngd-ftop b{font-size:.8rem;color:var(--text-muted)}
+.ngd-fstage{padding:10px 20px 0;display:flex;flex-direction:column;align-items:center}
+.ngd-fc{width:100%;max-width:340px;height:min(52vh,380px);perspective:1200px;cursor:pointer;transition:transform .22s,opacity .22s;touch-action:pan-y}
+.ngd-fc.out-l{transform:translateX(-120%) rotate(-12deg);opacity:0}.ngd-fc.out-r{transform:translateX(120%) rotate(12deg);opacity:0}
+.ngd-fci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,1.2,.5,1)}
+.ngd-fc.flip .ngd-fci{transform:rotateY(180deg)}
+.ngd-ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;box-shadow:0 26px 44px -24px rgba(0,0,0,.6)}
+.ngd-ff.front{background:linear-gradient(150deg,var(--a1),color-mix(in srgb,#a855f7 70%,var(--accent)));color:#fff}.ngd-ff.back{background:var(--glass-bg);border:1px solid var(--glass-border);transform:rotateY(180deg);backdrop-filter:blur(10px)}
+.ngd-ffw{font-size:4.6rem;font-weight:900;line-height:1.2;font-family:'Noto Sans JP',serif;word-break:break-all}.ngd-ff small{font-size:.7rem;opacity:.8}
+.ngd-ffr{font-size:1.4rem;font-weight:800;font-family:'Noto Sans JP',sans-serif;color:var(--accent)}.ngd-ffm{font-size:1.5rem;font-weight:900;line-height:1.35}
+.ngd-ff.back .ngd-circ{background:color-mix(in srgb,var(--accent) 16%,transparent)!important;color:var(--accent)!important}
+.ngd-fbtns{display:flex;gap:14px;margin-top:22px;width:100%;max-width:340px}
+.ngd-fb{flex:1;display:flex!important;flex-direction:column;align-items:center;gap:4px;padding:14px 0!important;border-radius:1.4rem;font-weight:800;font-size:.8rem}
+.ngd-fb.bad{background:rgba(239,68,68,.14)!important;color:#ef4444!important}.ngd-fb.good{background:rgba(34,197,94,.16)!important;color:#16a34a!important}
+.ngd-done{text-align:center;padding-top:30px}.ngd-done h3{font-size:1.4rem;font-weight:900;margin:18px 0 4px}.ngd-done p{color:var(--text-muted);margin:0 0 6px;font-size:.9rem}
+.ngd-ring{--p:0;width:150px;height:150px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),rgba(128,128,128,.2) 0)}
+.ngd-ring b{width:118px;height:118px;border-radius:50%;background:var(--bg-app);display:grid;place-items:center;font-size:2rem;font-weight:900;color:var(--accent)}
+.ngd-fbtns2{margin-top:10px}
+@media (prefers-reduced-motion:reduce){.ngd-page,.ngd-app,.ngd-tabbar::before,.ngd-seg::before,.ngd-seg3::before,.ngd-fci{transition:none!important}.ngd-row,.ngd-cat,.ngd-sense,.ngd-eg,.ngd-ph,.ngd-kt2,.ngd-gr,.ngd-sk{animation:none!important}}
+@media (min-width:560px){.ngd-app{border-radius:2rem;height:min(100%,920px);margin-top:max(0px,calc((100vh - 920px)/2))}}
+
+.ngd-kbody .ngd-sec{margin:20px 0 0}
+.dark .ngd-app{--a1:color-mix(in srgb,var(--accent) 46%,#000)}
+.dark .ngd-hero,.dark .ngd-whero,.dark .ngd-whero.k{background:radial-gradient(circle at 90% 0%,rgba(255,255,255,.14),transparent 50%),linear-gradient(140deg,var(--a1),color-mix(in srgb,var(--h2,#7c5cff) 58%,#000))}
+.dark .ngd-whero.k{--h2:#ff7a45}
+.dark .ngd-top2{background:linear-gradient(140deg,color-mix(in srgb,var(--cc) 62%,#000),color-mix(in srgb,var(--cc) 40%,#000))}
+.dark .ngd-wotd{background:radial-gradient(circle at 100% 0%,rgba(255,255,255,.16),transparent 50%),linear-gradient(140deg,color-mix(in srgb,var(--cc) 62%,#000),color-mix(in srgb,var(--cc) 40%,#000))}
+.dark .ngd-ff.front{background:linear-gradient(150deg,var(--a1),color-mix(in srgb,#a855f7 55%,#000))}
+.dark .ngd-tb.on,.dark .ngd-seg button.on,.dark .ngd-go,.dark .ngd-btn,.dark .ngd-swap,.dark .ngd-big-btn:not(.alt),.dark .ngd-num{color:#04140c!important}
+`;
+  document.head.appendChild(css);
+
+  /* ---------- pintu masuk dari Pengaturan ---------- */
+  const oTM = window.openThemeModal;
+  if (typeof oTM === 'function') window.openThemeModal = function () { const sec = document.getElementById('dev-tools-section'); if (sec) sec.classList.toggle('hidden', !ST().devMode); return oTM.apply(this, arguments); };
+  window.NGDev = { open: w => open(w === 'kamus' ? 'home' : w), close };
+})();
+
 </script>
 </body>
 </html>
