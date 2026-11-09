@@ -8153,7 +8153,7 @@ const Social = (function () {
 /* ===== MENU PEMBERITAHUAN v2.1.1: pesan developer & riwayat update ===== */
 (function () {
   'use strict';
-  const APP_VER = '2.1.8';
+  const APP_VER = '2.1.9';
   /* Opsional: alamat JSON pesan developer supaya bisa dikirim tanpa memperbarui file ini.
      Contoh (Firebase): 'https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app/notices.json'
      Format: { "pesan1": { "title": "Judul", "body": "Isi", "date": "20 Okt", "url": "https://...", "t": 1760000000 } }  */
@@ -8161,6 +8161,8 @@ const Social = (function () {
 
   /* Pesan developer bawaan (terbaru di atas). Tambah objek baru di sini untuk memunculkan bundaran merah. */
   const DEV_NOTES = [
+    { id: 'v219-home', date: 'v2.1.9', title: 'Dashboard baru & Leaderboard lebih rapi 🏆',
+      body: 'Mulai versi 2.1.9 tampilan Home dirombak: kartu sambutan baru, Target Hari Ini dengan cincin progres, dan Kemajuan Belajar yang lebih rapi.\nLeaderboard di Home kini berupa kartu ringkas. Ketuk kartunya untuk membuka halaman leaderboard lengkap, dengan filter Mingguan/Harian dan Semua/Teman.\nSkor dihitung dari kata unik yang dijawab benar di Kosakata dan Kanji.\nBuka Riwayat Update → v2.1.9 untuk melihat daftar lengkapnya.\n\n— RamaTeam' },
     { id: 'v218-kamus', date: 'v2.1.8', title: 'Kamus & Translate resmi dirilis 📖',
       body: 'Mulai versi 2.1.8 menu Kamus dan Terjemah dibuka untuk semua pengguna, tanpa token developer.\nBuka Home → bagian Kamus & Translate. Di dalamnya ada Kamus, Kanji, Terjemah, dan Simpanan.\n⚠️ Peringatan: kedua menu butuh koneksi internet, dan hasil terjemahan otomatis bisa kurang tepat. Cocokkan dengan materi pelajaran sebelum dipakai untuk ujian.\nBuka Riwayat Update → v2.1.8 untuk melihat cuplikannya.\n\n— RamaTeam' },
     { id: 'v217-tropis', date: 'v2.1.7', title: 'Tema Hutan Hujan Tropis dirombak 🌿',
@@ -8181,6 +8183,7 @@ const Social = (function () {
 
   /* Riwayat pembaruan (terbaru di atas) */
   const HISTORY = [
+    { v: '2.1.9', ic: '🏆', t: 'Dashboard Baru & Leaderboard Rapi', d: ['Tampilan Home dirombak: kartu sambutan baru dengan ilustrasi, serta Kemajuan Belajar (Bunpou, Hiragana, Katakana) yang lebih ringkas.', 'Target Hari Ini: atur target jumlah kata, lihat cincin progres, dan pantau pencapaian seminggu penuh.', 'Leaderboard di Home kini kartu ringkas yang bisa diketuk. Tampilan lengkapnya ada di halaman tersendiri.', 'Halaman leaderboard punya filter Mingguan/Harian dan Semua/Teman, plus kartu peringkatmu di bagian atas.', 'Tombol Teman kini ada di header, tepat di depan tombol Musik.', 'Kamus & Translate kini tampil penuh di laptop dan desktop.'], go: [{ w: 'leaderboard', t: 'Buka Leaderboard' }] },
     { v: '2.1.8', ic: '📖', t: 'Kamus & Translate Resmi Rilis', d: ['Menu Kamus dan Terjemah kini terbuka untuk semua pengguna, tidak lagi memerlukan token developer.', 'Tombolnya ada di Home, di bagian Kamus & Translate, dan tidak lagi di Pengaturan.', 'Kamus: cari kata lewat tulisan Jepang, romaji, atau bahasa Indonesia, lengkap dengan arti dan contoh kalimat. Ada juga tab Kanji dan Simpanan untuk kartu latihan.', 'Terjemah: Indonesia, Jepang, dan Inggris, lengkap dengan romaji.', 'Peringatan: kedua menu butuh koneksi internet, dan hasil terjemahan otomatis bisa kurang tepat.', 'Gambar di atas adalah cuplikan tampilan Kamus (kiri) dan Terjemah (kanan).'], ill: 'v218', go: [{ w: 'kamus', t: 'Buka Kamus' }, { w: 'trans', t: 'Buka Translate' }] },
     { v: '2.1.7', ic: '🌿', t: 'Tropis Baru', d: ['Tema Hutan Hujan Tropis dirombak total: latar hutan berlapis dengan kanopi, sulur, daun pisang, pakis, dan hibiscus.', 'Siang: sinar matahari menembus kanopi dan hujan tipis. Malam: cahaya bulan, kunang-kunang, dan jamur bercahaya.', 'Hewan bergerak: toucan, macaw yang terbang melintas, kupu-kupu morpho, dan kodok mata merah.', 'Kartu menu utama berbentuk daun dengan tulang daun, ikon berbentuk daun, serta sulur di pojok kartu dan pop-up.', 'Bar bawah kini berbingkai tali rotan cokelat yang melingkar, tanpa hiasan daun dan bunga di atasnya.', 'Dua gambar di atas adalah cuplikan versi siang (terang) dan malam (gelap) dari atas sampai bawah.'], ill: 'v217' },
     { v: '2.1.6', ic: '🎃', t: 'Halloween Update', d: ['Tema baru Halloween, tersedia di toko seharga 100 koin.', 'Mode terang: senja oranye menuju malam. Mode gelap: malam pekat dengan bulan purnama, bintang, dan kilat.', 'Tiga hantu melayang, kelelawar terbang, hujan, kabut, kuburan dengan pohon mati dan rumah hantu, serta labu yang menyala.', 'Kartu menu utama berbentuk batu nisan, dengan sarang laba-laba di pojok kartu dan pop-up.', 'Musik tema: Helloween Party.', 'Dua gambar di atas adalah cuplikan versi terang (senja) dan gelap (malam) dari atas sampai bawah.'], ill: 'v216' },
@@ -8506,7 +8509,7 @@ const Social = (function () {
   window.NGNotif = {
     open, close, closeDetail, detail, version: APP_VER,
     tab(t) { view = t; draw(); },
-    go(w) { close(); if (window.NGDev) NGDev.open(w); },
+    go(w) { close(); if (w === 'leaderboard') { if (window.NGHome) NGHome.openLb(); return; } if (window.NGDev) NGDev.open(w); },
     link(u) { try { window.open(decodeURI(u), '_blank', 'noopener'); } catch (e) {} }
   };
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('ng-notif-detail')) closeDetail(); else if ($('ng-notif')) close(); } });
@@ -9951,5 +9954,232 @@ html.ngd-lock{overflow:hidden}
 })();
 
 </script>
+<style id="ng-home-v3">
+/* ===== HOME v3: header, hero, target kata, leaderboard, kemajuan ===== */
+:root{--ng-sun:#F87171;--ng-r:1.9rem}
+[data-season="haru"]{--ng-sun:#F9A8D4}[data-season="natsu"]{--ng-sun:#FDBA74}[data-season="aki"]{--ng-sun:#FB923C}[data-season="fuyu"]{--ng-sun:#FCA5A5}
+[data-season="ios6"]{--ng-r:.9rem}[data-season="xpaero"]{--ng-r:.45rem}[data-season="kyoto"]{--ng-r:1.2rem}[data-season="space"]{--ng-r:1.4rem}
+#hdr-avatar-wrap{width:3.9rem!important;height:3.9rem!important}
+#hdr-avatar-wrap #user-avatar-trigger{width:3.9rem!important;height:3.9rem!important;font-size:2.1rem!important;border-width:3px!important}
+#hdr-name-row #header-user-name{font-size:1.05rem!important;font-weight:900!important}
+header.hdr-v212 .ng-hbtn,header.hdr-v212 > div:last-child > button{width:2.75rem!important;height:2.75rem!important}
+.ng-card{border-radius:var(--ng-r);padding:1.1rem 1.15rem;position:relative;overflow:hidden}
+.ng-hero{padding:1.5rem 1.3rem;background:linear-gradient(135deg,var(--glass-bg),color-mix(in srgb,var(--accent) 12%,transparent))}
+.ng-hero svg{position:absolute;right:-.4rem;bottom:0;height:100%;width:52%;pointer-events:none}
+.ng-hero .jp{font-size:.8rem;font-weight:700;color:var(--text-muted)}
+.ng-hero h1{font-size:1.9rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin:.15rem 0 .5rem}
+.ng-hero p{font-size:.72rem;line-height:1.5;color:var(--text-muted);max-width:58%}
+.ng-hero i.ln{display:block;width:2.4rem;height:.2rem;border-radius:9px;background:var(--accent);margin-top:.8rem}
+.ng-h{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.8rem}
+.ng-h b{font-size:1rem;font-weight:900;display:flex;align-items:center;gap:.5rem}
+.ng-h small{font-size:.62rem;font-weight:800;color:var(--text-muted)}
+.ng-bar{height:.55rem;border-radius:99px;background:var(--glass-border);overflow:hidden}
+.ng-bar>i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .5s}
+[data-season="ios6"] .ng-bar>i{background:linear-gradient(#8fb0dc,#4a74b3)}
+[data-season="xpaero"] .ng-bar>i{background:linear-gradient(#b9f5a0,#1f8a1f)}
+.ng-row{display:flex;align-items:center;gap:.75rem;padding:.7rem .8rem;border-radius:calc(var(--ng-r) * .7);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.ng-ico{width:2.7rem;height:2.7rem;border-radius:99px;display:grid;place-items:center;font-size:1.3rem;flex:none;background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.ng-pct{font-size:.78rem;font-weight:900;color:var(--accent)}
+.ng-goal{display:flex;align-items:center;gap:1rem}
+.ng-ring{position:relative;width:5.2rem;height:5.2rem;flex:none}
+.ng-ring svg{transform:rotate(-90deg)}
+.ng-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.05rem;font-weight:900}
+.ng-chip{padding:.4rem .75rem;border-radius:99px;font-size:.72rem;font-weight:800;border:1px solid var(--glass-border);background:var(--glass-bg);color:inherit}
+.ng-chip.on{background:var(--accent);color:#fff;border-color:transparent}
+.ng-chip[disabled]{opacity:.4}
+.ng-week{display:flex;gap:.3rem;margin-top:.7rem}
+.ng-week span{flex:1;text-align:center;font-size:.55rem;font-weight:800;color:var(--text-muted)}
+.ng-week span i{display:block;height:.35rem;border-radius:9px;background:var(--glass-border);margin-bottom:.25rem}
+.ng-week span.ok i{background:var(--accent)}.ng-week span.now{color:var(--accent)}
+.ng-seg{display:flex;gap:.3rem;padding:.25rem;border-radius:99px;background:var(--glass-border)}
+.ng-seg button{flex:1;padding:.45rem;border-radius:99px;font-size:.72rem;font-weight:800}
+.ng-seg button.on{background:var(--accent);color:#fff}
+.ng-rk{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:1rem}
+.ng-rk.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:1.5px solid var(--accent)}
+.ng-rk .n{width:1.7rem;text-align:center;font-weight:900;font-size:.85rem;color:var(--text-muted)}
+.ng-rk .a{width:2rem;height:2rem;border-radius:99px;display:grid;place-items:center;font-size:1.1rem;background:var(--glass-border);flex:none}
+.ng-rk .t{flex:1;min-width:0}.ng-rk .t b{display:block;font-size:.8rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ng-rk .t .ng-bar{height:.3rem;margin-top:.3rem}.ng-rk .s{font-size:.78rem;font-weight:900;color:var(--accent);white-space:nowrap}
+.ng-toast{position:fixed;left:50%;top:1rem;transform:translateX(-50%);z-index:200;padding:.7rem 1rem;border-radius:99px;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+[data-season="ios6"] .ng-chip.on,[data-season="ios6"] .ng-seg button.on{background:linear-gradient(#8fb0dc,#4a74b3)}
+[data-season="xpaero"] .ng-chip.on,[data-season="xpaero"] .ng-seg button.on{background:linear-gradient(#5aa0f0,#1b5fc8)}
+.ng-rk-a{width:1.9rem;height:1.9rem;border-radius:99px;display:grid;place-items:center;font-size:1rem;background:var(--bg-app);border:2px solid var(--glass-border);flex:none}
+#ng-lb-page{position:fixed;inset:0;z-index:75;background:var(--bg-app);color:var(--text-main);overflow-y:auto;overscroll-behavior:contain;animation:ngup .25s ease-out}
+.ng-lbp-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:.8rem;padding:calc(env(safe-area-inset-top,0px) + .8rem) 1rem .8rem;background:var(--bg-app);border-bottom:1px solid var(--glass-border)}
+.ng-lbp-top b{display:block;font-size:1.1rem;font-weight:900;line-height:1.2}.ng-lbp-top small{display:block;font-size:.66rem;font-weight:700;color:var(--text-muted)}
+.ng-lbp-back{width:2.6rem;height:2.6rem;border-radius:99px;display:grid;place-items:center;font-size:1.7rem;line-height:1;flex:none;background:var(--glass-bg);border:1px solid var(--glass-border);color:inherit}
+.ng-lbp-body{max-width:640px;margin:0 auto;padding:1rem 1rem calc(env(safe-area-inset-bottom,0px) + 2rem);display:flex;flex-direction:column;gap:.9rem}
+</style>
+<script>
+/* ===== HOME v3 + TARGET KATA + LEADERBOARD ===== */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = n => String(n).padStart(2, '0'), dk = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const monday = () => { const x = new Date(); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  const weekDays = () => { const m = monday(); return [...Array(7)].map((_, i) => { const d = new Date(m); d.setDate(m.getDate() + i); return d; }); };
+  const DN = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], wk = () => dk(monday());
+  const todayIdx = () => (new Date().getDay() + 6) % 7;
+  /* Isi dengan URL Firebase Realtime Database agar leaderboard tersimpan permanen (kosong = relay ntfy, ±12 jam) */
+  const LB_DB = '';
+  const base = () => { try { return NGNet.base(); } catch (e) { return 'https://ntfy.sh/'; } };
+  const G = () => { const g = (state.goal = state.goal && typeof state.goal === 'object' ? state.goal : {}); if (!g.days) g.days = {}; if (!(g.target > 0)) g.target = 20; if (!g.seen || g.seen.d !== dk(new Date())) g.seen = { d: dk(new Date()), k: [] }; return g; };
+  const toast = t => { const e = document.createElement('div'); e.className = 'ng-toast'; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2800); };
+  const V = { mode: 'w', day: todayIdx(), scope: 'all', open: false };
+  let pubT = 0;
+
+  /* ---- hitung kata unik yang dijawab benar hari ini ---- */
+  function addWord(key) {
+    const g = G(), t = dk(new Date()); if (!key || g.seen.k.includes(key)) return;
+    g.seen.k.push(key); const before = g.days[t] || 0; g.days[t] = before + 1;
+    Object.keys(g.days).forEach(k => { if (k < dk(new Date(Date.now() - 30 * 864e5))) delete g.days[k]; });
+    try { saveState(); } catch (e) {}
+    if (before < g.target && g.days[t] >= g.target) toast('🎉 Target kata hari ini tercapai!');
+    clearTimeout(pubT); pubT = setTimeout(() => publish(), 4000);
+  }
+  const prev = window.submitQuizAnswer;
+  if (typeof prev === 'function') window.submitQuizAnswer = function (chosen, correct) {
+    try { const it = state.quiz.questions[state.quiz.currentQuestion]; if (chosen !== null && it && it.arti && normalizeQuizAnswer(chosen) === normalizeQuizAnswer(correct)) addWord(it.kana || it.arti); } catch (e) {}
+    return prev.apply(this, arguments);
+  };
+
+  /* ---- kirim & ambil leaderboard ---- */
+  const mineArr = () => weekDays().map(d => G().days[dk(d)] || 0);
+  async function publish(force) {
+    const s = state.social || {}; if (!s.code || !state.user || !state.user.name) return;
+    const g = G(), arr = mineArr(), sig = wk() + arr.join() + state.user.name + state.user.avatar;
+    if (!force && g.sig === sig && Date.now() - (g.pubAt || 0) < 18e5) return;
+    if (!force && !arr.some(Boolean)) return;
+    const body = JSON.stringify({ c: s.code, n: String(state.user.name).slice(0, 24), a: String(state.user.avatar || '').slice(0, 8), d: arr });
+    try {
+      const r = LB_DB ? await fetch(LB_DB.replace(/\/+$/, '') + '/lb/' + wk() + '/' + s.code + '.json', { method: 'PUT', body }) : await fetch(base() + 'nhgo1-lb-' + wk(), { method: 'POST', body });
+      if (r && r.ok) { g.sig = sig; g.pubAt = Date.now(); saveState(); }
+    } catch (e) {}
+  }
+  const clean = m => (m && /^NJ-/.test(m.c || '') && Array.isArray(m.d)) ? { c: m.c, n: String(m.n || 'Pelajar').slice(0, 24), a: String(m.a || '👤').slice(0, 8), d: [...Array(7)].map((_, i) => Math.max(0, Math.min(9999, +m.d[i] || 0))) } : null;
+  async function load() {
+    const rows = {};
+    try {
+      if (LB_DB) { const o = (await (await fetch(LB_DB.replace(/\/+$/, '') + '/lb/' + wk() + '.json')).json()) || {}; Object.values(o).forEach(u => { const c = clean(u); if (c) rows[c.c] = c; }); }
+      else { const t = await (await fetch(base() + 'nhgo1-lb-' + wk() + '/json?poll=1&since=all')).text(); t.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event && e.event !== 'message') return; const c = clean(JSON.parse(e.message)); if (c) rows[c.c] = c; } catch (x) {} }); }
+    } catch (e) {}
+    const g = G(), old = g.lb && g.lb.wk === wk() ? g.lb.rows : {};
+    g.lb = { wk: wk(), rows: Object.assign({}, old, rows) }; try { saveState(); } catch (e) {}
+  }
+
+  /* ---- tampilan leaderboard ---- */
+  function rank(mode, scope, day) {
+    const g = G(), s = state.social || {}, me = s.code || 'me', fr = new Set(s.friends || []);
+    const all = Object.assign({}, g.lb && g.lb.wk === wk() ? g.lb.rows : {});
+    all[me] = { c: me, n: (state.user && state.user.name) || 'Kamu', a: (state.user && state.user.avatar) || '👤', d: mineArr() };
+    const sc = r => mode === 'w' ? r.d.reduce((a, b) => a + b, 0) : r.d[day];
+    const list = Object.values(all).filter(r => (r.c === me || sc(r) > 0) && (scope === 'all' || r.c === me || fr.has(r.c))).map(r => ({ r, v: sc(r) }));
+    list.sort((a, b) => b.v - a.v || String(a.r.n).localeCompare(b.r.n));
+    return { list, me, myPos: list.findIndex(x => x.r.c === me), max: Math.max(1, ...list.map(x => x.v)) };
+  }
+  const MEDAL = ['🥇', '🥈', '🥉'];
+
+  /* kartu ringkas di Home (bisa diketuk) */
+  function lbSummary() {
+    const R = rank('w', 'all'), mine = R.list[R.myPos], v = mine ? mine.v : 0, top = R.list.filter(x => x.v > 0).slice(0, 3);
+    const line = v > 0
+      ? `<p style="font-size:1.15rem;font-weight:900;line-height:1.1">Peringkat #${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${R.list.length}</span></p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">${v} kata minggu ini</p>`
+      : `<p style="font-size:.95rem;font-weight:900;line-height:1.2">Belum ada skor minggu ini</p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">Jawab benar kata di Kosakata &amp; Kanji</p>`;
+    const av = top.length ? `<div style="display:flex;margin-left:auto">${top.map((x, i) => `<span class="ng-rk-a" style="margin-left:${i ? '-.55rem' : '0'}">${esc(x.r.a)}</span>`).join('')}</div>` : '';
+    return `<div class="ng-h" style="margin-bottom:.7rem"><b>🏆 Leaderboard</b><small style="display:flex;align-items:center;gap:.2rem">Lihat semua <span style="font-size:1.1rem;line-height:1">›</span></small></div>
+      <div style="display:flex;align-items:center;gap:.75rem"><span class="ng-ico">${v > 0 && R.myPos < 3 ? MEDAL[R.myPos] : '🏅'}</span><div style="flex:1;min-width:0">${line}</div>${av}</div>`;
+  }
+
+  /* isi halaman leaderboard lengkap */
+  function lbPageInner() {
+    const R = rank(V.mode, V.scope, V.day), list = R.list, me = R.me, max = R.max, mine = list[R.myPos];
+    const row = (x, i) => `<div class="ng-rk ${x.r.c === me ? 'me' : ''}"><span class="n">${i < 3 && x.v > 0 ? MEDAL[i] : i + 1}</span><span class="a">${esc(x.r.a)}</span><div class="t"><b>${esc(x.r.n)}${x.r.c === me ? ' (Kamu)' : ''}</b><div class="ng-bar"><i style="width:${Math.round(x.v / max * 100)}%"></i></div></div><span class="s">${x.v} kata</span></div>`;
+    const dayChips = V.mode === 'd' ? `<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.6rem">${DN.map((n, i) => `<button class="ng-chip ${V.day === i ? 'on' : ''}" ${i > todayIdx() ? 'disabled' : ''} onclick="NGHome.day(${i})" style="padding:.35rem .55rem">${n}${i === todayIdx() ? '•' : ''}</button>`).join('')}</div>` : '';
+    const period = V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
+    const you = mine ? `<div class="ng-card ios-glass" style="display:flex;align-items:center;gap:.8rem"><span class="ng-ico">${mine.v > 0 && R.myPos < 3 ? MEDAL[R.myPos] : '🏅'}</span><div style="flex:1;min-width:0"><p style="font-size:.66rem;font-weight:800;color:var(--text-muted)">PERINGKATMU · ${period}</p><p style="font-size:1.3rem;font-weight:900;line-height:1.15">#${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${list.length}</span></p></div><div style="text-align:right"><p style="font-size:1.3rem;font-weight:900;color:var(--accent);line-height:1.15">${mine.v}</p><p style="font-size:.62rem;font-weight:800;color:var(--text-muted)">kata</p></div></div>` : '';
+    return `${you}
+      <div class="ng-card ios-glass">
+        <div class="ng-seg"><button class="${V.mode === 'w' ? 'on' : ''}" onclick="NGHome.mode('w')">Mingguan</button><button class="${V.mode === 'd' ? 'on' : ''}" onclick="NGHome.mode('d')">Harian</button></div>${dayChips}
+        <div style="display:flex;gap:.4rem;margin:.8rem 0"><button class="ng-chip ${V.scope === 'all' ? 'on' : ''}" onclick="NGHome.scope('all')">Semua</button><button class="ng-chip ${V.scope === 'f' ? 'on' : ''}" onclick="NGHome.scope('f')">Teman</button></div>
+        <div style="display:flex;flex-direction:column;gap:.35rem">${list.slice(0, 100).map(row).join('') || '<p style="text-align:center;color:var(--text-muted);font-size:.8rem;padding:1rem 0">Belum ada peringkat.</p>'}</div>
+      </div>
+      <p style="font-size:.62rem;color:var(--text-muted);padding:0 .3rem">Skor = kata unik yang dijawab benar di Kosakata &amp; Kanji. Buka aplikasi agar skormu ikut tampil di perangkat lain.</p>`;
+  }
+  const redrawLb = () => {
+    const e = $('ng-lb'); if (e) e.innerHTML = lbSummary();
+    const p = $('ng-lbp-body'); if (p) p.innerHTML = lbPageInner();
+    const sub = $('ng-lbp-sub'); if (sub) sub.textContent = V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
+  };
+
+  /* halaman leaderboard tersendiri */
+  function openLb() {
+    if ($('ng-lb-page')) return;
+    const d = document.createElement('div'); d.id = 'ng-lb-page'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Leaderboard');
+    d.innerHTML = `<div class="ng-lbp-top"><button class="ng-lbp-back" onclick="NGHome.closeLb()" aria-label="Kembali">‹</button><div style="min-width:0"><b>🏆 Leaderboard</b><small id="ng-lbp-sub"></small></div></div><div id="ng-lbp-body" class="ng-lbp-body"></div>`;
+    document.body.appendChild(d); redrawLb();
+    publish(true).then(load).then(redrawLb);
+  }
+  function closeLb() { const d = $('ng-lb-page'); if (d) d.remove(); }
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('ng-lb-page') && !$('ng-notif-detail') && !$('ng-notif')) closeLb(); });
+
+  /* ---- kartu target kata ---- */
+  function goalInner() {
+    const g = G(), n = g.days[dk(new Date())] || 0, t = g.target, p = Math.min(100, Math.round(n / t * 100)), C = 2 * Math.PI * 34, ti = todayIdx();
+    const chips = [10, 20, 30, 50, 75, 100].map(v => `<button class="ng-chip ${t === v ? 'on' : ''}" onclick="NGHome.target(${v})">${v}</button>`).join('');
+    const wk7 = mineArr().map((v, i) => `<span class="${v >= t ? 'ok' : ''} ${i === ti ? 'now' : ''}"><i></i>${DN[i]}</span>`).join('');
+    return `<div class="ng-h"><b>🎯 Target Hari Ini</b><button class="ng-chip" onclick="NGHome.edit()">Ubah</button></div>
+      <div class="ng-goal"><div class="ng-ring"><svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="var(--glass-border)" stroke-width="8"/><circle cx="42" cy="42" r="34" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - p / 100)}"/></svg><b>${p}%</b></div>
+      <div style="flex:1"><p style="font-size:1.5rem;font-weight:900;line-height:1">${n}<span style="font-size:.9rem;color:var(--text-muted)"> / ${t} kata</span></p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem">${n >= t ? 'Target tercapai! Kerja bagus 🎉' : 'Tinggal ' + (t - n) + ' kata lagi. Jawab benar soal Kosakata/Kanji.'}</p></div></div>
+      <div class="ng-week">${wk7}</div>
+      <div id="ng-goal-edit" style="display:${V.open ? 'block' : 'none'};margin-top:.8rem"><div style="display:flex;gap:.4rem;flex-wrap:wrap">${chips}</div><div style="display:flex;gap:.4rem;margin-top:.5rem"><input id="ng-tw" type="number" min="1" max="500" placeholder="Atur sendiri (kata)" class="ios-glass" style="flex:1;min-width:0;padding:.55rem .8rem;border-radius:99px;font-size:.8rem"><button class="ng-chip on" onclick="NGHome.custom()">Simpan</button></div></div>`;
+  }
+  const redrawGoal = () => { const e = $('ng-goal'); if (e) e.innerHTML = goalInner(); };
+
+  window.NGHome = {
+    mode(m) { V.mode = m; redrawLb(); }, day(i) { V.day = i; redrawLb(); }, scope(s) { V.scope = s; redrawLb(); },
+    edit() { V.open = !V.open; redrawGoal(); },
+    target(n) { G().target = n; saveState(); redrawGoal(); publish(true); },
+    custom() { const n = parseInt(($('ng-tw') || {}).value, 10); if (!(n >= 1 && n <= 500)) { toast('Isi angka 1–500'); return; } G().target = n; saveState(); redrawGoal(); },
+    refresh() { redrawGoal(); redrawLb(); },
+    openLb, closeLb
+  };
+
+  /* ---- ilustrasi hero (ikut warna tema) ---- */
+  const art = `<svg viewBox="0 0 220 170" preserveAspectRatio="xMaxYMax meet" aria-hidden="true"><circle cx="132" cy="58" r="26" fill="var(--ng-sun)" opacity=".85"/><path d="M20 150 L98 66 L118 84 L134 62 L214 150Z" fill="var(--accent)" opacity=".28"/><path d="M98 66 L84 82 L96 78 L104 86 L112 78 L118 84Z" fill="#fff" opacity=".9"/><path d="M0 150 Q60 128 110 146 T220 140 V170 H0Z" fill="var(--accent)" opacity=".18"/><g fill="var(--accent)" opacity=".75"><rect x="168" y="112" width="5" height="40"/><rect x="196" y="112" width="5" height="40"/><rect x="160" y="108" width="48" height="6" rx="2"/><rect x="164" y="120" width="40" height="4"/></g><g fill="#F9A8D4"><circle cx="190" cy="30" r="5"/><circle cx="204" cy="42" r="4"/><circle cx="176" cy="44" r="3.5"/><circle cx="150" cy="24" r="3"/></g></svg>`;
+  const prog = (t, i, p) => `<div class="ng-row" style="flex-direction:column;align-items:stretch;gap:.5rem"><div style="display:flex;align-items:center;gap:.6rem"><span class="ng-ico" style="width:2.4rem;height:2.4rem;font-size:1.1rem">${i}</span><b style="flex:1;font-size:.82rem">${t}</b><span class="ng-pct">${p}%</span></div><div class="ng-bar"><i style="width:${p}%"></i></div></div>`;
+
+  window.renderHome = function () {
+    const c = $('app-viewport'); if (!c) return;
+    const h = Math.min(100, Math.round(state.stats.hiraganaProgress || 0)), k = Math.min(100, Math.round(state.stats.katakanaProgress || 0));
+    const tb = Object.keys(BUNPOU_DB).reduce((a, x) => a + BUNPOU_DB[x].length, 0), b = Math.min(100, Math.round(state.stats.bunpouCompleted.length / tb * 100));
+    c.innerHTML = `<div id="ng-home" class="animate-fade-in space-y-4 pb-6">
+      <div class="ng-card ng-hero ios-glass"><span class="jp">こんにちは、</span><h1>Belajar Jepang</h1><p>Kuasai Hiragana, Katakana, Kanji N5, Kosakata, dan Tata Bahasa.</p><i class="ln"></i>${art}</div>
+      <div id="ng-goal" class="ng-card ios-glass">${goalInner()}</div>
+      <button type="button" id="ng-lb" class="ng-card ios-glass active:scale-95 transition-all" onclick="NGHome.openLb()" aria-label="Buka leaderboard" style="display:block;width:100%;text-align:left;cursor:pointer">${lbSummary()}</button>
+      <div class="ng-card ios-glass"><div class="ng-h" onclick="openProgressModal()" style="cursor:pointer"><b><i data-lucide="bar-chart-3" class="w-5 h-5 text-accent"></i> Kemajuan Belajar</b><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+        <div style="display:flex;flex-direction:column;gap:.6rem">${prog('Bunpou (Tata Bahasa)', '📘', b)}<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">${prog('Hiragana', '🌸', h)}${prog('Katakana', '⛩️', k)}</div></div>
+        <button onclick="openProgressModal()" class="ng-row" style="width:100%;justify-content:center;margin-top:.7rem;color:var(--accent);font-weight:800;font-size:.78rem"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Lihat Detail Progres</button></div>
+      <h3 class="text-xs font-semibold uppercase tracking-widest px-1 mt-2" style="color:var(--text-muted)">Menu Utama</h3>
+      <div class="grid grid-cols-2 gap-4">${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-20')}${renderMenuBtn('latihan', 'gamepad-2', 'Games', 'Kumpulkan ' + getCoinIcon())}</div>
+      <div class="flex items-center justify-between px-1 mt-2"><h3 class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text-muted)">Kamus &amp; Translate</h3><span class="text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full bg-accent text-white">BARU</span></div>
+      <div class="grid grid-cols-2 gap-4">${renderToolBtn('kamus', 'search', 'Kamus', 'Cari kata &amp; contoh kalimat')}${renderToolBtn('trans', 'languages', 'Translate', 'Indonesia &#8660; Jepang')}</div>
+      <button onclick="switchTab('ujian-menu')" class="w-full bg-accent text-white p-4 rounded-3xl font-bold flex items-center justify-between active:scale-95 shadow-md"><div class="flex items-center gap-3"><i data-lucide="award" class="w-6 h-6"></i> Mode Ujian Presisi</div><i data-lucide="chevron-right" class="w-5 h-5"></i></button></div>`;
+    lucide.createIcons();
+    publish(true).then(load).then(redrawLb);
+  };
+
+  /* ---- header: tombol Teman di depan Musik ---- */
+  function hdr() {
+    const m = $('music-btn'); if (!m || $('ng-friend-btn')) return;
+    const b = document.createElement('button'); b.id = 'ng-friend-btn'; b.className = m.className + ' ng-hbtn'; b.setAttribute('aria-label', 'Teman'); b.style.color = 'var(--text-muted)';
+    b.innerHTML = '<i data-lucide="users" class="w-5 h-5"></i>'; b.onclick = () => { try { Social.open('friends'); } catch (e) {} };
+    m.parentNode.insertBefore(b, m); try { lucide.createIcons(); } catch (e) {}
+  }
+  window.addEventListener('load', () => setTimeout(() => { hdr(); try { if (state.activeTab === 'home' && $('ng-home')) renderHome(); } catch (e) {} }, 200));
+  setInterval(() => { publish(); }, 18e5);
+})();
+</script>
+
 </body>
 </html>
