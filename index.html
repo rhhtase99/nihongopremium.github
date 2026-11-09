@@ -9955,14 +9955,10 @@ html.ngd-lock{overflow:hidden}
 
 </script>
 <style id="ng-home-v3">
-/* ===== HOME v3: header, hero, target kata, leaderboard, kemajuan ===== */
+/* ===== HOME v3: hero, target kata, leaderboard, kemajuan (header tidak diubah) ===== */
 :root{--ng-sun:#F87171;--ng-r:1.9rem}
 [data-season="haru"]{--ng-sun:#F9A8D4}[data-season="natsu"]{--ng-sun:#FDBA74}[data-season="aki"]{--ng-sun:#FB923C}[data-season="fuyu"]{--ng-sun:#FCA5A5}
 [data-season="ios6"]{--ng-r:.9rem}[data-season="xpaero"]{--ng-r:.45rem}[data-season="kyoto"]{--ng-r:1.2rem}[data-season="space"]{--ng-r:1.4rem}
-#hdr-avatar-wrap{width:3.9rem!important;height:3.9rem!important}
-#hdr-avatar-wrap #user-avatar-trigger{width:3.9rem!important;height:3.9rem!important;font-size:2.1rem!important;border-width:3px!important}
-#hdr-name-row #header-user-name{font-size:1.05rem!important;font-weight:900!important}
-header.hdr-v212 .ng-hbtn,header.hdr-v212 > div:last-child > button{width:2.75rem!important;height:2.75rem!important}
 .ng-card{border-radius:var(--ng-r);padding:1.1rem 1.15rem;position:relative;overflow:hidden}
 .ng-hero{padding:1.5rem 1.3rem;background:linear-gradient(135deg,var(--glass-bg),color-mix(in srgb,var(--accent) 12%,transparent))}
 .ng-hero svg{position:absolute;right:-.4rem;bottom:0;height:100%;width:52%;pointer-events:none}
@@ -10153,8 +10149,13 @@ header.hdr-v212 .ng-hbtn,header.hdr-v212 > div:last-child > button{width:2.75rem
     const c = $('app-viewport'); if (!c) return;
     const h = Math.min(100, Math.round(state.stats.hiraganaProgress || 0)), k = Math.min(100, Math.round(state.stats.katakanaProgress || 0));
     const tb = Object.keys(BUNPOU_DB).reduce((a, x) => a + BUNPOU_DB[x].length, 0), b = Math.min(100, Math.round(state.stats.bunpouCompleted.length / tb * 100));
+    const season = document.documentElement.getAttribute('data-season') || '';
+    /* Tema dengan papan atas rancangan sendiri (foto Inari, ornamen Ramadan/Halloween/Tropis) memakai papan lama apa adanya */
+    const heroHTML = ['inari', 'ramadan', 'halloween', 'tropis'].includes(season)
+      ? `<div class="home-hero ios-glass p-6 rounded-[2.5rem] relative overflow-hidden"><div class="absolute -right-6 -bottom-6 text-9xl opacity-10 pointer-events-none select-none">🇯🇵</div><h1 class="text-2xl font-black tracking-tight mb-1">Belajar Jepang</h1><p class="text-xs" style="color: var(--text-muted)">Kuasai Hiragana, Katakana, Kanji N5, Kosakata, dan Tata Bahasa.</p></div>`
+      : `<div class="ng-card ng-hero ios-glass"><span class="jp">こんにちは、</span><h1>Belajar Jepang</h1><p>Kuasai Hiragana, Katakana, Kanji N5, Kosakata, dan Tata Bahasa.</p><i class="ln"></i>${art}</div>`;
     c.innerHTML = `<div id="ng-home" class="animate-fade-in space-y-4 pb-6">
-      <div class="ng-card ng-hero ios-glass"><span class="jp">こんにちは、</span><h1>Belajar Jepang</h1><p>Kuasai Hiragana, Katakana, Kanji N5, Kosakata, dan Tata Bahasa.</p><i class="ln"></i>${art}</div>
+      ${heroHTML}
       <div id="ng-goal" class="ng-card ios-glass">${goalInner()}</div>
       <button type="button" id="ng-lb" class="ng-card ios-glass active:scale-95 transition-all" onclick="NGHome.openLb()" aria-label="Buka leaderboard" style="display:block;width:100%;text-align:left;cursor:pointer">${lbSummary()}</button>
       <div class="ng-card ios-glass"><div class="ng-h" onclick="openProgressModal()" style="cursor:pointer"><b><i data-lucide="bar-chart-3" class="w-5 h-5 text-accent"></i> Kemajuan Belajar</b><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
@@ -10169,14 +10170,8 @@ header.hdr-v212 .ng-hbtn,header.hdr-v212 > div:last-child > button{width:2.75rem
     publish(true).then(load).then(redrawLb);
   };
 
-  /* ---- header: tombol Teman di depan Musik ---- */
-  function hdr() {
-    const m = $('music-btn'); if (!m || $('ng-friend-btn')) return;
-    const b = document.createElement('button'); b.id = 'ng-friend-btn'; b.className = m.className + ' ng-hbtn'; b.setAttribute('aria-label', 'Teman'); b.style.color = 'var(--text-muted)';
-    b.innerHTML = '<i data-lucide="users" class="w-5 h-5"></i>'; b.onclick = () => { try { Social.open('friends'); } catch (e) {} };
-    m.parentNode.insertBefore(b, m); try { lucide.createIcons(); } catch (e) {}
-  }
-  window.addEventListener('load', () => setTimeout(() => { hdr(); try { if (state.activeTab === 'home' && $('ng-home')) renderHome(); } catch (e) {} }, 200));
+  /* header dibiarkan seperti semula (tombol Teman sudah ada di header lama) */
+  window.addEventListener('load', () => setTimeout(() => { try { if (state.activeTab === 'home' && $('ng-home')) renderHome(); } catch (e) {} }, 200));
   setInterval(() => { publish(); }, 18e5);
 })();
 </script>
