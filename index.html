@@ -721,9 +721,11 @@
         .hdr-coin-row #notif-btn #notif-dot { top: .1rem !important; right: .12rem !important; width: .48rem !important; height: .48rem !important; }
         #main-app header.hdr-v212 .hdr-coin-row { padding-left: 0; }
 
+        /* Koin disembunyikan dari header (lihat saldo di Shop); 🔥 streak menempati posisinya di samping lonceng */
+        .hdr-coin-row #header-coin-icon, .hdr-coin-row #header-coins { display: none !important; }
         #hdr-name-row { display: flex !important; align-items: center; gap: .45rem; min-width: 0; padding-top: .2rem; }
         #hdr-name-row #header-user-name { max-width: 7.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem; }
-        #hdr-name-row #streak-chip { flex: none; font-size: .62rem; font-weight: 900; color: #F97316; background: rgba(249,115,22,.14); border-radius: 999px; padding: .1rem .5rem; margin: 0; white-space: nowrap; }
+        #hdr-name-row #streak-chip, .hdr-coin-row #streak-chip { flex: none; font-size: .62rem; font-weight: 900; color: #F97316; background: rgba(249,115,22,.14); border-radius: 999px; padding: .1rem .5rem; margin: 0; white-space: nowrap; }
         .hdr-coin-row { display: flex; align-items: center; margin-top: .3rem !important; }
         #main-app header.hdr-v212 #header-bio { margin-left: .1rem; }
     </style>
@@ -8563,10 +8565,11 @@ const Social = (function () {
       sc = document.createElement('button'); sc.id = 'streak-chip'; sc.type = 'button'; sc.setAttribute('aria-label', 'Login harian');
       sc.setAttribute('onclick', 'DailyStreak.open()'); sc.textContent = '🔥 0';
     }
-    sc.removeAttribute('style'); nameRow.appendChild(sc);
+    sc.removeAttribute('style');
     /* baris koin */
     if (coins.parentNode) coins.parentNode.classList.add('hdr-coin-row');
     if (notif && coins.parentNode) coins.parentNode.insertBefore(notif, coins.parentNode.firstElementChild);
+    if (coins.parentNode) coins.parentNode.appendChild(sc);   /* 🔥 di samping lonceng, bekas tempat koin */
     header.classList.add('hdr-v212');
   }
   build();
@@ -9981,6 +9984,13 @@ html.ngd-lock{overflow:hidden}
 .ng-row{display:flex;align-items:center;gap:.75rem;padding:.7rem .8rem;border-radius:calc(var(--ng-r) * .7);background:color-mix(in srgb,var(--accent) 6%,transparent)}
 .ng-ico{width:2.7rem;height:2.7rem;border-radius:99px;display:grid;place-items:center;font-size:1.3rem;flex:none;background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .ng-pct{font-size:.78rem;font-weight:900;color:var(--accent)}
+/* Kemajuan Belajar: kartu Hiragana/Katakana muat di kolom sempit (HP) */
+.ng-pg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.ng-pg>.ng-row{min-width:0;padding:.6rem .6rem;gap:.45rem !important}
+.ng-pg>.ng-row>div:first-child{min-width:0;gap:.4rem !important}
+.ng-pg>.ng-row .ng-ico{width:1.9rem !important;height:1.9rem !important;font-size:.9rem !important}
+.ng-pg>.ng-row b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.74rem !important}
+.ng-pg>.ng-row .ng-pct{font-size:.7rem;flex:none}
 .ng-goal{display:flex;align-items:center;gap:1rem}
 .ng-ring{position:relative;width:5.2rem;height:5.2rem;flex:none}
 .ng-ring svg{transform:rotate(-90deg)}
@@ -10167,7 +10177,7 @@ html.ngd-lock{overflow:hidden}
       <div id="ng-goal" class="ng-card ios-glass">${goalInner()}</div>
       <button type="button" id="ng-lb" class="ng-card ios-glass active:scale-95 transition-all" onclick="NGHome.openLb()" aria-label="Buka leaderboard" style="display:block;width:100%;text-align:left;cursor:pointer">${lbSummary()}</button>
       <div class="ng-card ios-glass"><div class="ng-h" onclick="openProgressModal()" style="cursor:pointer"><b><i data-lucide="bar-chart-3" class="w-5 h-5 text-accent"></i> Kemajuan Belajar</b><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
-        <div style="display:flex;flex-direction:column;gap:.6rem">${prog('Bunpou (Tata Bahasa)', '📘', b)}<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">${prog('Hiragana', '🌸', h)}${prog('Katakana', '⛩️', k)}</div></div>
+        <div style="display:flex;flex-direction:column;gap:.6rem">${prog('Bunpou (Tata Bahasa)', '📘', b)}<div class="ng-pg">${prog('Hiragana', '🌸', h)}${prog('Katakana', '⛩️', k)}</div></div>
         <button onclick="openProgressModal()" class="ng-row" style="width:100%;justify-content:center;margin-top:.7rem;color:var(--accent);font-weight:800;font-size:.78rem"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Lihat Detail Progres</button></div>
       <h3 class="text-xs font-semibold uppercase tracking-widest px-1 mt-2" style="color:var(--text-muted)">Menu Utama</h3>
       <div class="grid grid-cols-2 gap-4">${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-20')}${renderMenuBtn('latihan', 'gamepad-2', 'Games', 'Kumpulkan ' + getCoinIcon())}</div>
