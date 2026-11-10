@@ -2790,7 +2790,7 @@ const KANJI_N5_DB = (() => {
             isFirstLogin: true, activeTab: 'home', user: { name: '', avatar: '🌸' },
             theme: 'auto', season: 'default', musicOn: false, backgroundVolume: 32, systemVolume: 70, customMusicName: '', examDifficulty: 'normal',
             orientationMode: 'auto', orientationView: 'landscape', kotobaPracticeMode: 'input', reminderOn: false, dailyTarget: 10, rating: 0, favorites: [],
-            coins: 0, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'], devMode: false,
+            coins: 0, xp: 0, xpClaims: {}, unlockedThemes: ['default', 'haru', 'natsu', 'aki', 'fuyu'], devMode: false,
             stats: { 
                 correct: 0, wrong: 0, history: [], 
                 hiraganaProgress: 0, katakanaProgress: 0, kotobaProgress: 0, bunpouProgress: 0, kanjiProgress: 0,
@@ -2845,6 +2845,8 @@ const KANJI_N5_DB = (() => {
                 try { 
                     const parsed = JSON.parse(saved);
                     if(parsed.coins === undefined) parsed.coins = 0;
+                    if(typeof parsed.xp !== 'number') parsed.xp = 0;
+                    if(!parsed.xpClaims || typeof parsed.xpClaims !== 'object') parsed.xpClaims = {};
                     if(!parsed.unlockedThemes) parsed.unlockedThemes = ['default', 'haru', 'natsu', 'aki', 'fuyu'];
                     if(!parsed.stats.bunpouCompleted) parsed.stats.bunpouCompleted = [];
                     if(!parsed.stats.kanaCompleted) parsed.stats.kanaCompleted = [];
@@ -2985,7 +2987,7 @@ const KANJI_N5_DB = (() => {
                         ${renderMenuBtn('belajar-menu', 'type', 'Huruf Kana', 'Hiragana, Katakana, Kanji')}
                         ${renderMenuBtn('bunpou', 'book-open-check', 'Bunpou (Pola)', 'Tata bahasa')}
                         ${renderMenuBtn('kotoba', 'layers', 'Kosakata', 'Pelajaran 1-20')}
-                        ${renderMenuBtn('latihan', 'gamepad-2', 'Games', `Kumpulkan ${coinIcon}`)}
+                        ${renderMenuBtn('latihan', 'gamepad-2', 'Games', `Kumpulkan ${coinIcon} & XP`)}
                     </div>
 
                     <div class="flex items-center justify-between px-1 mt-4">
@@ -3263,6 +3265,8 @@ const KANJI_N5_DB = (() => {
                         updateCoinUI();
                         saveState();
                     }
+                    /* XP Bunpou: hanya sekali per pola (kunci disimpan di state.xpClaims) */
+                    try { awardXP(BUNPOU_XP_PER_POLA, btn, { once: 'bunpo:' + item.id }); } catch (e) {}
                 }
                 lucide.createIcons();
 
@@ -4026,7 +4030,7 @@ const KANJI_N5_DB = (() => {
                 kotobaPracticeMenu.launchTimer = null;
                 // Latihan dari halaman Bab selalu mencakup seluruh kosakata bab tersebut,
                 // satu kali per putaran dan tetap diacak urutannya.
-                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode, 5, { normalCount:KOTOBA_DB[bab].length, returnLabel:`Kembali ke Bab ${bab}`, returnView:() => openKotobaBab(bab) });
+                setupQuizFlow(KOTOBA_DB[bab], `Latihan Bab ${bab}`, false, mode, 5, { normalCount:KOTOBA_DB[bab].length, xpOnce:{ key:'kotoba:bab'+bab, amount:10 * KOTOBA_DB[bab].length, label:`Bab ${bab}` }, returnLabel:`Kembali ke Bab ${bab}`, returnView:() => openKotobaBab(bab) });
             }, 320);
         }
         /* Dismiss lifecycle: panel tidak menghalangi tap atau scroll di halaman. */
@@ -4971,7 +4975,7 @@ const KANJI_N5_DB = (() => {
             return `<div class="ios-glass p-4 rounded-[2rem] space-y-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Latihan Menulis</p><p class="text-[11px] mt-1" style="color:var(--text-muted)">Pilih aksara untuk latihan dengan jari atau stylus.</p></div><div class="grid grid-cols-3 gap-2"><button onclick="openWritingMenu('hiragana','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Hiragana</span></button><button onclick="openWritingMenu('katakana','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Katakana</span></button><button onclick="openWritingMenu('kanji','${origin}')" class="rounded-2xl bg-accent-light text-accent p-3 text-center active:scale-95 transition-all"><i data-lucide="pen-line" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-[9px] font-black">Kanji</span></button></div></div>`;
         }
         function renderLatihanTabs() {
-            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div><h2 class="text-xl font-bold tracking-tight">Games</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Sesi kelompok berisi 10 soal; mode All berisi 60 soal acak.</p></div><div class="space-y-3">${renderKanaCourseCard('hiragana')}${renderKanaCourseCard('katakana')}${renderWritingShortcuts()}${renderKanaMasterCard()}${renderKanjiPracticeCard()}${renderPracticeDivider('Kosakata', 'Uji arti kata dari semua pelajaran.')}${renderStartBtn('Kosakata Campuran', '+10 🪙 per jawaban', 'openKotobaMixedHub()')}</div></div>`;
+            document.getElementById('app-viewport').innerHTML = `<div class="animate-fade-in space-y-4 pb-24"><div><h2 class="text-xl font-bold tracking-tight">Games</h2><p class="text-xs mt-1" style="color:var(--text-muted)">Sesi kelompok berisi 10 soal; mode All berisi 60 soal acak.</p></div><div class="space-y-3">${renderKanaCourseCard('hiragana')}${renderKanaCourseCard('katakana')}${renderWritingShortcuts()}${renderKanaMasterCard()}${renderKanjiPracticeCard()}${renderPracticeDivider('Kosakata', 'Uji arti kata dari semua pelajaran.')}${renderStartBtn('Kosakata Campuran', '+10 🪙 +10 XP per jawaban', 'openKotobaMixedHub()')}</div></div>`;
             lucide.createIcons();
         }
         function renderKanaModeSelector(mode, choiceAction, inputAction) {
@@ -5390,6 +5394,7 @@ const KANJI_N5_DB = (() => {
   const addCoins = (n, anchor) => {
     state.coins += n;
     try { updateCoinUI(); saveState(); if (anchor) showFloatingCoin(anchor, n); } catch (e) {}
+    try { awardXP(n, anchor); } catch (e) {}   /* menu Games: XP tanpa batas */
   };
   const bumpStat = ok => { try { state.stats[ok ? 'correct' : 'wrong'] = (state.stats[ok ? 'correct' : 'wrong'] || 0) + 1; saveState(); } catch (e) {} };
   const chime = ok => { try { playChime(ok); } catch (e) {} };
@@ -5403,7 +5408,7 @@ const KANJI_N5_DB = (() => {
     const sec = document.createElement('div');
     sec.className = 'space-y-3';
     sec.innerHTML = `
-      <div class="bg-accent text-white px-4 py-3 rounded-2xl shadow-md shadow-blue-500/15 flex items-center gap-3"><i data-lucide="gamepad-2" class="w-5 h-5 shrink-0"></i><div class="min-w-0"><span class="text-xs font-black uppercase tracking-widest block">Game Seru</span><span class="text-[10px] text-white/80">Main sambil belajar, kumpulkan koin.</span></div></div>
+      <div class="bg-accent text-white px-4 py-3 rounded-2xl shadow-md shadow-blue-500/15 flex items-center gap-3"><i data-lucide="gamepad-2" class="w-5 h-5 shrink-0"></i><div class="min-w-0"><span class="text-xs font-black uppercase tracking-widest block">Game Seru</span><span class="text-[10px] text-white/80">Main sambil belajar, kumpulkan koin &amp; XP tanpa batas.</span></div></div>
       <button onclick="openSambungKata()" class="w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-4 hover:border-accent active:scale-[.98] transition-all"><span class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center shrink-0"><i data-lucide="git-commit-horizontal" class="w-6 h-6"></i></span><span class="min-w-0 flex-1"><span class="block font-extrabold text-sm text-accent">Sambung Kata</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">Tarik garis dari kotoba ke artinya. Selesaikan 5 pasangan per ronde.</span></span><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--text-muted)"></i></button>
       <button onclick="openListeningKalimat()" class="w-full ios-glass p-4 rounded-3xl text-left flex items-center gap-4 hover:border-accent active:scale-[.98] transition-all"><span class="w-12 h-12 rounded-2xl bg-accent-light text-accent flex items-center justify-center shrink-0"><i data-lucide="headphones" class="w-6 h-6"></i></span><span class="min-w-0 flex-1"><span class="block font-extrabold text-sm text-accent">Listening Kalimat</span><span class="block text-[10px] mt-1" style="color:var(--text-muted)">Dengarkan satu kalimat, lalu tulis ulang persis seperti yang kamu dengar.</span></span><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--text-muted)"></i></button>`;
     box.insertBefore(sec, box.firstChild);
@@ -5424,7 +5429,7 @@ const KANJI_N5_DB = (() => {
     const chip = (v, label, active, fn) => `<button onclick="${fn}" class="rounded-xl py-2.5 text-xs font-bold transition-all ${active ? 'bg-accent text-white shadow-sm' : 'ios-glass text-main'}">${label}</button>`;
     $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
       <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Game</p><h2 class="text-xl font-bold">Sambung Kata</h2></div></div>
-      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Sentuh sebuah kartu, <b>tarik garis</b> ke kartu pasangannya, lalu lepas. Garis hijau berarti benar. Tebakan pertama yang tepat memberi 10 koin.</p></div>
+      <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Sentuh sebuah kartu, <b>tarik garis</b> ke kartu pasangannya, lalu lepas. Garis hijau berarti benar. Tebakan pertama yang tepat memberi 10 koin + 10 XP.</p></div>
       <div class="ios-glass p-4 rounded-[2rem] space-y-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Sumber kosakata</p>
         <select id="sk-bab" onchange="SKsetBab(this.value)" class="mt-2 w-full bg-appbg/60 border border-glassborder rounded-2xl px-4 py-3 text-sm font-bold text-main outline-none"><option value="all" ${SK.bab === 'all' ? 'selected' : ''}>Semua Bab</option>${babs.map(b => `<option value="${b}" ${String(SK.bab) === String(b) ? 'selected' : ''}>Bab ${b}</option>`).join('')}</select></div>
         <div><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah ronde</p><div class="grid grid-cols-4 gap-2">${[3, 5, 8, 10].map(n => chip(n, n, SK.rounds === n, `SKsetRounds(${n})`)).join('')}</div></div></div>
@@ -5661,7 +5666,7 @@ const KANJI_N5_DB = (() => {
     $vp().innerHTML = `<div class="animate-fade-in space-y-4 pb-24">
       <div class="flex items-center gap-2"><button onclick="renderLatihanTabs()" aria-label="Kembali ke Games" style="color:var(--text-muted)"><i data-lucide="chevron-left" class="w-7 h-7"></i></button><div><p class="text-[10px] font-black uppercase tracking-widest text-accent">Game · Kosakata</p><h2 class="text-xl font-bold">Listening Kalimat</h2></div></div>
       <div class="ios-glass p-4 rounded-[2rem] space-y-1"><p class="text-sm font-bold">Cara main</p><p class="text-xs leading-relaxed" style="color:var(--text-muted)">Kamu akan mendengar <b>satu kalimat utuh</b>. Putar sebanyak yang kamu mau, lalu <b>tulis ulang kalimat itu</b> dengan hiragana, katakana, kanji, atau romaji. Kemiripan <b>90% ke atas</b> dianggap benar (salah ketik kecil dimaklumi, \u201ctoukyou\u201d = \u201ctokyo\u201d). Spasi dan tanda baca tidak dinilai.</p></div>
-      <div class="ios-glass p-4 rounded-[2rem]"><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah kalimat</p><div class="grid grid-cols-4 gap-2">${[5, 10, 15, 20].map(chip).join('')}</div><p class="text-[10px] mt-3" style="color:var(--text-muted)">${LSN.pool.length} kalimat tersedia dari contoh di menu Pola. Benar = 10 koin; jika memakai petunjuk arti = 5 koin.</p></div>
+      <div class="ios-glass p-4 rounded-[2rem]"><p class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Jumlah kalimat</p><div class="grid grid-cols-4 gap-2">${[5, 10, 15, 20].map(chip).join('')}</div><p class="text-[10px] mt-3" style="color:var(--text-muted)">${LSN.pool.length} kalimat tersedia dari contoh di menu Pola. Benar = 10 koin + 10 XP; jika memakai petunjuk arti = 5 koin + 5 XP.</p></div>
       <button onclick="startListeningKalimat()" class="w-full bg-accent text-white py-4 rounded-2xl font-bold active:scale-[.98]"><i data-lucide="headphones" class="w-5 h-5 inline mr-1"></i> Mulai</button></div>`;
     icons();
   };
@@ -10041,35 +10046,38 @@ html.ngd-lock{overflow:hidden}
   };
 
   /* ---- kirim & ambil leaderboard ---- */
-  const mineArr = () => weekDays().map(d => G().days[dk(d)] || 0);
+  const mineArr = () => weekDays().map(d => G().days[dk(d)] || 0);   /* kata: dipakai kartu Target Hari Ini */
+  const mineXP = () => weekDays().map(d => (state.xpDays && state.xpDays[dk(d)]) || 0);   /* XP: dipakai Leaderboard */
+  const fmtN = n => Number(n || 0).toLocaleString('id-ID');
+  window.__lbXPChanged = () => { clearTimeout(pubT); pubT = setTimeout(() => publish(), 4000); };
   async function publish(force) {
     const s = state.social || {}; if (!s.code || !state.user || !state.user.name) return;
-    const g = G(), arr = mineArr(), sig = wk() + arr.join() + state.user.name + state.user.avatar;
+    const g = G(), arr = mineXP(), tot = Math.max(0, Math.round(state.xp || 0)), sig = wk() + arr.join() + '|' + tot + state.user.name + state.user.avatar;
     if (!force && g.sig === sig && Date.now() - (g.pubAt || 0) < 18e5) return;
-    if (!force && !arr.some(Boolean)) return;
-    const body = JSON.stringify({ c: s.code, n: String(state.user.name).slice(0, 24), a: String(state.user.avatar || '').slice(0, 8), d: arr });
+    if (!force && !arr.some(Boolean) && !tot) return;
+    const body = JSON.stringify({ c: s.code, n: String(state.user.name).slice(0, 24), a: String(state.user.avatar || '').slice(0, 8), d: arr, x: tot });
     try {
-      const r = LB_DB ? await fetch(LB_DB.replace(/\/+$/, '') + '/lb/' + wk() + '/' + s.code + '.json', { method: 'PUT', body }) : await fetch(base() + 'nhgo1-lb-' + wk(), { method: 'POST', body });
+      const r = LB_DB ? await fetch(LB_DB.replace(/\/+$/, '') + '/lb2/' + wk() + '/' + s.code + '.json', { method: 'PUT', body }) : await fetch(base() + 'nhgo2-lb-' + wk(), { method: 'POST', body });
       if (r && r.ok) { g.sig = sig; g.pubAt = Date.now(); saveState(); }
     } catch (e) {}
   }
-  const clean = m => (m && /^NJ-/.test(m.c || '') && Array.isArray(m.d)) ? { c: m.c, n: String(m.n || 'Pelajar').slice(0, 24), a: String(m.a || '👤').slice(0, 8), d: [...Array(7)].map((_, i) => Math.max(0, Math.min(9999, +m.d[i] || 0))) } : null;
+  const clean = m => (m && /^NJ-/.test(m.c || '') && Array.isArray(m.d)) ? { c: m.c, n: String(m.n || 'Pelajar').slice(0, 24), a: String(m.a || '👤').slice(0, 8), d: [...Array(7)].map((_, i) => Math.max(0, Math.min(1e9, +m.d[i] || 0))), x: Math.max(0, Math.min(1e12, +m.x || 0)) } : null;
   async function load() {
     const rows = {};
     try {
-      if (LB_DB) { const o = (await (await fetch(LB_DB.replace(/\/+$/, '') + '/lb/' + wk() + '.json')).json()) || {}; Object.values(o).forEach(u => { const c = clean(u); if (c) rows[c.c] = c; }); }
-      else { const t = await (await fetch(base() + 'nhgo1-lb-' + wk() + '/json?poll=1&since=all')).text(); t.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event && e.event !== 'message') return; const c = clean(JSON.parse(e.message)); if (c) rows[c.c] = c; } catch (x) {} }); }
+      if (LB_DB) { const o = (await (await fetch(LB_DB.replace(/\/+$/, '') + '/lb2/' + wk() + '.json')).json()) || {}; Object.values(o).forEach(u => { const c = clean(u); if (c) rows[c.c] = c; }); }
+      else { const t = await (await fetch(base() + 'nhgo2-lb-' + wk() + '/json?poll=1&since=all')).text(); t.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event && e.event !== 'message') return; const c = clean(JSON.parse(e.message)); if (c) rows[c.c] = c; } catch (x) {} }); }
     } catch (e) {}
-    const g = G(), old = g.lb && g.lb.wk === wk() ? g.lb.rows : {};
-    g.lb = { wk: wk(), rows: Object.assign({}, old, rows) }; try { saveState(); } catch (e) {}
+    const g = G(), old = g.lbx && g.lbx.wk === wk() ? g.lbx.rows : {};
+    g.lbx = { wk: wk(), rows: Object.assign({}, old, rows) }; try { saveState(); } catch (e) {}
   }
 
   /* ---- tampilan leaderboard ---- */
   function rank(mode, scope, day) {
     const g = G(), s = state.social || {}, me = s.code || 'me', fr = new Set(s.friends || []);
-    const all = Object.assign({}, g.lb && g.lb.wk === wk() ? g.lb.rows : {});
-    all[me] = { c: me, n: (state.user && state.user.name) || 'Kamu', a: (state.user && state.user.avatar) || '👤', d: mineArr() };
-    const sc = r => mode === 'w' ? r.d.reduce((a, b) => a + b, 0) : r.d[day];
+    const all = Object.assign({}, g.lbx && g.lbx.wk === wk() ? g.lbx.rows : {});
+    all[me] = { c: me, n: (state.user && state.user.name) || 'Kamu', a: (state.user && state.user.avatar) || '👤', d: mineXP(), x: Math.round(state.xp || 0) };
+    const sc = r => mode === 't' ? Math.max(r.x || 0, r.d.reduce((a, b) => a + b, 0)) : mode === 'w' ? r.d.reduce((a, b) => a + b, 0) : r.d[day];
     const list = Object.values(all).filter(r => (r.c === me || sc(r) > 0) && (scope === 'all' || r.c === me || fr.has(r.c))).map(r => ({ r, v: sc(r) }));
     list.sort((a, b) => b.v - a.v || String(a.r.n).localeCompare(b.r.n));
     return { list, me, myPos: list.findIndex(x => x.r.c === me), max: Math.max(1, ...list.map(x => x.v)) };
@@ -10080,8 +10088,8 @@ html.ngd-lock{overflow:hidden}
   function lbSummary() {
     const R = rank('w', 'all'), mine = R.list[R.myPos], v = mine ? mine.v : 0, top = R.list.filter(x => x.v > 0).slice(0, 3);
     const line = v > 0
-      ? `<p style="font-size:1.15rem;font-weight:900;line-height:1.1">Peringkat #${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${R.list.length}</span></p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">${v} kata minggu ini</p>`
-      : `<p style="font-size:.95rem;font-weight:900;line-height:1.2">Belum ada skor minggu ini</p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">Jawab benar kata di Kosakata &amp; Kanji</p>`;
+      ? `<p style="font-size:1.15rem;font-weight:900;line-height:1.1">Peringkat #${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${R.list.length}</span></p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">${fmtN(v)} XP minggu ini</p>`
+      : `<p style="font-size:.95rem;font-weight:900;line-height:1.2">Belum ada skor minggu ini</p><p style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">Main di menu Games untuk kumpulkan XP</p>`;
     const av = top.length ? `<div style="display:flex;margin-left:auto">${top.map((x, i) => `<span class="ng-rk-a" style="margin-left:${i ? '-.55rem' : '0'}">${esc(x.r.a)}</span>`).join('')}</div>` : '';
     return `<div class="ng-h" style="margin-bottom:.7rem"><b>🏆 Leaderboard</b><small style="display:flex;align-items:center;gap:.2rem">Lihat semua <span style="font-size:1.1rem;line-height:1">›</span></small></div>
       <div style="display:flex;align-items:center;gap:.75rem"><span class="ng-ico">${v > 0 && R.myPos < 3 ? MEDAL[R.myPos] : '🏅'}</span><div style="flex:1;min-width:0">${line}</div>${av}</div>`;
@@ -10090,22 +10098,22 @@ html.ngd-lock{overflow:hidden}
   /* isi halaman leaderboard lengkap */
   function lbPageInner() {
     const R = rank(V.mode, V.scope, V.day), list = R.list, me = R.me, max = R.max, mine = list[R.myPos];
-    const row = (x, i) => `<div class="ng-rk ${x.r.c === me ? 'me' : ''}"><span class="n">${i < 3 && x.v > 0 ? MEDAL[i] : i + 1}</span><span class="a">${esc(x.r.a)}</span><div class="t"><b>${esc(x.r.n)}${x.r.c === me ? ' (Kamu)' : ''}</b><div class="ng-bar"><i style="width:${Math.round(x.v / max * 100)}%"></i></div></div><span class="s">${x.v} kata</span></div>`;
+    const row = (x, i) => `<div class="ng-rk ${x.r.c === me ? 'me' : ''}"><span class="n">${i < 3 && x.v > 0 ? MEDAL[i] : i + 1}</span><span class="a">${esc(x.r.a)}</span><div class="t"><b>${esc(x.r.n)}${x.r.c === me ? ' (Kamu)' : ''}</b><div class="ng-bar"><i style="width:${Math.round(x.v / max * 100)}%"></i></div></div><span class="s">${fmtN(x.v)} XP</span></div>`;
     const dayChips = V.mode === 'd' ? `<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.6rem">${DN.map((n, i) => `<button class="ng-chip ${V.day === i ? 'on' : ''}" ${i > todayIdx() ? 'disabled' : ''} onclick="NGHome.day(${i})" style="padding:.35rem .55rem">${n}${i === todayIdx() ? '•' : ''}</button>`).join('')}</div>` : '';
-    const period = V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
-    const you = mine ? `<div class="ng-card ios-glass" style="display:flex;align-items:center;gap:.8rem"><span class="ng-ico">${mine.v > 0 && R.myPos < 3 ? MEDAL[R.myPos] : '🏅'}</span><div style="flex:1;min-width:0"><p style="font-size:.66rem;font-weight:800;color:var(--text-muted)">PERINGKATMU · ${period}</p><p style="font-size:1.3rem;font-weight:900;line-height:1.15">#${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${list.length}</span></p></div><div style="text-align:right"><p style="font-size:1.3rem;font-weight:900;color:var(--accent);line-height:1.15">${mine.v}</p><p style="font-size:.62rem;font-weight:800;color:var(--text-muted)">kata</p></div></div>` : '';
+    const period = V.mode === 't' ? 'Total XP' : V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
+    const you = mine ? `<div class="ng-card ios-glass" style="display:flex;align-items:center;gap:.8rem"><span class="ng-ico">${mine.v > 0 && R.myPos < 3 ? MEDAL[R.myPos] : '🏅'}</span><div style="flex:1;min-width:0"><p style="font-size:.66rem;font-weight:800;color:var(--text-muted)">PERINGKATMU · ${period}</p><p style="font-size:1.3rem;font-weight:900;line-height:1.15">#${R.myPos + 1}<span style="font-size:.8rem;color:var(--text-muted);font-weight:700"> dari ${list.length}</span></p></div><div style="text-align:right"><p style="font-size:1.3rem;font-weight:900;color:var(--accent);line-height:1.15">${fmtN(mine.v)}</p><p style="font-size:.62rem;font-weight:800;color:var(--text-muted)">XP</p></div></div>` : '';
     return `${you}
       <div class="ng-card ios-glass">
-        <div class="ng-seg"><button class="${V.mode === 'w' ? 'on' : ''}" onclick="NGHome.mode('w')">Mingguan</button><button class="${V.mode === 'd' ? 'on' : ''}" onclick="NGHome.mode('d')">Harian</button></div>${dayChips}
+        <div class="ng-seg"><button class="${V.mode === 'w' ? 'on' : ''}" onclick="NGHome.mode('w')">Mingguan</button><button class="${V.mode === 'd' ? 'on' : ''}" onclick="NGHome.mode('d')">Harian</button><button class="${V.mode === 't' ? 'on' : ''}" onclick="NGHome.mode('t')">Total</button></div>${dayChips}
         <div style="display:flex;gap:.4rem;margin:.8rem 0"><button class="ng-chip ${V.scope === 'all' ? 'on' : ''}" onclick="NGHome.scope('all')">Semua</button><button class="ng-chip ${V.scope === 'f' ? 'on' : ''}" onclick="NGHome.scope('f')">Teman</button></div>
         <div style="display:flex;flex-direction:column;gap:.35rem">${list.slice(0, 100).map(row).join('') || '<p style="text-align:center;color:var(--text-muted);font-size:.8rem;padding:1rem 0">Belum ada peringkat.</p>'}</div>
       </div>
-      <p style="font-size:.62rem;color:var(--text-muted);padding:0 .3rem">Skor = kata unik yang dijawab benar di Kosakata &amp; Kanji. Buka aplikasi agar skormu ikut tampil di perangkat lain.</p>`;
+      <p style="font-size:.62rem;color:var(--text-muted);padding:0 .3rem">Skor = XP. Kosakata &amp; Bunpou memberi XP sekali per bab/pola; menu Games memberi XP tanpa batas. Tab Total hanya menampilkan pemain yang aktif minggu ini.</p>`;
   }
   const redrawLb = () => {
     const e = $('ng-lb'); if (e) e.innerHTML = lbSummary();
     const p = $('ng-lbp-body'); if (p) p.innerHTML = lbPageInner();
-    const sub = $('ng-lbp-sub'); if (sub) sub.textContent = V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
+    const sub = $('ng-lbp-sub'); if (sub) sub.textContent = V.mode === 't' ? 'Total XP' : V.mode === 'w' ? 'Minggu ini · reset Senin' : 'Hari ' + DN[V.day];
   };
 
   /* halaman leaderboard tersendiri */
@@ -10173,6 +10181,122 @@ html.ngd-lock{overflow:hidden}
   /* header dibiarkan seperti semula (tombol Teman sudah ada di header lama) */
   window.addEventListener('load', () => setTimeout(() => { try { if (state.activeTab === 'home' && $('ng-home')) renderHome(); } catch (e) {} }, 200));
   setInterval(() => { publish(); }, 18e5);
+})();
+</script>
+
+<style>
+.xp-float{position:fixed !important;color:var(--accent);font-weight:900;font-size:.95rem;pointer-events:none;z-index:60;text-shadow:0 2px 4px rgba(0,0,0,.2);animation:floatCoin 1.1s ease-out forwards}
+.xp-pill{display:flex;align-items:center;gap:.4rem;padding:.6rem .9rem;border-radius:1rem;font-size:.7rem;font-weight:800;line-height:1.35;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.xp-pill--done{color:#10b981;background:rgba(16,185,129,.12)}
+</style>
+<script>
+/* =====================================================================
+   SISTEM XP (dipakai untuk peringkat di Leaderboard; tidak ada batas jumlah XP)
+   - Koin: tetap seperti sebelumnya.
+   - XP Kosakata (latihan per bab): SEKALI per bab = 10 XP x jumlah kosakata, diberikan saat latihan selesai.
+   - XP Bunpou: SEKALI per pola kalimat.
+   - Menu Games (Sambung Kata, Listening, kuis kana/kanji/kosakata campuran, latihan menulis): XP tiap kali, tanpa batas.
+   - Ujian & Buku Kesalahan: tidak memberi XP.
+   ===================================================================== */
+const BUNPO_XP_PER_POLA = 20;
+(function () {
+  'use strict';
+  const fmt = n => Number(n || 0).toLocaleString('id-ID');
+  const ensure = () => {
+    if (typeof state.xp !== 'number') state.xp = 0;
+    if (!state.xpClaims || typeof state.xpClaims !== 'object') state.xpClaims = {};
+  };
+  const wrapFn = (name, make) => { const o = window[name]; if (typeof o === 'function') window[name] = make(o); };
+
+  function floatXP(anchor, amount) {
+    const f = document.createElement('div');
+    f.className = 'xp-float'; f.textContent = '+' + fmt(amount) + ' XP';
+    let left, top;
+    if (anchor && anchor.getBoundingClientRect && document.body.contains(anchor)) {
+      const r = anchor.getBoundingClientRect(); left = r.left + r.width / 2 - 28; top = r.top + 24;
+    } else { left = window.innerWidth / 2 - 34; top = window.innerHeight * 0.42; }
+    f.style.left = Math.max(8, left) + 'px'; f.style.top = top + 'px';
+    document.body.appendChild(f); setTimeout(() => f.remove(), 1150);
+  }
+  /* opts.once = kunci klaim (hanya sekali seumur hidup), opts.silent = tanpa animasi */
+  function awardXP(amount, anchor, opts) {
+    opts = opts || {}; ensure();
+    amount = Math.round(Number(amount) || 0); if (amount <= 0) return 0;
+    if (opts.once) { if (state.xpClaims[opts.once]) return 0; state.xpClaims[opts.once] = Date.now(); }
+    state.xp += amount;
+    try { const k = new Date(), d = k.getFullYear() + '-' + String(k.getMonth() + 1).padStart(2, '0') + '-' + String(k.getDate()).padStart(2, '0'); state.xpDays = state.xpDays || {}; state.xpDays[d] = (state.xpDays[d] || 0) + amount; const cut = new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10); Object.keys(state.xpDays).forEach(x => { if (x < cut) delete state.xpDays[x]; }); } catch (e) {}
+    window.__xpSession = (window.__xpSession || 0) + amount;
+    try { saveState(); } catch (e) {}
+    if (!opts.silent) floatXP(anchor, amount);
+    try { window.__lbXPChanged && window.__lbXPChanged(); } catch (e) {}
+    return amount;
+  }
+  window.awardXP = awardXP;
+  window.getXP = () => { ensure(); return state.xp; };
+
+  /* ---- kuis: XP per jawaban benar hanya di sesi yang boleh berulang (menu Games) ---- */
+  wrapFn('setupQuizFlow', o => function () { window.__xpSession = 0; return o.apply(this, arguments); });
+  const repeatableCtx = ctx => ctx && !ctx.isExam && !ctx.xpOnce && ctx.title !== 'Buku Kesalahan';
+  wrapFn('submitQuizAnswer', o => function (chosen, correct, btn) {
+    let xp = 0;
+    try {
+      const item = state.quiz.questions[state.quiz.currentQuestion];
+      const ok = chosen !== null && normalizeQuizAnswer(chosen) === normalizeQuizAnswer(correct);
+      if (ok && item && repeatableCtx(quizSessionContext)) xp = (!!item.arti || isKanjiQuizItem(item)) ? 10 : 5;
+    } catch (e) {}
+    const r = o.apply(this, arguments);
+    if (xp) awardXP(xp, btn);
+    return r;
+  });
+
+  /* ---- layar hasil kuis: klaim XP sekali (latihan bab kosakata) / ringkasan XP sesi ---- */
+  const banner = (cls, html) => '<div class="xp-pill ' + cls + '" style="justify-content:center;text-align:center">' + html + '</div>';
+  wrapFn('renderQuizResults', o => function () {
+    ensure();
+    const ctx = quizSessionContext || {};
+    let note = '';
+    if (ctx.xpOnce && !ctx.isExam) {
+      const got = awardXP(ctx.xpOnce.amount, null, { once: ctx.xpOnce.key, silent: true });
+      note = got
+        ? banner('', '⚡ +' + fmt(got) + ' XP! Latihan ' + ctx.xpOnce.label + ' selesai.<br>XP bab ini cuma bisa didapat sekali. Mau lanjut kumpulkan XP? Main di menu Games.')
+        : banner('xp-pill--done', '✓ XP ' + ctx.xpOnce.label + ' sudah pernah kamu ambil.<br>Mau XP lagi? Main di menu Games.');
+    } else if (repeatableCtx(ctx) && (window.__xpSession || 0) > 0) {
+      note = banner('', '⚡ +' + fmt(window.__xpSession) + ' XP dari sesi ini');
+    }
+    const r = o.apply(this, arguments);
+    try { const h = document.querySelector('#app-viewport h2'); if (note && h) h.insertAdjacentHTML('afterend', note); } catch (e) {}
+    return r;
+  });
+
+  /* ---- latihan menulis: XP = koin yang didapat, kecuali dari menu Belajar ---- */
+  let writeOrigin = 'games';
+  wrapFn('renderBelajarMenu', o => function () { writeOrigin = 'belajar'; return o.apply(this, arguments); });
+  wrapFn('renderLatihanTabs', o => function () { writeOrigin = 'games'; return o.apply(this, arguments); });
+  wrapFn('openKanjiPracticeHub', o => function () { writeOrigin = 'games'; return o.apply(this, arguments); });
+  wrapFn('completeWritingPractice', o => function () {
+    const before = state.coins;
+    const r = o.apply(this, arguments);
+    const gain = state.coins - before;           /* hanya terjadi saat tulisan benar-benar dinilai selesai */
+    if (gain > 0 && writeOrigin === 'games') awardXP(gain);
+    return r;
+  });
+
+  /* ---- halaman bab kosakata: tampilkan status XP bab ---- */
+  wrapFn('openKotobaBab', o => function (bab) {
+    const r = o.apply(this, arguments);
+    try {
+      ensure();
+      const list = KOTOBA_DB[bab], root = document.querySelector('#app-viewport > div'), head = root && root.firstElementChild;
+      if (list && head) {
+        const amt = 10 * list.length, done = !!state.xpClaims['kotoba:bab' + bab];
+        head.insertAdjacentHTML('afterend', done
+          ? banner('xp-pill--done', '✓ XP Bab ' + bab + ' sudah didapat (+' + fmt(amt) + ' XP)')
+          : banner('', '⚡ Selesaikan Latihan pertama kali: +' + fmt(amt) + ' XP (sekali saja)'));
+      }
+    } catch (e) {}
+    return r;
+  });
+
 })();
 </script>
 
