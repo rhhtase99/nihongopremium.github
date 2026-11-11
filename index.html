@@ -10955,5 +10955,215 @@ const BUNPO_XP_PER_POLA = 20;
 })();
 </script>
 
+<style id="ng-rm-css">
+#rm{position:fixed;inset:0;z-index:260;overflow:auto;background:var(--bg-app,#fff);padding:1rem 1rem 6rem}
+#rm .w{max-width:32rem;margin:0 auto;display:flex;flex-direction:column;gap:.8rem}
+#rm h2{font-size:1.25rem;font-weight:900;letter-spacing:.02em}#rm h4{font-size:.68rem;font-weight:900;letter-spacing:.08em;color:var(--text-muted)}
+#rm .cd{border-radius:1.4rem;padding:1rem}
+#rm .cat{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+#rm .cat button{padding:1rem;border-radius:1.3rem;text-align:left;background:var(--glass-border);border:2px solid transparent}
+#rm .cat button.on,#rm .sp.on{border-color:var(--accent)}
+#rm .cat i{font-style:normal;font-size:1.8rem;font-weight:900;display:block}#rm .cat b{display:block;font-size:1rem;margin-top:.3rem}#rm small{color:var(--text-muted);font-size:.72rem}
+#rm .sp{width:100%;padding:1rem;border-radius:1.3rem;text-align:left;border:2px solid #b5833a;background:linear-gradient(135deg,transparent,rgba(120,60,200,.12))}
+#rm .tag{float:right;padding:.25rem .7rem;border-radius:99px;font-size:.7rem;font-weight:800;background:#fde4d8;color:#9a3412}
+#rm .ch{padding:.4rem .8rem;border-radius:99px;font-size:.75rem;font-weight:800;border:1.5px solid var(--accent);color:var(--accent)}
+#rm .ch.on{background:var(--accent);color:#fff}#rm .ch[disabled]{opacity:.35}#rm .row{display:flex;gap:.4rem;flex-wrap:wrap}
+#rm .btn{width:100%;padding:.85rem;border-radius:99px;font-weight:900;background:var(--accent);color:#fff}#rm .btn.alt{background:var(--glass-border);color:inherit}#rm .btn[disabled]{opacity:.4}
+#rm .pl{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:1rem;background:var(--glass-border)}#rm .pl.on{outline:2px solid var(--accent)}#rm .pl.out{opacity:.4;text-decoration:line-through}
+#rm .pl .a{font-size:1.4rem}#rm .pl b{flex:1;font-size:.85rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rm .tm{height:.4rem;border-radius:9px;background:var(--glass-border);overflow:hidden}#rm .tm i{display:block;height:100%;background:var(--accent)}
+#rm .op{padding:.9rem;border-radius:1.1rem;font-weight:800;text-align:left;background:var(--glass-border);border:2px solid transparent;width:100%}
+#rm .op.ok{border-color:#10b981;background:#10b98122}#rm .op.no{border-color:#ef4444;background:#ef444422}#rm .op.me{border-color:var(--accent)}
+#rm .big{font-size:2.6rem;font-weight:900;text-align:center;line-height:1.2;white-space:pre-line}
+#rm input{width:100%;padding:.7rem .9rem;border-radius:1rem;background:var(--glass-border);outline:none;font-size:.85rem}
+#rm .secret{filter:blur(12px);transition:filter .2s}#rm .secret.show{filter:none}
+#rm .msg{font-size:.75rem;line-height:1.4}#rm .msg b{color:var(--accent)}
+</style>
+<script>
+/* ===== ROOM TOURNAMENT (Kashikosa): lobi, kuis multiplayer, Undercover. Host-authoritative lewat relay ntfy ===== */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const B = () => { try { return NGNet.base(); } catch (e) { return 'https://ntfy.sh/'; } };
+  const ri = n => crypto.getRandomValues(new Uint32Array(1))[0] % n, rnd = n => Array.from({ length: n }, () => 'abcdefghjkmnpqrstuvwxyz23456789'[ri(31)]).join('');
+  const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = ri(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2600); };
+  /* Akses Room Tournament: hanya pemegang token NPJ (NPJ2026 / NPJ20267) dan token Support */
+  const canRoom = () => !!(state.devMode || state.devGold || state.support);
+  const deny = () => { toast('Room Tournament khusus pemegang token NPJ dan Support'); return false; };
+  const RM = () => (state.rm = state.rm || {});
+  const me = () => { const r = RM(); if (!r.pid) { r.pid = rnd(8); try { saveState(); } catch (e) {} } return { id: r.pid, n: (state.user && state.user.name) || 'Pemain', a: (state.user && state.user.avatar) || '👤' }; };
+  let R = null, S = null, isHost = false, V = 'menu', card = null, ML = {}, PT = '', es = [], seen = new Set(), tms = [], cfg = { name: '', cap: 4, mode: 'quiz', cat: 'kanji', n: 10, sec: 15, diff: 'e', csec: 60 };
+  const T = () => 'nhgo2rm-' + (S ? S.code : R.code);
+  const pub = (t, o) => fetch(B() + t, { method: 'POST', body: JSON.stringify(o) }).catch(() => {});
+  function sub(t, fn) { const e = new EventSource(B() + t + '/sse?since=3m'); e.onmessage = m => { try { const x = JSON.parse(m.data); if (x.event !== 'message' || seen.has(x.id)) return; seen.add(x.id); fn(JSON.parse(x.message)); } catch (_) {} }; es.push(e); }
+  const after = (ms, fn) => tms.push(setTimeout(fn, ms)), clr = () => { tms.forEach(clearTimeout); tms = []; };
+
+  /* ---- bank soal ---- */
+  const KB = () => Object.values(KOTOBA_DB).flat().filter(w => w.kana && w.arti);
+  const HB = () => Object.values(HIRAGANA_DB).filter(Array.isArray).flat().filter(c => c.j && c.r);
+  function mk(pool, fp, fo) { const c = pool[ri(pool.length)], d = []; shuf(pool).forEach(x => { if (d.length < 3 && fo(x) !== fo(c) && !d.some(y => fo(y) === fo(x))) d.push(x); }); const o = shuf([c, ...d]); return { p: fp(c), o: o.map(fo), i: o.indexOf(c) }; }
+  function mkQ(cat) {
+    if (cat === 'mix') cat = ['kanji', 'hira', 'kotoba', 'mean'][ri(4)];
+    const W = KB();
+    if (cat === 'hira') return mk(HB(), c => c.j, c => c.r);
+    if (cat === 'kanji') return mk(W.filter(w => w.kanji && w.kanji !== w.kana), w => w.kanji, w => w.kana);
+    if (cat === 'kotoba') return mk(W, w => w.arti, w => w.kana);
+    return mk(W, w => w.kanji || w.kana, w => w.arti);
+  }
+  const WP = { e: [['山', 'やま', 'Gunung', '丘', 'おか', 'Bukit'], ['海', 'うみ', 'Laut', '川', 'かわ', 'Sungai'], ['猫', 'ねこ', 'Kucing', '犬', 'いぬ', 'Anjing'], ['雨', 'あめ', 'Hujan', '雪', 'ゆき', 'Salju'], ['学校', 'がっこう', 'Sekolah', '大学', 'だいがく', 'Universitas'], ['電車', 'でんしゃ', 'Kereta', 'バス', 'バス', 'Bus']],
+    n: [['医者', 'いしゃ', 'Dokter', '看護師', 'かんごし', 'Perawat'], ['先生', 'せんせい', 'Guru', '学生', 'がくせい', 'Murid'], ['本', 'ほん', 'Buku', '雑誌', 'ざっし', 'Majalah'], ['朝', 'あさ', 'Pagi', '夜', 'よる', 'Malam']],
+    h: [['時計', 'とけい', 'Jam', 'カレンダー', 'カレンダー', 'Kalender'], ['傘', 'かさ', 'Payung', '帽子', 'ぼうし', 'Topi'], ['駅', 'えき', 'Stasiun', '空港', 'くうこう', 'Bandara']] };
+
+  /* ---- HOST: otoritas permainan ---- */
+  function snap() {
+    if (!isHost) return; const sp = R.mode === 'spy';
+    const s = { code: R.code, name: R.name, cap: R.cap, cat: R.cat, mode: R.mode, n: R.n, sec: R.sec, ph: R.ph, hid: R.hid, lk: R.lk, qi: R.qi, dl: R.dl, rv: R.rv, msgs: R.msgs, diff: R.diff,
+      pl: Object.entries(R.pl).map(([id, p]) => ({ id, h: id === R.hid, n: p.n, a: p.a, r: p.r, sc: p.sc, an: !!(R.ans && R.ans[id]) })), q: R.q && R.ph === 'q' || R.ph === 'rv' ? { k: R.qi, p: R.q.p, o: R.q.o } : null };
+    if (sp) Object.assign(s, { al: R.al, order: R.order, turn: R.turn, descs: R.descs, vt: Object.keys(R.votes || {}), tied: R.tied, last: R.last, end: R.ph === 'sw' ? { roles: R.spies, w: R.words, win: R.win, log: R.log } : null });
+    S = s; pub(T(), { t: 'st', s }); view();
+  }
+  function H(m) {
+    if (!R || !m || !m.id) return; const P = R.pl[m.id];
+    if (m.t === 'jn') {
+      if (P) { P.pt = m.pt; return snap(); }
+      if (R.ph !== 'lobby' || R.lk || Object.keys(R.pl).length >= R.cap) return pub(T(), { t: 'no', id: m.id, w: 'Room penuh, terkunci, atau pertandingan sudah mulai' });
+      R.pl[m.id] = { n: String(m.n).slice(0, 20), a: String(m.a || '👤').slice(0, 8), r: false, sc: 0, pt: String(m.pt || '') }; return snap();
+    }
+    if (!P) return;
+    if (m.t === 'rd' && R.ph === 'lobby') { P.r = !P.r; snap(); }
+    else if (m.t === 'ch') { const n = Date.now(); if (n - (P.lc || 0) < 1200) return; P.lc = n; R.msgs.push({ n: P.n, tx: String(m.tx).slice(0, 120) }); R.msgs = R.msgs.slice(-30); snap(); }
+    else if (m.t === 'lv') { delete R.pl[m.id]; if (R.al) R.al = R.al.filter(x => x !== m.id); snap(); }
+    else if (m.t === 'an' && R.ph === 'q' && m.k === R.qi && !R.ans[m.id]) { R.ans[m.id] = { c: m.c, ms: Math.max(0, Math.min(R.sec * 1000, +m.ms || 0)) }; Object.keys(R.ans).length >= Object.keys(R.pl).length ? reveal() : snap(); }
+    else if (m.t === 'ds' && R.ph === 'd' && R.order[R.turn] === m.id) {
+      const w = R.words[R.spies.includes(m.id) ? 'spy' : 'cit'], tx = String(m.tx || '').trim().slice(0, 100), l = tx.toLowerCase();
+      if (tx.length < 2) return; if ([w.j, w.k, w.a.toLowerCase()].some(x => x && l.includes(x.toLowerCase()))) return pub(T() + '-' + P.pt, { t: 'er', w: 'Deskripsi tidak boleh menyebut kata rahasia, bacaan, atau artinya' });
+      R.descs.push({ id: m.id, tx }); nextTurn();
+    } else if (m.t === 'vt' && R.ph === 'v' && R.al.includes(m.id) && !R.votes[m.id] && m.tg !== m.id && (R.tied || R.al).includes(m.tg) && R.al.includes(m.tg)) { R.votes[m.id] = m.tg; R.al.every(x => R.votes[x]) ? tally() : snap(); }
+  }
+  function start() {
+    const ids = Object.keys(R.pl); if (ids.length < 2 || (R.mode === 'spy' && ids.length < 4) || !ids.every(i => i === R.hid || R.pl[i].r)) return toast(R.mode === 'spy' && ids.length < 4 ? 'Undercover butuh minimal 4 pemain' : 'Semua pemain harus Ready dan minimal 2 orang');
+    R.lk = true; R.msgs = []; R.win = null; ids.forEach(i => R.pl[i].sc = 0);
+    if (R.mode === 'quiz') { R.qi = -1; return nextQ(); }
+    R.al = ids; R.spies = shuf(ids).slice(0, 2); R.log = []; const p = shuf(WP[R.diff])[0], sw = ri(2), pk = o => ({ j: p[o], k: p[o + 1], a: p[o + 2] });
+    R.words = { cit: pk(sw ? 3 : 0), spy: pk(sw ? 0 : 3) };
+    ids.forEach(i => { const w = R.words[R.spies.includes(i) ? 'spy' : 'cit']; i === R.hid ? card = w : pub(T() + '-' + R.pl[i].pt, { t: 'cd', w }); });
+    round();
+  }
+  function nextQ() { R.qi++; R.q = mkQ(R.cat); R.ans = {}; R.rv = null; R.ph = 'q'; R.dl = Date.now() + R.sec * 1000; snap(); after(R.sec * 1000 + 800, reveal); }
+  function reveal() {
+    if (R.ph !== 'q') return; clr(); R.rv = { c: R.q.i, sc: {} };
+    Object.entries(R.pl).forEach(([id, p]) => { const a = R.ans[id], g = a && a.c === R.q.i ? 100 + Math.round(50 * (1 - a.ms / (R.sec * 1000))) : 0; p.sc += g; R.rv.sc[id] = g; });
+    R.ph = 'rv'; snap(); after(3200, () => { if (R.qi + 1 >= R.n) { R.ph = 'end'; snap(); } else nextQ(); });
+  }
+  function round() { R.order = shuf(R.al); R.turn = 0; R.descs = []; R.tied = null; R.votes = {}; R.ph = 'd'; turn(); }
+  function turn() { R.dl = Date.now() + 20000; snap(); after(20800, () => { R.descs.push({ id: R.order[R.turn], tx: '(waktu habis)' }); nextTurn(); }); }
+  function nextTurn() {
+    clr(); R.turn++; if (R.turn < R.order.length) return turn();
+    R.ph = 'c'; R.dl = Date.now() + R.csec * 1000; snap(); after(R.csec * 1000, () => { R.ph = 'v'; R.votes = {}; R.dl = Date.now() + 25000; snap(); after(25500, tally); });
+  }
+  function tally() {
+    if (R.ph !== 'v') return; clr(); const c = {}; Object.values(R.votes).forEach(t => c[t] = (c[t] || 0) + 1);
+    const mx = Math.max(0, ...Object.values(c)), top = Object.keys(c).filter(k => c[k] === mx);
+    if (top.length > 1 && !R.tied) { R.tied = top; R.votes = {}; R.dl = Date.now() + 20000; snap(); return after(20500, tally); }
+    const out = top.length ? top[ri(top.length)] : R.al[ri(R.al.length)], role = R.spies.includes(out) ? 'spy' : 'cit';
+    R.al = R.al.filter(x => x !== out); R.last = { id: out, role }; R.log.push({ id: out, role, v: c }); R.ph = 'x'; snap();
+    const s = R.al.filter(x => R.spies.includes(x)).length, ct = R.al.length - s;
+    after(5000, () => { if (!s) R.win = 'cit'; else if (s >= ct) R.win = 'spy'; if (R.win) { R.ph = 'sw'; snap(); } else round(); });
+  }
+
+  /* ---- jaringan ---- */
+  function connect() {
+    const m = me(); PT = rnd(10); sub('nhgo2rm-' + (S ? S.code : R.code), x => {
+      if (isHost) { if (x.t !== 'st' && x.t !== 'no') H(x); return; }
+      if (x.t === 'st') { S = x.s; if (S.q && ML.k !== S.q.k) ML = { k: S.q.k, c: null, t0: Date.now() }; view(); }
+      else if (x.t === 'no' && x.id === m.id) { toast(x.w); leave(true); }
+      else if (x.t === 'kk' && x.id === m.id) { toast('Kamu dikeluarkan Host'); leave(true); }
+    });
+    sub('nhgo2rm-' + (S ? S.code : R.code) + '-' + PT, x => { if (x.t === 'cd') { card = x.w; view(); } else if (x.t === 'er') toast(x.w); });
+  }
+  function send(o) { const m = me(); o.id = m.id; if (isHost) H(o); else pub(T(), o); }
+  function create() {
+    if (!canRoom()) return deny();
+    const m = me(); isHost = true; R = { code: rnd(5).toUpperCase(), name: (cfg.name || m.n + ' Room').slice(0, 24), cap: cfg.cap, mode: cfg.mode, cat: cfg.cat, n: cfg.n, sec: cfg.sec, diff: cfg.diff, csec: cfg.csec, ph: 'lobby', hid: m.id, lk: false, msgs: [], pl: {}, qi: -1 };
+    R.pl[m.id] = { n: m.n, a: m.a, r: true, sc: 0, pt: '' }; V = 'room'; connect(); R.pl[m.id].pt = PT; snap(); setInterval_();
+  }
+  function join(code) {
+    if (!canRoom()) return deny();
+    code = String(code || '').trim().toUpperCase(); if (code.length !== 5) return toast('Kode room 5 karakter');
+    const m = me(); isHost = false; S = { code, pl: [] }; R = null; V = 'room'; connect(); view();
+    const go = () => pub('nhgo2rm-' + code, { t: 'jn', id: m.id, n: m.n, a: m.a, pt: PT }); go(); after(2500, () => { if (!S.name && !isHost) { go(); } }); after(9000, () => { if (!S || !S.name) { toast('Room tidak ditemukan atau Host offline'); leave(true); } });
+  }
+  function leave(quiet) { if (!quiet && !isHost && S && S.name) pub(T(), { t: 'lv', id: me().id }); es.forEach(e => e.close()); es = []; clr(); clearInterval(hb); R = S = card = null; isHost = false; V = 'menu'; seen = new Set(); quiet ? view() : close(); }
+  let hb = 0; const setInterval_ = () => { clearInterval(hb); hb = setInterval(() => { if (isHost && R) snap(); }, 6000); };
+  const close = () => { const e = $('rm'); if (e) e.remove(); };
+
+  /* ---- tampilan ---- */
+  const chip = (on, fn, l, d) => `<button class="ch ${on ? 'on' : ''}" ${d ? 'disabled' : ''} onclick="${fn}">${l}</button>`;
+  const CATS = [['kanji', '漢', 'Kanji Quiz', 'Tebak kanji'], ['hira', 'あ', 'Hiragana Quiz', 'Tebak hiragana'], ['kotoba', '言葉', 'Kotoba Quiz', 'Tebak kosakata'], ['mean', '文', 'Meaning Quiz', 'Tebak arti']];
+  function vMenu() {
+    return `<h2>KASHIKOSA TOURNAMENT</h2><div class="cd ios-glass"><h4>BUAT ROOM</h4><p style="font-size:.78rem;margin:.3rem 0 .7rem;color:var(--text-muted)">Jadi Host, atur aturan, lalu bagikan kode ke teman.</p><button class="btn" onclick="NGRoom.cfgOpen()">Buat Custom Room</button></div>
+    <div class="cd ios-glass"><h4>GABUNG</h4><div class="row" style="margin-top:.5rem;flex-wrap:nowrap"><input id="rm-code" maxlength="5" placeholder="Kode room (5 huruf)" style="text-transform:uppercase"><button class="btn" style="width:auto;padding:.7rem 1.2rem" onclick="NGRoom.join(document.getElementById('rm-code').value)">Masuk</button></div></div>
+    <p style="font-size:.66rem;color:var(--text-muted)">Quick Match otomatis butuh server pencocokan, lihat catatan pengembangan.</p>`;
+  }
+  function vCfg() {
+    const c = cfg, sp = c.mode === 'spy';
+    return `<h2>KASHIKOSA TOURNAMENT</h2><input id="rm-name" maxlength="24" placeholder="Nama room" value="${esc(c.name)}" oninput="NGRoom.c('name',this.value,1)">
+    <div class="cat">${CATS.map(x => `<button class="${!sp && c.cat === x[0] ? 'on' : ''}" onclick="NGRoom.c('mode','quiz');NGRoom.c('cat','${x[0]}')"><i>${x[1]}</i><b>${x[2]}</b><small>${x[3]}</small></button>`).join('')}</div>
+    <div class="row">${chip(!sp && c.cat === 'mix', "NGRoom.c('mode','quiz');NGRoom.c('cat','mix')", 'Mixed Quiz')}</div>
+    <button class="sp ${sp ? 'on' : ''}" onclick="NGRoom.c('mode','spy')"><span class="tag">Special Mode</span><div style="font-size:1.7rem">🕵️</div><b style="font-size:1.05rem;display:block;margin-top:.3rem">スパイを探せ！</b><small>Find the Spy · Social Deduction · min. 4 pemain, 2 Spy</small></button>
+    <h4>KAPASITAS</h4><div class="row">${[2, 4, 8, 12, 16].map(v => chip(c.cap === v, `NGRoom.c('cap',${v})`, v, sp && v < 4)).join('')}</div>
+    <h4>LEVEL JLPT</h4><div class="row">${chip(1, '', 'N5')}${['N4', 'N3', 'N2', 'N1'].map(l => chip(0, '', l, 1)).join('')}</div>
+    ${sp ? `<h4>KEMIRIPAN KATA</h4><div class="row">${[['e', 'Easy'], ['n', 'Normal'], ['h', 'Hard']].map(x => chip(c.diff === x[0], `NGRoom.c('diff','${x[0]}')`, x[1])).join('')}</div><h4>DISKUSI</h4><div class="row">${[30, 60, 90].map(v => chip(c.csec === v, `NGRoom.c('csec',${v})`, v + ' dtk')).join('')}</div>`
+      : `<h4>JUMLAH SOAL</h4><div class="row">${[5, 10, 15, 20].map(v => chip(c.n === v, `NGRoom.c('n',${v})`, v)).join('')}</div><h4>WAKTU PER SOAL</h4><div class="row">${[10, 15, 20, 30].map(v => chip(c.sec === v, `NGRoom.c('sec',${v})`, v + ' dtk')).join('')}</div>`}
+    <button class="btn" onclick="NGRoom.create()">Buat Room</button><button class="btn alt" onclick="NGRoom.c('v','menu')">Kembali</button>`;
+  }
+  const nm = id => { const p = (S.pl || []).find(x => x.id === id); return p ? p.n : '?'; };
+  const pl = (p, x) => `<div class="pl ${x || ''}"><span class="a">${esc(p.a)}</span><b>${esc(p.n)}${p.id === me().id ? ' (Kamu)' : ''}</b>${p.h ? '<small>👑 Host</small>' : ''}${S.ph === 'lobby' ? (p.r ? '<small style="color:#10b981;font-weight:800">Siap</small>' : '<small>Belum</small>') : '<small style="font-weight:900">' + (p.sc || 0) + '</small>'}${isHost && !p.h && S.ph === 'lobby' ? `<button onclick="NGRoom.kick('${p.id}')" style="color:#ef4444;font-size:.7rem;font-weight:800">Kick</button>` : ''}</div>`;
+  const tmr = () => `<div class="tm"><i id="rm-tm" style="width:100%"></i></div>`;
+  const chat = () => `<div class="cd ios-glass"><h4>CHAT</h4><div style="max-height:9rem;overflow:auto;margin:.4rem 0">${(S.msgs || []).slice(-12).map(m => `<p class="msg"><b>${esc(m.n)}</b> ${esc(m.tx)}</p>`).join('') || '<small>Belum ada pesan</small>'}</div><div class="row" style="flex-wrap:nowrap"><input id="rm-ch" maxlength="120" placeholder="Tulis pesan…" onkeydown="if(event.key==='Enter')NGRoom.chat()"><button class="ch on" onclick="NGRoom.chat()">Kirim</button></div></div>`;
+  function vRoom() {
+    if (!S || !S.name) return `<p style="text-align:center;padding:3rem 0;color:var(--text-muted)">Menyambung ke room…</p>`;
+    const m = me(), mine = S.pl.find(p => p.id === m.id), sp = S.mode === 'spy', ph = S.ph, head = `<div style="display:flex;justify-content:space-between;align-items:center"><h2>${esc(S.name)}</h2><small>${sp ? 'Undercover' : 'Kuis'} · ${S.pl.length}/${S.cap}</small></div>`;
+    if (ph === 'lobby') return head + `<div class="cd ios-glass" style="text-align:center"><small>KODE UNDANGAN</small><div class="big" style="letter-spacing:.2em">${S.code}</div><button class="ch" onclick="navigator.clipboard&&navigator.clipboard.writeText('${S.code}');NGRoom.t('Kode disalin')">Salin kode</button></div>` + S.pl.map(p => pl(p)).join('') +
+      (isHost ? `<button class="btn" onclick="NGRoom.start()">Mulai Pertandingan</button><button class="btn alt" onclick="NGRoom.lock()">${S.lk ? 'Buka kunci room' : 'Kunci room'}</button>` : `<button class="btn" onclick="NGRoom.ready()">${mine && mine.r ? 'Batal Ready' : 'Ready'}</button>`) + chat();
+    if (!sp) {
+      if (ph === 'q' || ph === 'rv') { const q = S.q, rv = S.rv; return head + `<small>Soal ${q.k + 1}/${S.n}</small>${ph === 'q' ? tmr() : ''}<div class="cd ios-glass"><div class="big">${esc(q.p)}</div></div>` + q.o.map((o, i) => `<button class="op ${rv ? (i === rv.c ? 'ok' : ML.c === i ? 'no' : '') : ML.c === i ? 'me' : ''}" ${ML.c != null || rv ? 'disabled' : ''} onclick="NGRoom.ans(${i})">${esc(o)}</button>`).join('') + `<div style="display:flex;flex-direction:column;gap:.35rem;margin-top:.4rem">${S.pl.slice().sort((a, b) => b.sc - a.sc).map(p => pl(p, p.an && !rv ? 'on' : '')).join('')}</div>`; }
+      return head + podium();
+    }
+    const alive = id => (S.al || []).includes(id), order = S.order || [];
+    const cardH = card ? `<div class="cd ios-glass" style="text-align:center"><small>KARTU RAHASIAMU (ketuk untuk lihat)</small><div id="rm-card" class="secret" onclick="this.classList.toggle('show')"><div class="big">${esc(card.j)}</div><div style="font-weight:800">${esc(card.k)} · ${esc(card.a)}</div></div></div>` : '';
+    const list = S.pl.map(p => pl(p, (ph === 'd' && order[S.turn] === p.id ? 'on ' : '') + (alive(p.id) ? '' : 'out'))).join('');
+    const descs = (S.descs || []).map(d => `<p class="msg"><b>${esc(nm(d.id))}</b> ${esc(d.tx)}</p>`).join('');
+    if (ph === 'd') { const my = order[S.turn] === m.id; return head + cardH + `<small>Giliran: <b>${esc(nm(order[S.turn]))}</b></small>${tmr()}` + (my ? `<input id="rm-ds" maxlength="100" placeholder="Deskripsikan tanpa menyebut katanya…"><button class="btn" onclick="NGRoom.desc()">Kirim deskripsi</button>` : '') + `<div class="cd ios-glass">${descs || '<small>Belum ada deskripsi</small>'}</div>` + list; }
+    if (ph === 'c') return head + cardH + `<small>Diskusi: curigai siapa Spy-nya</small>${tmr()}<div class="cd ios-glass">${descs}</div>` + chat() + list;
+    if (ph === 'v') { const can = alive(m.id), voted = (S.vt || []).includes(m.id); return head + cardH + `<small>${S.tied ? 'Suara seri, pilih ulang di antara yang seri' : 'Pilih satu pemain yang dicurigai Spy'}</small>${tmr()}` + (can ? S.pl.filter(p => alive(p.id) && p.id !== m.id && (!S.tied || S.tied.includes(p.id))).map(p => `<button class="op" ${voted ? 'disabled' : ''} onclick="NGRoom.vote('${p.id}')">${esc(p.a)} ${esc(p.n)}</button>`).join('') + (voted ? '<small>Suara terkirim</small>' : '') : '<small>Kamu sudah tereliminasi, hanya menonton</small>') + `<small>${(S.vt || []).length}/${(S.al || []).length} sudah memilih</small>`; }
+    if (ph === 'x') return head + `<div class="cd ios-glass" style="text-align:center"><div class="big">${S.last.role === 'spy' ? '🕵️' : '🙂'}</div><b>${esc(nm(S.last.id))} dikeluarkan</b><p>Ternyata dia ${S.last.role === 'spy' ? 'SPY (スパイ)' : 'CITIZEN (市民)'}</p></div>` + list;
+    const e = S.end; return head + `<div class="cd ios-glass" style="text-align:center"><div class="big">${e.win === 'cit' ? '市民' : 'スパイ'}</div><b>${e.win === 'cit' ? 'Citizen menang!' : 'Spy menang!'}</b></div><div class="cd ios-glass"><small>Kata Citizen</small><p><b>${esc(e.w.cit.j)}</b> ${esc(e.w.cit.k)} · ${esc(e.w.cit.a)}</p><small>Kata Spy</small><p><b>${esc(e.w.spy.j)}</b> ${esc(e.w.spy.k)} · ${esc(e.w.spy.a)}</p></div><div class="cd ios-glass"><h4>PERAN & ELIMINASI</h4>${S.pl.map(p => `<p class="msg"><b>${esc(p.n)}</b> ${e.roles.includes(p.id) ? 'Spy' : 'Citizen'}</p>`).join('')}${e.log.map((l, i) => `<p class="msg">#${i + 1} ${esc(nm(l.id))} (${l.role === 'spy' ? 'Spy' : 'Citizen'}) · suara: ${Object.entries(l.v).map(([k, v]) => esc(nm(k)) + ' ' + v).join(', ')}</p>`).join('')}</div>` + (isHost ? `<button class="btn" onclick="NGRoom.again()">Main lagi</button>` : '');
+  }
+  function podium() { return `<div class="cd ios-glass" style="text-align:center"><div class="big">🏆</div><b>Hasil Pertandingan</b></div>` + S.pl.slice().sort((a, b) => b.sc - a.sc).map((p, i) => pl({ ...p }, i === 0 ? 'on' : '').replace('<span class="a">', '<span class="a">' + ['🥇', '🥈', '🥉'][i] + ' ')).join('') + (isHost ? `<button class="btn" onclick="NGRoom.again()">Main lagi</button>` : ''); }
+  function view() {
+    let e = $('rm'); if (!e) { e = document.createElement('div'); e.id = 'rm'; document.body.appendChild(e); }
+    const top = `<button class="ch" onclick="NGRoom.back()" style="align-self:flex-start">‹ ${V === 'room' ? 'Keluar' : 'Tutup'}</button>`;
+    const keep = ['rm-ds', 'rm-ch', 'rm-code'].map(i => { const x = $(i); return x ? [i, x.value, document.activeElement === x] : null; }).filter(Boolean);
+    e.innerHTML = `<div class="w">${top}${V === 'menu' ? vMenu() : V === 'cfg' ? vCfg() : vRoom()}</div>`;
+    keep.forEach(([i, v, f]) => { const x = $(i); if (x) { x.value = v; if (f) x.focus(); } });
+  }
+  setInterval(() => { const b = $('rm-tm'); if (b && S && S.dl) { const tot = S.ph === 'q' ? S.sec * 1000 : S.ph === 'd' ? 20000 : S.ph === 'c' ? 60000 : 25000; b.style.width = Math.max(0, Math.min(100, (S.dl - Date.now()) / tot * 100)) + '%'; } }, 250);
+
+  window.NGRoom = {
+    open() { if (!canRoom()) return deny(); V = 'menu'; view(); }, cfgOpen() { if (!canRoom()) return deny(); V = 'cfg'; view(); }, create, join, t: toast,
+    c(k, v, silent) { if (k === 'v') V = v; else { cfg[k] = v; if (k === 'mode' && v === 'spy' && cfg.cap < 4) cfg.cap = 4; } if (!silent) view(); },
+    back() { V === 'room' ? (confirm('Keluar dari room?') && leave()) : close(); },
+    start, ready: () => send({ t: 'rd' }), lock() { R.lk = !R.lk; snap(); }, kick(id) { delete R.pl[id]; pub(T(), { t: 'kk', id }); snap(); },
+    ans(i) { if (ML.c != null) return; ML.c = i; send({ t: 'an', k: ML.k, c: i, ms: Date.now() - ML.t0 }); view(); },
+    chat() { const e = $('rm-ch'); if (e && e.value.trim()) { send({ t: 'ch', tx: e.value }); e.value = ''; } }, desc() { const e = $('rm-ds'); if (e) send({ t: 'ds', tx: e.value }); },
+    vote: id => send({ t: 'vt', tg: id }), again() { clr(); R.ph = 'lobby'; R.lk = false; R.win = null; R.q = null; R.rv = null; Object.values(R.pl).forEach(p => { p.r = false; }); S = null; card = null; snap(); }
+  };
+  const oh = window.NGDuel && NGDuel.hub;
+  if (oh) NGDuel.hub = function () { const r = oh.apply(this, arguments); try { const c = document.querySelectorAll('.dl-mpcard'), l = c[c.length - 1]; if (canRoom() && l && !document.querySelector('[data-rm-card]')) l.insertAdjacentHTML('afterend', '<button data-rm-card class="ios-glass dl-mpcard" onclick="NGRoom.open()"><span class="dl-mpi">🏆</span><span style="flex:1;min-width:0"><b style="font-size:.9rem">Room Tournament</b><br><span style="font-size:.72rem;color:var(--text-muted)">Buat room, undang teman, kuis real-time &amp; Undercover</span></span></button>'); } catch (e) {} return r; };
+})();
+</script>
+
 </body>
 </html>
