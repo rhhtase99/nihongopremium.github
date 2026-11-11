@@ -2812,6 +2812,9 @@ const KANJI_N5_DB = (() => {
         const DEV_TOKEN = 'NPJ2026';
         const DEV_TOKEN_GOLD = 'NPJ20267';   /* developer emas: tampil paling atas & berwarna emas di daftar teman */
         const isDevToken = v => v === DEV_TOKEN || v === DEV_TOKEN_GOLD;
+        /* Token support: tidak membuka tema/latihan dan tidak memberi koin. Hanya: sembunyi di pencarian teman, kirim pesan ke pengguna, lihat ulasan pengguna */
+        const SUPPORT_TOKEN = 'SUPPORT2026';
+        const isSupportToken = v => v === SUPPORT_TOKEN;
         function applyDevMode(fresh) {
             if (!state.devMode) return;
             state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), ...SHOP_ITEMS.map(i => i.id)])];
@@ -2820,7 +2823,7 @@ const KANJI_N5_DB = (() => {
         }
         function refreshTokenCapsule() {
             const t = document.getElementById('token-capsule-text'); if (!t) return;
-            t.textContent = state.devGold ? 'Developer ★' : state.devMode ? 'Token Aktif' : 'Masukkan Token';
+            t.textContent = state.devGold ? 'Developer ★' : (state.support && state.devMode) ? 'Support + Token' : state.support ? 'Support ✓' : state.devMode ? 'Token Aktif' : 'Masukkan Token';
             document.getElementById('token-box')?.classList.add('hidden');
         }
         function toggleTokenBox() {
@@ -2831,6 +2834,14 @@ const KANJI_N5_DB = (() => {
         function activateToken() {
             const v = (document.getElementById('profile-token').value || '').trim().toUpperCase();
             if (!v) { alert('Masukkan token dulu ya.'); return; }
+            if (isSupportToken(v)) {
+                if (state.support) { alert('Token support sudah aktif.'); return; }
+                state.support = true; saveState();
+                document.getElementById('profile-token').value = '';
+                refreshTokenCapsule(); updateHeaderUI();
+                alert('Token support diterima! Kamu bisa menyembunyikan diri dari pencarian teman, mengirim pesan ke pengguna, dan melihat ulasan pengguna lewat Pengaturan → Panel Support.');
+                return;
+            }
             if (!isDevToken(v)) { alert('Token tidak valid.'); return; }
             const hadDev = !!state.devMode;
             state.devMode = true; if (v === DEV_TOKEN_GOLD) state.devGold = true;
@@ -2934,7 +2945,8 @@ const KANJI_N5_DB = (() => {
             const nameInput = document.getElementById('setup-name').value.trim();
             if (!nameInput) { alert("Tolong isi nama kamu dulu ya!"); return; }
             const tokenInput = (document.getElementById('setup-token')?.value || '').trim().toUpperCase();
-            if (tokenInput && !isDevToken(tokenInput)) { alert("Token tidak valid. Kosongkan kolom token jika tidak punya."); return; }
+            if (tokenInput && !isDevToken(tokenInput) && !isSupportToken(tokenInput)) { alert("Token tidak valid. Kosongkan kolom token jika tidak punya."); return; }
+            if (isSupportToken(tokenInput)) { state.support = true; }
             if (isDevToken(tokenInput)) { state.devMode = true; if (tokenInput === DEV_TOKEN_GOLD) state.devGold = true; applyDevMode(true); }
             state.user.name = nameInput; state.isFirstLogin = false; saveState();
             
@@ -6803,7 +6815,7 @@ const Social = (function () {
     try {
       const s = S(); if (!(state.user && state.user.name) || state.isFirstLogin || navigator.onLine === false) return;
       const db = dbURL();
-      if (state.devMode && s.visible === false) {
+      if ((state.devMode || state.support) && s.visible === false) {
         if (db) { const r = await fetch(db + '/users/' + s.code + '.json', { method: 'DELETE' }); if (r && r.ok) { s.dirPosted = false; delete s.dirSig; saveState(); } return; }
         if (s.dirPosted) { const r = await fetch(dirURL(), { method: 'POST', body: JSON.stringify({ t: 'd', c: s.code }) }); if (r && r.ok) { s.dirPosted = false; delete s.dirSig; saveState(); } }
         return;
@@ -7056,7 +7068,7 @@ const Social = (function () {
       <p style="font-size:.7rem;font-weight:800;margin:.9rem 0 .4rem">Level</p>
       <div style="display:flex;flex-wrap:wrap;gap:.4rem">${btn('Otomatis', "Social.levelMode('auto')", s.levelMode === 'auto')}${LEVELS.map(L => btn(L, `Social.levelMode('${L}')`, s.levelMode === L)).join('')}</div>
       <p style="font-size:.62rem;color:var(--text-muted);margin-top:.35rem;line-height:1.5">Level otomatis dihitung dari progres kana, kosakata, dan pola N5 kamu (skor ${auto.p}%) → saat ini <b>${auto.label}</b>. Pilih level tertentu untuk menetapkannya sendiri.</p>
-      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${state.devMode ? toggle('visible', 'Muncul di pencarian teman (developer)', 'Hanya developer yang bisa menyembunyikan diri dari daftar publik') : ''}</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.9rem">${toggle('showLevel', 'Tampilkan level', 'Label level di samping nama')}${(state.devMode || state.support) ? toggle('visible', 'Muncul di pencarian teman (developer / support)', 'Hanya developer dan support yang bisa menyembunyikan diri dari daftar publik') : ''}</div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.7rem .9rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between"><span><b style="font-size:.78rem">Kode teman</b><span style="display:block;font-size:.62rem;color:var(--text-muted)">Bagikan agar bisa ditambahkan</span></span><button onclick="Social.copyCode()" style="font-weight:900;letter-spacing:.08em;color:var(--accent)">${esc(s.code)} ⧉</button></div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem"><b style="font-size:.78rem">🔗 Relay teman</b><p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;margin:.25rem 0 .5rem">Pesan antar-teman lewat relay publik gratis <b>ntfy.sh</b>. Bila jaringanmu memblokirnya, isi alamat server ntfy lain (harus sama dengan milik temanmu). Kosongkan untuk bawaan.</p><input id="soc-relay" type="text" value="${esc(s.relay || '')}" placeholder="https://ntfy.sh/" onchange="Social.setRelay(this.value)" class="ios-glass" style="width:100%;padding:.55rem .8rem;border-radius:.8rem;font-size:.75rem;font-weight:700;outline:none"><div style="display:flex;gap:.4rem;margin-top:.45rem"><button onclick="Social.reconnect()" style="padding:.4rem .8rem;border-radius:.8rem;font-size:.68rem;font-weight:800;background:rgba(59,130,246,.14);color:#3B82F6">Tes & sambung ulang</button></div></div>
       <div class="ios-glass" style="margin-top:.9rem;padding:.8rem .9rem;border-radius:1rem">
@@ -8160,7 +8172,7 @@ const Social = (function () {
 /* ===== MENU PEMBERITAHUAN v2.1.1: pesan developer & riwayat update ===== */
 (function () {
   'use strict';
-  const APP_VER = '2.2.0';
+  const APP_VER = '2.2.1';
   /* Opsional: alamat JSON pesan developer supaya bisa dikirim tanpa memperbarui file ini.
      Contoh (Firebase): 'https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app/notices.json'
      Format: { "pesan1": { "title": "Judul", "body": "Isi", "date": "20 Okt", "url": "https://...", "t": 1760000000 } }  */
@@ -8168,6 +8180,8 @@ const Social = (function () {
 
   /* Pesan developer bawaan (terbaru di atas). Tambah objek baru di sini untuk memunculkan bundaran merah. */
   const DEV_NOTES = [
+    { id: 'v221-saran', date: 'v2.2.1', title: 'Menu Saran & Pesan Developer 💌',
+      body: 'Mulai versi 2.2.1 kamu bisa mengirim saran, laporan bug, dan tanggapan langsung ke developer. Buka Pengaturan → Saran untuk Developer.\nPesan penting dari developer akan masuk otomatis ke menu Pemberitahuan ini, lengkap dengan bundaran merah di lonceng.\nSetiap ada versi baru, kamu juga akan diminta memberi bintang dan tanggapan atas tampilan UI terbaru. Terima kasih sudah membantu NihonGo! jadi lebih baik.\n\n— RamaTeam' },
     { id: 'v220-avatar', date: 'v2.2.0', title: 'Border Avatar & harga tema baru 🖼️',
       body: 'Mulai versi 2.2.0 ada fitur baru: Border Avatar! Pasang bingkai di sekeliling foto profilmu. Ada tiga jenis: Elit (50 koin), Spesial (150 koin), dan Epic (400 koin) yang bergerak dan menyala.\nBuka Toko → tab Avatar untuk melihat semuanya, lalu ketuk Beli dan bingkai langsung terpasang.\nHarga tema juga disesuaikan, dan tema event (Natal, Halloween, Ramadhan) kini dibuka lewat misi. Cek di Toko → tab Tema.\nBuka Riwayat Update → v2.2.0 untuk melihat cuplikannya.\n\n— RamaTeam' },
     { id: 'v219-home', date: 'v2.1.9', title: 'Dashboard baru & Leaderboard lebih rapi 🏆',
@@ -8192,6 +8206,7 @@ const Social = (function () {
 
   /* Riwayat pembaruan (terbaru di atas) */
   const HISTORY = [
+    { v: '2.2.1', ic: '💌', t: 'Saran & Pesan dari Developer', d: ['Menu baru Saran untuk Developer di Pengaturan: kirim saran fitur, laporan bug, atau tanggapan update lewat pop up.', 'Pesan dari developer otomatis masuk ke menu Pemberitahuan, dengan bundaran merah di lonceng saat kamu membuka aplikasi.', 'Setiap versi baru, pengguna diminta memberi bintang dan tanggapan atas update dan tampilan UI terbaru.', 'Developer Pro (token NPJ 2026.7) punya Panel Developer di Pengaturan untuk membaca masukan pengguna dan mengirim pesan ke semua pengguna.'] },
     { v: '2.2.0', ic: '🖼️', t: 'Border Avatar & Penyesuaian Harga Tema', d: ['Fitur baru: Border Avatar. Pasang bingkai di sekeliling foto profilmu; bingkainya tampil di header dan di halaman profil.', '37 pilihan dalam tiga jenis. Border Elit (50 koin): hanya berganti warna dan bentuk. Border Spesial (150 koin): desain berbeda total bertema alam dan event, seperti Halloween, Ramadan, Mekar Bunga, Daun Momiji, dan Salju Fuyu. Border Epic (400 koin): bergerak, menyala, dan berkelip, seperti Naga Api, Aurora, Neon Cyber, dan Prisma Pelangi.', 'Cara pakai: buka Toko, pilih tab Avatar, ketuk Beli, lalu bingkai langsung terpasang. Ganti kapan saja lewat tombol Gunakan.', 'Harga tema disesuaikan: Inari Shrine 5.000 koin, Kyoto Zen 10.000, Luar Angkasa 2.000, iOS 6 Blue 2.500, XP Frutiger Aero 1.500, dan Hutan Tropis 1.000 koin.', 'Tema event (Natal, Halloween, Ramadhan) kini dibuka lewat misi dan gratis dipakai selama event berlangsung. Tema yang sudah kamu miliki tetap menjadi milikmu.', 'Gambar di atas adalah contoh tiga jenis border, dipasang pada avatarmu.'], ill: 'v220', go: [{ t: 'Lihat Border Avatar', w: 'avatar' }, { t: 'Lihat Harga Tema', w: 'themes' }] },
     { v: '2.1.9', ic: '🏆', t: 'Dashboard Baru & Leaderboard Rapi', d: ['Tampilan Home dirombak: kartu sambutan baru dengan ilustrasi, serta Kemajuan Belajar (Bunpou, Hiragana, Katakana) yang lebih ringkas.', 'Target Hari Ini: atur target jumlah kata, lihat cincin progres, dan pantau pencapaian seminggu penuh.', 'Leaderboard di Home kini kartu ringkas yang bisa diketuk. Tampilan lengkapnya ada di halaman tersendiri.', 'Halaman leaderboard punya filter Mingguan/Harian dan Semua/Teman, plus kartu peringkatmu di bagian atas.', 'Tombol Teman kini ada di header, tepat di depan tombol Musik.', 'Kamus & Translate kini tampil penuh di laptop dan desktop.'], go: [{ w: 'leaderboard', t: 'Buka Leaderboard' }] },
     { v: '2.1.8', ic: '📖', t: 'Kamus & Translate Resmi Rilis', d: ['Menu Kamus dan Terjemah kini terbuka untuk semua pengguna, tidak lagi memerlukan token developer.', 'Tombolnya ada di Home, di bagian Kamus & Translate, dan tidak lagi di Pengaturan.', 'Kamus: cari kata lewat tulisan Jepang, romaji, atau bahasa Indonesia, lengkap dengan arti dan contoh kalimat. Ada juga tab Kanji dan Simpanan untuk kartu latihan.', 'Terjemah: Indonesia, Jepang, dan Inggris, lengkap dengan romaji.', 'Peringatan: kedua menu butuh koneksi internet, dan hasil terjemahan otomatis bisa kurang tepat.', 'Gambar di atas adalah cuplikan tampilan Kamus (kiri) dan Terjemah (kanan).'], ill: 'v218', go: [{ w: 'kamus', t: 'Buka Kamus' }, { w: 'trans', t: 'Buka Translate' }] },
@@ -8528,7 +8543,7 @@ const Social = (function () {
   }
 
   window.NGNotif = {
-    open, close, closeDetail, detail, version: APP_VER,
+    open, close, closeDetail, detail, dot, version: APP_VER,
     tab(t) { view = t; draw(); },
     go(w) { close(); if (w === 'leaderboard') { if (window.NGHome) NGHome.openLb(); return; } if (w === 'avatar' || w === 'themes') { try { window.NGShopTab && window.NGShopTab(w === 'avatar' ? 'avatar' : 'theme'); } catch (e) {} return; } if (window.NGDev) NGDev.open(w); },
     link(u) { try { window.open(decodeURI(u), '_blank', 'noopener'); } catch (e) {} }
@@ -10606,6 +10621,171 @@ const BUNPO_XP_PER_POLA = 20;
 })();
 </script>
 
+
+<script>
+/* ===== v2.2.1: SARAN UNTUK DEVELOPER, PESAN DARI DEVELOPER, PANEL DEVELOPER PRO ===== */
+(function () {
+  'use strict';
+  const VER = '2.2.1', NTFY = 'https://ntfy.sh/', T_FB = 'nhgo2-saran-7c91e4', T_MSG = 'nhgo2-pesan-7c91e4';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const F = () => { const f = (state.fb = state.fb || {}); if (!Array.isArray(f.queue)) f.queue = []; if (!Array.isArray(f.inbox)) f.inbox = []; if (!Array.isArray(f.sentMsgs)) f.sentMsgs = []; return f; };
+  const save = () => { try { saveState(); } catch (e) {} };
+  const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2800); };
+  const ago = t => { const d = Math.max(0, Date.now() - t) / 6e4; return d < 1 ? 'baru saja' : d < 60 ? Math.floor(d) + ' mnt lalu' : d < 1440 ? Math.floor(d / 60) + ' jam lalu' : Math.floor(d / 1440) + ' hari lalu'; };
+  const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+  /* ---------- ikon gambar sendiri (SVG garis, mengikuti warna tema) ---------- */
+  const SVG = d => '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  const ICON = {
+    idea: SVG('<path d="M12 3a6 6 0 0 0-3.7 10.7c.8.7 1.2 1.5 1.2 2.3v.5h5V16c0-.8.4-1.6 1.2-2.3A6 6 0 0 0 12 3z"/><path d="M12 11V8"/><path d="M9.5 19h5"/><path d="M10.5 22h3"/>'),
+    dev: SVG('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7.5 9.5 10.5 12l-3 2.5"/><path d="M13 15h3.5"/>'),
+    support: SVG('<path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/><path d="M19 20c0 1.6-1.6 2-4 2h-1.5"/>'),
+    inbox: SVG('<path d="M4 13h4l1.5 2.5h5L16 13h4"/><path d="M4 13 6.2 5.8a2 2 0 0 1 1.9-1.3h7.8a2 2 0 0 1 1.9 1.3L20 13v4.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5V13z"/>'),
+    send: SVG('<path d="M21 3 10.5 13.5"/><path d="M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/>')
+  };
+  const ico = (k, px, mr) => '<span style="display:inline-flex;flex:none;width:' + px + ';height:' + px + ';' + (mr ? 'margin-right:' + mr + ';' : '') + '">' + ICON[k] + '</span>';
+
+  /* ---------- relay (ntfy.sh) ---------- */
+  async function post(topic, obj) { try { const r = await fetch(NTFY + topic, { method: 'POST', body: JSON.stringify(obj) }); return !!(r && r.ok); } catch (e) { return false; } }
+  async function read(topic) {
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 8000);
+      const r = await fetch(NTFY + topic + '/json?poll=1&since=all', { signal: ctl.signal, cache: 'no-store' }); clearTimeout(to);
+      if (!r.ok) return null; const out = [];
+      (await r.text()).split('\n').forEach(l => { l = l.trim(); if (!l) return; try { const m = JSON.parse(l); if (m.event === 'message') out.push(JSON.parse(m.message)); } catch (e) {} });
+      return out;
+    } catch (e) { return null; }
+  }
+
+  /* ---------- PESAN DEVELOPER -> menu Pemberitahuan (semua pengguna) ---------- */
+  async function pullMessages() {
+    const arr = await read(T_MSG); if (!arr) return;
+    const n = (state.notif = state.notif || {}); if (!Array.isArray(n.remote)) n.remote = []; if (!n.read) n.read = {};
+    let added = 0;
+    arr.forEach(m => {
+      if (!m || !m.id || !m.title) return; const id = 'dm-' + String(m.id).slice(0, 30);
+      if (n.remote.some(x => x.id === id)) return;
+      const t = Math.floor((m.t || Date.now()) / (m.t > 1e12 ? 1000 : 1));
+      n.remote.push({ id, title: String(m.title).slice(0, 80), body: String(m.body || '').slice(0, 800), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t }); added++;
+    });
+    if (added) { n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); save(); try { NGNotif.dot(); } catch (e) {} }
+  }
+
+  /* ---------- SARAN: pop up & antrean kirim ---------- */
+  async function flush() {
+    const f = F(); if (!f.queue.length || f.busy) return; f.busy = true;
+    try { for (const q of f.queue.slice()) { if (await post(T_FB, q)) { f.queue = f.queue.filter(x => x.id !== q.id); save(); } else break; } } finally { f.busy = false; }
+  }
+  function modal(html, closable) {
+    close(); const m = document.createElement('div'); m.id = 'ng-fb'; m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center';
+    m.innerHTML = '<div class="ios-glass" style="width:100%;max-width:30rem;max-height:92vh;overflow:auto;border-radius:2rem 2rem 0 0;padding:1.3rem 1.2rem 1.6rem;background:var(--bg-app,#fff)">' + html + '</div>';
+    if (closable) m.addEventListener('click', e => { if (e.target === m) close(); });
+    document.body.appendChild(m); return m;
+  }
+  const close = () => { const m = $('ng-fb'); if (m) m.remove(); };
+  let draft = { r: 0, k: 'update' };
+  const CAT = { update: 'Tanggapan update', saran: 'Saran fitur', bug: 'Laporan bug' };
+  function openForm(first) {
+    draft = { r: 0, k: first ? 'update' : 'saran' };
+    const catBtns = Object.keys(CAT).map(k => '<button data-k="' + k + '" onclick="NGFeedback.cat(\'' + k + '\')" class="ngfb-cat" style="padding:.45rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;border:1.5px solid var(--accent);' + (draft.k === k ? 'background:var(--accent);color:#fff' : 'color:var(--accent)') + '">' + CAT[k] + '</button>').join('');
+    modal('<div style="text-align:center"><div style="font-size:2rem;line-height:1">' + (first ? '🎉' : ico('idea', '2.4rem')) + '</div><h3 style="font-weight:900;font-size:1.05rem;margin-top:.2rem">' + (first ? 'Bagaimana update & tampilan barunya?' : 'Saran untuk Developer') + '</h3>' +
+      '<p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem;line-height:1.45">' + (first ? 'Versi ' + VER + ' hadir dengan tampilan UI terbaru, Border Avatar, dan misi tema event. Beri bintang dan ceritakan pendapatmu, masukanmu langsung dibaca tim RamaTeam.' : 'Punya ide fitur, menemukan bug, atau ada yang kurang nyaman? Tulis di sini, langsung dikirim ke developer.') + '</p></div>' +
+      '<div id="ngfb-stars" style="display:flex;justify-content:center;gap:.25rem;margin:.9rem 0 .5rem">' + [1, 2, 3, 4, 5].map(i => '<button onclick="NGFeedback.rate(' + i + ')" data-s="' + i + '" style="font-size:2rem;line-height:1;color:#cbd5e1">★</button>').join('') + '</div>' +
+      (first ? '' : '<div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:.7rem">' + catBtns + '</div>') +
+      '<textarea id="ngfb-text" maxlength="500" rows="4" placeholder="' + (first ? 'Apa yang kamu suka atau kurang dari update dan tampilan baru ini?' : 'Tulis saranmu…') + '" class="ios-glass" style="width:100%;padding:.8rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none"></textarea>' +
+      '<p id="ngfb-err" style="font-size:.68rem;color:#ef4444;min-height:1rem;margin-top:.3rem"></p>' +
+      '<div style="display:flex;gap:.6rem;margin-top:.3rem">' + (first ? '' : '<button onclick="NGFeedback.close()" class="ios-glass" style="flex:1;padding:.75rem;border-radius:999px;font-weight:800;font-size:.8rem">Batal</button>') +
+      '<button onclick="NGFeedback.submit(' + (first ? 1 : 0) + ')" style="flex:2;padding:.75rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Kirim</button></div>' +
+      (first ? '<p style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:.6rem">Pertanyaan ini muncul sekali untuk setiap versi baru.</p>' : ''), !first);
+  }
+  function submit(first) {
+    const text = ($('ngfb-text') || {}).value || '', err = $('ngfb-err');
+    if (first && !draft.r) { if (err) err.textContent = 'Pilih jumlah bintang dulu ya.'; return; }
+    if (!first && text.trim().length < 5) { if (err) err.textContent = 'Tulis minimal beberapa kata.'; return; }
+    const f = F(), code = (state.social && state.social.code) || '';
+    f.queue.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), n: String(state.user.name || 'Pengguna').slice(0, 24), a: String(state.user.avatar || '').slice(0, 8), v: VER, r: draft.r, k: draft.k, m: text.trim().slice(0, 500), t: Date.now(), c: code });
+    f.asked = VER; save(); close(); toast('Terima kasih! Masukanmu dikirim 💌'); flush();
+  }
+  function autoAsk() {
+    let tries = 0;
+    (function wait() {
+      if (F().asked === VER) return;
+      const mainApp = $('main-app'), ready = mainApp && !mainApp.classList.contains('hidden') && mainApp.offsetParent !== null;
+      if (ready && !$('ng-notif') && !$('ng-notif-detail') && !$('ng-fb')) { setTimeout(() => { if (F().asked !== VER && !$('ng-notif-detail') && !$('ng-fb')) openForm(true); else if (F().asked !== VER) wait(); }, 1200); return; }
+      if (++tries < 120) setTimeout(wait, 1500);
+    })();
+  }
+
+  /* ---------- PANEL DEVELOPER PRO (token NPJ 2026.7) ---------- */
+  const isPro = () => !!state.devGold;
+  /* Akses panel (lihat ulasan + kirim pesan): developer Pro (NPJ20267) atau token SUPPORT2026. Token biasa NPJ2026 tidak punya akses. */
+  const canView = () => !!(state.devGold || state.support);
+  let tab = 'in', filt = 'all';
+  async function openPanel() {
+    if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
+    draw('<p style="text-align:center;font-size:.8rem;color:var(--text-muted);padding:2rem">Memuat masukan…</p>');
+    const arr = await read(T_FB), f = F();
+    if (arr) { const have = new Set(f.inbox.map(x => x.id)); arr.forEach(x => { if (x && x.id && !have.has(x.id)) f.inbox.push(x); }); f.inbox.sort((a, b) => b.t - a.t); f.inbox = f.inbox.slice(0, 300); save(); }
+    draw(null, !arr);
+  }
+  function draw(html, offline) {
+    const f = F(), tabBtn = (k, l) => '<button onclick="NGFeedback.tab(\'' + k + '\')" style="flex:1;padding:.55rem;border-radius:999px;font-size:.75rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;' + (tab === k ? 'background:var(--accent);color:#fff' : 'background:var(--glass-border)') + '">' + l + '</button>';
+    let body = html;
+    if (body == null) {
+      if (tab === 'in') {
+        const list = f.inbox.filter(x => filt === 'all' || x.k === filt), rated = f.inbox.filter(x => x.r), avg = rated.length ? (rated.reduce((s, x) => s + x.r, 0) / rated.length).toFixed(1) : '-';
+        body = (offline ? '<p style="font-size:.68rem;color:#ef4444;margin-bottom:.5rem">Gagal memuat dari server, menampilkan data tersimpan.</p>' : '') +
+          '<div class="ios-glass" style="border-radius:1.2rem;padding:.8rem;text-align:center;margin-bottom:.7rem"><b style="font-size:1.4rem;color:var(--accent)">⭐ ' + avg + '</b><p style="font-size:.65rem;color:var(--text-muted)">' + f.inbox.length + ' masukan · ' + rated.length + ' memberi bintang</p></div>' +
+          '<div style="display:flex;gap:.35rem;margin-bottom:.7rem;flex-wrap:wrap">' + [['all', 'Semua'], ['update', 'Update'], ['saran', 'Saran'], ['bug', 'Bug']].map(([k, l]) => '<button onclick="NGFeedback.filter(\'' + k + '\')" style="padding:.3rem .7rem;border-radius:999px;font-size:.66rem;font-weight:800;border:1.5px solid var(--accent);' + (filt === k ? 'background:var(--accent);color:#fff' : 'color:var(--accent)') + '">' + l + '</button>').join('') + '</div>' +
+          (list.length ? list.map(x => '<div class="ios-glass" style="border-radius:1.1rem;padding:.75rem .9rem;margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><b style="font-size:.78rem">' + esc(x.a) + ' ' + esc(x.n) + '</b><span style="font-size:.6rem;color:var(--text-muted)">v' + esc(x.v) + ' · ' + ago(x.t) + '</span></div>' +
+            (x.r ? '<div style="color:#f59e0b;font-size:.8rem;letter-spacing:.1em">' + stars(Math.min(5, x.r)) + '</div>' : '') + '<span style="font-size:.58rem;font-weight:800;color:var(--accent)">' + esc(CAT[x.k] || x.k) + '</span>' +
+            (x.m ? '<p style="font-size:.76rem;margin-top:.3rem;line-height:1.45;white-space:pre-wrap">' + esc(x.m) + '</p>' : '') + '</div>').join('') : '<p style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:1.2rem">Belum ada masukan.</p>') +
+          '<p style="font-size:.6rem;color:var(--text-muted);margin-top:.5rem;line-height:1.4">Server ntfy hanya menyimpan pesan ±12 jam. Buka panel ini rutin; masukan yang pernah termuat tersimpan di perangkatmu.</p>';
+      } else {
+        body = '<input id="ngdm-t" maxlength="80" placeholder="Judul pesan" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;font-weight:800;outline:none;margin-bottom:.5rem"><textarea id="ngdm-b" maxlength="800" rows="5" placeholder="Isi pesan untuk semua pengguna…" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none"></textarea>' +
+          '<button onclick="NGFeedback.sendMsg()" style="width:100%;margin-top:.6rem;padding:.8rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Kirim ke semua pengguna</button>' +
+          '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.5rem;line-height:1.4">Pesan masuk ke menu Pemberitahuan (lonceng) di HP pengguna saat mereka membuka aplikasi, dengan bundaran merah. Pengguna yang baru membuka lebih dari ±12 jam kemudian bisa tidak menerimanya, jadi kirim ulang bila perlu.</p>' +
+          (f.sentMsgs.length ? '<h4 style="font-weight:900;font-size:.8rem;margin:.9rem 0 .4rem">Terkirim</h4>' + f.sentMsgs.slice(0, 5).map((m, i) => '<div class="ios-glass" style="border-radius:1rem;padding:.6rem .8rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem"><div style="flex:1;min-width:0"><b style="font-size:.74rem">' + esc(m.title) + '</b><p style="font-size:.6rem;color:var(--text-muted)">' + ago(m.t) + '</p></div><button onclick="NGFeedback.resend(' + i + ')" style="font-size:.66rem;font-weight:800;color:var(--accent)">Kirim ulang</button></div>').join('') : '');
+      }
+    }
+    modal('<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center">' + ico(isPro() ? 'dev' : 'support', '1.3rem', '.5rem') + (isPro() ? 'Panel Developer' : 'Panel Support') + '</h3><button onclick="NGFeedback.close()" style="font-size:1.4rem;line-height:1;color:var(--text-muted)">×</button></div><div style="display:flex;gap:.4rem;margin-bottom:.8rem">' + tabBtn('in', ico('inbox', '1rem', '.35rem') + 'Masukan') + tabBtn('out', ico('send', '1rem', '.35rem') + 'Kirim Pesan') + '</div>' + body, true);
+  }
+  async function sendMsg(again) {
+    if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
+    const f = F(); let m;
+    if (again != null) m = f.sentMsgs[again]; else { const t = ($('ngdm-t') || {}).value || '', b = ($('ngdm-b') || {}).value || ''; if (t.trim().length < 3 || b.trim().length < 3) { toast('Isi judul dan pesan dulu'); return; } m = { id: 'm' + Date.now().toString(36), title: t.trim(), body: b.trim(), t: Date.now() }; }
+    if (!(await post(T_MSG, m))) { toast('Gagal mengirim, cek koneksi'); return; }
+    if (again == null) { f.sentMsgs.unshift(m); f.sentMsgs = f.sentMsgs.slice(0, 20); save(); }
+    toast(again != null ? 'Pesan dikirim ulang ✅' : 'Pesan terkirim ke semua pengguna ✅'); tab = 'out'; draw(); pullMessages();
+  }
+
+  window.NGFeedback = {
+    open: () => openForm(false), close, submit, panel: openPanel,
+    rate(i) { draft.r = i; document.querySelectorAll('#ngfb-stars button').forEach(b => { b.style.color = +b.dataset.s <= i ? '#f59e0b' : '#cbd5e1'; }); },
+    cat(k) { draft.k = k; document.querySelectorAll('.ngfb-cat').forEach(b => { const on = b.dataset.k === k; b.style.background = on ? 'var(--accent)' : 'transparent'; b.style.color = on ? '#fff' : 'var(--accent)'; }); },
+    tab(t) { if (!canView()) return; tab = t; draw(); }, filter(k) { filt = k; draw(); }, sendMsg: () => sendMsg(), resend: i => sendMsg(i)
+  };
+
+  /* ---------- baris menu di Pengaturan ---------- */
+  function addRows() {
+    const anchor = document.querySelector('button[onclick*="openSettingsDetail(\'privacy\')"]'); if (!anchor || $('ng-set-fb')) return;
+    const mk = (id, ic, label, fn) => { const b = document.createElement('button'); b.id = id; b.className = 'settings-row'; b.setAttribute('onclick', fn); b.innerHTML = '<span style="display:inline-flex;flex:none;width:1.25rem;height:1.25rem">' + ic + '</span><span class="font-bold text-sm">' + label + '</span><i data-lucide="chevron-right" class="w-4 h-4 ml-auto"></i>'; anchor.parentNode.insertBefore(b, anchor); };
+    mk('ng-set-fb', ICON.idea, 'Saran untuk Developer', 'NGFeedback.open()'); mk('ng-set-dev', ICON.dev, 'Panel Developer (Pro)', 'NGFeedback.panel()');
+    try { lucide.createIcons(); } catch (e) {}
+  }
+  const syncRows = () => {
+    addRows(); const d = $('ng-set-dev'); if (!d) return;
+    d.style.display = canView() ? '' : 'none';
+    const lb = d.querySelector('span.font-bold'); if (lb) lb.textContent = isPro() ? 'Panel Developer (Pro)' : 'Panel Support';
+    const ic = d.querySelector('span'); if (ic) ic.innerHTML = isPro() ? ICON.dev : ICON.support;
+  };
+  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { syncRows(); } catch (e) {} return r; }; });
+
+  function init() { syncRows(); pullMessages(); flush(); autoAsk(); setInterval(pullMessages, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) { pullMessages(); flush(); } }); }
+  if (document.readyState === 'complete') setTimeout(init, 800); else window.addEventListener('load', () => setTimeout(init, 1200));
+})();
+</script>
 
 </body>
 </html>
