@@ -10626,7 +10626,7 @@ const BUNPO_XP_PER_POLA = 20;
 /* ===== v2.2.1: SARAN UNTUK DEVELOPER, PESAN DARI DEVELOPER, PANEL DEVELOPER PRO ===== */
 (function () {
   'use strict';
-  const VER = '2.2.1', NTFY = 'https://ntfy.sh/', T_FB = 'nhgo2-saran-7c91e4', T_MSG = 'nhgo2-pesan-7c91e4';
+  const VER = '2.2.1', NTFY = 'https://ntfy.sh/', T_FB = 'nhgo2-saran-7c91e4', T_MSG = 'nhgo2-pesan-7c91e4', T_RATE = 'nhgo2-rating-7c91e4';
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const F = () => { const f = (state.fb = state.fb || {}); if (!Array.isArray(f.queue)) f.queue = []; if (!Array.isArray(f.inbox)) f.inbox = []; if (!Array.isArray(f.sentMsgs)) f.sentMsgs = []; return f; };
@@ -10642,6 +10642,7 @@ const BUNPO_XP_PER_POLA = 20;
     dev: SVG('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7.5 9.5 10.5 12l-3 2.5"/><path d="M13 15h3.5"/>'),
     support: SVG('<path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/><path d="M19 20c0 1.6-1.6 2-4 2h-1.5"/>'),
     inbox: SVG('<path d="M4 13h4l1.5 2.5h5L16 13h4"/><path d="M4 13 6.2 5.8a2 2 0 0 1 1.9-1.3h7.8a2 2 0 0 1 1.9 1.3L20 13v4.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5V13z"/>'),
+    star: SVG('<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/>'),
     send: SVG('<path d="M21 3 10.5 13.5"/><path d="M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/>')
   };
   const ico = (k, px, mr) => '<span style="display:inline-flex;flex:none;width:' + px + ';height:' + px + ';' + (mr ? 'margin-right:' + mr + ';' : '') + '">' + ICON[k] + '</span>';
@@ -10659,54 +10660,112 @@ const BUNPO_XP_PER_POLA = 20;
   }
 
   /* ---------- PESAN DEVELOPER -> menu Pemberitahuan (semua pengguna) ---------- */
-  async function pullMessages() {
-    const arr = await read(T_MSG); if (!arr) return;
+  /* Pesan di relay berupa catatan: {id,title,body,t,by} = pesan asli; + ed = hasil edit; {id,op:'del',ed} = penarikan.
+     Catatan diterapkan berurutan menurut waktu (ed || t); revisi terbaru menang, pesan yang sudah ditarik tidak muncul lagi. */
+  function applyMsgs(arr) {
     const n = (state.notif = state.notif || {}); if (!Array.isArray(n.remote)) n.remote = []; if (!n.read) n.read = {};
-    let added = 0;
-    arr.forEach(m => {
-      if (!m || !m.id || !m.title) return; const id = 'dm-' + String(m.id).slice(0, 30);
-      if (n.remote.some(x => x.id === id)) return;
+    const rev = (n.dmRev = n.dmRev || {}), gone = (n.dmGone = n.dmGone || {});
+    let changed = 0;
+    arr.filter(m => m && m.id).sort((a, b) => (+a.ed || +a.t || 0) - (+b.ed || +b.t || 0)).forEach(m => {
+      const id = 'dm-' + String(m.id).slice(0, 30), r = +m.ed || 0;
+      if (rev[id] !== undefined && r <= rev[id]) return;
+      rev[id] = r;
+      if (m.op === 'del') {
+        gone[id] = r; const k = n.remote.findIndex(x => x.id === id);
+        if (k >= 0) { n.remote.splice(k, 1); changed++; }
+        return;
+      }
+      if (gone[id] !== undefined || !m.title) return;
       const t = Math.floor((m.t || Date.now()) / (m.t > 1e12 ? 1000 : 1));
-      n.remote.push({ id, title: String(m.title).slice(0, 80), body: String(m.body || '').slice(0, 800), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t }); added++;
+      const e = { id, title: String(m.title).slice(0, 80), body: String(m.body || '').slice(0, 800), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t };
+      if (m.by) e.by = String(m.by).slice(0, 30);
+      const k = n.remote.findIndex(x => x.id === id);
+      if (k < 0) { n.remote.push(e); changed++; }
+      else if (r) { Object.assign(n.remote[k], e); changed++; }
     });
-    if (added) { n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); save(); try { NGNotif.dot(); } catch (e) {} }
+    [rev, gone].forEach(o => { const ks = Object.keys(o); if (ks.length > 200) ks.slice(0, ks.length - 200).forEach(k => delete o[k]); });
+    if (changed) { n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); save(); try { NGNotif.dot(); } catch (e) {} }
+    return changed;
   }
+  async function pullMessages() { const arr = await read(T_MSG); if (!arr) return false; applyMsgs(arr); return true; }
+
+  /* Semua pesan developer yang dikenal perangkat ini (diterima dari relay atau dikirim dari sini), bisa diedit/ditarik dari HP mana pun */
+  function allSent() {
+    const f = F(), n = state.notif || {}, rev = n.dmRev || {}, gone = n.dmGone || {}, map = new Map();
+    (n.remote || []).forEach(x => {
+      if (!x || !String(x.id).startsWith('dm-')) return;
+      const id = String(x.id).slice(3), r = rev[x.id] || 0;
+      map.set(id, { id, title: x.title, body: x.body, by: x.by, t: x.t < 1e12 ? x.t * 1000 : x.t, ed: r || undefined });
+    });
+    f.sentMsgs.forEach(m => { if (m && !map.has(m.id) && gone['dm-' + m.id] === undefined) map.set(m.id, m); });
+    return Array.from(map.values()).sort((a, b) => (b.t || 0) - (a.t || 0));
+  }
+  const myName = () => String((state.user && state.user.name) || '').slice(0, 30);
 
   /* ---------- SARAN: pop up & antrean kirim ---------- */
   async function flush() {
     const f = F(); if (!f.queue.length || f.busy) return; f.busy = true;
     try { for (const q of f.queue.slice()) { if (await post(T_FB, q)) { f.queue = f.queue.filter(x => x.id !== q.id); save(); } else break; } } finally { f.busy = false; }
   }
-  function modal(html, closable) {
+  let onDismiss = null;
+  function modal(html, closable, dismissFn) {
     close(); const m = document.createElement('div'); m.id = 'ng-fb'; m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center';
     m.innerHTML = '<div class="ios-glass" style="width:100%;max-width:30rem;max-height:92vh;overflow:auto;border-radius:2rem 2rem 0 0;padding:1.3rem 1.2rem 1.6rem;background:var(--bg-app,#fff)">' + html + '</div>';
-    if (closable) m.addEventListener('click', e => { if (e.target === m) close(); });
+    m.dataset.closable = closable ? '1' : ''; onDismiss = dismissFn || null;
+    if (closable) m.addEventListener('click', e => { if (e.target === m) dismiss(); });
     document.body.appendChild(m); return m;
   }
-  const close = () => { const m = $('ng-fb'); if (m) m.remove(); };
+  const close = () => { onDismiss = null; const m = $('ng-fb'); if (m) m.remove(); };
+  const dismiss = () => { const fn = onDismiss; close(); if (typeof fn === 'function') fn(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { const m = $('ng-fb'); if (m && m.dataset.closable) dismiss(); } });
   let draft = { r: 0, k: 'update' };
   const CAT = { update: 'Tanggapan update', saran: 'Saran fitur', bug: 'Laporan bug' };
-  function openForm(first) {
-    draft = { r: 0, k: first ? 'update' : 'saran' };
+  const CATX = k => CAT[k] || (k === 'rating' ? 'Rating' : k);
+  function openForm(first, push) {
+    const rate = !!(first || push), preview = !!(push && push.preview);
+    draft = { r: 0, k: push ? 'rating' : first ? 'update' : 'saran', push: push || null };
     const catBtns = Object.keys(CAT).map(k => '<button data-k="' + k + '" onclick="NGFeedback.cat(\'' + k + '\')" class="ngfb-cat" style="padding:.45rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;border:1.5px solid var(--accent);' + (draft.k === k ? 'background:var(--accent);color:#fff' : 'color:var(--accent)') + '">' + CAT[k] + '</button>').join('');
-    modal('<div style="text-align:center"><div style="font-size:2rem;line-height:1">' + (first ? '🎉' : ico('idea', '2.4rem')) + '</div><h3 style="font-weight:900;font-size:1.05rem;margin-top:.2rem">' + (first ? 'Bagaimana update & tampilan barunya?' : 'Saran untuk Developer') + '</h3>' +
-      '<p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem;line-height:1.45">' + (first ? 'Versi ' + VER + ' hadir dengan tampilan UI terbaru, Border Avatar, dan misi tema event. Beri bintang dan ceritakan pendapatmu, masukanmu langsung dibaca tim RamaTeam.' : 'Punya ide fitur, menemukan bug, atau ada yang kurang nyaman? Tulis di sini, langsung dikirim ke developer.') + '</p></div>' +
+    /* ditutup tanpa menulis ulasan = dianggap sudah ditanya, tidak muncul lagi untuk versi/pemicu yang sama */
+    const done = () => { const f = F(); if (first) f.asked = VER; if (push && !preview) { const s = (f.pushSeen = f.pushSeen || {}); s[push.id] = 1; const ks = Object.keys(s); if (ks.length > 30) ks.slice(0, ks.length - 30).forEach(k => delete s[k]); } save(); };
+    const title = first ? 'Bagaimana update & tampilan barunya?' : push ? (push.q || 'Bagaimana pengalamanmu memakai NihonGo!?') : 'Saran untuk Developer';
+    const desc = first ? 'Versi ' + VER + ' hadir dengan tampilan UI terbaru, Border Avatar, dan misi tema event. Beri bintang dan ceritakan pendapatmu, masukanmu langsung dibaca tim RamaTeam.'
+      : push ? 'Beri bintang dan ceritakan pendapatmu kalau mau. Ulasanmu langsung dibaca tim RamaTeam.' : 'Punya ide fitur, menemukan bug, atau ada yang kurang nyaman? Tulis di sini, langsung dikirim ke developer.';
+    modal('<div style="text-align:center"><div style="font-size:2rem;line-height:1">' + (first ? '🎉' : push ? ico('star', '2.4rem') : ico('idea', '2.4rem')) + '</div><h3 style="font-weight:900;font-size:1.05rem;margin-top:.2rem">' + esc(title) + '</h3>' +
+      '<p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem;line-height:1.45">' + esc(desc) + '</p></div>' +
       '<div id="ngfb-stars" style="display:flex;justify-content:center;gap:.25rem;margin:.9rem 0 .5rem">' + [1, 2, 3, 4, 5].map(i => '<button onclick="NGFeedback.rate(' + i + ')" data-s="' + i + '" style="font-size:2rem;line-height:1;color:#cbd5e1">★</button>').join('') + '</div>' +
-      (first ? '' : '<div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:.7rem">' + catBtns + '</div>') +
-      '<textarea id="ngfb-text" maxlength="500" rows="4" placeholder="' + (first ? 'Apa yang kamu suka atau kurang dari update dan tampilan baru ini?' : 'Tulis saranmu…') + '" class="ios-glass" style="width:100%;padding:.8rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none"></textarea>' +
+      (rate ? '' : '<div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:.7rem">' + catBtns + '</div>') +
+      '<textarea id="ngfb-text" maxlength="500" rows="4" placeholder="' + (first ? 'Apa yang kamu suka atau kurang dari update dan tampilan baru ini?' : push ? 'Tulis ulasanmu (boleh dikosongkan)…' : 'Tulis saranmu…') + '" class="ios-glass" style="width:100%;padding:.8rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none"></textarea>' +
       '<p id="ngfb-err" style="font-size:.68rem;color:#ef4444;min-height:1rem;margin-top:.3rem"></p>' +
-      '<div style="display:flex;gap:.6rem;margin-top:.3rem">' + (first ? '' : '<button onclick="NGFeedback.close()" class="ios-glass" style="flex:1;padding:.75rem;border-radius:999px;font-weight:800;font-size:.8rem">Batal</button>') +
-      '<button onclick="NGFeedback.submit(' + (first ? 1 : 0) + ')" style="flex:2;padding:.75rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Kirim</button></div>' +
-      (first ? '<p style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:.6rem">Pertanyaan ini muncul sekali untuk setiap versi baru.</p>' : ''), !first);
+      '<div style="display:flex;gap:.6rem;margin-top:.3rem">' + (rate ? '<button onclick="NGFeedback.skip()" class="ios-glass" style="flex:1;padding:.75rem;border-radius:999px;font-weight:800;font-size:.8rem">Nanti saja</button>' : '<button onclick="NGFeedback.close()" class="ios-glass" style="flex:1;padding:.75rem;border-radius:999px;font-weight:800;font-size:.8rem">Batal</button>') +
+      '<button onclick="NGFeedback.submit(' + (push ? 2 : first ? 1 : 0) + ')" style="flex:2;padding:.75rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Kirim</button></div>' +
+      (rate ? '<p style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:.6rem">' + (preview ? 'Pratinjau untuk developer, tidak dikirim. ' : first ? 'Pertanyaan ini muncul sekali untuk setiap versi baru. ' : '') + 'Boleh ditutup tanpa menulis ulasan.</p>' : ''), true, rate ? done : null);
   }
-  function submit(first) {
-    const text = ($('ngfb-text') || {}).value || '', err = $('ngfb-err');
-    if (first && !draft.r) { if (err) err.textContent = 'Pilih jumlah bintang dulu ya.'; return; }
-    if (!first && text.trim().length < 5) { if (err) err.textContent = 'Tulis minimal beberapa kata.'; return; }
+  function submit(mode) {
+    const text = ($('ngfb-text') || {}).value || '', err = $('ngfb-err'), rate = mode > 0, push = draft.push;
+    if (rate && !draft.r) { if (err) err.textContent = 'Pilih jumlah bintang dulu, atau tekan Nanti saja.'; return; }
+    if (!rate && text.trim().length < 5) { if (err) err.textContent = 'Tulis minimal beberapa kata.'; return; }
+    if (push && push.preview) { close(); toast('Pratinjau ditutup (tidak dikirim)'); return; }
     const f = F(), code = (state.social && state.social.code) || '';
     f.queue.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), n: String(state.user.name || 'Pengguna').slice(0, 24), a: String(state.user.avatar || '').slice(0, 8), v: VER, r: draft.r, k: draft.k, m: text.trim().slice(0, 500), t: Date.now(), c: code });
-    f.asked = VER; save(); close(); toast('Terima kasih! Masukanmu dikirim 💌'); flush();
+    if (push) { const s = (f.pushSeen = f.pushSeen || {}); s[push.id] = 1; } else f.asked = VER;
+    save(); close(); toast('Terima kasih! Masukanmu dikirim 💌'); flush();
   }
+  /* ---------- POP-UP RATING DARI DEVELOPER (muncul di HP pengguna saat aplikasi dibuka) ---------- */
+  let rateShowing = false;
+  async function pullRate() {
+    if (rateShowing) return;
+    const arr = await read(T_RATE); if (!arr) return;
+    const f = F(), seen = (f.pushSeen = f.pushSeen || {}), gone = new Set(arr.filter(x => x && x.op === 'del').map(x => String(x.id)));
+    const rec = arr.filter(x => x && x.id && x.op !== 'del' && !gone.has(String(x.id)) && !seen[x.id] && Date.now() - (+x.t || 0) < 864e5).sort((a, b) => b.t - a.t)[0];
+    if (!rec) return;
+    rateShowing = true; let tries = 0;
+    (function wait() {
+      const mainApp = $('main-app'), ready = mainApp && !mainApp.classList.contains('hidden') && mainApp.offsetParent !== null && !document.hidden;
+      if (ready && !$('ng-notif') && !$('ng-notif-detail') && !$('ng-fb')) { rateShowing = false; openForm(false, { id: String(rec.id).slice(0, 40), q: String(rec.q || '').slice(0, 120) }); return; }
+      if (++tries < 40) setTimeout(wait, 1500); else rateShowing = false;
+    })();
+  }
+
   function autoAsk() {
     let tries = 0;
     (function wait() {
@@ -10721,50 +10780,115 @@ const BUNPO_XP_PER_POLA = 20;
   const isPro = () => !!state.devGold;
   /* Akses panel (lihat ulasan + kirim pesan): developer Pro (NPJ20267) atau token SUPPORT2026. Token biasa NPJ2026 tidak punya akses. */
   const canView = () => !!(state.devGold || state.support);
-  let tab = 'in', filt = 'all';
+  let tab = 'in', filt = 'all', editing = null;
   async function openPanel() {
     if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
     draw('<p style="text-align:center;font-size:.8rem;color:var(--text-muted);padding:2rem">Memuat masukan…</p>');
     const arr = await read(T_FB), f = F();
     if (arr) { const have = new Set(f.inbox.map(x => x.id)); arr.forEach(x => { if (x && x.id && !have.has(x.id)) f.inbox.push(x); }); f.inbox.sort((a, b) => b.t - a.t); f.inbox = f.inbox.slice(0, 300); save(); }
+    await pullMessages();
     draw(null, !arr);
   }
   function draw(html, offline) {
-    const f = F(), tabBtn = (k, l) => '<button onclick="NGFeedback.tab(\'' + k + '\')" style="flex:1;padding:.55rem;border-radius:999px;font-size:.75rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;' + (tab === k ? 'background:var(--accent);color:#fff' : 'background:var(--glass-border)') + '">' + l + '</button>';
+    const f = F(), tabBtn = (k, l) => '<button onclick="NGFeedback.tab(\'' + k + '\')" style="flex:1;padding:.55rem .2rem;border-radius:999px;font-size:.72rem;font-weight:800;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;' + (tab === k ? 'background:var(--accent);color:#fff' : 'background:var(--glass-border)') + '">' + l + '</button>';
     let body = html;
     if (body == null) {
       if (tab === 'in') {
         const list = f.inbox.filter(x => filt === 'all' || x.k === filt), rated = f.inbox.filter(x => x.r), avg = rated.length ? (rated.reduce((s, x) => s + x.r, 0) / rated.length).toFixed(1) : '-';
         body = (offline ? '<p style="font-size:.68rem;color:#ef4444;margin-bottom:.5rem">Gagal memuat dari server, menampilkan data tersimpan.</p>' : '') +
           '<div class="ios-glass" style="border-radius:1.2rem;padding:.8rem;text-align:center;margin-bottom:.7rem"><b style="font-size:1.4rem;color:var(--accent)">⭐ ' + avg + '</b><p style="font-size:.65rem;color:var(--text-muted)">' + f.inbox.length + ' masukan · ' + rated.length + ' memberi bintang</p></div>' +
-          '<div style="display:flex;gap:.35rem;margin-bottom:.7rem;flex-wrap:wrap">' + [['all', 'Semua'], ['update', 'Update'], ['saran', 'Saran'], ['bug', 'Bug']].map(([k, l]) => '<button onclick="NGFeedback.filter(\'' + k + '\')" style="padding:.3rem .7rem;border-radius:999px;font-size:.66rem;font-weight:800;border:1.5px solid var(--accent);' + (filt === k ? 'background:var(--accent);color:#fff' : 'color:var(--accent)') + '">' + l + '</button>').join('') + '</div>' +
+          '<div style="display:flex;gap:.35rem;margin-bottom:.7rem;flex-wrap:wrap">' + [['all', 'Semua'], ['update', 'Update'], ['saran', 'Saran'], ['bug', 'Bug'], ['rating', 'Rating']].map(([k, l]) => '<button onclick="NGFeedback.filter(\'' + k + '\')" style="padding:.3rem .7rem;border-radius:999px;font-size:.66rem;font-weight:800;border:1.5px solid var(--accent);' + (filt === k ? 'background:var(--accent);color:#fff' : 'color:var(--accent)') + '">' + l + '</button>').join('') + '</div>' +
           (list.length ? list.map(x => '<div class="ios-glass" style="border-radius:1.1rem;padding:.75rem .9rem;margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem"><b style="font-size:.78rem">' + esc(x.a) + ' ' + esc(x.n) + '</b><span style="font-size:.6rem;color:var(--text-muted)">v' + esc(x.v) + ' · ' + ago(x.t) + '</span></div>' +
-            (x.r ? '<div style="color:#f59e0b;font-size:.8rem;letter-spacing:.1em">' + stars(Math.min(5, x.r)) + '</div>' : '') + '<span style="font-size:.58rem;font-weight:800;color:var(--accent)">' + esc(CAT[x.k] || x.k) + '</span>' +
+            (x.r ? '<div style="color:#f59e0b;font-size:.8rem;letter-spacing:.1em">' + stars(Math.min(5, x.r)) + '</div>' : '') + '<span style="font-size:.58rem;font-weight:800;color:var(--accent)">' + esc(CATX(x.k)) + '</span>' +
             (x.m ? '<p style="font-size:.76rem;margin-top:.3rem;line-height:1.45;white-space:pre-wrap">' + esc(x.m) + '</p>' : '') + '</div>').join('') : '<p style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:1.2rem">Belum ada masukan.</p>') +
           '<p style="font-size:.6rem;color:var(--text-muted);margin-top:.5rem;line-height:1.4">Server ntfy hanya menyimpan pesan ±12 jam. Buka panel ini rutin; masukan yang pernah termuat tersimpan di perangkatmu.</p>';
+      } else if (tab === 'out') {
+        const all = allSent(), ed = editing && all.find(x => x.id === editing), btn = 'font-size:.66rem;font-weight:800;';
+        body = (ed ? '<div class="ios-glass" style="border-radius:1rem;padding:.6rem .8rem;margin-bottom:.5rem;border:1.5px solid var(--accent)"><b style="font-size:.72rem">Mengedit pesan</b><p style="font-size:.62rem;color:var(--text-muted);line-height:1.4;margin-top:.15rem">Perubahan menggantikan isi pesan lama di HP pengguna saat mereka membuka aplikasi.</p></div>' : '') +
+          '<input id="ngdm-t" maxlength="80" placeholder="Judul pesan" value="' + esc(ed ? ed.title : '') + '" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;font-weight:800;outline:none;margin-bottom:.5rem"><textarea id="ngdm-b" maxlength="800" rows="5" placeholder="Isi pesan untuk semua pengguna…" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none">' + esc(ed ? ed.body : '') + '</textarea>' +
+          '<button onclick="NGFeedback.sendMsg()" style="width:100%;margin-top:.6rem;padding:.8rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">' + (ed ? 'Simpan perubahan' : 'Kirim ke semua pengguna') + '</button>' +
+          (ed ? '<button onclick="NGFeedback.cancelEdit()" style="width:100%;margin-top:.3rem;padding:.6rem;font-size:.75rem;font-weight:800;color:var(--text-muted)">Batal</button>' : '') +
+          '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.5rem;line-height:1.4">Pesan masuk ke menu Pemberitahuan (lonceng) di HP pengguna saat mereka membuka aplikasi, dengan bundaran merah. Edit dan Tarik juga baru berlaku di HP pengguna saat aplikasinya dibuka, dan hanya sampai ±12 jam setelah dikirim (batas penyimpanan server). Pengguna yang baru membuka lebih lama dari itu bisa tidak menerimanya, jadi kirim ulang bila perlu.</p>' +
+          (all.length ? '<h4 style="font-weight:900;font-size:.8rem;margin:.9rem 0 .2rem">Semua pesan developer</h4><p style="font-size:.6rem;color:var(--text-muted);margin-bottom:.4rem;line-height:1.4">Termasuk yang dikirim dari HP lain atau oleh developer/support lain. HP ini harus sudah membuka aplikasi dalam ±12 jam setelah pesan dikirim agar pesannya muncul di sini.</p>' + all.slice(0, 15).map(m => '<div class="ios-glass" style="border-radius:1rem;padding:.6rem .8rem;margin-bottom:.4rem' + (m.id === editing ? ';border:1.5px solid var(--accent)' : '') + '"><b style="font-size:.74rem">' + esc(m.title) + '</b><p style="font-size:.6rem;color:var(--text-muted)">' + ago(m.t) + (m.by ? ' · oleh ' + esc(m.by) : '') + (m.ed ? ' · diedit ' + ago(m.ed) : '') + '</p><div style="display:flex;gap:1.1rem;margin-top:.4rem"><button onclick="NGFeedback.edit(\'' + esc(m.id) + '\')" style="' + btn + 'color:var(--accent)">Edit</button><button onclick="NGFeedback.resend(\'' + esc(m.id) + '\')" style="' + btn + 'color:var(--accent)">Kirim ulang</button><button onclick="NGFeedback.retract(\'' + esc(m.id) + '\')" style="' + btn + 'color:#ef4444">Tarik</button></div></div>').join('') : '');
       } else {
-        body = '<input id="ngdm-t" maxlength="80" placeholder="Judul pesan" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;font-weight:800;outline:none;margin-bottom:.5rem"><textarea id="ngdm-b" maxlength="800" rows="5" placeholder="Isi pesan untuk semua pengguna…" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;outline:none;resize:none"></textarea>' +
-          '<button onclick="NGFeedback.sendMsg()" style="width:100%;margin-top:.6rem;padding:.8rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Kirim ke semua pengguna</button>' +
-          '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.5rem;line-height:1.4">Pesan masuk ke menu Pemberitahuan (lonceng) di HP pengguna saat mereka membuka aplikasi, dengan bundaran merah. Pengguna yang baru membuka lebih dari ±12 jam kemudian bisa tidak menerimanya, jadi kirim ulang bila perlu.</p>' +
-          (f.sentMsgs.length ? '<h4 style="font-weight:900;font-size:.8rem;margin:.9rem 0 .4rem">Terkirim</h4>' + f.sentMsgs.slice(0, 5).map((m, i) => '<div class="ios-glass" style="border-radius:1rem;padding:.6rem .8rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem"><div style="flex:1;min-width:0"><b style="font-size:.74rem">' + esc(m.title) + '</b><p style="font-size:.6rem;color:var(--text-muted)">' + ago(m.t) + '</p></div><button onclick="NGFeedback.resend(' + i + ')" style="font-size:.66rem;font-weight:800;color:var(--accent)">Kirim ulang</button></div>').join('') : '');
+        const rs = f.sentRate || [], dq = 'Bagaimana pengalamanmu memakai NihonGo!?';
+        body = '<p style="font-size:.8rem;font-weight:900">Munculkan pop-up rating</p><p style="font-size:.64rem;color:var(--text-muted);margin:.25rem 0 .6rem;line-height:1.45">Pop-up bintang dan kolom ulasan muncul di HP semua pengguna saat mereka membuka aplikasi. Pengguna boleh menutupnya tanpa menulis ulasan, dan setiap pengguna hanya melihatnya sekali per pemicu.</p>' +
+          '<input id="ngdr-q" maxlength="120" placeholder="Pertanyaan (opsional), mis. Bagaimana fitur XP yang baru?" class="ios-glass" style="width:100%;padding:.75rem;border-radius:1rem;font-size:.8rem;font-weight:700;outline:none"><p style="font-size:.6rem;color:var(--text-muted);margin:.25rem .2rem 0">Kosongkan untuk memakai: ' + dq + '</p>' +
+          '<button onclick="NGFeedback.sendRate()" style="width:100%;margin-top:.6rem;padding:.8rem;border-radius:999px;font-weight:900;font-size:.85rem;background:var(--accent);color:#fff">Munculkan ke semua pengguna</button>' +
+          '<button onclick="NGFeedback.previewRate()" style="width:100%;margin-top:.3rem;padding:.6rem;font-size:.75rem;font-weight:800;color:var(--accent)">Pratinjau di HP ini</button>' +
+          '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.4rem;line-height:1.4">Pop-up baru tampil di HP pengguna yang membuka aplikasi dalam ±12 jam setelah dikirim (batas penyimpanan server). Ulasan yang masuk tampil di tab Masukan dengan label Rating.</p>' +
+          (rs.length ? '<h4 style="font-weight:900;font-size:.8rem;margin:.9rem 0 .4rem">Pemicu terkirim</h4>' + rs.slice(0, 5).map(r => '<div class="ios-glass" style="border-radius:1rem;padding:.6rem .8rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem"><div style="flex:1;min-width:0"><b style="font-size:.74rem">' + esc(r.q || dq) + '</b><p style="font-size:.6rem;color:var(--text-muted)">' + ago(r.t) + '</p></div><button onclick="NGFeedback.retractRate(\'' + esc(r.id) + '\')" style="font-size:.66rem;font-weight:800;color:#ef4444">Tarik</button></div>').join('') : '');
       }
     }
-    modal('<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center">' + ico(isPro() ? 'dev' : 'support', '1.3rem', '.5rem') + (isPro() ? 'Panel Developer' : 'Panel Support') + '</h3><button onclick="NGFeedback.close()" style="font-size:1.4rem;line-height:1;color:var(--text-muted)">×</button></div><div style="display:flex;gap:.4rem;margin-bottom:.8rem">' + tabBtn('in', ico('inbox', '1rem', '.35rem') + 'Masukan') + tabBtn('out', ico('send', '1rem', '.35rem') + 'Kirim Pesan') + '</div>' + body, true);
+    modal('<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center">' + ico(isPro() ? 'dev' : 'support', '1.3rem', '.5rem') + (isPro() ? 'Panel Developer' : 'Panel Support') + '</h3><button onclick="NGFeedback.close()" style="font-size:1.4rem;line-height:1;color:var(--text-muted)">×</button></div><div style="display:flex;gap:.4rem;margin-bottom:.8rem">' + tabBtn('in', ico('inbox', '1rem', '.35rem') + 'Masukan') + tabBtn('out', ico('send', '1rem', '.35rem') + 'Kirim Pesan') + tabBtn('rate', ico('star', '1rem', '.35rem') + 'Rating') + '</div>' + body, true);
   }
   async function sendMsg(again) {
     if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
     const f = F(); let m;
-    if (again != null) m = f.sentMsgs[again]; else { const t = ($('ngdm-t') || {}).value || '', b = ($('ngdm-b') || {}).value || ''; if (t.trim().length < 3 || b.trim().length < 3) { toast('Isi judul dan pesan dulu'); return; } m = { id: 'm' + Date.now().toString(36), title: t.trim(), body: b.trim(), t: Date.now() }; }
+    if (again != null) { const x = allSent().find(y => y.id === again); if (!x) { toast('Pesan tidak ditemukan'); return; } m = { id: x.id, title: x.title, body: x.body, t: x.t, by: x.by, ed: x.ed }; }
+    else {
+      const t = ($('ngdm-t') || {}).value || '', b = ($('ngdm-b') || {}).value || '';
+      if (t.trim().length < 3 || b.trim().length < 3) { toast('Isi judul dan pesan dulu'); return; }
+      if (editing) {
+        const x = allSent().find(y => y.id === editing);
+        if (!x) { editing = null; toast('Pesan tidak ditemukan'); draw(); return; }
+        m = { id: x.id, title: t.trim(), body: b.trim(), t: x.t, by: x.by, ed: Date.now() };
+        if (!(await post(T_MSG, m))) { toast('Gagal menyimpan, cek koneksi'); return; }
+        const i = f.sentMsgs.findIndex(y => y.id === m.id); if (i >= 0) f.sentMsgs[i] = m;
+        editing = null; applyMsgs([m]); save(); pullMessages();
+        toast('Pesan diperbarui ✅'); tab = 'out'; draw(); return;
+      }
+      m = { id: 'm' + Date.now().toString(36), title: t.trim(), body: b.trim(), t: Date.now(), by: myName() };
+    }
     if (!(await post(T_MSG, m))) { toast('Gagal mengirim, cek koneksi'); return; }
-    if (again == null) { f.sentMsgs.unshift(m); f.sentMsgs = f.sentMsgs.slice(0, 20); save(); }
-    toast(again != null ? 'Pesan dikirim ulang ✅' : 'Pesan terkirim ke semua pengguna ✅'); tab = 'out'; draw(); pullMessages();
+    if (again == null) { f.sentMsgs.unshift(m); f.sentMsgs = f.sentMsgs.slice(0, 20); }
+    applyMsgs([m]); save(); pullMessages();
+    toast(again != null ? 'Pesan dikirim ulang ✅' : 'Pesan terkirim ke semua pengguna ✅'); tab = 'out'; draw();
+  }
+  async function sendRate() {
+    if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
+    if (!confirm('Munculkan pop-up rating ke semua pengguna?')) return;
+    const q = (($('ngdr-q') || {}).value || '').trim().slice(0, 120), f = F();
+    const rec = { id: 'r' + Date.now().toString(36), q, t: Date.now(), by: myName() };
+    if (!(await post(T_RATE, rec))) { toast('Gagal mengirim, cek koneksi'); return; }
+    f.sentRate = [rec].concat(f.sentRate || []).slice(0, 10);
+    (f.pushSeen = f.pushSeen || {})[rec.id] = 1; save();
+    toast('Pop-up rating dikirim ✅'); tab = 'rate'; draw();
+  }
+  async function retractRate(id) {
+    if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
+    if (!confirm('Tarik pemicu rating ini? Pengguna yang belum melihatnya tidak akan mendapat pop-up.')) return;
+    if (!(await post(T_RATE, { id, op: 'del', t: Date.now() }))) { toast('Gagal menarik, cek koneksi'); return; }
+    const f = F(); f.sentRate = (f.sentRate || []).filter(x => x.id !== id); save();
+    toast('Pemicu rating ditarik ✅'); tab = 'rate'; draw();
+  }
+  function previewRate() {
+    if (!canView()) return;
+    const q = (($('ngdr-q') || {}).value || '').trim().slice(0, 120);
+    close(); openForm(false, { id: 'preview', q, preview: true });
+  }
+  function startEdit(id) {
+    if (!canView() || !allSent().some(x => x.id === id)) return;
+    editing = id; tab = 'out'; draw();
+    const el = $('ngdm-t'); if (el) { try { el.scrollIntoView({ block: 'center' }); el.focus(); } catch (e) {} }
+  }
+  async function retract(id) {
+    if (!canView()) { toast('Khusus developer & support (butuh token)'); return; }
+    const f = F(), m = allSent().find(x => x.id === id); if (!m) return;
+    if (!confirm('Tarik pesan "' + m.title + '" dari semua pengguna?\n\nPesan akan hilang dari menu Pemberitahuan mereka saat aplikasinya dibuka.')) return;
+    const rec = { id, op: 'del', ed: Date.now() };
+    if (!(await post(T_MSG, rec))) { toast('Gagal menarik pesan, cek koneksi'); return; }
+    f.sentMsgs = f.sentMsgs.filter(x => x.id !== id); if (editing === id) editing = null;
+    applyMsgs([rec]); save(); pullMessages();
+    toast('Pesan ditarik ✅'); tab = 'out'; draw();
   }
 
   window.NGFeedback = {
     open: () => openForm(false), close, submit, panel: openPanel,
     rate(i) { draft.r = i; document.querySelectorAll('#ngfb-stars button').forEach(b => { b.style.color = +b.dataset.s <= i ? '#f59e0b' : '#cbd5e1'; }); },
     cat(k) { draft.k = k; document.querySelectorAll('.ngfb-cat').forEach(b => { const on = b.dataset.k === k; b.style.background = on ? 'var(--accent)' : 'transparent'; b.style.color = on ? '#fff' : 'var(--accent)'; }); },
-    tab(t) { if (!canView()) return; tab = t; draw(); }, filter(k) { filt = k; draw(); }, sendMsg: () => sendMsg(), resend: i => sendMsg(i)
+    tab(t) { if (!canView()) return; tab = t; draw(); }, filter(k) { filt = k; draw(); }, sendMsg: () => sendMsg(), resend: id => sendMsg(id), skip: dismiss, sendRate, retractRate, previewRate,
+    edit: id => startEdit(id), retract: id => retract(id), cancelEdit() { editing = null; draw(); }
   };
 
   /* ---------- baris menu di Pengaturan ---------- */
@@ -10782,7 +10906,7 @@ const BUNPO_XP_PER_POLA = 20;
   };
   ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { syncRows(); } catch (e) {} return r; }; });
 
-  function init() { syncRows(); pullMessages(); flush(); autoAsk(); setInterval(pullMessages, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) { pullMessages(); flush(); } }); }
+  function init() { syncRows(); pullMessages(); flush(); autoAsk(); pullRate(); setInterval(pullMessages, 300000); setInterval(pullRate, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) { pullMessages(); flush(); pullRate(); } }); }
   if (document.readyState === 'complete') setTimeout(init, 800); else window.addEventListener('load', () => setTimeout(init, 1200));
 })();
 </script>
