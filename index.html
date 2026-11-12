@@ -11202,7 +11202,7 @@ const BUNPO_XP_PER_POLA = 20;
 </script>
 
 <script>
-/* ===== HADIAH DEVELOPER (developer emas, token NPJ2026.7): beri koin, tema, atau bingkai avatar ke semua orang atau teman ===== */
+/* ===== HADIAH DEVELOPER (token NPJ2027): beri koin, tema, atau bingkai avatar ke semua orang atau teman ===== */
 (function () {
   'use strict';
   const T = 'nhgo2-hadiah-7c91e4', NT = 'https://ntfy.sh/', MAXC = 100000, $ = id => document.getElementById(id);
@@ -11211,16 +11211,10 @@ const BUNPO_XP_PER_POLA = 20;
   const save = () => { try { saveState(); } catch (e) {} };
   const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 3000); };
   const ICON = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
-  const bases = () => { let b = NT; try { b = NGNet.base() || NT; } catch (e) {} return [...new Set([b, NT])]; };
-  async function post(rec) {
-    let ok = 0, err = 'tidak ada koneksi';
-    for (const b of bases()) { try { const r = await fetch(b + T, { method: 'POST', body: JSON.stringify(rec) }); if (r.ok) ok++; else err = 'HTTP ' + r.status; } catch (e) { err = 'tidak ada koneksi'; } }
-    return ok ? { ok: 1 } : { ok: 0, err };
-  }
-  const users = () => { const s = state.social || {}, d = s.dir || {}, m = new Map(); Object.keys(d).forEach(c => m.set(c, { id: c, n: d[c].name || c, a: d[c].avatar || '👤', fr: 0 })); (s.friends || []).forEach(c => { const r = (s.remote || {})[c] || {}, o = m.get(c) || { id: c, n: r.name || r.n || c, a: r.avatar || r.a || '👤' }; o.fr = 1; m.set(c, o); }); m.delete(s.code); return [...m.values()].sort((a, b) => b.fr - a.fr || String(a.n).localeCompare(String(b.n))); };
   const themes = () => (typeof SHOP_ITEMS !== 'undefined' ? SHOP_ITEMS : []).map(i => ({ id: i.id, n: i.name }));
   const frames = () => ((window.NGFrames && NGFrames.list) || []).filter(f => f.id !== 'default').map(f => ({ id: f.id, n: f.name }));
-    const lab = m => m.k === 'coin' ? (+m.v).toLocaleString('id-ID') + ' koin' : m.k === 'theme' ? 'Tema ' + ((themes().find(x => x.id === m.v) || {}).n || m.v) : 'Bingkai avatar ' + ((frames().find(x => x.id === m.v) || {}).n || m.v);
+  const friends = () => ((state.social && state.social.friends) || []).map(id => { const r = (state.social.remote || {})[id] || {}; return { id, n: r.name || r.n || id, a: r.avatar || r.a || '👤' }; });
+  const lab = m => m.k === 'coin' ? (+m.v).toLocaleString('id-ID') + ' koin' : m.k === 'theme' ? 'Tema ' + ((themes().find(x => x.id === m.v) || {}).n || m.v) : 'Bingkai avatar ' + ((frames().find(x => x.id === m.v) || {}).n || m.v);
 
   /* ---- terima hadiah ---- */
   function apply(m) {
@@ -11235,7 +11229,7 @@ const BUNPO_XP_PER_POLA = 20;
     n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); try { NGNotif.dot(); } catch (e) {}
   }
   async function pull() {
-    let txt = ''; for (const b of bases()) { try { const r = await fetch(b + T + '/json?poll=1&since=all', { cache: 'no-store' }); if (r.ok) txt += '\n' + await r.text(); } catch (e) {} } if (!txt.trim()) return;
+    let txt; try { const r = await fetch(NT + T + '/json?poll=1&since=all', { cache: 'no-store' }); if (!r.ok) return; txt = await r.text(); } catch (e) { return; }
     const g = G(), code = (state.social && state.social.code) || '', list = [];
     txt.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event !== 'message') return; const m = JSON.parse(e.message); if (m && m.id && (m.to === 'all' || m.to === code)) list.push(m); } catch (x) {} });
     let got = 0; list.slice(-60).forEach(m => { if (g.claimed[m.id] || Date.now() - (+m.t || 0) > 14 * 864e5 || !apply(m)) return; g.claimed[m.id] = 1; inbox(m); got++; toast('🎁 Hadiah: ' + lab(m)); });
@@ -11252,13 +11246,13 @@ const BUNPO_XP_PER_POLA = 20;
     const keep = ($('gf-n') || {}).value, keepN = ($('gf-note') || {}).value, keepC = ($('gf-code') || {}).value;
     const val = D.k === 'coin' ? [100, 500, 1000, 5000, 10000, 50000].map(v => ch(D.v === v, `NGGift.v(${v})`, v.toLocaleString('id-ID'))).join('') + '<input id="gf-n" type="number" min="1" max="100000" placeholder="Jumlah lain" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">'
       : (D.k === 'theme' ? themes() : frames()).map(x => ch(D.v === x.id, `NGGift.v('${x.id}')`, esc(x.n))).join('') || '<small>Tidak ada item</small>';
-    const us = users();
+    const fr = friends();
     m.innerHTML = `<div class="ios-glass" style="width:100%;max-width:30rem;max-height:92vh;overflow:auto;border-radius:2rem 2rem 0 0;padding:1.3rem 1.2rem 1.6rem;background:var(--bg-app,#fff)">
       <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center"><span style="display:inline-flex;width:1.3rem;height:1.3rem;margin-right:.5rem">${ICON}</span>Kirim Hadiah</h3><button onclick="document.getElementById('ng-gift').remove()" style="font-size:1.4rem;color:var(--text-muted)">×</button></div>
       ${sec('JENIS HADIAH', ch(D.k === 'coin', "NGGift.k('coin')", 'Koin') + ch(D.k === 'theme', "NGGift.k('theme')", 'Tema') + ch(D.k === 'frame', "NGGift.k('frame')", 'Bingkai avatar'))}
       ${sec('ISI HADIAH', val)}
-      ${sec('PENERIMA', ch(D.to === 'all', "NGGift.to('all')", 'Semua pengguna') + ch(D.to === 'pick', "NGGift.to('pick')", 'Pilih dari daftar / kode'))}
-      ${D.to === 'pick' ? `<style>.gf-u{display:flex;align-items:center;gap:.5rem;width:100%;padding:.5rem .7rem;border-radius:.9rem;text-align:left;font-size:.78rem;font-weight:700;background:var(--glass-border)}.gf-u.on{background:var(--accent);color:#fff}.gf-u small{margin-left:auto;font-size:.6rem;opacity:.75}</style><input id="gf-q" oninput="NGGift.q(this.value)" placeholder="Cari nama atau kode…" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin:.5rem 0 .4rem"><div style="max-height:11rem;overflow:auto;display:flex;flex-direction:column;gap:.3rem">${us.map(u => `<button class="gf-u ${D.sel.has(u.id) ? 'on' : ''}" data-gu="${esc(u.id)}" data-s="${esc((u.n + ' ' + u.id).toLowerCase())}" onclick="NGGift.pick(this.dataset.gu)"><span>${esc(u.a)}</span><span>${esc(u.n)}</span><small>${u.fr ? 'Teman · ' : ''}${esc(u.id)}</small></button>`).join('') || '<small>Daftar pengguna kosong, buka menu Teman dulu</small>'}</div><input id="gf-code" placeholder="atau ketik kode (pisahkan dengan koma)" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.5rem"><small id="gf-cnt">${D.sel.size} dipilih</small>` : ''}
+      ${sec('PENERIMA', ch(D.to === 'all', "NGGift.to('all')", 'Semua pengguna') + ch(D.to === 'f', "NGGift.to('f')", 'Teman'))}
+      ${D.to === 'f' ? sec('PILIH TEMAN', (fr.map(f => ch(D.who === f.id, `NGGift.who('${esc(f.id)}')`, esc(f.a) + ' ' + esc(f.n))).join('') || '<small>Belum ada teman</small>')) + '<input id="gf-code" placeholder="atau ketik kode teman" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">' : ''}
       <input id="gf-note" maxlength="120" placeholder="Catatan (opsional)" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.9rem">
       <button onclick="NGGift.send()" style="width:100%;margin-top:1rem;padding:.85rem;border-radius:999px;font-weight:900;background:var(--accent);color:#fff">Kirim hadiah</button>
       <p style="font-size:.62rem;color:var(--text-muted);margin-top:.6rem;line-height:1.5">Hadiah tersimpan di relay sekitar 12 jam. Penerima mendapatkannya saat membuka aplikasi dalam waktu itu, lalu muncul di Pemberitahuan.</p></div>`;
@@ -11267,30 +11261,33 @@ const BUNPO_XP_PER_POLA = 20;
   async function send() {
     let v = D.v; if (D.k === 'coin') { const n = parseInt(($('gf-n') || {}).value, 10); if (n > 0) v = n; }
     if (D.k === 'coin' && !(v >= 1 && v <= MAXC)) return toast('Jumlah koin 1 sampai 100.000'); if (v == null || v === '') return toast('Pilih isi hadiahnya dulu');
-    const codes = (($('gf-code') || {}).value || '').split(/[\s,]+/).filter(Boolean), tos = D.to === 'all' ? ['all'] : [...new Set([...D.sel, ...codes])].slice(0, 25);
-    if (!tos.length) return toast('Pilih penerima dari daftar atau ketik kodenya');
-    const note = (($('gf-note') || {}).value || '').slice(0, 120), by = String((state.user && state.user.name) || '').slice(0, 24), g = G(); let ok = 0, err = '';
-    for (const to of tos) { const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: D.k, v, to, n: note, by, t: Date.now() }; const r = await post(rec); if (r.ok) { ok++; g.sent.unshift(rec); } else err = r.err; }
-    g.sent = g.sent.slice(0, 20); save();
-    if (!ok) return toast('Gagal mengirim (' + err + '). Coba lagi atau cek relay di pengaturan Teman.');
-    toast('Hadiah terkirim: ' + lab({ k: D.k, v }) + (tos[0] === 'all' ? ' ke semua pengguna' : ' ke ' + ok + ' penerima')); const e = $('ng-gift'); if (e) e.remove();
+    const to = D.to === 'all' ? 'all' : ((($('gf-code') || {}).value || '').trim() || D.who); if (!to) return toast('Pilih atau ketik teman penerima');
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: D.k, v, to, n: (($('gf-note') || {}).value || '').slice(0, 120), by: String((state.user && state.user.name) || '').slice(0, 24), t: Date.now() };
+    let ok = false; try { ok = (await fetch(NT + T, { method: 'POST', body: JSON.stringify(rec) })).ok; } catch (e) {}
+    if (!ok) return toast('Gagal mengirim, coba lagi');
+    const g = G(); g.sent.unshift(rec); g.sent = g.sent.slice(0, 20); save(); toast('Hadiah terkirim: ' + lab(rec) + (to === 'all' ? ' ke semua pengguna' : ' ke teman')); const e = $('ng-gift'); if (e) e.remove();
   }
   window.NGGift = {
-    open() { if (!state.devGold) return toast('Khusus developer emas (token NPJ2026.7)'); D = { k: 'coin', v: 1000, to: 'all', sel: new Set() }; draw(); },
-    k(k) { D.k = k; D.v = k === 'coin' ? 1000 : null; draw(); }, v(v) { D.v = v; if ($('gf-n')) $('gf-n').value = ''; draw(); }, to(t) { D.to = t; draw(); }, pick(id) { D.sel.has(id) ? D.sel.delete(id) : D.sel.add(id); const b = document.querySelector('[data-gu="' + id + '"]'); if (b) b.classList.toggle('on'); const c = $('gf-cnt'); if (c) c.textContent = D.sel.size + ' dipilih'; },
-    q(t) { t = String(t).toLowerCase(); document.querySelectorAll('.gf-u').forEach(b => { b.style.display = b.dataset.s.includes(t) ? '' : 'none'; }); }, send, pull
+    open() { if (!state.giftDev) return toast('Khusus token NPJ2027'); D = { k: 'coin', v: 1000, to: 'all', who: '' }; draw(); },
+    k(k) { D.k = k; D.v = k === 'coin' ? 1000 : null; draw(); }, v(v) { D.v = v; if ($('gf-n')) $('gf-n').value = ''; draw(); }, to(t) { D.to = t; draw(); }, who(id) { D.who = id; draw(); }, send, pull
   };
 
-  /* ---- baris Pengaturan: hanya developer emas (token NPJ2026.7) ---- */
+  /* ---- token NPJ2027 + baris Pengaturan ---- */
+  const oa = window.activateToken;
+  if (typeof oa === 'function') window.activateToken = function () {
+    const el = $('profile-token'), v = ((el && el.value) || '').trim().toUpperCase();
+    if (v === 'NPJ2027') { if (state.giftDev) { alert('Token NPJ2027 sudah aktif.'); return; } state.giftDev = true; save(); el.value = ''; try { refreshTokenCapsule(); } catch (e) {} sync(); alert('Token NPJ2027 diterima! Buka Pengaturan → Kirim Hadiah untuk memberi koin, tema, atau bingkai avatar ke semua pengguna atau teman.'); return; }
+    return oa.apply(this, arguments);
+  };
   function sync() {
     const src = $('ng-set-fb'); let r = $('ng-set-gift');
-    if (!state.devGold) { if (r) r.remove(); return; }
+    if (!state.giftDev) { if (r) r.remove(); return; }
     if (r || !src) return; r = src.cloneNode(true); r.id = 'ng-set-gift'; r.setAttribute('onclick', 'NGGift.open()');
     const sp = r.querySelector('span'); if (sp) sp.innerHTML = ICON; const lb = r.querySelector('span.font-bold'); if (lb) lb.textContent = 'Kirim Hadiah';
     src.parentNode.insertBefore(r, src.nextSibling); try { lucide.createIcons(); } catch (e) {}
   }
-  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { sync(); } catch (e) {} return r; }; });
-  setTimeout(() => { sync(); pull(); }, 2500);
+  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { sync(); if (n === 'refreshTokenCapsule' && state.giftDev) { const t = $('token-capsule-text'); if (t && !/Gift/.test(t.textContent)) t.textContent += ' + Gift'; } } catch (e) {} return r; }; });
+  setTimeout(() => { sync(); pull(); try { refreshTokenCapsule(); } catch (e) {} }, 2500);
   setInterval(pull, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
 })();
 </script>
