@@ -10979,6 +10979,18 @@ const BUNPO_XP_PER_POLA = 20;
 #rm .secret{filter:blur(12px);transition:filter .2s}#rm .secret.show{filter:none}
 #rm .msg{font-size:.75rem;line-height:1.4}#rm .msg b{color:var(--accent)}
 </style>
+<style id="ng-blue2">
+/* Biru hanya untuk tombol menu: Multiplayer, Duel, Room Tournament, kategori kuis */
+[data-mp],[data-ng-duel] .dl-mpcard,#rm .cat button,#rm .sp,#rm .op{background:linear-gradient(135deg,#3b82f6,#1d4ed8)!important;color:#fff!important;border:1.5px solid rgba(255,255,255,.35)!important}
+[data-mp] *,[data-ng-duel] .dl-mpcard *,#rm .cat button *,#rm .sp>*:not(.tag){color:#fff!important}
+[data-ng-duel] .dl-mpi{background:rgba(255,255,255,.22)}
+#rm .cat button small,#rm .sp small,[data-ng-duel] .dl-mpcard span span{color:rgba(255,255,255,.85)!important}
+#rm .sp{border:2px solid #d6a24a!important}
+#rm .cat button.on,#rm .sp.on{box-shadow:0 0 0 3px #93c5fd}
+#rm .op:active,#rm .op.me{background:#60a5fa!important}
+#rm .op.ok{background:#16a34a!important}#rm .op.no{background:#dc2626!important}
+#rm .lf{border:1.5px solid #f59e0b}
+</style>
 <script>
 /* ===== ROOM TOURNAMENT (Kashikosa): lobi, kuis multiplayer, Undercover. Host-authoritative lewat relay ntfy ===== */
 (function () {
@@ -10988,12 +11000,9 @@ const BUNPO_XP_PER_POLA = 20;
   const ri = n => crypto.getRandomValues(new Uint32Array(1))[0] % n, rnd = n => Array.from({ length: n }, () => 'abcdefghjkmnpqrstuvwxyz23456789'[ri(31)]).join('');
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = ri(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 2600); };
-  /* Akses Room Tournament: hanya pemegang token NPJ (NPJ2026 / NPJ20267) dan token Support */
-  const canRoom = () => !!(state.devMode || state.devGold || state.support);
-  const deny = () => { toast('Room Tournament khusus pemegang token NPJ dan Support'); return false; };
   const RM = () => (state.rm = state.rm || {});
   const me = () => { const r = RM(); if (!r.pid) { r.pid = rnd(8); try { saveState(); } catch (e) {} } return { id: r.pid, n: (state.user && state.user.name) || 'Pemain', a: (state.user && state.user.avatar) || '👤' }; };
-  let R = null, S = null, isHost = false, V = 'menu', card = null, ML = {}, PT = '', es = [], seen = new Set(), tms = [], cfg = { name: '', cap: 4, mode: 'quiz', cat: 'kanji', n: 10, sec: 15, diff: 'e', csec: 60 };
+  let HL = false, LFSEEN = 0, lastSt = 0, waitHid = null, R = null, S = null, isHost = false, V = 'menu', card = null, ML = {}, PT = '', es = [], seen = new Set(), tms = [], cfg = { name: '', cap: 4, mode: 'quiz', cat: 'kanji', n: 10, sec: 15, diff: 'e', csec: 60 };
   const T = () => 'nhgo2rm-' + (S ? S.code : R.code);
   const pub = (t, o) => fetch(B() + t, { method: 'POST', body: JSON.stringify(o) }).catch(() => {});
   function sub(t, fn) { const e = new EventSource(B() + t + '/sse?since=3m'); e.onmessage = m => { try { const x = JSON.parse(m.data); if (x.event !== 'message' || seen.has(x.id)) return; seen.add(x.id); fn(JSON.parse(x.message)); } catch (_) {} }; es.push(e); }
@@ -11018,28 +11027,44 @@ const BUNPO_XP_PER_POLA = 20;
   /* ---- HOST: otoritas permainan ---- */
   function snap() {
     if (!isHost) return; const sp = R.mode === 'spy';
-    const s = { code: R.code, name: R.name, cap: R.cap, cat: R.cat, mode: R.mode, n: R.n, sec: R.sec, ph: R.ph, hid: R.hid, lk: R.lk, qi: R.qi, dl: R.dl, rv: R.rv, msgs: R.msgs, diff: R.diff,
+    const s = { code: R.code, name: R.name, cap: R.cap, cat: R.cat, mode: R.mode, n: R.n, sec: R.sec, ph: R.ph, hid: R.hid, lk: R.lk, qi: R.qi, dl: R.dl, rv: R.rv, msgs: R.msgs, diff: R.diff, lf: R.lf,
       pl: Object.entries(R.pl).map(([id, p]) => ({ id, h: id === R.hid, n: p.n, a: p.a, r: p.r, sc: p.sc, an: !!(R.ans && R.ans[id]) })), q: R.q && R.ph === 'q' || R.ph === 'rv' ? { k: R.qi, p: R.q.p, o: R.q.o } : null };
     if (sp) Object.assign(s, { al: R.al, order: R.order, turn: R.turn, descs: R.descs, vt: Object.keys(R.votes || {}), tied: R.tied, last: R.last, end: R.ph === 'sw' ? { roles: R.spies, w: R.words, win: R.win, log: R.log } : null });
-    S = s; pub(T(), { t: 'st', s }); view();
+    while (JSON.stringify(s).length > 3600 && s.msgs && s.msgs.length) s.msgs = s.msgs.slice(1);
+    setS(s); pub(T(), { t: 'st', s }); view();
   }
+  function setS(s) { S = s; if (S.q && ML.k !== S.q.k) ML = { k: S.q.k, c: null, t0: Date.now() }; }
   function H(m) {
     if (!R || !m || !m.id) return; const P = R.pl[m.id];
     if (m.t === 'jn') {
       if (P) { P.pt = m.pt; return snap(); }
       if (R.ph !== 'lobby' || R.lk || Object.keys(R.pl).length >= R.cap) return pub(T(), { t: 'no', id: m.id, w: 'Room penuh, terkunci, atau pertandingan sudah mulai' });
-      R.pl[m.id] = { n: String(m.n).slice(0, 20), a: String(m.a || '👤').slice(0, 8), r: false, sc: 0, pt: String(m.pt || '') }; return snap();
+      R.pl[m.id] = { n: String(m.n).slice(0, 20), a: String(m.a || '👤').slice(0, 8), r: false, sc: 0, seen: Date.now(), pt: String(m.pt || '') }; return snap();
     }
-    if (!P) return;
+    if (!P) return; P.seen = Date.now();
     if (m.t === 'rd' && R.ph === 'lobby') { P.r = !P.r; snap(); }
-    else if (m.t === 'ch') { const n = Date.now(); if (n - (P.lc || 0) < 1200) return; P.lc = n; R.msgs.push({ n: P.n, tx: String(m.tx).slice(0, 120) }); R.msgs = R.msgs.slice(-30); snap(); }
-    else if (m.t === 'lv') { delete R.pl[m.id]; if (R.al) R.al = R.al.filter(x => x !== m.id); snap(); }
+    else if (m.t === 'ch') { const n = Date.now(); if (n - (P.lc || 0) < 1200) return; P.lc = n; R.msgs.push({ n: P.n, tx: String(m.tx).slice(0, 80) }); R.msgs = R.msgs.slice(-10); snap(); }
+    else if (m.t === 'lv') drop(m.id);
     else if (m.t === 'an' && R.ph === 'q' && m.k === R.qi && !R.ans[m.id]) { R.ans[m.id] = { c: m.c, ms: Math.max(0, Math.min(R.sec * 1000, +m.ms || 0)) }; Object.keys(R.ans).length >= Object.keys(R.pl).length ? reveal() : snap(); }
     else if (m.t === 'ds' && R.ph === 'd' && R.order[R.turn] === m.id) {
       const w = R.words[R.spies.includes(m.id) ? 'spy' : 'cit'], tx = String(m.tx || '').trim().slice(0, 100), l = tx.toLowerCase();
       if (tx.length < 2) return; if ([w.j, w.k, w.a.toLowerCase()].some(x => x && l.includes(x.toLowerCase()))) return pub(T() + '-' + P.pt, { t: 'er', w: 'Deskripsi tidak boleh menyebut kata rahasia, bacaan, atau artinya' });
       R.descs.push({ id: m.id, tx }); nextTurn();
     } else if (m.t === 'vt' && R.ph === 'v' && R.al.includes(m.id) && !R.votes[m.id] && m.tg !== m.id && (R.tied || R.al).includes(m.tg) && R.al.includes(m.tg)) { R.votes[m.id] = m.tg; R.al.every(x => R.votes[x]) ? tally() : snap(); }
+  }
+  function drop(id) {
+    const P = R.pl[id]; if (!P || id === R.hid) return; delete R.pl[id]; if (R.ph !== 'lobby') R.lf = { n: P.n, t: Date.now() };
+    if (R.mode === 'quiz') { if (R.ph === 'q' && Object.keys(R.pl).length && Object.keys(R.ans).length >= Object.keys(R.pl).length) return reveal(); }
+    else if (R.al) { R.al = R.al.filter(x => x !== id); if (R.ph !== 'lobby' && R.ph !== 'sw') { const s = R.al.filter(x => R.spies.includes(x)).length, c = R.al.length - s; if (!s || s >= c) { R.win = !s ? 'cit' : 'spy'; clr(); R.ph = 'sw'; return snap(); } if (R.ph === 'd' && R.order[R.turn] === id) { R.descs.push({ id, tx: '(keluar)' }); return nextTurn(); } if (R.ph === 'v' && R.al.every(x => R.votes[x])) return tally(); } }
+    snap();
+  }
+  function takeover() {
+    const m = me(), old = S; isHost = true; HL = false;
+    R = { code: old.code, name: old.name, cap: old.cap, mode: old.mode, cat: old.cat, n: old.n, sec: old.sec, diff: old.diff || 'e', csec: 60, hid: m.id, lk: old.lk, msgs: (old.msgs || []).slice(-9), qi: old.qi, ans: {}, pl: {}, ph: 'lobby' };
+    old.pl.forEach(p => { if (p.id !== old.hid) R.pl[p.id] = { n: p.n, a: p.a, r: p.id === m.id || p.r, sc: p.sc || 0, pt: '', seen: Date.now() }; });
+    R.pl[m.id].pt = PT; R.msgs.push({ n: 'Sistem', tx: 'Host baru: ' + m.n }); pub(T(), { t: 'nh', id: m.id }); setInterval_();
+    if (old.mode === 'quiz' && old.ph !== 'lobby' && old.ph !== 'end') { R.lk = true; R.ph = 'rv'; R.q = { p: 'Host baru mengambil alih…', o: [], i: -1 }; R.rv = { c: -1, sc: {} }; snap(); after(2500, () => { if (R.qi + 1 >= R.n) { R.ph = 'end'; snap(); } else nextQ(); }); }
+    else { R.lk = false; if (old.ph === 'end') R.ph = 'end'; snap(); }
   }
   function start() {
     const ids = Object.keys(R.pl); if (ids.length < 2 || (R.mode === 'spy' && ids.length < 4) || !ids.every(i => i === R.hid || R.pl[i].r)) return toast(R.mode === 'spy' && ids.length < 4 ? 'Undercover butuh minimal 4 pemain' : 'Semua pemain harus Ready dan minimal 2 orang');
@@ -11054,16 +11079,16 @@ const BUNPO_XP_PER_POLA = 20;
   function reveal() {
     if (R.ph !== 'q') return; clr(); R.rv = { c: R.q.i, sc: {} };
     Object.entries(R.pl).forEach(([id, p]) => { const a = R.ans[id], g = a && a.c === R.q.i ? 100 + Math.round(50 * (1 - a.ms / (R.sec * 1000))) : 0; p.sc += g; R.rv.sc[id] = g; });
-    R.ph = 'rv'; snap(); after(3200, () => { if (R.qi + 1 >= R.n) { R.ph = 'end'; snap(); } else nextQ(); });
+    R.ph = 'rv'; snap(); after(2200, () => { if (R.qi + 1 >= R.n) { R.ph = 'end'; snap(); } else nextQ(); });
   }
   function round() { R.order = shuf(R.al); R.turn = 0; R.descs = []; R.tied = null; R.votes = {}; R.ph = 'd'; turn(); }
   function turn() { R.dl = Date.now() + 20000; snap(); after(20800, () => { R.descs.push({ id: R.order[R.turn], tx: '(waktu habis)' }); nextTurn(); }); }
   function nextTurn() {
-    clr(); R.turn++; if (R.turn < R.order.length) return turn();
+    clr(); R.turn++; while (R.turn < R.order.length && !R.al.includes(R.order[R.turn])) R.turn++; if (R.turn < R.order.length) return turn();
     R.ph = 'c'; R.dl = Date.now() + R.csec * 1000; snap(); after(R.csec * 1000, () => { R.ph = 'v'; R.votes = {}; R.dl = Date.now() + 25000; snap(); after(25500, tally); });
   }
   function tally() {
-    if (R.ph !== 'v') return; clr(); const c = {}; Object.values(R.votes).forEach(t => c[t] = (c[t] || 0) + 1);
+    if (R.ph !== 'v') return; clr(); const c = {}; Object.values(R.votes).forEach(t => { if (R.al.includes(t)) c[t] = (c[t] || 0) + 1; });
     const mx = Math.max(0, ...Object.values(c)), top = Object.keys(c).filter(k => c[k] === mx);
     if (top.length > 1 && !R.tied) { R.tied = top; R.votes = {}; R.dl = Date.now() + 20000; snap(); return after(20500, tally); }
     const out = top.length ? top[ri(top.length)] : R.al[ri(R.al.length)], role = R.spies.includes(out) ? 'spy' : 'cit';
@@ -11076,7 +11101,9 @@ const BUNPO_XP_PER_POLA = 20;
   function connect() {
     const m = me(); PT = rnd(10); sub('nhgo2rm-' + (S ? S.code : R.code), x => {
       if (isHost) { if (x.t !== 'st' && x.t !== 'no') H(x); return; }
-      if (x.t === 'st') { S = x.s; if (S.q && ML.k !== S.q.k) ML = { k: S.q.k, c: null, t0: Date.now() }; view(); }
+      if (x.t === 'st') { lastSt = Date.now(); HL = false; setS(x.s); view(); }
+      else if (x.t === 'hl' && S && x.id === S.hid) { HL = true; view(); }
+      else if (x.t === 'nh') { HL = false; waitHid = null; if (S) S.hid = x.id; pub(T(), { t: 'jn', id: m.id, n: m.n, a: m.a, pt: PT }); view(); }
       else if (x.t === 'no' && x.id === m.id) { toast(x.w); leave(true); }
       else if (x.t === 'kk' && x.id === m.id) { toast('Kamu dikeluarkan Host'); leave(true); }
     });
@@ -11084,18 +11111,18 @@ const BUNPO_XP_PER_POLA = 20;
   }
   function send(o) { const m = me(); o.id = m.id; if (isHost) H(o); else pub(T(), o); }
   function create() {
-    if (!canRoom()) return deny();
     const m = me(); isHost = true; R = { code: rnd(5).toUpperCase(), name: (cfg.name || m.n + ' Room').slice(0, 24), cap: cfg.cap, mode: cfg.mode, cat: cfg.cat, n: cfg.n, sec: cfg.sec, diff: cfg.diff, csec: cfg.csec, ph: 'lobby', hid: m.id, lk: false, msgs: [], pl: {}, qi: -1 };
     R.pl[m.id] = { n: m.n, a: m.a, r: true, sc: 0, pt: '' }; V = 'room'; connect(); R.pl[m.id].pt = PT; snap(); setInterval_();
   }
   function join(code) {
-    if (!canRoom()) return deny();
     code = String(code || '').trim().toUpperCase(); if (code.length !== 5) return toast('Kode room 5 karakter');
     const m = me(); isHost = false; S = { code, pl: [] }; R = null; V = 'room'; connect(); view();
-    const go = () => pub('nhgo2rm-' + code, { t: 'jn', id: m.id, n: m.n, a: m.a, pt: PT }); go(); after(2500, () => { if (!S.name && !isHost) { go(); } }); after(9000, () => { if (!S || !S.name) { toast('Room tidak ditemukan atau Host offline'); leave(true); } });
+    lastSt = Date.now(); const go = () => pub('nhgo2rm-' + code, { t: 'jn', id: m.id, n: m.n, a: m.a, pt: PT }); go(); [1500, 3500, 6000, 9000].forEach(d => after(d, () => { if (S && !S.name && !isHost) go(); })); after(13000, () => { if (!S || !S.name) { toast('Room tidak ditemukan atau Host offline'); leave(true); } });
   }
-  function leave(quiet) { if (!quiet && !isHost && S && S.name) pub(T(), { t: 'lv', id: me().id }); es.forEach(e => e.close()); es = []; clr(); clearInterval(hb); R = S = card = null; isHost = false; V = 'menu'; seen = new Set(); quiet ? view() : close(); }
-  let hb = 0; const setInterval_ = () => { clearInterval(hb); hb = setInterval(() => { if (isHost && R) snap(); }, 6000); };
+  function leave(quiet) { if (!quiet && S && S.name) pub(T(), isHost ? { t: 'hl', id: me().id } : { t: 'lv', id: me().id }); es.forEach(e => e.close()); es = []; clr(); clearInterval(hb); R = S = card = null; isHost = false; V = 'menu'; seen = new Set(); quiet ? view() : close(); }
+  let hb = 0; const setInterval_ = () => { clearInterval(hb); hb = setInterval(() => { if (!isHost || !R) return; Object.entries(R.pl).forEach(([id, p]) => { if (id !== R.hid && Date.now() - (p.seen || Date.now()) > 20000) drop(id); }); snap(); }, 4000); };
+  setInterval(() => { if (!isHost && S && S.name && !HL) { pub(T(), { t: 'pg', id: me().id }); if (Date.now() - lastSt > 16000) { HL = true; view(); } } }, 5000);
+  window.addEventListener('pagehide', () => { try { if (S && S.name) navigator.sendBeacon(B() + T(), JSON.stringify(isHost ? { t: 'hl', id: me().id } : { t: 'lv', id: me().id })); } catch (e) {} });
   const close = () => { const e = $('rm'); if (e) e.remove(); };
 
   /* ---- tampilan ---- */
@@ -11123,6 +11150,14 @@ const BUNPO_XP_PER_POLA = 20;
   const tmr = () => `<div class="tm"><i id="rm-tm" style="width:100%"></i></div>`;
   const chat = () => `<div class="cd ios-glass"><h4>CHAT</h4><div style="max-height:9rem;overflow:auto;margin:.4rem 0">${(S.msgs || []).slice(-12).map(m => `<p class="msg"><b>${esc(m.n)}</b> ${esc(m.tx)}</p>`).join('') || '<small>Belum ada pesan</small>'}</div><div class="row" style="flex-wrap:nowrap"><input id="rm-ch" maxlength="120" placeholder="Tulis pesan…" onkeydown="if(event.key==='Enter')NGRoom.chat()"><button class="ch on" onclick="NGRoom.chat()">Kirim</button></div></div>`;
   function vRoom() {
+    if (S && S.name && HL) {
+      const succ = (S.pl.filter(p => p.id !== S.hid)[0] || {}).id === me().id, dead = S.mode === 'spy' && S.ph !== 'lobby' && S.ph !== 'sw';
+      return `<div class="cd ios-glass lf"><b>Host meninggalkan room</b><p style="font-size:.78rem;margin:.4rem 0 .7rem">${dead ? 'Undercover tidak bisa dilanjutkan tanpa Host. Lanjut berarti kembali ke lobi.' : 'Mau tetap lanjut tanpa Host?'}${succ ? ' Kamu akan jadi Host baru.' : ' Pemain pertama di daftar akan jadi Host baru.'}</p><div class="row"><button class="ch on" onclick="NGRoom.cont()">Tetap lanjut</button><button class="ch" onclick="NGRoom.back(1)">Keluar</button></div></div>`;
+    }
+    const lf = S && S.name && S.ph !== 'lobby' && S.lf && LFSEEN !== S.lf.t ? `<div class="cd ios-glass lf"><b>${esc(S.lf.n)} meninggalkan permainan</b><div class="row" style="margin-top:.5rem"><button class="ch on" onclick="NGRoom.ok()">Tetap lanjut</button>${isHost ? '<button class="ch" onclick="NGRoom.again()">Akhiri permainan</button>' : '<button class="ch" onclick="NGRoom.back(1)">Keluar</button>'}</div></div>` : '';
+    return lf + vRoom0();
+  }
+  function vRoom0() {
     if (!S || !S.name) return `<p style="text-align:center;padding:3rem 0;color:var(--text-muted)">Menyambung ke room…</p>`;
     const m = me(), mine = S.pl.find(p => p.id === m.id), sp = S.mode === 'spy', ph = S.ph, head = `<div style="display:flex;justify-content:space-between;align-items:center"><h2>${esc(S.name)}</h2><small>${sp ? 'Undercover' : 'Kuis'} · ${S.pl.length}/${S.cap}</small></div>`;
     if (ph === 'lobby') return head + `<div class="cd ios-glass" style="text-align:center"><small>KODE UNDANGAN</small><div class="big" style="letter-spacing:.2em">${S.code}</div><button class="ch" onclick="navigator.clipboard&&navigator.clipboard.writeText('${S.code}');NGRoom.t('Kode disalin')">Salin kode</button></div>` + S.pl.map(p => pl(p)).join('') +
@@ -11152,16 +11187,108 @@ const BUNPO_XP_PER_POLA = 20;
   setInterval(() => { const b = $('rm-tm'); if (b && S && S.dl) { const tot = S.ph === 'q' ? S.sec * 1000 : S.ph === 'd' ? 20000 : S.ph === 'c' ? 60000 : 25000; b.style.width = Math.max(0, Math.min(100, (S.dl - Date.now()) / tot * 100)) + '%'; } }, 250);
 
   window.NGRoom = {
-    open() { if (!canRoom()) return deny(); V = 'menu'; view(); }, cfgOpen() { if (!canRoom()) return deny(); V = 'cfg'; view(); }, create, join, t: toast,
+    open() { V = 'menu'; view(); }, cfgOpen() { V = 'cfg'; view(); }, create, join, t: toast,
     c(k, v, silent) { if (k === 'v') V = v; else { cfg[k] = v; if (k === 'mode' && v === 'spy' && cfg.cap < 4) cfg.cap = 4; } if (!silent) view(); },
-    back() { V === 'room' ? (confirm('Keluar dari room?') && leave()) : close(); },
+    back(f) { V === 'room' ? ((f || confirm('Keluar dari room?')) && leave()) : close(); },
+    ok() { LFSEEN = S.lf.t; view(); }, cont() { if ((S.pl.filter(p => p.id !== S.hid)[0] || {}).id === me().id) return takeover(); HL = false; waitHid = S.hid; view(); after(14000, () => { if (!isHost && S && S.hid === waitHid) { toast('Tidak ada Host baru'); leave(true); } }); },
     start, ready: () => send({ t: 'rd' }), lock() { R.lk = !R.lk; snap(); }, kick(id) { delete R.pl[id]; pub(T(), { t: 'kk', id }); snap(); },
     ans(i) { if (ML.c != null) return; ML.c = i; send({ t: 'an', k: ML.k, c: i, ms: Date.now() - ML.t0 }); view(); },
     chat() { const e = $('rm-ch'); if (e && e.value.trim()) { send({ t: 'ch', tx: e.value }); e.value = ''; } }, desc() { const e = $('rm-ds'); if (e) send({ t: 'ds', tx: e.value }); },
-    vote: id => send({ t: 'vt', tg: id }), again() { clr(); R.ph = 'lobby'; R.lk = false; R.win = null; R.q = null; R.rv = null; Object.values(R.pl).forEach(p => { p.r = false; }); S = null; card = null; snap(); }
+    vote: id => send({ t: 'vt', tg: id }), again() { clr(); R.ph = 'lobby'; R.lk = false; R.win = null; R.q = null; R.rv = null; Object.values(R.pl).forEach(p => { p.r = false; }); S = null; card = null; ML = {}; snap(); }
   };
-  const oh = window.NGDuel && NGDuel.hub;
-  if (oh) NGDuel.hub = function () { const r = oh.apply(this, arguments); try { const c = document.querySelectorAll('.dl-mpcard'), l = c[c.length - 1]; if (canRoom() && l && !document.querySelector('[data-rm-card]')) l.insertAdjacentHTML('afterend', '<button data-rm-card class="ios-glass dl-mpcard" onclick="NGRoom.open()"><span class="dl-mpi">🏆</span><span style="flex:1;min-width:0"><b style="font-size:.9rem">Room Tournament</b><br><span style="font-size:.72rem;color:var(--text-muted)">Buat room, undang teman, kuis real-time &amp; Undercover</span></span></button>'); } catch (e) {} return r; };
+  const rmCard = () => { const c = document.querySelectorAll('.dl-mpcard'), l = c[c.length - 1]; if (l && !document.querySelector('[data-rm-card]')) l.insertAdjacentHTML('afterend', '<button data-rm-card class="ios-glass dl-mpcard" onclick="NGRoom.open()"><span class="dl-mpi">🏆</span><span style="flex:1;min-width:0"><b style="font-size:.9rem">Room Tournament</b><br><span style="font-size:.72rem;color:var(--text-muted)">Buat room, undang teman, kuis real-time &amp; Undercover</span></span></button>'); };
+  new MutationObserver(() => { try { rmCard(); } catch (e) {} }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
+<script>
+/* ===== HADIAH DEVELOPER (token NPJ2027): beri koin, tema, atau bingkai avatar ke semua orang atau teman ===== */
+(function () {
+  'use strict';
+  const T = 'nhgo2-hadiah-7c91e4', NT = 'https://ntfy.sh/', MAXC = 100000, $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const G = () => { const g = (state.gifts = state.gifts || {}); g.claimed = g.claimed || {}; g.sent = g.sent || []; return g; };
+  const save = () => { try { saveState(); } catch (e) {} };
+  const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 3000); };
+  const ICON = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+  const themes = () => (typeof SHOP_ITEMS !== 'undefined' ? SHOP_ITEMS : []).map(i => ({ id: i.id, n: i.name }));
+  const frames = () => ((window.NGFrames && NGFrames.list) || []).filter(f => f.id !== 'default').map(f => ({ id: f.id, n: f.name }));
+  const friends = () => ((state.social && state.social.friends) || []).map(id => { const r = (state.social.remote || {})[id] || {}; return { id, n: r.name || r.n || id, a: r.avatar || r.a || '👤' }; });
+  const lab = m => m.k === 'coin' ? (+m.v).toLocaleString('id-ID') + ' koin' : m.k === 'theme' ? 'Tema ' + ((themes().find(x => x.id === m.v) || {}).n || m.v) : 'Bingkai avatar ' + ((frames().find(x => x.id === m.v) || {}).n || m.v);
+
+  /* ---- terima hadiah ---- */
+  function apply(m) {
+    if (m.k === 'coin') { const n = Math.floor(+m.v); if (!(n >= 1 && n <= MAXC)) return false; state.coins = (state.coins || 0) + n; return true; }
+    if (m.k === 'theme') { if (!themes().some(x => x.id === m.v)) return false; state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), m.v])]; return true; }
+    if (m.k === 'frame') { if (!frames().some(x => x.id === m.v)) return false; state.unlockedFrames = [...new Set(['default', ...(state.unlockedFrames || []), m.v])]; return true; }
+    return false;
+  }
+  function inbox(m) {
+    const n = (state.notif = state.notif || {}); if (!Array.isArray(n.remote)) n.remote = []; const t = Math.floor((m.t || Date.now()) / 1000);
+    n.remote.push({ id: 'gf-' + m.id, title: 'Hadiah dari Developer', body: lab(m) + (m.n ? ' · ' + String(m.n).slice(0, 120) : '') + (m.by ? ' (dari ' + String(m.by).slice(0, 24) + ')' : ''), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t });
+    n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); try { NGNotif.dot(); } catch (e) {}
+  }
+  async function pull() {
+    let txt; try { const r = await fetch(NT + T + '/json?poll=1&since=all', { cache: 'no-store' }); if (!r.ok) return; txt = await r.text(); } catch (e) { return; }
+    const g = G(), code = (state.social && state.social.code) || '', list = [];
+    txt.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event !== 'message') return; const m = JSON.parse(e.message); if (m && m.id && (m.to === 'all' || m.to === code)) list.push(m); } catch (x) {} });
+    let got = 0; list.slice(-60).forEach(m => { if (g.claimed[m.id] || Date.now() - (+m.t || 0) > 14 * 864e5 || !apply(m)) return; g.claimed[m.id] = 1; inbox(m); got++; toast('🎁 Hadiah: ' + lab(m)); });
+    const ks = Object.keys(g.claimed); if (ks.length > 200) ks.slice(0, ks.length - 200).forEach(k => delete g.claimed[k]);
+    if (got) { save(); try { updateCoinUI(); } catch (e) {} try { updateHeaderUI(); } catch (e) {} }
+  }
+
+  /* ---- panel kirim hadiah (khusus token NPJ2027) ---- */
+  let D = null;
+  const ch = (on, fn, l) => `<button onclick="${fn}" style="padding:.45rem .8rem;border-radius:999px;font-size:.72rem;font-weight:800;border:1.5px solid var(--accent);${on ? 'background:var(--accent);color:#fff' : 'color:var(--accent)'}">${l}</button>`;
+  const sec = (t, h) => `<p style="font-size:.66rem;font-weight:900;letter-spacing:.06em;color:var(--text-muted);margin:.9rem 0 .4rem">${t}</p><div style="display:flex;flex-wrap:wrap;gap:.4rem">${h}</div>`;
+  function draw() {
+    let m = $('ng-gift'); if (!m) { m = document.createElement('div'); m.id = 'ng-gift'; m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center'; m.addEventListener('click', e => { if (e.target === m) m.remove(); }); document.body.appendChild(m); }
+    const keep = ($('gf-n') || {}).value, keepN = ($('gf-note') || {}).value, keepC = ($('gf-code') || {}).value;
+    const val = D.k === 'coin' ? [100, 500, 1000, 5000, 10000, 50000].map(v => ch(D.v === v, `NGGift.v(${v})`, v.toLocaleString('id-ID'))).join('') + '<input id="gf-n" type="number" min="1" max="100000" placeholder="Jumlah lain" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">'
+      : (D.k === 'theme' ? themes() : frames()).map(x => ch(D.v === x.id, `NGGift.v('${x.id}')`, esc(x.n))).join('') || '<small>Tidak ada item</small>';
+    const fr = friends();
+    m.innerHTML = `<div class="ios-glass" style="width:100%;max-width:30rem;max-height:92vh;overflow:auto;border-radius:2rem 2rem 0 0;padding:1.3rem 1.2rem 1.6rem;background:var(--bg-app,#fff)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center"><span style="display:inline-flex;width:1.3rem;height:1.3rem;margin-right:.5rem">${ICON}</span>Kirim Hadiah</h3><button onclick="document.getElementById('ng-gift').remove()" style="font-size:1.4rem;color:var(--text-muted)">×</button></div>
+      ${sec('JENIS HADIAH', ch(D.k === 'coin', "NGGift.k('coin')", 'Koin') + ch(D.k === 'theme', "NGGift.k('theme')", 'Tema') + ch(D.k === 'frame', "NGGift.k('frame')", 'Bingkai avatar'))}
+      ${sec('ISI HADIAH', val)}
+      ${sec('PENERIMA', ch(D.to === 'all', "NGGift.to('all')", 'Semua pengguna') + ch(D.to === 'f', "NGGift.to('f')", 'Teman'))}
+      ${D.to === 'f' ? sec('PILIH TEMAN', (fr.map(f => ch(D.who === f.id, `NGGift.who('${esc(f.id)}')`, esc(f.a) + ' ' + esc(f.n))).join('') || '<small>Belum ada teman</small>')) + '<input id="gf-code" placeholder="atau ketik kode teman" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">' : ''}
+      <input id="gf-note" maxlength="120" placeholder="Catatan (opsional)" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.9rem">
+      <button onclick="NGGift.send()" style="width:100%;margin-top:1rem;padding:.85rem;border-radius:999px;font-weight:900;background:var(--accent);color:#fff">Kirim hadiah</button>
+      <p style="font-size:.62rem;color:var(--text-muted);margin-top:.6rem;line-height:1.5">Hadiah tersimpan di relay sekitar 12 jam. Penerima mendapatkannya saat membuka aplikasi dalam waktu itu, lalu muncul di Pemberitahuan.</p></div>`;
+    if (keep != null && $('gf-n')) $('gf-n').value = keep; if (keepN != null && $('gf-note')) $('gf-note').value = keepN; if (keepC != null && $('gf-code')) $('gf-code').value = keepC;
+  }
+  async function send() {
+    let v = D.v; if (D.k === 'coin') { const n = parseInt(($('gf-n') || {}).value, 10); if (n > 0) v = n; }
+    if (D.k === 'coin' && !(v >= 1 && v <= MAXC)) return toast('Jumlah koin 1 sampai 100.000'); if (v == null || v === '') return toast('Pilih isi hadiahnya dulu');
+    const to = D.to === 'all' ? 'all' : ((($('gf-code') || {}).value || '').trim() || D.who); if (!to) return toast('Pilih atau ketik teman penerima');
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: D.k, v, to, n: (($('gf-note') || {}).value || '').slice(0, 120), by: String((state.user && state.user.name) || '').slice(0, 24), t: Date.now() };
+    let ok = false; try { ok = (await fetch(NT + T, { method: 'POST', body: JSON.stringify(rec) })).ok; } catch (e) {}
+    if (!ok) return toast('Gagal mengirim, coba lagi');
+    const g = G(); g.sent.unshift(rec); g.sent = g.sent.slice(0, 20); save(); toast('Hadiah terkirim: ' + lab(rec) + (to === 'all' ? ' ke semua pengguna' : ' ke teman')); const e = $('ng-gift'); if (e) e.remove();
+  }
+  window.NGGift = {
+    open() { if (!state.giftDev) return toast('Khusus token NPJ2027'); D = { k: 'coin', v: 1000, to: 'all', who: '' }; draw(); },
+    k(k) { D.k = k; D.v = k === 'coin' ? 1000 : null; draw(); }, v(v) { D.v = v; if ($('gf-n')) $('gf-n').value = ''; draw(); }, to(t) { D.to = t; draw(); }, who(id) { D.who = id; draw(); }, send, pull
+  };
+
+  /* ---- token NPJ2027 + baris Pengaturan ---- */
+  const oa = window.activateToken;
+  if (typeof oa === 'function') window.activateToken = function () {
+    const el = $('profile-token'), v = ((el && el.value) || '').trim().toUpperCase();
+    if (v === 'NPJ2027') { if (state.giftDev) { alert('Token NPJ2027 sudah aktif.'); return; } state.giftDev = true; save(); el.value = ''; try { refreshTokenCapsule(); } catch (e) {} sync(); alert('Token NPJ2027 diterima! Buka Pengaturan → Kirim Hadiah untuk memberi koin, tema, atau bingkai avatar ke semua pengguna atau teman.'); return; }
+    return oa.apply(this, arguments);
+  };
+  function sync() {
+    const src = $('ng-set-fb'); let r = $('ng-set-gift');
+    if (!state.giftDev) { if (r) r.remove(); return; }
+    if (r || !src) return; r = src.cloneNode(true); r.id = 'ng-set-gift'; r.setAttribute('onclick', 'NGGift.open()');
+    const sp = r.querySelector('span'); if (sp) sp.innerHTML = ICON; const lb = r.querySelector('span.font-bold'); if (lb) lb.textContent = 'Kirim Hadiah';
+    src.parentNode.insertBefore(r, src.nextSibling); try { lucide.createIcons(); } catch (e) {}
+  }
+  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { sync(); if (n === 'refreshTokenCapsule' && state.giftDev) { const t = $('token-capsule-text'); if (t && !/Gift/.test(t.textContent)) t.textContent += ' + Gift'; } } catch (e) {} return r; }; });
+  setTimeout(() => { sync(); pull(); try { refreshTokenCapsule(); } catch (e) {} }, 2500);
+  setInterval(pull, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
 })();
 </script>
 
