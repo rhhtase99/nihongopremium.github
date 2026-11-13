@@ -10980,14 +10980,14 @@ const BUNPO_XP_PER_POLA = 20;
 #rm .msg{font-size:.75rem;line-height:1.4}#rm .msg b{color:var(--accent)}
 </style>
 <style id="ng-blue2">
-/* Biru hanya untuk tombol menu: Multiplayer, Duel, Room Tournament, kategori kuis */
-[data-mp],[data-ng-duel] .dl-mpcard,#rm .cat button,#rm .sp,#rm .op{background:linear-gradient(135deg,#3b82f6,#1d4ed8)!important;color:#fff!important;border:1.5px solid rgba(255,255,255,.35)!important}
+/* Tombol menu Multiplayer, Duel, Room Tournament, kategori kuis: mengikuti warna aksen tema (Sakura = pink, Musim Gugur = oranye, dst.) */
+[data-mp],[data-ng-duel] .dl-mpcard,#rm .cat button,#rm .sp,#rm .op{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,#000))!important;color:#fff!important;border:1.5px solid rgba(255,255,255,.35)!important;text-shadow:0 1px 2px rgba(0,0,0,.28)}
 [data-mp] *,[data-ng-duel] .dl-mpcard *,#rm .cat button *,#rm .sp>*:not(.tag){color:#fff!important}
 [data-ng-duel] .dl-mpi{background:rgba(255,255,255,.22)}
-#rm .cat button small,#rm .sp small,[data-ng-duel] .dl-mpcard span span{color:rgba(255,255,255,.85)!important}
+#rm .cat button small,#rm .sp small,[data-ng-duel] .dl-mpcard span span{color:rgba(255,255,255,.88)!important}
 #rm .sp{border:2px solid #d6a24a!important}
-#rm .cat button.on,#rm .sp.on{box-shadow:0 0 0 3px #93c5fd}
-#rm .op:active,#rm .op.me{background:#60a5fa!important}
+#rm .cat button.on,#rm .sp.on{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,#fff)}
+#rm .op:active,#rm .op.me{background:color-mix(in srgb,var(--accent) 78%,#fff)!important}
 #rm .op.ok{background:#16a34a!important}#rm .op.no{background:#dc2626!important}
 #rm .lf{border:1.5px solid #f59e0b}
 </style>
