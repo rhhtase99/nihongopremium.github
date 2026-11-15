@@ -7172,7 +7172,7 @@ const Social = (function () {
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { net.connect(); dirSync(); } catch (e) {} } });
   })();
 
-  return { reconnect, share, pasteCode, pasteKey, onType, retry, retryAi, resend, setRelay, addCode, aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
+  return { dirRefresh: () => dirFetch(), reconnect, share, pasteCode, pasteKey, onType, retry, retryAi, resend, setRelay, addCode, aiKey, testAi, diagAi, warning, ask, open, close, chatWith, send, add, unfriend, query, filter, openSettings, chipToggle, custom, levelMode, toggle, copyCode, myLevel, autoInfo, api, bioText, refreshHeader };
 })();
 
 /* =====================================================================
@@ -8536,6 +8536,7 @@ const Social = (function () {
       (fresh.has(n.id) ? '<span style="' + chipTxt + ';background:#ef4444;color:#fff">BARU</span>' : '') + '</div>' +
       (n.date ? '<p style="font-size:.62rem;color:var(--text-muted);margin-top:.1rem">' + esc(n.date) + '</p>' : '') +
       '<p style="font-size:.78rem;line-height:1.6;margin-top:.45rem;white-space:normal">' + esc(n.body).replace(/\n/g, '<br>') + '</p>' +
+      (n.gift ? (n.done ? '<p style="margin-top:.6rem;font-size:.74rem;font-weight:800;color:#10b981">✓ ' + (n.done === 2 ? 'Sudah dimiliki' : 'Sudah diklaim') + '</p>' : '<button onclick="NGGift.claim(\'' + esc(n.gift.id) + '\')" class="bg-accent text-white" style="margin-top:.65rem;width:100%;padding:.65rem;border-radius:1rem;font-size:.8rem;font-weight:900">🎁 Klaim hadiah</button>') : '') +
       (n.url ? '<button onclick="NGNotif.link(\'' + encodeURI(n.url).replace(/'/g, '%27') + '\')" class="bg-accent text-white" style="margin-top:.6rem;padding:.5rem .9rem;border-radius:.9rem;font-size:.74rem;font-weight:800">Buka tautan</button>' : '') + '</div>';
   }
   function histHTML(h, i) {
@@ -11202,91 +11203,140 @@ const BUNPO_XP_PER_POLA = 20;
 </script>
 
 <script>
-/* ===== HADIAH DEVELOPER (token NPJ2027): beri koin, tema, atau bingkai avatar ke semua orang atau teman ===== */
+/* ===== HADIAH DEVELOPER (token NPJ20267): koin, tema, atau avatar -> semua pemain atau pemain terpilih =====
+   Developer memilih SATU hadiah, penerimanya (semua pemain, atau pilih dari daftar teman / daftar pengguna / ketik kode),
+   dan cara pemberiannya: 'claim' = muncul di Pemberitahuan dan diklaim pemain, 'auto' = langsung ditambahkan ke akun.
+   Pengiriman lewat relay ntfy (±12 jam). Token lama NPJ2027 tetap bisa membuka panel ini. */
 (function () {
   'use strict';
-  const T = 'nhgo2-hadiah-7c91e4', NT = 'https://ntfy.sh/', MAXC = 100000, $ = id => document.getElementById(id);
+  const T = 'nhgo2-hadiah-7c91e4', NT = 'https://ntfy.sh/', MAXC = 100000, MAXTO = 100, $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const G = () => { const g = (state.gifts = state.gifts || {}); g.claimed = g.claimed || {}; g.sent = g.sent || []; return g; };
   const save = () => { try { saveState(); } catch (e) {} };
-  const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 3000); };
+  const toast = t => { const e = document.createElement('div'); e.className = 'fixed top-10 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg'; e.style.zIndex = 400; e.style.maxWidth = '90vw'; e.style.textAlign = 'center'; e.textContent = t; document.body.appendChild(e); setTimeout(() => e.remove(), 3000); };
   const ICON = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+  const canHost = () => !!(state.devGold || state.giftDev);          /* token developer emas NPJ20267 (atau NPJ2027 lama) */
+  const canon = c => { try { return NGNet.canon(c); } catch (e) { return ''; } };
+  const myCode = () => (state.social && state.social.code) || '';
   const themes = () => (typeof SHOP_ITEMS !== 'undefined' ? SHOP_ITEMS : []).map(i => ({ id: i.id, n: i.name }));
   const frames = () => ((window.NGFrames && NGFrames.list) || []).filter(f => f.id !== 'default').map(f => ({ id: f.id, n: f.name }));
-  const friends = () => ((state.social && state.social.friends) || []).map(id => { const r = (state.social.remote || {})[id] || {}; return { id, n: r.name || r.n || id, a: r.avatar || r.a || '👤' }; });
-  const lab = m => m.k === 'coin' ? (+m.v).toLocaleString('id-ID') + ' koin' : m.k === 'theme' ? 'Tema ' + ((themes().find(x => x.id === m.v) || {}).n || m.v) : 'Bingkai avatar ' + ((frames().find(x => x.id === m.v) || {}).n || m.v);
+  const friends = () => ((state.social && state.social.friends) || []).filter(id => /^NJ-/.test(id)).map(id => { const r = (state.social.remote || {})[id] || {}; return { id, n: r.name || r.n || id, a: r.avatar || r.a || '👤' }; });
+  const users = () => { const d = (state.social && state.social.dir) || {}, me = myCode(); return Object.keys(d).filter(c => c !== me && d[c] && d[c].name).sort((a, b) => (d[b].ts || 0) - (d[a].ts || 0)).map(c => ({ id: c, n: d[c].name, a: d[c].avatar || '👤' })); };
+  const lab = m => m.k === 'coin' ? (+m.v).toLocaleString('id-ID') + ' koin' : m.k === 'theme' ? 'Tema ' + ((themes().find(x => x.id === m.v) || {}).n || m.v) : 'Avatar ' + ((frames().find(x => x.id === m.v) || {}).n || m.v);
 
   /* ---- terima hadiah ---- */
+  const valid = m => m.k === 'coin' ? (Math.floor(+m.v) >= 1 && Math.floor(+m.v) <= MAXC) : m.k === 'theme' ? themes().some(x => x.id === m.v) : m.k === 'frame' ? frames().some(x => x.id === m.v) : false;
+  const have = m => m.k === 'theme' ? (state.unlockedThemes || []).includes(m.v) : m.k === 'frame' ? (state.unlockedFrames || []).includes(m.v) : false;
   function apply(m) {
-    if (m.k === 'coin') { const n = Math.floor(+m.v); if (!(n >= 1 && n <= MAXC)) return false; state.coins = (state.coins || 0) + n; return true; }
-    if (m.k === 'theme') { if (!themes().some(x => x.id === m.v)) return false; state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), m.v])]; return true; }
-    if (m.k === 'frame') { if (!frames().some(x => x.id === m.v)) return false; state.unlockedFrames = [...new Set(['default', ...(state.unlockedFrames || []), m.v])]; return true; }
-    return false;
+    if (!valid(m)) return false;
+    if (m.k === 'coin') { state.coins = (state.coins || 0) + Math.floor(+m.v); return true; }
+    if (m.k === 'theme') { state.unlockedThemes = [...new Set([...(state.unlockedThemes || []), m.v])]; return true; }
+    state.unlockedFrames = [...new Set(['default', ...(state.unlockedFrames || []), m.v])]; return true;
   }
-  function inbox(m) {
+  function inbox(m, extra) {
     const n = (state.notif = state.notif || {}); if (!Array.isArray(n.remote)) n.remote = []; const t = Math.floor((m.t || Date.now()) / 1000);
-    n.remote.push({ id: 'gf-' + m.id, title: 'Hadiah dari Developer', body: lab(m) + (m.n ? ' · ' + String(m.n).slice(0, 120) : '') + (m.by ? ' (dari ' + String(m.by).slice(0, 24) + ')' : ''), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t });
+    n.remote.push(Object.assign({ id: 'gf-' + m.id, title: 'Hadiah dari Developer', body: lab(m) + (m.n ? ' · ' + String(m.n).slice(0, 120) : '') + (m.by ? ' (dari ' + String(m.by).slice(0, 24) + ')' : ''), date: new Date(t * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }), t }, extra || {}));
     n.remote.sort((a, b) => (b.t || 0) - (a.t || 0)); n.remote = n.remote.slice(0, 50); try { NGNotif.dot(); } catch (e) {}
   }
+  const forMe = (m, code) => m.to === 'all' ? canon(m.c) !== code : Array.isArray(m.to) ? m.to.map(canon).includes(code) : canon(m.to) === code;   /* "semua pemain" tidak kembali ke pengirimnya */
   async function pull() {
     let txt; try { const r = await fetch(NT + T + '/json?poll=1&since=all', { cache: 'no-store' }); if (!r.ok) return; txt = await r.text(); } catch (e) { return; }
-    const g = G(), code = (state.social && state.social.code) || '', list = [];
-    txt.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event !== 'message') return; const m = JSON.parse(e.message); if (m && m.id && (m.to === 'all' || m.to === code)) list.push(m); } catch (x) {} });
-    let got = 0; list.slice(-60).forEach(m => { if (g.claimed[m.id] || Date.now() - (+m.t || 0) > 14 * 864e5 || !apply(m)) return; g.claimed[m.id] = 1; inbox(m); got++; toast('🎁 Hadiah: ' + lab(m)); });
+    const g = G(), code = myCode(), list = []; if (!code || state.isFirstLogin) return;
+    txt.split('\n').forEach(l => { try { const e = JSON.parse(l); if (e.event !== 'message') return; const m = JSON.parse(e.message); if (m && m.id && forMe(m, code)) list.push(m); } catch (x) {} });
+    let got = 0, pend = 0;
+    list.slice(-60).forEach(m => {
+      if (g.claimed[m.id] || Date.now() - (+m.t || 0) > 14 * 864e5 || !valid(m)) return;
+      g.claimed[m.id] = 1;
+      if (m.m === 'claim') { inbox(m, { gift: { id: String(m.id), k: m.k, v: m.v }, done: 0 }); pend++; }   /* menunggu diklaim di Pemberitahuan */
+      else if (apply(m)) { inbox(m); got++; toast('🎁 Hadiah: ' + lab(m)); }                              /* langsung diberikan (juga untuk hadiah versi lama) */
+    });
     const ks = Object.keys(g.claimed); if (ks.length > 200) ks.slice(0, ks.length - 200).forEach(k => delete g.claimed[k]);
-    if (got) { save(); try { updateCoinUI(); } catch (e) {} try { updateHeaderUI(); } catch (e) {} }
+    if (pend) toast('🎁 ' + (pend > 1 ? pend + ' hadiah' : 'Hadiah') + ' dari developer menunggumu! Buka 🔔 untuk klaim');
+    if (got || pend) { save(); try { updateCoinUI(); } catch (e) {} try { updateHeaderUI(); } catch (e) {} }
+  }
+  function claim(id) {
+    const n = (state.notif = state.notif || {}), e = (n.remote || []).find(x => x.gift && x.gift.id === String(id)); if (!e || e.done) return;
+    const m = { k: e.gift.k, v: e.gift.v };
+    if (!valid(m)) { e.done = 2; save(); toast('Hadiah tidak valid'); }
+    else { const dup = have(m); if (!dup) apply(m); e.done = dup ? 2 : 1; save(); toast(dup ? 'Kamu sudah memiliki ' + lab(m) : '🎁 Hadiah diklaim: ' + lab(m)); }
+    try { updateCoinUI(); } catch (x) {} try { updateHeaderUI(); } catch (x) {}
+    try { NGNotif.dot(); if ($('ng-notif')) NGNotif.tab('pesan'); } catch (x) {}
   }
 
-  /* ---- panel kirim hadiah (khusus token NPJ2027) ---- */
-  let D = null;
+  /* ---- panel kirim hadiah (token developer NPJ20267) ---- */
+  let D = null, dirAt = 0;
   const ch = (on, fn, l) => `<button onclick="${fn}" style="padding:.45rem .8rem;border-radius:999px;font-size:.72rem;font-weight:800;border:1.5px solid var(--accent);${on ? 'background:var(--accent);color:#fff' : 'color:var(--accent)'}">${l}</button>`;
   const sec = (t, h) => `<p style="font-size:.66rem;font-weight:900;letter-spacing:.06em;color:var(--text-muted);margin:.9rem 0 .4rem">${t}</p><div style="display:flex;flex-wrap:wrap;gap:.4rem">${h}</div>`;
+  const hint = t => `<p style="font-size:.62rem;color:var(--text-muted);line-height:1.5;width:100%">${t}</p>`;
+  const person = u => { const on = D.sel.includes(u.id); return `<button onclick="NGGift.tog('${u.id}')" class="ios-glass" style="width:100%;display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:1rem;text-align:left;${on ? 'outline:2px solid var(--accent)' : ''}"><span style="font-size:1.3rem">${esc(u.a)}</span><span style="flex:1;min-width:0"><b style="font-size:.78rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.n)}</b><span style="font-size:.58rem;color:var(--text-muted)">${esc(u.id)}</span></span><span style="font-size:1rem;font-weight:900;color:var(--accent)">${on ? '✓' : '＋'}</span></button>`; };
+  function recipients() {
+    if (D.to === 'all') return hint('Semua pemain yang membuka NihonGo dalam ±12 jam setelah dikirim akan menerimanya.');
+    const fr = friends(), us = users(), map = {}; fr.concat(us).forEach(u => { map[u.id] = u; });
+    const src = D.src === 'friends' ? (fr.length ? fr.map(person).join('') : hint('Belum ada teman dari kode. Tambahkan lewat menu Teman, atau pakai tab Kode.'))
+      : D.src === 'users' ? (us.length ? us.map(person).join('') + hint('Pengguna yang muncul di pencarian teman. Yang menyembunyikan diri tidak tampil, pakai tab Kode.') : hint('Belum ada pengguna terdeteksi. Buka menu Teman › Cari teman sekali, atau pakai tab Kode.'))
+      : `<div style="display:flex;gap:.4rem;width:100%"><input id="gf-code" placeholder="NJ-XXXXXXXX (boleh banyak, pisah spasi/koma)" onkeydown="if(event.key==='Enter'){NGGift.addCode()}" class="ios-glass" style="flex:1;min-width:0;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem"><button onclick="NGGift.addCode()" style="padding:.6rem .9rem;border-radius:1rem;font-size:.72rem;font-weight:800;background:var(--accent);color:#fff">Tambah</button></div>` + hint('Kode ada di profil pemain (Kode temanmu).');
+    const chips = D.sel.length ? D.sel.map(c => `<span style="display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .3rem .25rem .65rem;border-radius:999px;font-size:.66rem;font-weight:800;background:var(--accent);color:#fff">${esc(map[c] ? map[c].n : c)}<button onclick="NGGift.tog('${c}')" aria-label="Hapus" style="width:1.2rem;height:1.2rem;border-radius:50%;background:rgba(255,255,255,.28);line-height:1">✕</button></span>`).join('') : hint('Belum ada pemain dipilih.');
+    return `<div style="display:flex;gap:.4rem;width:100%">${ch(D.src === 'friends', "NGGift.src('friends')", 'Daftar teman')}${ch(D.src === 'users', "NGGift.src('users')", 'Pengguna')}${ch(D.src === 'code', "NGGift.src('code')", 'Kode')}</div><div style="display:flex;flex-direction:column;gap:.35rem;width:100%">${src}</div><p style="font-size:.66rem;font-weight:900;width:100%;margin-top:.3rem">Dipilih (${D.sel.length})</p><div style="display:flex;flex-wrap:wrap;gap:.35rem;width:100%">${chips}</div>`;
+  }
   function draw() {
     let m = $('ng-gift'); if (!m) { m = document.createElement('div'); m.id = 'ng-gift'; m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center'; m.addEventListener('click', e => { if (e.target === m) m.remove(); }); document.body.appendChild(m); }
-    const keep = ($('gf-n') || {}).value, keepN = ($('gf-note') || {}).value, keepC = ($('gf-code') || {}).value;
+    const keep = ($('gf-n') || {}).value, keepN = ($('gf-note') || {}).value, keepC = ($('gf-code') || {}).value, sc = m.firstElementChild ? m.firstElementChild.scrollTop : 0;
     const val = D.k === 'coin' ? [100, 500, 1000, 5000, 10000, 50000].map(v => ch(D.v === v, `NGGift.v(${v})`, v.toLocaleString('id-ID'))).join('') + '<input id="gf-n" type="number" min="1" max="100000" placeholder="Jumlah lain" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">'
       : (D.k === 'theme' ? themes() : frames()).map(x => ch(D.v === x.id, `NGGift.v('${x.id}')`, esc(x.n))).join('') || '<small>Tidak ada item</small>';
-    const fr = friends();
     m.innerHTML = `<div class="ios-glass" style="width:100%;max-width:30rem;max-height:92vh;overflow:auto;border-radius:2rem 2rem 0 0;padding:1.3rem 1.2rem 1.6rem;background:var(--bg-app,#fff)">
       <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-weight:900;font-size:1.05rem;display:flex;align-items:center"><span style="display:inline-flex;width:1.3rem;height:1.3rem;margin-right:.5rem">${ICON}</span>Kirim Hadiah</h3><button onclick="document.getElementById('ng-gift').remove()" style="font-size:1.4rem;color:var(--text-muted)">×</button></div>
-      ${sec('JENIS HADIAH', ch(D.k === 'coin', "NGGift.k('coin')", 'Koin') + ch(D.k === 'theme', "NGGift.k('theme')", 'Tema') + ch(D.k === 'frame', "NGGift.k('frame')", 'Bingkai avatar'))}
+      ${sec('1. PILIH HADIAH (SALAH SATU)', ch(D.k === 'coin', "NGGift.k('coin')", '🪙 Koin') + ch(D.k === 'theme', "NGGift.k('theme')", '🎨 Tema') + ch(D.k === 'frame', "NGGift.k('frame')", '🧑 Avatar'))}
       ${sec('ISI HADIAH', val)}
-      ${sec('PENERIMA', ch(D.to === 'all', "NGGift.to('all')", 'Semua pengguna') + ch(D.to === 'f', "NGGift.to('f')", 'Teman'))}
-      ${D.to === 'f' ? sec('PILIH TEMAN', (fr.map(f => ch(D.who === f.id, `NGGift.who('${esc(f.id)}')`, esc(f.a) + ' ' + esc(f.n))).join('') || '<small>Belum ada teman</small>')) + '<input id="gf-code" placeholder="atau ketik kode teman" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.2rem">' : ''}
+      ${sec('2. PENERIMA', ch(D.to === 'all', "NGGift.to('all')", '👥 Semua pemain') + ch(D.to === 'pick', "NGGift.to('pick')", '🎯 Pilih pemain') + recipients())}
+      ${sec('3. CARA PEMBERIAN', ch(D.mode === 'claim', "NGGift.mode('claim')", '🔔 Klaim di notifikasi') + ch(D.mode === 'auto', "NGGift.mode('auto')", '⚡ Langsung diberikan') + hint(D.mode === 'auto' ? 'Hadiah langsung ditambahkan ke akun pemain saat mereka membuka aplikasi, lalu tercatat di Pemberitahuan.' : 'Pemain mendapat pemberitahuan dengan tombol Klaim. Hadiah baru masuk setelah diklaim.'))}
       <input id="gf-note" maxlength="120" placeholder="Catatan (opsional)" class="ios-glass" style="width:100%;padding:.6rem .9rem;border-radius:1rem;font-size:.8rem;margin-top:.9rem">
-      <button onclick="NGGift.send()" style="width:100%;margin-top:1rem;padding:.85rem;border-radius:999px;font-weight:900;background:var(--accent);color:#fff">Kirim hadiah</button>
-      <p style="font-size:.62rem;color:var(--text-muted);margin-top:.6rem;line-height:1.5">Hadiah tersimpan di relay sekitar 12 jam. Penerima mendapatkannya saat membuka aplikasi dalam waktu itu, lalu muncul di Pemberitahuan.</p></div>`;
+      <button onclick="NGGift.send()" style="width:100%;margin-top:1rem;padding:.85rem;border-radius:999px;font-weight:900;background:var(--accent);color:#fff">🎁 Kirim hadiah</button>
+      <p style="font-size:.62rem;color:var(--text-muted);margin-top:.6rem;line-height:1.5">Hadiah tersimpan di relay sekitar 12 jam. Pemain menerimanya saat membuka aplikasi dalam waktu itu, lalu muncul di Pemberitahuan.</p></div>`;
     if (keep != null && $('gf-n')) $('gf-n').value = keep; if (keepN != null && $('gf-note')) $('gf-note').value = keepN; if (keepC != null && $('gf-code')) $('gf-code').value = keepC;
+    if (m.firstElementChild && sc) m.firstElementChild.scrollTop = sc;
+  }
+  function addCode() {
+    const el = $('gf-code'); if (!el) return; const parts = String(el.value || '').split(/[\s,;]+/).filter(Boolean); if (!parts.length) return toast('Ketik kode pemain dulu');
+    let bad = 0; parts.forEach(p => { const c = canon(p); if (!c) { bad++; return; } if (!D.sel.includes(c) && D.sel.length < MAXTO) D.sel.push(c); });
+    el.value = ''; if (bad) toast(bad + ' kode tidak valid (format NJ-XXXXXXXX)'); draw();
   }
   async function send() {
+    if (!canHost()) return toast('Khusus token developer NPJ20267');
     let v = D.v; if (D.k === 'coin') { const n = parseInt(($('gf-n') || {}).value, 10); if (n > 0) v = n; }
     if (D.k === 'coin' && !(v >= 1 && v <= MAXC)) return toast('Jumlah koin 1 sampai 100.000'); if (v == null || v === '') return toast('Pilih isi hadiahnya dulu');
-    const to = D.to === 'all' ? 'all' : ((($('gf-code') || {}).value || '').trim() || D.who); if (!to) return toast('Pilih atau ketik teman penerima');
-    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: D.k, v, to, n: (($('gf-note') || {}).value || '').slice(0, 120), by: String((state.user && state.user.name) || '').slice(0, 24), t: Date.now() };
+    if (D.to === 'pick') { const typed = (($('gf-code') || {}).value || '').trim(); if (typed) addCode(); if (!D.sel.length) return toast('Pilih minimal satu pemain (teman, pengguna, atau kode)'); }
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: D.k, v, to: D.to === 'all' ? 'all' : D.sel.slice(0, MAXTO), m: D.mode, n: (($('gf-note') || {}).value || '').slice(0, 120), by: String((state.user && state.user.name) || '').slice(0, 24), c: myCode(), t: Date.now() };
+    const who = rec.to === 'all' ? 'SEMUA pemain' : rec.to.length + ' pemain terpilih';
+    if (!confirm('Kirim ' + lab(rec) + ' ke ' + who + '?\n\n' + (rec.m === 'auto' ? 'Hadiah langsung ditambahkan ke akun pemain saat mereka membuka aplikasi.' : 'Pemain mengklaimnya lewat menu Pemberitahuan (lonceng).'))) return;
     let ok = false; try { ok = (await fetch(NT + T, { method: 'POST', body: JSON.stringify(rec) })).ok; } catch (e) {}
     if (!ok) return toast('Gagal mengirim, coba lagi');
-    const g = G(); g.sent.unshift(rec); g.sent = g.sent.slice(0, 20); save(); toast('Hadiah terkirim: ' + lab(rec) + (to === 'all' ? ' ke semua pengguna' : ' ke teman')); const e = $('ng-gift'); if (e) e.remove();
+    const g = G(); g.sent.unshift({ id: rec.id, k: rec.k, v, to: rec.to === 'all' ? 'all' : rec.to.length, m: rec.m, t: rec.t }); g.sent = g.sent.slice(0, 20); save();
+    toast('Hadiah terkirim: ' + lab(rec) + ' ke ' + who.toLowerCase()); const e = $('ng-gift'); if (e) e.remove();
   }
   window.NGGift = {
-    open() { if (!state.giftDev) return toast('Khusus token NPJ2027'); D = { k: 'coin', v: 1000, to: 'all', who: '' }; draw(); },
-    k(k) { D.k = k; D.v = k === 'coin' ? 1000 : null; draw(); }, v(v) { D.v = v; if ($('gf-n')) $('gf-n').value = ''; draw(); }, to(t) { D.to = t; draw(); }, who(id) { D.who = id; draw(); }, send, pull
+    open() { if (!canHost()) return toast('Khusus token developer NPJ20267'); D = { k: 'coin', v: 1000, to: 'all', src: 'friends', sel: [], mode: 'claim' }; draw(); },
+    k(k) { D.k = k; D.v = k === 'coin' ? 1000 : null; draw(); }, v(v) { D.v = v; if ($('gf-n')) $('gf-n').value = ''; draw(); },
+    to(t) { D.to = t; draw(); }, mode(m) { D.mode = m; draw(); },
+    src(s) { D.src = s; draw(); if (s === 'users' && Date.now() - dirAt > 60000) { dirAt = Date.now(); try { Promise.resolve(Social.dirRefresh()).then(() => { if ($('ng-gift') && D && D.src === 'users') draw(); }); } catch (e) {} } },
+    tog(c) { const i = D.sel.indexOf(c); if (i >= 0) D.sel.splice(i, 1); else if (D.sel.length < MAXTO) D.sel.push(c); draw(); },
+    addCode, send, pull, claim
   };
 
-  /* ---- token NPJ2027 + baris Pengaturan ---- */
+  /* ---- token NPJ2027 (lama) + baris Pengaturan ---- */
   const oa = window.activateToken;
   if (typeof oa === 'function') window.activateToken = function () {
     const el = $('profile-token'), v = ((el && el.value) || '').trim().toUpperCase();
-    if (v === 'NPJ2027') { if (state.giftDev) { alert('Token NPJ2027 sudah aktif.'); return; } state.giftDev = true; save(); el.value = ''; try { refreshTokenCapsule(); } catch (e) {} sync(); alert('Token NPJ2027 diterima! Buka Pengaturan → Kirim Hadiah untuk memberi koin, tema, atau bingkai avatar ke semua pengguna atau teman.'); return; }
+    if (v === 'NPJ2027') { if (state.giftDev) { alert('Token NPJ2027 sudah aktif.'); return; } state.giftDev = true; save(); el.value = ''; try { refreshTokenCapsule(); } catch (e) {} sync(); alert('Token NPJ2027 diterima! Buka Pengaturan → Kirim Hadiah untuk memberi koin, tema, atau avatar ke semua pemain atau pemain terpilih.'); return; }
     return oa.apply(this, arguments);
   };
   function sync() {
     const src = $('ng-set-fb'); let r = $('ng-set-gift');
-    if (!state.giftDev) { if (r) r.remove(); return; }
+    if (!canHost()) { if (r) r.remove(); return; }
     if (r || !src) return; r = src.cloneNode(true); r.id = 'ng-set-gift'; r.setAttribute('onclick', 'NGGift.open()');
     const sp = r.querySelector('span'); if (sp) sp.innerHTML = ICON; const lb = r.querySelector('span.font-bold'); if (lb) lb.textContent = 'Kirim Hadiah';
     src.parentNode.insertBefore(r, src.nextSibling); try { lucide.createIcons(); } catch (e) {}
   }
-  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { sync(); if (n === 'refreshTokenCapsule' && state.giftDev) { const t = $('token-capsule-text'); if (t && !/Gift/.test(t.textContent)) t.textContent += ' + Gift'; } } catch (e) {} return r; }; });
+  ['refreshSettingsSummary', 'refreshTokenCapsule', 'switchTab'].forEach(n => { const o = window[n]; if (typeof o === 'function') window[n] = function () { const r = o.apply(this, arguments); try { sync(); if (n === 'refreshTokenCapsule' && state.giftDev && !state.devGold) { const t = $('token-capsule-text'); if (t && !/Gift/.test(t.textContent)) t.textContent += ' + Gift'; } } catch (e) {} return r; }; });
   setTimeout(() => { sync(); pull(); try { refreshTokenCapsule(); } catch (e) {} }, 2500);
   setInterval(pull, 300000); document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
 })();
